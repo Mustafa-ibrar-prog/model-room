@@ -75,7 +75,9 @@ def fit_adjustments(p: pd.DataFrame, injury_k: float | None) -> FittedAdjustment
     coef, *_ = np.linalg.lstsq(X, y.to_numpy(), rcond=None)
     total_points = float(np.mean(p["actual_total"] - p["total_raw"]))
     resid = y.to_numpy() - X @ coef
+    total_resid = p["actual_total"] - p["total_raw"] - total_points
     return FittedAdjustments(
+        total_sigma=round(float(np.std(total_resid)), 4),
         b2b_points=round(float(coef[0]), 4),
         rest_points=round(float(coef[1]), 4),
         total_points=round(total_points, 4),

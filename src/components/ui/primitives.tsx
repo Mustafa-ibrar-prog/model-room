@@ -32,13 +32,29 @@ export function Panel({ children, className = "" }: { children: ReactNode; class
   return <div className={`rounded-xl border border-navy-700 bg-navy-900 ${className}`}>{children}</div>;
 }
 
-/** Small "Demo data" stamp placed on every table caption. */
-export function DemoStamp() {
+/** Inline marker for a value the source doesn't have. Never rendered as 0. */
+export function Missing({ title = "No data" }: { title?: string }) {
   return (
-    <span className="rounded-sm border border-edge/40 px-1.5 py-px font-display text-[0.75rem] font-600 text-edge">
-      Demo data
+    <span className="text-sm text-faint" title={title}>
+      <span aria-hidden="true">–</span>
+      <span className="sr-only">{title}</span>
     </span>
   );
+}
+
+/** Full-width notice when a dataset or engine isn't available. */
+export function Unavailable({ title, body }: { title: string; body: string }) {
+  return (
+    <Panel className="p-6">
+      <h3 className="font-display text-xl font-600 text-ink">{title}</h3>
+      <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-mute">{body}</p>
+    </Panel>
+  );
+}
+
+/** Small label naming where a table's numbers come from. */
+export function SourceStamp({ children }: { children: ReactNode }) {
+  return <span className="rounded-sm border border-navy-600 px-1.5 py-px text-[0.75rem] text-mute">{children}</span>;
 }
 
 export function LockIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {

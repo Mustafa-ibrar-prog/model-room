@@ -10,7 +10,7 @@ export default function InjuriesPage() {
     <>
       <PageHeader
         title="Injury impact"
-        intro="The latest status for every listed player. Plus shows how many points each absence moves the spread and the total."
+        intro="Players with a game designation on the latest reports. Plus shows the projection change where the model accounts for an absence."
       />
       <Section title="NFL">
         <Suspense fallback={<TableSkeleton />}>

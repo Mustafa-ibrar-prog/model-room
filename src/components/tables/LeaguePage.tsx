@@ -2,16 +2,19 @@ import { Suspense } from "react";
 import type { League } from "@/types/domain";
 import { GameBoard } from "./GameBoard";
 import { InjuryBoard } from "./InjuryBoard";
+import { ModelPerformance } from "./ModelPerformance";
+import { RatingsBoard } from "./RatingsBoard";
+import { ResultsBoard } from "./ResultsBoard";
 import { PageHeader, Section, TableSkeleton } from "@/components/ui/primitives";
 
 const COPY: Record<League, { title: string; intro: string }> = {
   nfl: {
     title: "NFL",
-    intro: "Every game on the slate with the posted spread and total, the model's numbers and the edge between them.",
+    intro: "Upcoming games with the model's line, total, projected score and win probability, next to the market line where one is published.",
   },
   nba: {
     title: "NBA",
-    intro: "Tonight's games with the posted spread and total, the model's numbers and the edge between them.",
+    intro: "The next week of games with the model's line, total, projected score and win probability. Market lines appear when a line source is connected.",
   },
 };
 
@@ -23,13 +26,25 @@ export function LeaguePage({ league }: { league: League }) {
         <Suspense fallback={<TableSkeleton />}>
           <GameBoard league={league} />
         </Suspense>
-        <p className="mt-3 text-sm text-faint">
-          Spreads are shown from the home team&rsquo;s side. Negative means the home team is favored.
-        </p>
       </div>
-      <Section title="Injuries" intro="Status from the latest report and the projected effect on the line.">
+      <Section title="Recent results" intro="Final scores next to what the model projected before each game.">
+        <Suspense fallback={<TableSkeleton rows={6} />}>
+          <ResultsBoard league={league} />
+        </Suspense>
+      </Section>
+      <Section title="Model performance" intro="How far off the model has been, measured on games it never saw while being tuned.">
         <Suspense fallback={<TableSkeleton rows={4} />}>
-          <InjuryBoard league={league} compact />
+          <ModelPerformance league={league} />
+        </Suspense>
+      </Section>
+      <Section title="Power ratings" intro="Current team strength from the same ratings the projections use.">
+        <Suspense fallback={<TableSkeleton rows={8} />}>
+          <RatingsBoard league={league} limit={10} />
+        </Suspense>
+      </Section>
+      <Section title="Injuries">
+        <Suspense fallback={<TableSkeleton rows={4} />}>
+          <InjuryBoard league={league} limit={12} />
         </Suspense>
       </Section>
     </>

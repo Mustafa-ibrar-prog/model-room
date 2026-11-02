@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getGameBoard } from "@/server/data";
+import { getLeagueBoard } from "@/server/data";
 import { getViewer } from "@/server/viewer";
 
 /**
@@ -14,6 +14,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Set league to nfl or nba." }, { status: 400 });
   }
   const viewer = await getViewer();
-  const board = await getGameBoard(league, viewer.tier);
-  return NextResponse.json(board, { headers: { "Cache-Control": "private, no-store" } });
+  const board = await getLeagueBoard(league, viewer.tier);
+  return NextResponse.json(
+    { viewerTier: viewer.tier, data: board },
+    { status: board.ok ? 200 : 503, headers: { "Cache-Control": "private, no-store" } },
+  );
 }

@@ -94,6 +94,11 @@ def _nba(args) -> int:
         return 0 if r.get("ok") else 1
     if args.cmd in ("odds", "lines"):
         return _lines("nba", args.cmd)
+    if args.cmd == "project":
+        from modelroom.nba import pipeline
+
+        _print(pipeline.run(days=args.days))
+        return 0
     if args.cmd == "backtest":
         from modelroom.nba import backtest, injuries
 
@@ -136,7 +141,8 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--verbose", action="store_true")
 
     b = sub.add_parser("nba")
-    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest"])
+    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest", "project"])
+    b.add_argument("--days", type=int, default=7, help="project: how many days ahead")
     b.add_argument("--season", type=int)
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 

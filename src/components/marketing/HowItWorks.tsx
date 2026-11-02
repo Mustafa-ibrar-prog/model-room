@@ -2,20 +2,20 @@ import { Section } from "@/components/ui/primitives";
 
 const STEPS = [
   {
-    title: "Collect the inputs",
-    body: "Schedules, results, play-by-play, posted lines and official injury reports are pulled in and checked before anything is modeled.",
+    title: "Collect and check the data",
+    body: "Schedules, results, box scores, play-by-play and injury reports are downloaded, then checked for gaps, duplicates and conflicts between sources.",
   },
   {
     title: "Rate every team",
-    body: "Each team gets an offensive, defensive and pace rating measured in points against an average opponent.",
+    body: "NBA teams get offense, defense and pace ratings per 100 possessions. NFL teams get EPA per play ratings, with garbage time down-weighted. Both adjust for opponents and weight recent games more.",
   },
   {
-    title: "Adjust for availability",
-    body: "Players ruled out or limited move the ratings by an estimate of what that player is worth.",
+    title: "Adjust for the situation",
+    body: "Rest, back-to-backs, home field and, for the NFL, the starting quarterback move the projection. Each adjustment is fitted on past seasons.",
   },
   {
     title: "Project the game",
-    body: "Ratings, home field, rest and travel produce a projected score, spread and total for each matchup.",
+    body: "Ratings produce projected scores. The line, total and win probability come from those scores and the model's measured error.",
   },
   {
     title: "Compare with the market",
@@ -28,7 +28,7 @@ export function HowItWorks() {
     <Section
       id="how-it-works"
       title="How it works"
-      intro="The same five steps run for every NFL and NBA game. The engines behind them are in development, so the boards show demo data for now."
+      intro="The same five steps run for every NFL and NBA game. Each model version is tested on seasons it never saw before its projections are shown."
     >
       <ol className="grid gap-px overflow-hidden rounded-xl border border-navy-700 bg-navy-700 sm:grid-cols-2 lg:grid-cols-5">
         {STEPS.map((s, i) => (

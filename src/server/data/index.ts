@@ -1,135 +1,228 @@
 import "server-only";
 import { FREE_EDGE_FINDER_LIMIT, canAccess, gate } from "@/lib/entitlements";
-import { getProvider } from "@/server/providers";
+import { loadBoard } from "@/server/engine/board";
 import type {
-  DailyInsight,
-  DataEnvelope,
-  GameProjection,
-  InjuryReport,
+  Freshness,
+  GameView,
+  InjuryView,
   League,
-  PlayerPropProjection,
-  TeamRating,
+  LeagueBoard,
+  PerformanceView,
+  RatingView,
   TierId,
 } from "@/types/domain";
+import type { EngineBoard, EngineGame } from "@/types/engine";
 
 /**
  * Data Access Layer.
  *
- * The only path from a provider to a page or API route. Every premium field
- * is passed through `gate()` here, so a viewer's response never contains
- * values their plan does not include — not in HTML, not in RSC payloads,
- * not in JSON.
+ * The only path from engine output to a page or API route. Every premium
+ * field passes through gate() here, so responses never contain values the
+ * viewer's plan doesn't include. Missing data stays null; nothing is filled in.
  */
 
-function envelope<T>(tier: TierId, data: T): DataEnvelope<T> {
-  const { info } = getProvider();
+const UNAVAILABLE: Freshness = { status: "unavailable", reasons: [], resultsThrough: null, lastIngest: null, modelRunAt: null };
+
+function freshness(b: EngineBoard): Freshness {
   return {
-    meta: { source: info.source, generatedBy: info.name, note: info.note },
-    viewerTier: tier,
-    data,
+    status: b.data.freshness.status,
+    reasons: b.data.freshness.reasons,
+    resultsThrough: b.data.freshness.results_through,
+    lastIngest: b.data.freshness.last_ingest,
+    modelRunAt: b.generated_at,
   };
 }
 
-const round1 = (n: number) => Math.round(n * 10) / 10;
+export function toGameView(g: EngineGame, league: League, tier: TierId, edgeAllowed: boolean): GameView {
+  const p = g.projection;
+  const edgeFeature = edgeAllowed ? "games.edgeFinder.limited" : "games.edgeFinder.full";
+  const e = g.edges;
+  return {
+    id: g.game_id,
+    league,
+    startTime: g.start_time,
+    gameDate: g.game_date,
+    status: g.status,
+    week: g.week ?? null,
+    neutral: g.neutral,
+    home: { abbr: g.home.abbr, name: g.home.name },
+    away: { abbr: g.away.abbr, name: g.away.name },
+    modelSpread: p.spread,
+    modelTotal: p.total,
+    projectedMargin: p.margin,
+    projectedScore: gate(tier, "games.projectedScores", { home: p.home_score, away: p.away_score }),
+    winProbability: gate(tier, "games.projectedScores", { home: p.home_win_prob, away: p.away_win_prob }),
+    ranges: gate(tier, "games.projectedScores", { margin: p.margin_range_80, total: p.total_range_80 }),
+    market: g.market
+      ? {
+          spread: g.market.spread,
+          total: g.market.total,
+          homeMoneyline: g.market.home_ml,
+          awayMoneyline: g.market.away_ml,
+          books: g.market.books,
+          capturedAt: g.market.captured_at,
+          sources: g.market.sources,
+        }
+      : null,
+    spreadEdge: gate(tier, edgeFeature, e?.spread ?? null),
+    totalEdge: gate(tier, edgeFeature, e?.total ?? null),
+    probabilityEdge: gate(
+      tier,
+      edgeFeature,
+      e && e.home_prob_market !== null && e.home_prob_diff !== null
+        ? { homeMarket: e.home_prob_market, homeDiff: e.home_prob_diff }
+        : null,
+    ),
+    rest: {
+      homeDays: g.rest.home_days,
+      awayDays: g.rest.away_days,
+      homeB2b: Boolean(g.rest.home_b2b),
+      awayB2b: Boolean(g.rest.away_b2b),
+    },
+    injuryAdjustment: gate(tier, "injuries.adjustments", g.adjustments.injury_points),
+    quarterbacks: g.quarterbacks ?? null,
+    qbAdjustment: gate(tier, "injuries.adjustments", g.adjustments.qb_points ?? null),
+    result: g.result
+      ? { homeScore: g.result.home_score, awayScore: g.result.away_score, margin: g.result.margin, total: g.result.total }
+      : null,
+  };
+}
 
-export async function getGameBoard(league: League, tier: TierId): Promise<DataEnvelope<GameProjection[]>> {
-  const raw = await getProvider().getGames(league);
+function performance(b: EngineBoard): PerformanceView {
+  const bt = b.performance.backtest;
+  const base = bt?.baselines ?? {};
+  const mc = bt?.market_comparison as { spread?: { market_mae?: number }; total?: { market_mae?: number } } | string | null | undefined;
+  return {
+    backtest: bt
+      ? {
+          modelVersion: bt.model_version,
+          testSeasons: bt.test_seasons,
+          games: bt.games,
+          marginMae: bt.margin_mae,
+          totalMae: bt.total_mae,
+          totalBias: bt.total_bias,
+          brier: bt.brier,
+          winnerCorrect: bt.winner_correct,
+          baselines: [
+            { label: "Home edge only", marginMae: base.home_court_margin_mae ?? null, totalMae: base.home_court_total_mae ?? null },
+            ...(base.season_to_date_margin_mae != null
+              ? [{ label: "Season-to-date margin", marginMae: base.season_to_date_margin_mae, totalMae: null }]
+              : []),
+          ],
+          marketMarginMae: typeof mc === "object" && mc ? (mc.spread?.market_mae ?? null) : null,
+          marketTotalMae: typeof mc === "object" && mc ? (mc.total?.market_mae ?? null) : null,
+          calibration: bt.calibration,
+        }
+      : null,
+    seasonToDate: b.performance.season_to_date
+      ? {
+          games: b.performance.season_to_date.games,
+          marginMae: b.performance.season_to_date.margin_mae,
+          totalMae: b.performance.season_to_date.total_mae,
+          winnerCorrect: b.performance.season_to_date.winner_correct,
+          note: b.performance.season_to_date.note,
+        }
+      : null,
+    ledger: {
+      tracked: b.performance.ledger.tracked,
+      graded: b.performance.ledger.graded,
+      versions: Object.entries(b.performance.ledger.by_version ?? {}).map(([version, v]) => ({
+        version,
+        games: v.games,
+        marginMae: v.margin_mae,
+        totalMae: v.total_mae,
+        winnerCorrect: v.winner_correct,
+      })),
+    },
+  };
+}
+
+export async function getLeagueBoard(league: League, tier: TierId): Promise<LeagueBoard> {
+  const res = await loadBoard(league);
+  if (!res.ok) return { ok: false, league, reason: res.reason, freshness: UNAVAILABLE };
+  const b = res.board;
   const fullEdges = canAccess(tier, "games.edgeFinder.full");
-
-  const rows = raw.map((g, i): GameProjection => {
-    // Edge = gap between market and model. Arithmetic only, not a model.
-    // Spread edge > 0 means the model likes the home side more than the market.
-    const spreadEdge = round1(g.marketSpread - g.modelSpread);
-    const totalEdge = round1(g.modelTotal - g.marketTotal);
-    const edgeVisible = fullEdges || i < FREE_EDGE_FINDER_LIMIT;
-    const edgeFeature = edgeVisible ? "games.edgeFinder.limited" : "games.edgeFinder.full";
-
-    return {
-      id: g.id,
-      league: g.league,
-      slot: g.slot,
-      away: g.away,
-      home: g.home,
-      marketSpread: g.marketSpread,
-      marketTotal: g.marketTotal,
-      modelSpread: gate(tier, "games.basicProjections", g.modelSpread),
-      modelTotal: gate(tier, "games.basicProjections", g.modelTotal),
-      spreadEdge: gate(tier, edgeFeature, spreadEdge),
-      totalEdge: gate(tier, edgeFeature, totalEdge),
-      projectedScore: gate(tier, "games.projectedScores", g.projectedScore),
-      openingSpread: gate(tier, "games.lineMovement", g.openingSpread),
-      matchupNote: gate(tier, "games.matchupBreakdowns", g.matchupNote),
-    };
+  // Free: edges on the first FREE_EDGE_FINDER_LIMIT upcoming games that have a market line.
+  let freeEdgesLeft = FREE_EDGE_FINDER_LIMIT;
+  const upcoming = b.upcoming.map((g) => {
+    const allowed = fullEdges || (g.market !== null && freeEdgesLeft-- > 0);
+    return toGameView(g, league, tier, allowed);
   });
-
-  return envelope(tier, rows);
+  const recent = b.recent.map((g) => toGameView(g, league, tier, fullEdges));
+  const pregame: Record<string, { margin: number; total: number; homeWinProb: number }> = {};
+  for (const g of b.recent) {
+    pregame[g.game_id] = { margin: g.projection.margin, total: g.projection.total, homeWinProb: g.projection.home_win_prob };
+  }
+  return {
+    ok: true,
+    league,
+    seasonLabel: b.season_label,
+    week: b.week ?? null,
+    model: { version: b.model.version, status: b.model.status, fittedAt: b.model.fitted_at, uncertaintyMethod: b.model.uncertainty.method },
+    freshness: freshness(b),
+    sources: b.data.sources,
+    market: b.data.market,
+    injuries: { connected: b.data.injuries.connected, note: b.data.injuries.note },
+    upcoming,
+    recent,
+    // Pre-game projections for finished games are historical model data (Pro).
+    recentPregame: gate(tier, "history", pregame),
+    performance: performance(b),
+  };
 }
 
-export async function getInjuryReport(league: League, tier: TierId): Promise<DataEnvelope<InjuryReport[]>> {
-  const raw = await getProvider().getInjuries(league);
-  return envelope(
-    tier,
-    raw.map((r) => ({
-      id: r.id,
-      league: r.league,
-      player: r.player,
-      team: r.team,
-      position: r.position,
-      status: r.status,
-      detail: r.detail,
-      spreadImpact: gate(tier, "injuries.adjustments", r.spreadImpact),
-      totalImpact: gate(tier, "injuries.adjustments", r.totalImpact),
-    })),
-  );
-}
-
-/** Returns null data when the viewer's plan has no prop access at all. */
-export async function getPropBoard(
+export async function getRatings(
   league: League,
   tier: TierId,
-): Promise<DataEnvelope<PlayerPropProjection[] | null>> {
-  if (!canAccess(tier, "props.projections")) return envelope(tier, null);
-  const raw = await getProvider().getProps(league);
-  return envelope(
-    tier,
-    raw.map((p) => ({
-      id: p.id,
-      league: p.league,
-      player: p.player,
-      team: p.team,
-      opponent: p.opponent,
-      market: p.market,
-      line: p.line,
-      projection: p.projection,
-      edge: round1(p.projection - p.line),
-      overShare: gate(tier, "props.advanced", p.overShare),
-      range: gate(tier, "props.advanced", p.range),
-    })),
-  );
-}
-
-export async function getRatings(league: League, tier: TierId): Promise<DataEnvelope<TeamRating[]>> {
-  const raw = await getProvider().getRatings(league);
-  const sorted = [...raw].sort((a, b) => b.overall - a.overall);
-  return envelope(
-    tier,
-    sorted.map((r, i) => ({
-      rank: i + 1,
-      team: r.team,
-      league: r.league,
+): Promise<{ ok: true; seasonLabel: string; modelVersion: string; rows: RatingView[] } | { ok: false; reason: string }> {
+  const res = await loadBoard(league);
+  if (!res.ok) return { ok: false, reason: res.reason };
+  return {
+    ok: true,
+    seasonLabel: res.board.season_label,
+    modelVersion: res.board.model.version,
+    rows: res.board.ratings.map((r) => ({
+      rank: r.rank,
+      team: { abbr: r.abbr, name: r.name },
+      games: r.games_played,
       overall: r.overall,
-      offense: gate(tier, "ratings.advanced", r.offense),
-      defense: gate(tier, "ratings.advanced", r.defense),
-      pace: gate(tier, "ratings.advanced", r.pace),
-      scheduleStrength: gate(tier, "ratings.advanced", r.scheduleStrength),
+      overallUnit: r.overall_unit,
+      avgMargin: r.avg_margin,
+      last10Margin: r.last10_margin,
+      components: gate(
+        tier,
+        "ratings.advanced",
+        r.components.map((c) => ({ key: c.key, label: c.label, value: c.value, unit: c.unit, higherIsBetter: c.higher_is_better })),
+      ),
     })),
-  );
+  };
 }
 
-export async function getDailyInsights(tier: TierId): Promise<DataEnvelope<DailyInsight[]>> {
-  return envelope(tier, await getProvider().getInsights());
+export async function getInjuries(
+  league: League,
+  tier: TierId,
+): Promise<{ ok: true; connected: boolean; note: string | null; rows: InjuryView[] } | { ok: false; reason: string }> {
+  const res = await loadBoard(league);
+  if (!res.ok) return { ok: false, reason: res.reason };
+  const b = res.board;
+  return {
+    ok: true,
+    connected: b.data.injuries.connected,
+    note: b.data.injuries.note,
+    rows: (b.injuries ?? []).map((i) => ({
+      team: i.team,
+      player: i.player,
+      position: i.position,
+      status: i.status,
+      injury: i.injury,
+      practice: i.practice,
+      impactPoints: gate(tier, "injuries.adjustments", i.impact_points),
+      impactNote: i.impact_note,
+    })),
+  };
 }
 
-export function getDataSourceInfo() {
-  return getProvider().info;
+export async function getFreshness(league: League): Promise<Freshness> {
+  const res = await loadBoard(league);
+  return res.ok ? freshness(res.board) : UNAVAILABLE;
 }

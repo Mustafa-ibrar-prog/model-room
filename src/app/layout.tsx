@@ -8,7 +8,8 @@ import "@fontsource/barlow-condensed/700.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
-import { DemoBanner } from "@/components/layout/DemoBanner";
+import { Suspense } from "react";
+import { DataStatus, DataStatusFallback } from "@/components/layout/DataStatus";
 
 export const metadata: Metadata = {
   title: { default: "Model Room — NFL and NBA projections", template: "%s · Model Room" },
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           Skip to content
         </a>
         <SiteHeader />
-        <DemoBanner />
+        <Suspense fallback={<DataStatusFallback />}>
+          <DataStatus />
+        </Suspense>
         <main id="main" className="flex-1">
           {children}
         </main>

@@ -10,7 +10,7 @@ export default function RatingsPage() {
     <>
       <PageHeader
         title="Team ratings"
-        intro="Power ratings in points against an average team on a neutral field. Pro adds offense, defense, pace and schedule strength."
+        intro="Current team strength from the same ratings the projections use. Pro adds the offense, defense and schedule breakdown."
       />
       <Section title="NFL">
         <Suspense fallback={<TableSkeleton rows={10} />}>

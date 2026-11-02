@@ -31,6 +31,7 @@ class FittedAdjustments:
     rest_points: float = 0.0          # margin per day of rest advantage (capped at 3)
     total_points: float = 0.0         # mean total residual (overtime, scoring drift)
     margin_sigma: float = 12.0        # std. dev. of margin errors, for win probability
+    total_sigma: float | None = None  # std. dev. of total errors, for the total's uncertainty range
     injury_points_per_value: float | None = None  # k in docs; None until fitted
 
 
