@@ -54,3 +54,62 @@ def fetch(league: str, providers: list[str] | None = None, days: int = 10, log=p
 
 def provider_status() -> list[dict]:
     return [config.status(p).__dict__ for p in config.PROVIDERS]
+
+
+def depth(league: str, max_requests: int = 60, log=print) -> dict:
+    """Fetch order-book depth for Polymarket US contracts the latest props run flagged as an edge.
+
+    Polymarket's market listing has no sizes, so without this its edges can never be "strong". Each book
+    is one request (2 s apart), so only flagged contracts are fetched, at most max_requests per run.
+    The result is stored as a new snapshot of that contract (fresh bid/ask with sizes)."""
+    from . import evaluation
+    from .schema import PropQuote
+
+    st = config.status("polymarket_us")
+    if not st.enabled:
+        return {"skipped": st.reason}
+    ev = evaluation._load(league)
+    if ev.empty:
+        return {"contracts": 0, "note": "no evaluated contracts yet; run markets fetch, then the props run"}
+    latest = ev[ev["generated_at"] == ev["generated_at"].max()]
+    want = latest[(latest["provider"] == "polymarket_us") & latest["grade"].isin(["lean", "strong"])]
+    want = want.drop_duplicates("market_id").head(max_requests)
+    snap = snapshots.latest(league, "polymarket_us")
+    by_id = {r["provider_market_id"]: r for r in snap.to_dict("records")} if len(snap) else {}
+    c = polymarket_us.client(data_root() / "markets" / "cache" / "polymarket_us_books")
+    c.cache_ttl_s = 0  # depth must be fresh
+    out, errors = [], []
+    for mid in want["market_id"]:
+        base = by_id.get(mid)
+        if base is None:
+            continue
+        try:
+            b = polymarket_us.book(c, mid)
+        except ProviderError as e:
+            errors.append(str(e))
+            continue
+        q = PropQuote(**{k: (None if isinstance(v, float) and v != v else v) for k, v in base.items() if k in PropQuote.__dataclass_fields__})
+        q.yes_bid, q.yes_ask = b["yes_bid"], b["yes_ask"]
+        q.no_bid = 1 - b["yes_ask"] if b["yes_ask"] is not None else None
+        q.no_ask = 1 - b["yes_bid"] if b["yes_bid"] is not None else None
+        q.yes_bid_size, q.yes_ask_size = b["yes_bid_size"], b["yes_ask_size"]
+        q.quote_time = b.get("transact_time") or q.quote_time
+        q.captured_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        q.game_id = q.player_id = q.match_note = None
+        out.append(q)
+    snapshots.append(out, league)
+    return {"flagged": int(len(want)), "books_fetched": len(out), "requests": c.calls, "errors": errors}
+
+
+def refresh(league: str, days: int = 10, log=print) -> dict:
+    """The whole local market loop: prices → props → depth for flagged contracts → props again."""
+    if league == "nfl":
+        from modelroom.nfl.props import pipeline as props
+    else:
+        from modelroom.nba.props import pipeline as props
+    report = {"fetch": fetch(league, days=days, log=log)}
+    report["props"] = props.run()
+    report["depth"] = depth(league, log=log)
+    if report["depth"].get("books_fetched"):
+        report["props_after_depth"] = props.run()
+    return report

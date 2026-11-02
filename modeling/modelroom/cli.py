@@ -17,6 +17,11 @@
   nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
   markets status                  which market-data providers are on, and why
   markets fetch nfl [--provider]  store a snapshot from each enabled provider (Polymarket US, Kalshi)
+  markets depth nfl               order-book depth for Polymarket contracts the last props run flagged
+  markets refresh nfl             fetch -> props -> depth -> props (the whole local loop)
+  markets report nfl              settle past contracts: model vs market accuracy, ROI, closing-line value
+  markets backfill nfl --days 30  Kalshi: hourly price history of settled contracts (local only)
+  markets replay nfl              price that history with the walk-forward model (then: markets report)
   ledger verify                   check the prediction ledgers' hash chains
 """
 from __future__ import annotations
@@ -175,6 +180,27 @@ def _markets(args) -> int:
     if args.cmd == "status":
         _print(markets.provider_status())
         return 0
+    if args.cmd == "depth":
+        _print(markets.depth(args.league))
+        return 0
+    if args.cmd == "refresh":
+        _print(markets.refresh(args.league))
+        return 0
+    if args.cmd == "report":
+        from modelroom.markets import evaluation
+
+        _print(evaluation.report(args.league))
+        return 0
+    if args.cmd == "backfill":
+        from modelroom.markets import history
+
+        _print(history.backfill_kalshi(args.league, days=args.days))
+        return 0
+    if args.cmd == "replay":
+        from modelroom.markets import history
+
+        _print(history.replay(args.league))
+        return 0
     providers = None if args.provider == "all" else [args.provider]
     _print(markets.fetch(args.league, providers, days=args.days))
     return 0
@@ -212,7 +238,7 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 
     mk = sub.add_parser("markets")
-    mk.add_argument("cmd", choices=["status", "fetch"])
+    mk.add_argument("cmd", choices=["status", "fetch", "depth", "refresh", "report", "backfill", "replay"])
     mk.add_argument("league", nargs="?", default="nfl", choices=["nfl", "nba"])
     mk.add_argument("--provider", default="all", choices=["all", "polymarket_us", "kalshi"])
     mk.add_argument("--days", type=int, default=10)
