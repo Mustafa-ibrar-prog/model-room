@@ -11,6 +11,10 @@
   nfl odds | nfl lines            same as NBA
   nfl backtest                    NFL walk-forward validation (writes params.json)
   nba project | nfl project       projections -> ledger -> published board for the site
+  nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
+  nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
+  markets status                  which market-data providers are on, and why
+  markets fetch nfl [--provider]  store a snapshot from each enabled provider (Polymarket US, Kalshi)
   ledger verify                   check the prediction ledgers' hash chains
 """
 from __future__ import annotations
@@ -115,10 +119,25 @@ def _nfl(args) -> int:
     from modelroom.nfl import ingest
 
     if args.cmd == "ingest":
-        _print(ingest.run(local_dir=Path(args.from_dir) if args.from_dir else None))
+        from modelroom.nfl import player_data
+
+        summary = ingest.run(local_dir=Path(args.from_dir) if args.from_dir else None)
+        summary["players"] = player_data.run(download_current=None if args.from_dir else ingest.current_season())
+        _print(summary)
         return 0
     if args.cmd in ("odds", "lines"):
         return _lines("nfl", args.cmd)
+    if args.cmd == "props":
+        from modelroom.nfl.props import pipeline as props
+
+        _print(props.run(days=args.days))
+        return 0
+    if args.cmd == "props-backtest":
+        from modelroom.nfl.props import backtest as pb
+
+        r = pb.run(log=lambda m: print(m, flush=True))
+        _print({"test_log_loss": r["test_objective"], "vs_baseline": r["test"].get("overall_vs_baseline")})
+        return 0
     if args.cmd == "backtest":
         from modelroom.nfl import backtest
 
@@ -134,11 +153,22 @@ def _nfl(args) -> int:
     return 2
 
 
+def _markets(args) -> int:
+    from modelroom.markets import run as markets
+
+    if args.cmd == "status":
+        _print(markets.provider_status())
+        return 0
+    providers = None if args.provider == "all" else [args.provider]
+    _print(markets.fetch(args.league, providers, days=args.days))
+    return 0
+
+
 def _ledger(args) -> int:
     from modelroom.common import ledger
     from modelroom.common.paths import ledger_path
 
-    for league in ("nba", "nfl"):
+    for league in ("nba", "nfl", "nfl_props"):
         n = ledger.verify(ledger_path(league))
         print(f"{league}: {n} predictions, chain intact")
     return 0
@@ -161,14 +191,20 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 
     f = sub.add_parser("nfl")
-    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project"])
+    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest"])
     f.add_argument("--days", type=int, default=10, help="project: how many days ahead")
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
+
+    mk = sub.add_parser("markets")
+    mk.add_argument("cmd", choices=["status", "fetch"])
+    mk.add_argument("league", nargs="?", default="nfl", choices=["nfl", "nba"])
+    mk.add_argument("--provider", default="all", choices=["all", "polymarket_us", "kalshi"])
+    mk.add_argument("--days", type=int, default=10)
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "ledger": _ledger}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger}[args.group]
     return handler(args)
 
 

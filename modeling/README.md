@@ -7,6 +7,8 @@ NBA and NFL data collection, validation and projection engines. The website (Nex
 - **Data collection and validation:** working for both leagues.
 - **NBA engine 1.1.0:** live on the site, provisional. Backtest: `../docs/models/results/`.
 - **NFL engine 1.0.1:** live on the site, provisional.
+- **NFL props 0.1.0:** live on the site, provisional. Method and results: `../docs/models/nfl-props.md`.
+- **Market data (optional):** Polymarket US, Kalshi, manual CSV in `modelroom/markets/`. Off by default; see `../docs/markets.md`.
 
 See `../docs/data-inventory.md` for every source and `../docs/data-sources.md` for the rules.
 
@@ -57,6 +59,10 @@ Copy `templates\lines_template.csv` to `data\manual\<league>_lines.csv` and fill
 ```powershell
 python -m modelroom nba project           # ratings -> next 7 days -> ledger -> data\published\nba.json
 python -m modelroom nfl project           # next 10 days -> ledger -> data\published\nfl.json
+python -m modelroom nfl props             # player props -> ledger\nfl_props.jsonl -> data\published\nfl_props.json
+python -m modelroom nfl props-backtest    # prop walk-forward tuning + held-out test (~20 min)
+python -m modelroom markets status        # which exchange feeds are on
+python -m modelroom markets fetch nfl     # snapshot from each enabled exchange
 python -m modelroom nba backtest          # walk-forward tuning + held-out test (~3 min); rewrites params.json
 python -m modelroom nfl backtest          # same for NFL (~5 min)
 python -m modelroom ledger verify         # check the prediction ledgers' hash chains
@@ -90,6 +96,8 @@ modelroom/
   sources/    registry (inventory), validation, reconciliation, odds, Land of Basketball
   nba/        NBA ingestion, ratings, projections, backtest, pipeline
   nfl/        NFL ingestion, EPA ratings, QB adjustment, projections, backtest, pipeline
+  nfl/props/  player-prop features, simulation, backtest, pipeline
+  markets/    exchange adapters (Polymarket US, Kalshi), manual CSV, matching, comparison, snapshots
 data/         gitignored: raw/ (as downloaded), processed/, output/, manual/
 ledger/       append-only prediction ledgers (committed)
 templates/    manual line entry template

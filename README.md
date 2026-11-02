@@ -9,9 +9,11 @@ NFL and NBA projections from real data: the model's line, total, projected score
 | NBA engine | **Live**, version 1.1.0, provisional. hoopR data from 2015-16 to now. |
 | NFL engine | **Live**, version 1.0.1, provisional. nflverse play-by-play, 2018 to now. |
 | Website | Reads the engines' published boards. No demo or fictional data anywhere. |
-| Prediction ledger | Every pre-game projection stored, hash-chained, never edited. |
+| NFL player props | **Live**, version 0.1.0, provisional. Own simulation per player; 13 markets; calibrated per market. |
+| Prop market data | Optional, off by default: Polymarket US, Kalshi, manual CSV. Compared after the model, never an input. |
+| Prediction ledger | Every pre-game projection stored, hash-chained, never edited (games and props). |
 | Market lines | NFL: nflverse's published line. NBA: optional (Odds API key or manual CSV). |
-| Not built | Player props, NBA injury feed, Shopify login and billing (design in `docs/auth-architecture.md`). |
+| Not built | NBA player props, NBA injury feed, Shopify login and billing (design in `docs/auth-architecture.md`). |
 
 Backtests (held-out seasons, never used for tuning):
 
@@ -21,6 +23,8 @@ Backtests (held-out seasons, never used for tuning):
 | NFL 1.0.1 (2023 to 2025) | 855 | 10.21 | 10.35 | 9.79 |
 
 The NFL model is less accurate than the market line, and no claim is made that either model beats the market. Reports: `docs/models/results/`.
+
+NFL props 0.1.0 (2023 to 2025, 502,813 thresholds across 13 markets): log loss 0.418 vs 0.446 for each player's recent hit rate, calibration error 1.1%. That measures probability accuracy only; there's no historical prop-price data, so no ROI or closing-line value yet. Details: `docs/models/nfl-props.md`.
 
 ## Run it locally on Windows
 
@@ -51,6 +55,7 @@ python -m modelroom sources validate
 # 5. Generate projections (writes modeling\data\published\*.json and the ledger)
 python -m modelroom nba project
 python -m modelroom nfl project
+python -m modelroom nfl props
 
 # 6. Start the site
 cd ..
@@ -63,7 +68,15 @@ Open http://localhost:3000. The bar under the header shows each league's data st
 
 ```powershell
 python -m modelroom nba ingest; python -m modelroom nfl ingest
-python -m modelroom nba project; python -m modelroom nfl project
+python -m modelroom nba project; python -m modelroom nfl project; python -m modelroom nfl props
+```
+
+**Prop prices from Polymarket US / Kalshi** (optional, your machine only; read `docs/markets.md` for the terms first):
+
+```powershell
+$env:MODELROOM_MARKETS_POLYMARKET_US = "on"; $env:MODELROOM_MARKETS_KALSHI = "on"
+python -m modelroom markets fetch nfl      # stores a timestamped snapshot
+python -m modelroom nfl props              # compares the model with the latest snapshot
 ```
 
 The site reads the new files on the next page load; no restart is needed.
@@ -85,6 +98,7 @@ Manual CSV template: `modeling\templates\lines_template.csv` → copy to `modeli
 ```powershell
 python -m modelroom nba backtest
 python -m modelroom nfl backtest
+python -m modelroom nfl props-backtest     # about 20 minutes; rewrites nfl\props\params.json
 ```
 
 ## Private online preview
@@ -122,7 +136,8 @@ modeling/ (Python)                                     src/ (Next.js)
 ## More documentation
 
 - `modeling/README.md`: engine commands and folders
-- `docs/models/nba.md`, `docs/models/nfl.md`: methodology
+- `docs/models/nba.md`, `docs/models/nfl.md`, `docs/models/nfl-props.md`: methodology
+- `docs/markets.md`: Polymarket US, Kalshi and manual prop prices; edge rules; terms
 - `docs/models/results/`: backtest reports, including superseded versions
 - `docs/data-sources.md`, `docs/data-inventory.md`: sources, terms, coverage
 - `docs/database.md`, `docs/auth-architecture.md`: Supabase schema and the planned Shopify login (not needed to run locally)
