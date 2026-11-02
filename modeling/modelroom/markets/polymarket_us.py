@@ -20,8 +20,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from modelroom.sources.odds import NFL_TEAMS
-
+from . import teams as T
 from .http import JsonClient, ProviderError
 from .schema import PropQuote, price, to_float
 
@@ -53,23 +52,16 @@ MARKET_TYPES = {
 }
 VARIANTS = {"football_player_fantasy_points_ppr": "espn_ppr"}
 VOID_RULE = "no snap: settles at last fair price"
-# Polymarket abbreviations that differ from nflverse codes (tried in order).
-SLUG_CODES = {"LA": ["lar", "la"], "JAX": ["jax", "jac"], "WAS": ["was", "wsh"], "LV": ["lv"], "LAC": ["lac"]}
-TEAM_BY_NAME = {k.lower(): v for k, v in NFL_TEAMS.items()}
 
 
 def client(cache_dir: Path | None, opener=None) -> JsonClient:
     return JsonClient(BASE, name=PROVIDER, min_interval_s=MIN_INTERVAL_S, cache_dir=cache_dir, cache_ttl_s=60.0, opener=opener)
 
 
-def _codes(team: str) -> list[str]:
-    return SLUG_CODES.get(team, [team.lower()])
-
-
 def candidate_slugs(league: str, away: str, home: str, game_date: str) -> list[str]:
     out = []
-    for a in _codes(away):
-        for h in _codes(home):
+    for a in T.slug_codes(league, away):
+        for h in T.slug_codes(league, home):
             out += [f"{league}-{a}-{h}-{game_date}", f"{league}-{h}-{a}-{game_date}"]
     return list(dict.fromkeys(out))
 
@@ -82,13 +74,10 @@ def fetch_event(c: JsonClient, league: str, away: str, home: str, game_date: str
     return None
 
 
-def _team_code(name: str | None) -> str | None:
-    if not name:
-        return None
-    return TEAM_BY_NAME.get(name.lower())
-
-
 def parse_event(ev: dict, league: str, captured_at: str | None = None) -> list[PropQuote]:
+    def _team_code(name):
+        return T.code_from_name(league, name)
+
     teams = {t.get("id"): t for t in ev.get("teams") or []}
     out = []
     slug = ev.get("slug") or ""

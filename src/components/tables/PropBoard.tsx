@@ -200,7 +200,7 @@ export async function PropBoard({ league, game }: { league: League; game?: strin
               return (
                 <Link
                   key={s.id}
-                  href={`/props?game=${encodeURIComponent(s.id)}`}
+                  href={`/props?${league}=${encodeURIComponent(s.id)}#${league}`}
                   scroll={false}
                   aria-current={on ? "page" : undefined}
                   className={`rounded-full border px-3 py-1.5 text-sm ${on ? "border-model bg-model/15 text-ink" : "border-navy-600 text-mute hover:text-ink"}`}

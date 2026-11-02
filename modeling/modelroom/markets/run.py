@@ -21,7 +21,8 @@ def upcoming_games(league: str, days: int) -> pd.DataFrame:
     if league == "nfl":
         g = pd.read_parquet(processed_dir("nfl") / "games.parquet")
     else:
-        g = pd.read_parquet(processed_dir("nba") / "games.parquet")
+        g = pd.read_parquet(processed_dir("nba") / "games.parquet").rename(columns={"home_abbr": "home_team", "away_abbr": "away_team"})
+        g["game_id"] = g["game_id"].astype(str)
     g = g[g["status"] == "scheduled"].copy()
     st = pd.to_datetime(g["start_time"], utc=True)
     now = datetime.now(timezone.utc)

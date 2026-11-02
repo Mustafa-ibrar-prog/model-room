@@ -11,6 +11,8 @@
   nfl odds | nfl lines            same as NBA
   nfl backtest                    NFL walk-forward validation (writes params.json)
   nba project | nfl project       projections -> ledger -> published board for the site
+  nba props                       NBA player-prop projections (next 3 days) -> ledger -> nba_props.json
+  nba props-backtest              NBA prop walk-forward (tunes on 2021-22, tests 2022-23 to 2025-26; ~1 h)
   nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
   nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
   markets status                  which market-data providers are on, and why
@@ -81,6 +83,9 @@ def _nba(args) -> int:
         from modelroom.sources import state
 
         summary = ingest.run()
+        from modelroom.nba.props import data as prop_data
+
+        summary["prop_players"] = prop_data.validate(prop_data.build())
         seasons = list(range(ingest.FIRST_SEASON, ingest.current_season() + 1))
         state.record("hoopr_schedule", seasons=summary["seasons"], latest_final=summary["latest_final"])
         state.record("hoopr_team_box", seasons=summary["seasons"])
@@ -104,6 +109,17 @@ def _nba(args) -> int:
         from modelroom.nba import pipeline
 
         _print(pipeline.run(days=args.days))
+        return 0
+    if args.cmd == "props":
+        from modelroom.nba.props import pipeline as props
+
+        _print(props.run(days=min(args.days, 3)))
+        return 0
+    if args.cmd == "props-backtest":
+        from modelroom.nba.props import backtest as pb
+
+        r = pb.run(log=lambda m: print(m, flush=True))
+        _print({"test_log_loss": r["test_objective"], "vs_baseline": r["test"].get("overall_vs_baseline")})
         return 0
     if args.cmd == "backtest":
         from modelroom.nba import backtest, injuries
@@ -168,7 +184,7 @@ def _ledger(args) -> int:
     from modelroom.common import ledger
     from modelroom.common.paths import ledger_path
 
-    for league in ("nba", "nfl", "nfl_props"):
+    for league in ("nba", "nfl", "nfl_props", "nba_props"):
         n = ledger.verify(ledger_path(league))
         print(f"{league}: {n} predictions, chain intact")
     return 0
@@ -185,7 +201,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--verbose", action="store_true")
 
     b = sub.add_parser("nba")
-    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest", "project"])
+    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest", "project", "props", "props-backtest"])
     b.add_argument("--days", type=int, default=7, help="project: how many days ahead")
     b.add_argument("--season", type=int)
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")

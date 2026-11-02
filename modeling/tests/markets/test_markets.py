@@ -79,6 +79,7 @@ def test_kalshi_fantasy_is_a_different_contract(kx):
 def test_kalshi_team_codes():
     assert kalshi.parse_event_ticker("KXNFLREC-26NOV05JACBAL", "JAC vs BAL (Nov 5)") == ("2026-11-05", "JAX", "BAL")
     assert kalshi.parse_event_ticker("KXNFLREC-26NOV08LARWAS", "LAR vs WAS (Nov 8)")[1] == "LA"
+    assert kalshi.parse_event_ticker("KXNBAPTS-26NOV02PHXGSW", "PHX vs GSW (Nov 2)", "nba") == ("2026-11-02", "PHX", "GS")
 
 
 # ------------------------------------------------------------------ manual CSV
@@ -197,3 +198,14 @@ def test_client_caches_retries_and_fails_cleanly(tmp_path, monkeypatch):
     with pytest.raises(ProviderError):
         d.get("/y")
     assert d.failures
+
+
+def test_nba_adapters_map_teams_and_markets():
+    ev = json.loads((FIX / "polymarket_us_event_nba.json").read_text())["event"]
+    qs = polymarket_us.parse_event(ev, "nba")
+    assert {"points", "rebounds", "assists", "pra", "threes", "steals", "blocks"} <= {q.market for q in qs}
+    assert {q.team for q in qs} <= {"OKC", "CLE"} and all(q.op == ">=" for q in qs)
+    kx = json.loads((FIX / "kalshi_events_nba.json").read_text())
+    ks = kalshi.parse_events("KXNBAPTS", kx["KXNBAPTS"], "nba")
+    assert ks and all(q.market == "points" and q.op == ">" and q.team in ("OKC", "CLE") for q in ks)
+    assert all(q.sportradar_player_id for q in ks)
