@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, type CSSProperties } from "react";
 import { favoredLine, formatKickoff, formatNumber } from "@/lib/format";
 import { getLeagueBoard } from "@/server/data";
 import { getViewer } from "@/server/viewer";
@@ -76,17 +76,19 @@ function EdgeFigure({ g }: { g: GameView }) {
   const mk = favoredLine(market, g.home.abbr, g.away.abbr);
   const md = favoredLine(model, g.home.abbr, g.away.abbr);
   const left = Math.min(pos(market), pos(model));
+  // Keep a label inside the track near either end instead of centring it off the edge.
+  const anchor = (x: number) => ({ left: `${x}%`, "--mx": x > 82 ? "-100%" : x < 18 ? "0%" : "-50%", transform: "translateX(var(--mx))", textAlign: x > 82 ? "right" : x < 18 ? "left" : "center" }) as CSSProperties;
   const width = Math.abs(pos(market) - pos(model));
 
   return (
     <figure className="rounded-2xl border border-navy-700 bg-navy-900 p-5 sm:p-7">
       <Caption g={g} note={`Market line from ${g.market!.sources.join(", ")}`} />
       <div className="relative mt-14 h-28" role="img" aria-label={`Market ${mk.text}, model ${md.text}, a ${edge.toFixed(1)} point gap.`}>
-        <div className="gap-marker absolute -top-10 text-center" style={{ left: `${pos(market)}%`, transform: "translateX(-50%)" }}>
+        <div className="gap-marker absolute -top-10 whitespace-nowrap" style={anchor(pos(market))}>
           <div className="text-[0.8rem] text-mute">Market</div>
           <div className="font-display text-2xl font-700 leading-none text-market sm:text-3xl">{mk.text}</div>
         </div>
-        <div className="gap-marker absolute top-[3.6rem] text-center" style={{ left: `${pos(model)}%`, transform: "translateX(-50%)" }}>
+        <div className="gap-marker absolute top-[3.6rem] whitespace-nowrap" style={anchor(pos(model))}>
           <div className="font-display text-2xl font-700 leading-none text-model sm:text-3xl">{md.text}</div>
           <div className="text-[0.8rem] text-mute">Model</div>
         </div>
