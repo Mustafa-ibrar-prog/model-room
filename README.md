@@ -38,6 +38,10 @@ Set `ENABLE_TIER_PREVIEW=true` in `.env.local`. A switcher appears at the bottom
 
 Pages prerender as Free unless `ENABLE_TIER_PREVIEW=true` is set when you run `next build` (or `next dev`). Once Shopify login ships, pages that read the session render per request automatically.
 
+## Data and modeling (Python)
+
+NBA and NFL data collection, validation and the projection engines live in [`modeling/`](modeling/README.md), with Windows setup, ingestion, validation, backtest and test commands. Sources and their terms: [docs/data-sources.md](docs/data-sources.md) and the generated [docs/data-inventory.md](docs/data-inventory.md).
+
 ## Database
 
 Schema, relationships and security rules: [docs/database.md](docs/database.md). Migrations are in `supabase/migrations/`.
