@@ -1,38 +1,92 @@
 @import "tailwindcss";
 
 /*
- * Model Room tokens.
- * Color carries meaning across the app:
- *   blue   = the market (posted lines)
+ * Model Room tokens: a ledger-style analytics look, light and dark.
+ * Color carries meaning everywhere:
+ *   blue   = the market (posted lines, exchange prices)
  *   teal   = the model (Model Room's numbers)
  *   orange = the edge (the gap between them) and anything that needs attention
+ * The "navy-*" names are kept so every existing component re-themes without changes:
+ *   navy-950 page, navy-900 surface, navy-850/800 soft fills, navy-700/600 lines.
  */
+:root {
+  color-scheme: light;
+  --mr-bg: #f3f5f8;
+  --mr-surface: #ffffff;
+  --mr-soft: #eef2f7;
+  --mr-soft-2: #e5ebf2;
+  --mr-line: #d7dee7;
+  --mr-line-2: #c3cdd9;
+  --mr-ink: #14202e;
+  --mr-mute: #4f5f72;
+  --mr-faint: #6f7f92;
+  --mr-model: #0b6e75;
+  --mr-market: #2f5fb3;
+  --mr-edge: #b4540a;
+  --mr-danger: #b3362f;
+  --mr-good: #1a7a4c;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --mr-bg: #0e151d;
+    --mr-surface: #16202b;
+    --mr-soft: #1a2633;
+    --mr-soft-2: #1e2b3a;
+    --mr-line: #263444;
+    --mr-line-2: #34465a;
+    --mr-ink: #e7edf3;
+    --mr-mute: #a3b2c3;
+    --mr-faint: #7d8fa3;
+    --mr-model: #4fc3c9;
+    --mr-market: #7aa7ff;
+    --mr-edge: #f0a35e;
+    --mr-danger: #ef7d75;
+    --mr-good: #5ccf93;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --mr-bg: #0e151d;
+  --mr-surface: #16202b;
+  --mr-soft: #1a2633;
+  --mr-soft-2: #1e2b3a;
+  --mr-line: #263444;
+  --mr-line-2: #34465a;
+  --mr-ink: #e7edf3;
+  --mr-mute: #a3b2c3;
+  --mr-faint: #7d8fa3;
+  --mr-model: #4fc3c9;
+  --mr-market: #7aa7ff;
+  --mr-edge: #f0a35e;
+  --mr-danger: #ef7d75;
+  --mr-good: #5ccf93;
+}
+
 @theme {
-  --color-navy-950: #061020;
-  --color-navy-900: #0a182c;
-  --color-navy-850: #0e1f38;
-  --color-navy-800: #132845;
-  --color-navy-700: #1d365a;
-  --color-navy-600: #2a4a75;
-  --color-ink: #e8eef8;
-  --color-mute: #93a6c2;
-  --color-faint: #5f7596;
-  --color-market: #4c8dff;
-  --color-model: #2fd3b5;
-  --color-edge: #ff8a3d;
-  --color-danger: #ff5d6c;
+  --color-navy-950: var(--mr-bg);
+  --color-navy-900: var(--mr-surface);
+  --color-navy-850: var(--mr-soft);
+  --color-navy-800: var(--mr-soft-2);
+  --color-navy-700: var(--mr-line);
+  --color-navy-600: var(--mr-line-2);
+  --color-ink: var(--mr-ink);
+  --color-mute: var(--mr-mute);
+  --color-faint: var(--mr-faint);
+  --color-market: var(--mr-market);
+  --color-model: var(--mr-model);
+  --color-edge: var(--mr-edge);
+  --color-danger: var(--mr-danger);
+  --color-good: var(--mr-good);
 
   --font-weight-400: 400;
   --font-weight-500: 500;
   --font-weight-600: 600;
   --font-weight-700: 700;
 
-  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Barlow Condensed", "Barlow", ui-sans-serif, system-ui, sans-serif;
-}
-
-:root {
-  color-scheme: dark;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: "Barlow Condensed", "Arial Narrow", ui-sans-serif, sans-serif;
 }
 
 html {
@@ -40,9 +94,7 @@ html {
 }
 
 body {
-  background:
-    radial-gradient(1200px 500px at 85% -10%, rgb(47 211 181 / 0.07), transparent 60%),
-    var(--color-navy-950);
+  background: var(--color-navy-950);
   color: var(--color-ink);
   font-family: var(--font-sans);
   font-feature-settings: "tnum" 1, "lnum" 1;

@@ -23,15 +23,19 @@ export async function DataStatus() {
 }
 
 function LeagueStatus({ league, f }: { league: League; f: Freshness }) {
-  const detail =
-    f.status === "unavailable"
-      ? "No projections generated yet"
-      : `Results through ${f.resultsThrough ? formatDateShort(f.resultsThrough) : "n/a"}. Model run ${formatTimestamp(f.modelRunAt)}`;
+  const through = f.resultsThrough ? formatDateShort(f.resultsThrough) : "n/a";
   return (
     <p className="flex items-center gap-2" title={f.reasons.join("; ") || undefined}>
       <span className="font-display text-[0.85rem] font-700 text-ink">{league.toUpperCase()}</span>
       <span className={`rounded-sm px-1.5 py-px font-display text-[0.75rem] font-700 ${STYLE[f.status]}`}>{LABEL[f.status]}</span>
-      <span>{detail}</span>
+      {f.status === "unavailable" ? (
+        <span>No projections yet</span>
+      ) : (
+        <span>
+          <span className="sm:hidden">to {through}</span>
+          <span className="hidden sm:inline">Results through {through}. Model run {formatTimestamp(f.modelRunAt)}</span>
+        </span>
+      )}
       {f.status === "delayed" && f.reasons[0] && <span className="hidden text-faint lg:inline">({f.reasons[0]})</span>}
     </p>
   );
