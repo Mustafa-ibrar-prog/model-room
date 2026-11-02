@@ -1,0 +1,8318 @@
+{
+  "schema_version": 1,
+  "league": "nba",
+  "generated_at": "2026-11-02T07:28:00+00:00",
+  "season": 2027,
+  "season_label": "2026-27",
+  "model": {
+    "id": "nba-game",
+    "version": "1.1.0",
+    "params_hash": "b6f976a4fe33ed0f",
+    "status": "provisional",
+    "fitted_at": "2026-11-02T07:16:22+00:00",
+    "inputs_hash": "c8cc3e4cfe857113",
+    "ratings_through_games": 88,
+    "uncertainty": {
+      "margin_sigma": 13.3165,
+      "total_sigma": 18.6545,
+      "method": "80% range = projection \u00b1 1.28 \u00d7 out-of-sample error std. dev. (training seasons)"
+    }
+  },
+  "data": {
+    "sources": [
+      "hoopR / sportsdataverse (ESPN)"
+    ],
+    "freshness": {
+      "status": "delayed",
+      "reasons": [
+        "4 finished game(s) have no result in the source yet"
+      ],
+      "results_through": "2026-10-31",
+      "last_ingest": "2026-11-02T07:27:41+00:00",
+      "missing_results": [
+        "401909903",
+        "401909904",
+        "401909905",
+        "401909906"
+      ]
+    },
+    "injuries": {
+      "connected": false,
+      "note": "No NBA injury feed connected; injury adjustments are not applied."
+    },
+    "market": {
+      "connected": false,
+      "sources": [],
+      "note": "No NBA sportsbook lines connected (optional Odds API key or manual CSV)."
+    }
+  },
+  "upcoming": [
+    {
+      "game_id": "401909907",
+      "start_time": "2026-11-03T00:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 2.59
+      },
+      "away": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 4.96
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.0,
+        "away_score": 113.6,
+        "margin": -0.6,
+        "total": 226.7,
+        "spread": 0.6,
+        "home_win_prob": 0.4834,
+        "away_win_prob": 0.5166,
+        "margin_range_80": [
+          -17.6,
+          16.5
+        ],
+        "total_range_80": [
+          202.7,
+          250.6
+        ],
+        "pace": 102.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909908",
+      "start_time": "2026-11-03T00:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -2.35
+      },
+      "away": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.4
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 101.3,
+        "away_score": 107.3,
+        "margin": -5.9,
+        "total": 208.6,
+        "spread": 5.9,
+        "home_win_prob": 0.3278,
+        "away_win_prob": 0.6722,
+        "margin_range_80": [
+          -23.0,
+          11.1
+        ],
+        "total_range_80": [
+          184.7,
+          232.5
+        ],
+        "pace": 97.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909909",
+      "start_time": "2026-11-03T00:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -3.97
+      },
+      "away": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.38
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.6,
+        "away_score": 122.1,
+        "margin": -5.5,
+        "total": 238.8,
+        "spread": 5.5,
+        "home_win_prob": 0.3388,
+        "away_win_prob": 0.6612,
+        "margin_range_80": [
+          -22.6,
+          11.5
+        ],
+        "total_range_80": [
+          214.9,
+          262.7
+        ],
+        "pace": 106.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909910",
+      "start_time": "2026-11-03T00:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.06
+      },
+      "away": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -7.29
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.5,
+        "away_score": 104.0,
+        "margin": 15.5,
+        "total": 223.5,
+        "spread": -15.5,
+        "home_win_prob": 0.8776,
+        "away_win_prob": 0.1224,
+        "margin_range_80": [
+          -1.6,
+          32.6
+        ],
+        "total_range_80": [
+          199.6,
+          247.4
+        ],
+        "pace": 102.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909911",
+      "start_time": "2026-11-03T00:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -0.93
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -5.35
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.0,
+        "away_score": 112.6,
+        "margin": 4.5,
+        "total": 229.6,
+        "spread": -4.5,
+        "home_win_prob": 0.6317,
+        "away_win_prob": 0.3683,
+        "margin_range_80": [
+          -12.6,
+          21.5
+        ],
+        "total_range_80": [
+          205.7,
+          253.5
+        ],
+        "pace": 103.6
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909912",
+      "start_time": "2026-11-03T00:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.82
+      },
+      "away": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -6.22
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 125.7,
+        "away_score": 116.2,
+        "margin": 9.6,
+        "total": 241.9,
+        "spread": -9.6,
+        "home_win_prob": 0.7636,
+        "away_win_prob": 0.2364,
+        "margin_range_80": [
+          -7.5,
+          26.6
+        ],
+        "total_range_80": [
+          218.0,
+          265.8
+        ],
+        "pace": 109.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909913",
+      "start_time": "2026-11-03T01:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -0.14
+      },
+      "away": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -8.6
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 124.6,
+        "away_score": 113.5,
+        "margin": 11.0,
+        "total": 238.1,
+        "spread": -11.0,
+        "home_win_prob": 0.7965,
+        "away_win_prob": 0.2035,
+        "margin_range_80": [
+          -6.0,
+          28.1
+        ],
+        "total_range_80": [
+          214.2,
+          262.0
+        ],
+        "pace": 105.5
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909914",
+      "start_time": "2026-11-03T01:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": 1.03
+      },
+      "away": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -2.23
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.0,
+        "away_score": 115.6,
+        "margin": 5.4,
+        "total": 236.6,
+        "spread": -5.4,
+        "home_win_prob": 0.6577,
+        "away_win_prob": 0.3423,
+        "margin_range_80": [
+          -11.7,
+          22.5
+        ],
+        "total_range_80": [
+          212.7,
+          260.5
+        ],
+        "pace": 106.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909915",
+      "start_time": "2026-11-03T01:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.67
+      },
+      "away": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -7.02
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 124.8,
+        "away_score": 109.6,
+        "margin": 15.2,
+        "total": 234.4,
+        "spread": -15.2,
+        "home_win_prob": 0.8737,
+        "away_win_prob": 0.1263,
+        "margin_range_80": [
+          -1.8,
+          32.3
+        ],
+        "total_range_80": [
+          210.5,
+          258.3
+        ],
+        "pace": 104.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909916",
+      "start_time": "2026-11-03T01:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 6.48
+      },
+      "away": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.94
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.0,
+        "away_score": 107.8,
+        "margin": 5.1,
+        "total": 220.8,
+        "spread": -5.1,
+        "home_win_prob": 0.6493,
+        "away_win_prob": 0.3507,
+        "margin_range_80": [
+          -12.0,
+          22.2
+        ],
+        "total_range_80": [
+          196.9,
+          244.7
+        ],
+        "pace": 97.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909917",
+      "start_time": "2026-11-03T01:30:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.98
+      },
+      "away": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.5
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.1,
+        "away_score": 107.4,
+        "margin": 14.7,
+        "total": 229.6,
+        "spread": -14.7,
+        "home_win_prob": 0.8651,
+        "away_win_prob": 0.1349,
+        "margin_range_80": [
+          -2.4,
+          31.8
+        ],
+        "total_range_80": [
+          205.7,
+          253.5
+        ],
+        "pace": 102.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909918",
+      "start_time": "2026-11-03T02:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 1.61
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.34
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.6,
+        "away_score": 113.3,
+        "margin": 1.3,
+        "total": 227.9,
+        "spread": -1.3,
+        "home_win_prob": 0.5389,
+        "away_win_prob": 0.4611,
+        "margin_range_80": [
+          -15.8,
+          18.4
+        ],
+        "total_range_80": [
+          204.0,
+          251.8
+        ],
+        "pace": 100.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909919",
+      "start_time": "2026-11-03T03:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": 1.08
+      },
+      "away": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.11
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.5,
+        "away_score": 114.4,
+        "margin": 3.1,
+        "total": 232.0,
+        "spread": -3.1,
+        "home_win_prob": 0.5921,
+        "away_win_prob": 0.4079,
+        "margin_range_80": [
+          -14.0,
+          20.2
+        ],
+        "total_range_80": [
+          208.1,
+          255.9
+        ],
+        "pace": 101.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909920",
+      "start_time": "2026-11-03T03:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": -0.51
+      },
+      "away": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 2.82
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 110.9,
+        "away_score": 112.4,
+        "margin": -1.5,
+        "total": 223.2,
+        "spread": 1.5,
+        "home_win_prob": 0.4544,
+        "away_win_prob": 0.5456,
+        "margin_range_80": [
+          -18.6,
+          15.5
+        ],
+        "total_range_80": [
+          199.3,
+          247.1
+        ],
+        "pace": 101.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909921",
+      "start_time": "2026-11-03T03:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.25
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.18
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.1,
+        "away_score": 119.6,
+        "margin": 2.5,
+        "total": 241.7,
+        "spread": -2.5,
+        "home_win_prob": 0.5741,
+        "away_win_prob": 0.4259,
+        "margin_range_80": [
+          -14.6,
+          19.6
+        ],
+        "total_range_80": [
+          217.8,
+          265.6
+        ],
+        "pace": 105.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909922",
+      "start_time": "2026-11-05T00:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.39
+      },
+      "away": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.81
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.0,
+        "away_score": 106.4,
+        "margin": 6.6,
+        "total": 219.4,
+        "spread": -6.6,
+        "home_win_prob": 0.6888,
+        "away_win_prob": 0.3112,
+        "margin_range_80": [
+          -10.5,
+          23.6
+        ],
+        "total_range_80": [
+          195.5,
+          243.3
+        ],
+        "pace": 102.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909923",
+      "start_time": "2026-11-05T00:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -5.36
+      },
+      "away": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.37
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.2,
+        "away_score": 120.4,
+        "margin": -5.2,
+        "total": 235.7,
+        "spread": 5.2,
+        "home_win_prob": 0.3483,
+        "away_win_prob": 0.6517,
+        "margin_range_80": [
+          -22.3,
+          11.9
+        ],
+        "total_range_80": [
+          211.8,
+          259.6
+        ],
+        "pace": 106.0
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909924",
+      "start_time": "2026-11-05T00:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.94
+      },
+      "away": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -6.99
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.0,
+        "away_score": 108.0,
+        "margin": 13.9,
+        "total": 230.0,
+        "spread": -13.9,
+        "home_win_prob": 0.8524,
+        "away_win_prob": 0.1476,
+        "margin_range_80": [
+          -3.1,
+          31.0
+        ],
+        "total_range_80": [
+          206.1,
+          253.9
+        ],
+        "pace": 101.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909925",
+      "start_time": "2026-11-05T00:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -7.28
+      },
+      "away": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -2.32
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 107.1,
+        "away_score": 110.3,
+        "margin": -3.1,
+        "total": 217.4,
+        "spread": 3.1,
+        "home_win_prob": 0.4069,
+        "away_win_prob": 0.5931,
+        "margin_range_80": [
+          -20.2,
+          13.9
+        ],
+        "total_range_80": [
+          193.5,
+          241.3
+        ],
+        "pace": 100.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909926",
+      "start_time": "2026-11-05T00:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.08
+      },
+      "away": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -6.19
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 125.0,
+        "away_score": 112.1,
+        "margin": 12.9,
+        "total": 237.1,
+        "spread": -12.9,
+        "home_win_prob": 0.8341,
+        "away_win_prob": 0.1659,
+        "margin_range_80": [
+          -4.1,
+          30.0
+        ],
+        "total_range_80": [
+          213.2,
+          261.0
+        ],
+        "pace": 106.8
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909927",
+      "start_time": "2026-11-05T01:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": 0.99
+      },
+      "away": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -3.96
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.8,
+        "away_score": 113.7,
+        "margin": 7.1,
+        "total": 234.5,
+        "spread": -7.1,
+        "home_win_prob": 0.7019,
+        "away_win_prob": 0.2981,
+        "margin_range_80": [
+          -10.0,
+          24.1
+        ],
+        "total_range_80": [
+          210.6,
+          258.4
+        ],
+        "pace": 104.0
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909928",
+      "start_time": "2026-11-05T01:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -2.23
+      },
+      "away": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.49
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.8,
+        "away_score": 115.4,
+        "margin": 6.4,
+        "total": 237.2,
+        "spread": -6.4,
+        "home_win_prob": 0.6856,
+        "away_win_prob": 0.3144,
+        "margin_range_80": [
+          -10.6,
+          23.5
+        ],
+        "total_range_80": [
+          213.3,
+          261.1
+        ],
+        "pace": 105.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909929",
+      "start_time": "2026-11-05T01:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 4.97
+      },
+      "away": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 2.59
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.5,
+        "away_score": 111.2,
+        "margin": 4.3,
+        "total": 226.7,
+        "spread": -4.3,
+        "home_win_prob": 0.627,
+        "away_win_prob": 0.373,
+        "margin_range_80": [
+          -12.8,
+          21.4
+        ],
+        "total_range_80": [
+          202.8,
+          250.6
+        ],
+        "pace": 102.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909930",
+      "start_time": "2026-11-05T01:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 6.45
+      },
+      "away": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.64
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.0,
+        "away_score": 111.3,
+        "margin": 2.7,
+        "total": 225.2,
+        "spread": -2.7,
+        "home_win_prob": 0.5797,
+        "away_win_prob": 0.4203,
+        "margin_range_80": [
+          -14.4,
+          19.7
+        ],
+        "total_range_80": [
+          201.3,
+          249.1
+        ],
+        "pace": 101.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909931",
+      "start_time": "2026-11-05T02:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 1.62
+      },
+      "away": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 2.81
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.2,
+        "away_score": 112.5,
+        "margin": 0.6,
+        "total": 225.7,
+        "spread": -0.6,
+        "home_win_prob": 0.5191,
+        "away_win_prob": 0.4809,
+        "margin_range_80": [
+          -16.4,
+          17.7
+        ],
+        "total_range_80": [
+          201.8,
+          249.6
+        ],
+        "pace": 100.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909932",
+      "start_time": "2026-11-05T02:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.09
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.32
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.6,
+        "away_score": 116.3,
+        "margin": -2.6,
+        "total": 229.9,
+        "spread": 2.6,
+        "home_win_prob": 0.4215,
+        "away_win_prob": 0.5785,
+        "margin_range_80": [
+          -19.7,
+          14.4
+        ],
+        "total_range_80": [
+          206.0,
+          253.8
+        ],
+        "pace": 102.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909933",
+      "start_time": "2026-11-05T02:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.97
+      },
+      "away": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -0.17
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.6,
+        "away_score": 110.4,
+        "margin": 8.2,
+        "total": 229.0,
+        "spread": -8.2,
+        "home_win_prob": 0.7321,
+        "away_win_prob": 0.2679,
+        "margin_range_80": [
+          -8.8,
+          25.3
+        ],
+        "total_range_80": [
+          205.1,
+          252.9
+        ],
+        "pace": 103.5
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909934",
+      "start_time": "2026-11-05T03:00:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -8.58
+      },
+      "away": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.24
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.3,
+        "away_score": 123.7,
+        "margin": -9.3,
+        "total": 238.0,
+        "spread": 9.3,
+        "home_win_prob": 0.2418,
+        "away_win_prob": 0.7582,
+        "margin_range_80": [
+          -26.4,
+          7.7
+        ],
+        "total_range_80": [
+          214.1,
+          261.9
+        ],
+        "pace": 103.8
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909935",
+      "start_time": "2026-11-05T03:30:00+00:00",
+      "game_date": "2026-11-04",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": -0.5
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.18
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.1,
+        "away_score": 117.6,
+        "margin": 1.6,
+        "total": 236.7,
+        "spread": -1.6,
+        "home_win_prob": 0.5475,
+        "away_win_prob": 0.4525,
+        "margin_range_80": [
+          -15.5,
+          18.7
+        ],
+        "total_range_80": [
+          212.8,
+          260.6
+        ],
+        "pace": 105.2
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909936",
+      "start_time": "2026-11-06T02:00:00+00:00",
+      "game_date": "2026-11-05",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.08
+      },
+      "away": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -0.91
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.2,
+        "away_score": 115.6,
+        "margin": -1.3,
+        "total": 229.8,
+        "spread": 1.3,
+        "home_win_prob": 0.4606,
+        "away_win_prob": 0.5394,
+        "margin_range_80": [
+          -18.4,
+          15.7
+        ],
+        "total_range_80": [
+          205.9,
+          253.7
+        ],
+        "pace": 102.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909937",
+      "start_time": "2026-11-06T03:00:00+00:00",
+      "game_date": "2026-11-05",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": 1.06
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.17
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 123.6,
+        "away_score": 118.4,
+        "margin": 5.2,
+        "total": 242.0,
+        "spread": -5.2,
+        "home_win_prob": 0.6532,
+        "away_win_prob": 0.3468,
+        "margin_range_80": [
+          -11.8,
+          22.3
+        ],
+        "total_range_80": [
+          218.1,
+          265.9
+        ],
+        "pace": 106.2
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909287",
+      "start_time": "2026-11-07T00:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.36
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -5.37
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.4,
+        "away_score": 113.3,
+        "margin": 9.1,
+        "total": 235.7,
+        "spread": -9.1,
+        "home_win_prob": 0.7522,
+        "away_win_prob": 0.2478,
+        "margin_range_80": [
+          -8.0,
+          26.1
+        ],
+        "total_range_80": [
+          211.8,
+          259.6
+        ],
+        "pace": 106.0
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909288",
+      "start_time": "2026-11-07T00:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -2.29
+      },
+      "away": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.95
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 103.0,
+        "away_score": 108.2,
+        "margin": -5.2,
+        "total": 211.2,
+        "spread": 5.2,
+        "home_win_prob": 0.3492,
+        "away_win_prob": 0.6508,
+        "margin_range_80": [
+          -22.2,
+          11.9
+        ],
+        "total_range_80": [
+          187.3,
+          235.1
+        ],
+        "pace": 95.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909289",
+      "start_time": "2026-11-07T00:30:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 2.58
+      },
+      "away": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.81
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.8,
+        "away_score": 113.1,
+        "margin": 3.7,
+        "total": 229.9,
+        "spread": -3.7,
+        "home_win_prob": 0.6102,
+        "away_win_prob": 0.3898,
+        "margin_range_80": [
+          -13.3,
+          20.8
+        ],
+        "total_range_80": [
+          205.9,
+          253.8
+        ],
+        "pace": 103.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909290",
+      "start_time": "2026-11-07T01:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -0.19
+      },
+      "away": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.49
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.6,
+        "away_score": 112.1,
+        "margin": 8.4,
+        "total": 232.7,
+        "spread": -8.4,
+        "home_win_prob": 0.7365,
+        "away_win_prob": 0.2635,
+        "margin_range_80": [
+          -8.6,
+          25.5
+        ],
+        "total_range_80": [
+          208.8,
+          256.6
+        ],
+        "pace": 103.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909291",
+      "start_time": "2026-11-07T01:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": 0.96
+      },
+      "away": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 4.99
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.4,
+        "away_score": 113.7,
+        "margin": -2.3,
+        "total": 225.1,
+        "spread": 2.3,
+        "home_win_prob": 0.4324,
+        "away_win_prob": 0.5676,
+        "margin_range_80": [
+          -19.3,
+          14.8
+        ],
+        "total_range_80": [
+          201.2,
+          249.0
+        ],
+        "pace": 102.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909292",
+      "start_time": "2026-11-07T01:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -6.97
+      },
+      "away": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 2.79
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.9,
+        "away_score": 120.2,
+        "margin": -8.3,
+        "total": 232.1,
+        "spread": 8.3,
+        "home_win_prob": 0.2678,
+        "away_win_prob": 0.7322,
+        "margin_range_80": [
+          -25.3,
+          8.8
+        ],
+        "total_range_80": [
+          208.2,
+          256.0
+        ],
+        "pace": 104.0
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909293",
+      "start_time": "2026-11-07T01:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -2.23
+      },
+      "away": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.61
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.2,
+        "away_score": 120.6,
+        "margin": -6.4,
+        "total": 234.8,
+        "spread": 6.4,
+        "home_win_prob": 0.3152,
+        "away_win_prob": 0.6848,
+        "margin_range_80": [
+          -23.5,
+          10.7
+        ],
+        "total_range_80": [
+          210.9,
+          258.7
+        ],
+        "pace": 106.5
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909294",
+      "start_time": "2026-11-07T03:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.23
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.3
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.0,
+        "away_score": 114.2,
+        "margin": 1.8,
+        "total": 230.2,
+        "spread": -1.8,
+        "home_win_prob": 0.554,
+        "away_win_prob": 0.446,
+        "margin_range_80": [
+          -15.3,
+          18.9
+        ],
+        "total_range_80": [
+          206.3,
+          254.1
+        ],
+        "pace": 102.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909295",
+      "start_time": "2026-11-07T03:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -8.55
+      },
+      "away": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.97
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 110.8,
+        "away_score": 124.1,
+        "margin": -13.3,
+        "total": 234.9,
+        "spread": 13.3,
+        "home_win_prob": 0.1596,
+        "away_win_prob": 0.8404,
+        "margin_range_80": [
+          -30.3,
+          3.8
+        ],
+        "total_range_80": [
+          211.0,
+          258.8
+        ],
+        "pace": 104.5
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909938",
+      "start_time": "2026-11-07T22:00:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": true,
+      "home": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -3.96
+      },
+      "away": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 1.63
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.2,
+        "away_score": 118.8,
+        "margin": -5.6,
+        "total": 232.0,
+        "spread": 5.6,
+        "home_win_prob": 0.3362,
+        "away_win_prob": 0.6638,
+        "margin_range_80": [
+          -22.7,
+          11.4
+        ],
+        "total_range_80": [
+          208.1,
+          255.9
+        ],
+        "pace": 100.8
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909939",
+      "start_time": "2026-11-08T00:30:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.36
+      },
+      "away": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -7.26
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.8,
+        "away_score": 113.5,
+        "margin": 9.2,
+        "total": 236.3,
+        "spread": -9.2,
+        "home_win_prob": 0.7563,
+        "away_win_prob": 0.2437,
+        "margin_range_80": [
+          -7.8,
+          26.3
+        ],
+        "total_range_80": [
+          212.4,
+          260.2
+        ],
+        "pace": 107.6
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909940",
+      "start_time": "2026-11-08T01:00:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 2.58
+      },
+      "away": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.1
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.6,
+        "away_score": 113.3,
+        "margin": -1.7,
+        "total": 224.9,
+        "spread": 1.7,
+        "home_win_prob": 0.4495,
+        "away_win_prob": 0.5505,
+        "margin_range_80": [
+          -18.8,
+          15.4
+        ],
+        "total_range_80": [
+          201.0,
+          248.8
+        ],
+        "pace": 100.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909941",
+      "start_time": "2026-11-08T01:00:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 5.0
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -5.37
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.5,
+        "away_score": 106.0,
+        "margin": 12.5,
+        "total": 224.5,
+        "spread": -12.5,
+        "home_win_prob": 0.8265,
+        "away_win_prob": 0.1735,
+        "margin_range_80": [
+          -4.5,
+          29.6
+        ],
+        "total_range_80": [
+          200.6,
+          248.4
+        ],
+        "pace": 102.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909942",
+      "start_time": "2026-11-08T01:30:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": 1.04
+      },
+      "away": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -0.91
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.2,
+        "away_score": 113.3,
+        "margin": 3.9,
+        "total": 230.5,
+        "spread": -3.9,
+        "home_win_prob": 0.615,
+        "away_win_prob": 0.385,
+        "margin_range_80": [
+          -13.2,
+          21.0
+        ],
+        "total_range_80": [
+          206.6,
+          254.4
+        ],
+        "pace": 103.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909943",
+      "start_time": "2026-11-08T02:00:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.05
+      },
+      "away": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 6.41
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.7,
+        "away_score": 116.5,
+        "margin": -6.8,
+        "total": 226.3,
+        "spread": 6.8,
+        "home_win_prob": 0.3051,
+        "away_win_prob": 0.6949,
+        "margin_range_80": [
+          -23.9,
+          10.3
+        ],
+        "total_range_80": [
+          202.4,
+          250.2
+        ],
+        "pace": 99.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909944",
+      "start_time": "2026-11-08T03:00:00+00:00",
+      "game_date": "2026-11-07",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.28
+      },
+      "away": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.97
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 112.7,
+        "away_score": 114.6,
+        "margin": -1.9,
+        "total": 227.2,
+        "spread": 1.9,
+        "home_win_prob": 0.4428,
+        "away_win_prob": 0.5572,
+        "margin_range_80": [
+          -19.0,
+          15.1
+        ],
+        "total_range_80": [
+          203.3,
+          251.1
+        ],
+        "pace": 103.4
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909945",
+      "start_time": "2026-11-08T20:30:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -6.14
+      },
+      "away": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.8
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.2,
+        "away_score": 123.6,
+        "margin": -5.4,
+        "total": 241.8,
+        "spread": 5.4,
+        "home_win_prob": 0.3418,
+        "away_win_prob": 0.6582,
+        "margin_range_80": [
+          -22.5,
+          11.6
+        ],
+        "total_range_80": [
+          217.9,
+          265.7
+        ],
+        "pace": 109.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909946",
+      "start_time": "2026-11-08T23:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.38
+      },
+      "away": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.22
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.2,
+        "away_score": 109.0,
+        "margin": 5.2,
+        "total": 223.2,
+        "spread": -5.2,
+        "home_win_prob": 0.6525,
+        "away_win_prob": 0.3475,
+        "margin_range_80": [
+          -11.8,
+          22.3
+        ],
+        "total_range_80": [
+          199.3,
+          247.1
+        ],
+        "pace": 100.9
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909947",
+      "start_time": "2026-11-09T00:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.58
+      },
+      "away": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.48
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.7,
+        "away_score": 108.3,
+        "margin": 14.4,
+        "total": 231.0,
+        "spread": -14.4,
+        "home_win_prob": 0.8605,
+        "away_win_prob": 0.1395,
+        "margin_range_80": [
+          -2.7,
+          31.5
+        ],
+        "total_range_80": [
+          207.1,
+          254.9
+        ],
+        "pace": 103.8
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909948",
+      "start_time": "2026-11-09T00:30:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -0.22
+      },
+      "away": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -7.26
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.7,
+        "away_score": 110.5,
+        "margin": 11.2,
+        "total": 232.1,
+        "spread": -11.2,
+        "home_win_prob": 0.7994,
+        "away_win_prob": 0.2006,
+        "margin_range_80": [
+          -5.9,
+          28.2
+        ],
+        "total_range_80": [
+          208.2,
+          256.0
+        ],
+        "pace": 105.7
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909949",
+      "start_time": "2026-11-09T01:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -6.94
+      },
+      "away": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.95
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.9,
+        "away_score": 120.1,
+        "margin": -10.2,
+        "total": 229.9,
+        "spread": 10.2,
+        "home_win_prob": 0.222,
+        "away_win_prob": 0.778,
+        "margin_range_80": [
+          -27.3,
+          6.9
+        ],
+        "total_range_80": [
+          206.0,
+          253.8
+        ],
+        "pace": 101.3
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909950",
+      "start_time": "2026-11-09T02:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": -0.47
+      },
+      "away": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -2.23
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.9,
+        "away_score": 113.9,
+        "margin": 3.9,
+        "total": 231.8,
+        "spread": -3.9,
+        "home_win_prob": 0.6165,
+        "away_win_prob": 0.3835,
+        "margin_range_80": [
+          -13.1,
+          21.0
+        ],
+        "total_range_80": [
+          207.9,
+          255.7
+        ],
+        "pace": 104.6
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    },
+    {
+      "game_id": "401909951",
+      "start_time": "2026-11-09T02:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -8.53
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.16
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.2,
+        "away_score": 127.4,
+        "margin": -7.3,
+        "total": 247.6,
+        "spread": 7.3,
+        "home_win_prob": 0.2929,
+        "away_win_prob": 0.7071,
+        "margin_range_80": [
+          -24.3,
+          9.8
+        ],
+        "total_range_80": [
+          223.7,
+          271.5
+        ],
+        "pace": 108.1
+      },
+      "market": null,
+      "edges": null,
+      "result": null
+    }
+  ],
+  "recent": [
+    {
+      "game_id": "401909902",
+      "start_time": "2026-11-01T00:30:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 5.61
+      },
+      "away": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 6.03
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 110.3,
+        "away_score": 111.1,
+        "margin": -0.8,
+        "total": 221.5,
+        "spread": 0.8,
+        "home_win_prob": 0.4765,
+        "away_win_prob": 0.5235,
+        "margin_range_80": [
+          -17.9,
+          16.3
+        ],
+        "total_range_80": [
+          197.6,
+          245.4
+        ],
+        "pace": 101.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 119,
+        "away_score": 98,
+        "margin": 21,
+        "total": 217
+      }
+    },
+    {
+      "game_id": "401909901",
+      "start_time": "2026-11-01T00:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.64
+      },
+      "away": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 6.09
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.9,
+        "away_score": 111.7,
+        "margin": 3.2,
+        "total": 226.6,
+        "spread": -3.2,
+        "home_win_prob": 0.5952,
+        "away_win_prob": 0.4048,
+        "margin_range_80": [
+          -13.9,
+          20.3
+        ],
+        "total_range_80": [
+          202.7,
+          250.5
+        ],
+        "pace": 103.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 121,
+        "away_score": 111,
+        "margin": 10,
+        "total": 232
+      }
+    },
+    {
+      "game_id": "401909900",
+      "start_time": "2026-11-01T00:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -6.15
+      },
+      "away": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 1.74
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.5,
+        "away_score": 120.8,
+        "margin": -6.3,
+        "total": 235.4,
+        "spread": 6.3,
+        "home_win_prob": 0.3183,
+        "away_win_prob": 0.6817,
+        "margin_range_80": [
+          -23.4,
+          10.8
+        ],
+        "total_range_80": [
+          211.5,
+          259.3
+        ],
+        "pace": 103.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 111,
+        "away_score": 136,
+        "margin": -25,
+        "total": 247
+      }
+    },
+    {
+      "game_id": "401909899",
+      "start_time": "2026-11-01T00:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": 0.07
+      },
+      "away": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -7.81
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 123.1,
+        "away_score": 113.2,
+        "margin": 9.9,
+        "total": 236.3,
+        "spread": -9.9,
+        "home_win_prob": 0.7723,
+        "away_win_prob": 0.2277,
+        "margin_range_80": [
+          -7.1,
+          27.0
+        ],
+        "total_range_80": [
+          212.4,
+          260.2
+        ],
+        "pace": 104.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 136,
+        "away_score": 105,
+        "margin": 31,
+        "total": 241
+      }
+    },
+    {
+      "game_id": "401909898",
+      "start_time": "2026-10-31T23:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -3.48
+      },
+      "away": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 2.53
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.5,
+        "away_score": 124.2,
+        "margin": -4.8,
+        "total": 243.7,
+        "spread": 4.8,
+        "home_win_prob": 0.36,
+        "away_win_prob": 0.64,
+        "margin_range_80": [
+          -21.8,
+          12.3
+        ],
+        "total_range_80": [
+          219.8,
+          267.6
+        ],
+        "pace": 108.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 121,
+        "away_score": 99,
+        "margin": 22,
+        "total": 220
+      }
+    },
+    {
+      "game_id": "401909897",
+      "start_time": "2026-10-31T22:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -2.08
+      },
+      "away": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.62
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 107.2,
+        "away_score": 108.3,
+        "margin": -1.1,
+        "total": 215.4,
+        "spread": 1.1,
+        "home_win_prob": 0.4675,
+        "away_win_prob": 0.5325,
+        "margin_range_80": [
+          -18.2,
+          16.0
+        ],
+        "total_range_80": [
+          191.5,
+          239.3
+        ],
+        "pace": 100.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 104,
+        "away_score": 109,
+        "margin": -5,
+        "total": 213
+      }
+    },
+    {
+      "game_id": "401909896",
+      "start_time": "2026-10-31T19:00:00+00:00",
+      "game_date": "2026-10-31",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -5.82
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 1.44
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.6,
+        "away_score": 120.2,
+        "margin": -5.7,
+        "total": 234.8,
+        "spread": 5.7,
+        "home_win_prob": 0.3351,
+        "away_win_prob": 0.6649,
+        "margin_range_80": [
+          -22.7,
+          11.4
+        ],
+        "total_range_80": [
+          210.9,
+          258.7
+        ],
+        "pace": 103.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 90,
+        "away_score": 112,
+        "margin": -22,
+        "total": 202
+      }
+    },
+    {
+      "game_id": "401909286",
+      "start_time": "2026-10-31T02:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -1.89
+      },
+      "away": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 1.11
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.7,
+        "away_score": 113.2,
+        "margin": -1.6,
+        "total": 224.9,
+        "spread": 1.6,
+        "home_win_prob": 0.4534,
+        "away_win_prob": 0.5466,
+        "margin_range_80": [
+          -18.6,
+          15.5
+        ],
+        "total_range_80": [
+          201.0,
+          248.8
+        ],
+        "pace": 98.5
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 127,
+        "margin": -7,
+        "total": 247
+      }
+    },
+    {
+      "game_id": "401909285",
+      "start_time": "2026-10-31T02:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": -0.05
+      },
+      "away": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 3.37
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.2,
+        "away_score": 119.4,
+        "margin": -2.3,
+        "total": 236.6,
+        "spread": 2.3,
+        "home_win_prob": 0.4327,
+        "away_win_prob": 0.5673,
+        "margin_range_80": [
+          -19.3,
+          14.8
+        ],
+        "total_range_80": [
+          212.7,
+          260.5
+        ],
+        "pace": 102.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 112,
+        "away_score": 95,
+        "margin": 17,
+        "total": 207
+      }
+    },
+    {
+      "game_id": "401909284",
+      "start_time": "2026-10-31T00:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 4.91
+      },
+      "away": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": 0.84
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.9,
+        "away_score": 109.5,
+        "margin": 5.4,
+        "total": 224.3,
+        "spread": -5.4,
+        "home_win_prob": 0.6586,
+        "away_win_prob": 0.3414,
+        "margin_range_80": [
+          -11.6,
+          22.5
+        ],
+        "total_range_80": [
+          200.4,
+          248.3
+        ],
+        "pace": 102.8
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 127,
+        "away_score": 101,
+        "margin": 26,
+        "total": 228
+      }
+    },
+    {
+      "game_id": "401909283",
+      "start_time": "2026-10-31T00:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -0.69
+      },
+      "away": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 6.11
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.0,
+        "away_score": 116.7,
+        "margin": -5.7,
+        "total": 227.6,
+        "spread": 5.7,
+        "home_win_prob": 0.3347,
+        "away_win_prob": 0.6653,
+        "margin_range_80": [
+          -22.8,
+          11.4
+        ],
+        "total_range_80": [
+          203.7,
+          251.5
+        ],
+        "pace": 101.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 116,
+        "away_score": 111,
+        "margin": 5,
+        "total": 227
+      }
+    },
+    {
+      "game_id": "401909282",
+      "start_time": "2026-10-31T00:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.92
+      },
+      "away": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -3.27
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.5,
+        "away_score": 118.7,
+        "margin": 3.8,
+        "total": 241.2,
+        "spread": -3.8,
+        "home_win_prob": 0.6133,
+        "away_win_prob": 0.3867,
+        "margin_range_80": [
+          -13.2,
+          20.9
+        ],
+        "total_range_80": [
+          217.3,
+          265.1
+        ],
+        "pace": 107.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 145,
+        "away_score": 125,
+        "margin": 20,
+        "total": 270
+      }
+    },
+    {
+      "game_id": "401909278",
+      "start_time": "2026-10-30T23:30:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 5.03
+      },
+      "away": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -6.22
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 126.8,
+        "away_score": 113.3,
+        "margin": 13.5,
+        "total": 240.1,
+        "spread": -13.5,
+        "home_win_prob": 0.8447,
+        "away_win_prob": 0.1553,
+        "margin_range_80": [
+          -3.6,
+          30.6
+        ],
+        "total_range_80": [
+          216.2,
+          264.1
+        ],
+        "pace": 106.8
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 111,
+        "margin": 14,
+        "total": 236
+      }
+    },
+    {
+      "game_id": "401909281",
+      "start_time": "2026-10-30T23:30:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 3.52
+      },
+      "away": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -1.69
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.4,
+        "away_score": 110.5,
+        "margin": 6.8,
+        "total": 227.9,
+        "spread": -6.8,
+        "home_win_prob": 0.6961,
+        "away_win_prob": 0.3039,
+        "margin_range_80": [
+          -10.2,
+          23.9
+        ],
+        "total_range_80": [
+          204.0,
+          251.8
+        ],
+        "pace": 106.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 114,
+        "away_score": 121,
+        "margin": -7,
+        "total": 235
+      }
+    },
+    {
+      "game_id": "401909280",
+      "start_time": "2026-10-30T23:30:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.26
+      },
+      "away": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.4
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.7,
+        "away_score": 114.8,
+        "margin": -3.0,
+        "total": 226.5,
+        "spread": 3.0,
+        "home_win_prob": 0.4098,
+        "away_win_prob": 0.5902,
+        "margin_range_80": [
+          -20.1,
+          14.0
+        ],
+        "total_range_80": [
+          202.6,
+          250.4
+        ],
+        "pace": 104.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 98,
+        "away_score": 93,
+        "margin": 5,
+        "total": 191
+      }
+    },
+    {
+      "game_id": "401909279",
+      "start_time": "2026-10-30T23:30:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -6.95
+      },
+      "away": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.14
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 106.4,
+        "away_score": 117.4,
+        "margin": -11.0,
+        "total": 223.8,
+        "spread": 11.0,
+        "home_win_prob": 0.2044,
+        "away_win_prob": 0.7956,
+        "margin_range_80": [
+          -28.1,
+          6.1
+        ],
+        "total_range_80": [
+          199.9,
+          247.8
+        ],
+        "pace": 103.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 94,
+        "away_score": 110,
+        "margin": -16,
+        "total": 204
+      }
+    },
+    {
+      "game_id": "401909277",
+      "start_time": "2026-10-30T23:00:00+00:00",
+      "game_date": "2026-10-30",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -6.3
+      },
+      "away": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -1.1
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.3,
+        "away_score": 113.3,
+        "margin": -4.0,
+        "total": 222.6,
+        "spread": 4.0,
+        "home_win_prob": 0.3829,
+        "away_win_prob": 0.6171,
+        "margin_range_80": [
+          -21.0,
+          13.1
+        ],
+        "total_range_80": [
+          198.7,
+          246.5
+        ],
+        "pace": 100.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 95,
+        "away_score": 79,
+        "margin": 16,
+        "total": 174
+      }
+    },
+    {
+      "game_id": "401909895",
+      "start_time": "2026-10-30T02:00:00+00:00",
+      "game_date": "2026-10-29",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 3.11
+      },
+      "away": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": -1.45
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.0,
+        "away_score": 113.0,
+        "margin": 5.9,
+        "total": 232.0,
+        "spread": -5.9,
+        "home_win_prob": 0.6723,
+        "away_win_prob": 0.3277,
+        "margin_range_80": [
+          -11.1,
+          23.0
+        ],
+        "total_range_80": [
+          208.1,
+          255.9
+        ],
+        "pace": 104.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 103,
+        "away_score": 124,
+        "margin": -21,
+        "total": 227
+      }
+    },
+    {
+      "game_id": "401909894",
+      "start_time": "2026-10-30T00:00:00+00:00",
+      "game_date": "2026-10-29",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -3.79
+      },
+      "away": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -7.46
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.2,
+        "away_score": 117.8,
+        "margin": 3.4,
+        "total": 239.0,
+        "spread": -3.4,
+        "home_win_prob": 0.6021,
+        "away_win_prob": 0.3979,
+        "margin_range_80": [
+          -13.6,
+          20.5
+        ],
+        "total_range_80": [
+          215.1,
+          262.9
+        ],
+        "pace": 105.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 132,
+        "away_score": 120,
+        "margin": 12,
+        "total": 252
+      }
+    },
+    {
+      "game_id": "401909893",
+      "start_time": "2026-10-30T00:00:00+00:00",
+      "game_date": "2026-10-29",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 2.5
+      },
+      "away": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 1.68
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.5,
+        "away_score": 119.2,
+        "margin": 2.3,
+        "total": 240.7,
+        "spread": -2.3,
+        "home_win_prob": 0.5682,
+        "away_win_prob": 0.4318,
+        "margin_range_80": [
+          -14.8,
+          19.4
+        ],
+        "total_range_80": [
+          216.8,
+          264.6
+        ],
+        "pace": 106.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 114,
+        "away_score": 111,
+        "margin": 3,
+        "total": 225
+      }
+    },
+    {
+      "game_id": "401909892",
+      "start_time": "2026-10-29T02:30:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": 1.95
+      },
+      "away": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.5
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.1,
+        "away_score": 116.3,
+        "margin": 2.8,
+        "total": 235.4,
+        "spread": -2.8,
+        "home_win_prob": 0.5847,
+        "away_win_prob": 0.4153,
+        "margin_range_80": [
+          -14.2,
+          19.9
+        ],
+        "total_range_80": [
+          211.5,
+          259.3
+        ],
+        "pace": 102.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 87,
+        "away_score": 103,
+        "margin": -16,
+        "total": 190
+      }
+    },
+    {
+      "game_id": "401909891",
+      "start_time": "2026-10-29T01:30:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -2.64
+      },
+      "away": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 7.98
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 108.8,
+        "away_score": 118.5,
+        "margin": -9.7,
+        "total": 227.3,
+        "spread": 9.7,
+        "home_win_prob": 0.2342,
+        "away_win_prob": 0.7658,
+        "margin_range_80": [
+          -26.7,
+          7.4
+        ],
+        "total_range_80": [
+          203.4,
+          251.2
+        ],
+        "pace": 104.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 96,
+        "margin": 24,
+        "total": 216
+      }
+    },
+    {
+      "game_id": "401909890",
+      "start_time": "2026-10-29T01:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.23
+      },
+      "away": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.88
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.8,
+        "away_score": 123.3,
+        "margin": -9.5,
+        "total": 237.1,
+        "spread": 9.5,
+        "home_win_prob": 0.2382,
+        "away_win_prob": 0.7618,
+        "margin_range_80": [
+          -26.5,
+          7.6
+        ],
+        "total_range_80": [
+          213.2,
+          261.0
+        ],
+        "pace": 105.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 111,
+        "away_score": 117,
+        "margin": -6,
+        "total": 228
+      }
+    },
+    {
+      "game_id": "401909887",
+      "start_time": "2026-10-29T00:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -4.91
+      },
+      "away": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 4.88
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.9,
+        "away_score": 118.4,
+        "margin": -8.5,
+        "total": 228.3,
+        "spread": 8.5,
+        "home_win_prob": 0.2616,
+        "away_win_prob": 0.7384,
+        "margin_range_80": [
+          -25.6,
+          8.6
+        ],
+        "total_range_80": [
+          204.4,
+          252.2
+        ],
+        "pace": 101.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 100,
+        "away_score": 132,
+        "margin": -32,
+        "total": 232
+      }
+    },
+    {
+      "game_id": "401909889",
+      "start_time": "2026-10-29T00:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -3.22
+      },
+      "away": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 0.54
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.5,
+        "away_score": 119.7,
+        "margin": -2.3,
+        "total": 237.2,
+        "spread": 2.3,
+        "home_win_prob": 0.4328,
+        "away_win_prob": 0.5672,
+        "margin_range_80": [
+          -19.3,
+          14.8
+        ],
+        "total_range_80": [
+          213.3,
+          261.1
+        ],
+        "pace": 102.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 91,
+        "away_score": 104,
+        "margin": -13,
+        "total": 195
+      }
+    },
+    {
+      "game_id": "401909888",
+      "start_time": "2026-10-29T00:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.58
+      },
+      "away": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": -0.87
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.3,
+        "away_score": 110.3,
+        "margin": 8.0,
+        "total": 228.7,
+        "spread": -8.0,
+        "home_win_prob": 0.7255,
+        "away_win_prob": 0.2745,
+        "margin_range_80": [
+          -9.1,
+          25.0
+        ],
+        "total_range_80": [
+          204.7,
+          252.6
+        ],
+        "pace": 102.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 114,
+        "away_score": 119,
+        "margin": -5,
+        "total": 233
+      }
+    },
+    {
+      "game_id": "401909886",
+      "start_time": "2026-10-29T00:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -6.48
+      },
+      "away": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.7
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.6,
+        "away_score": 122.2,
+        "margin": -8.7,
+        "total": 235.8,
+        "spread": 8.7,
+        "home_win_prob": 0.2572,
+        "away_win_prob": 0.7428,
+        "margin_range_80": [
+          -25.7,
+          8.4
+        ],
+        "total_range_80": [
+          211.9,
+          259.7
+        ],
+        "pace": 107.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 127,
+        "away_score": 133,
+        "margin": -6,
+        "total": 260
+      }
+    },
+    {
+      "game_id": "401909885",
+      "start_time": "2026-10-28T23:30:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 2.12
+      },
+      "away": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -0.13
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.4,
+        "away_score": 112.5,
+        "margin": 3.9,
+        "total": 228.9,
+        "spread": -3.9,
+        "home_win_prob": 0.6144,
+        "away_win_prob": 0.3856,
+        "margin_range_80": [
+          -13.2,
+          20.9
+        ],
+        "total_range_80": [
+          204.9,
+          252.8
+        ],
+        "pace": 106.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 129,
+        "away_score": 99,
+        "margin": 30,
+        "total": 228
+      }
+    },
+    {
+      "game_id": "401909884",
+      "start_time": "2026-10-28T23:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -3.12
+      },
+      "away": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.18
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.7,
+        "away_score": 118.9,
+        "margin": -2.3,
+        "total": 235.6,
+        "spread": 2.3,
+        "home_win_prob": 0.4325,
+        "away_win_prob": 0.5675,
+        "margin_range_80": [
+          -19.3,
+          14.8
+        ],
+        "total_range_80": [
+          211.7,
+          259.5
+        ],
+        "pace": 107.5
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 109,
+        "away_score": 114,
+        "margin": -5,
+        "total": 223
+      }
+    },
+    {
+      "game_id": "401909883",
+      "start_time": "2026-10-28T23:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.04
+      },
+      "away": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -1.09
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 111.1,
+        "away_score": 105.5,
+        "margin": 5.6,
+        "total": 216.6,
+        "spread": -5.6,
+        "home_win_prob": 0.6635,
+        "away_win_prob": 0.3365,
+        "margin_range_80": [
+          -11.4,
+          22.7
+        ],
+        "total_range_80": [
+          192.7,
+          240.5
+        ],
+        "pace": 98.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 97,
+        "away_score": 89,
+        "margin": 8,
+        "total": 186
+      }
+    },
+    {
+      "game_id": "401909882",
+      "start_time": "2026-10-28T23:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 1.65
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -6.24
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 124.8,
+        "away_score": 114.9,
+        "margin": 9.8,
+        "total": 239.7,
+        "spread": -9.8,
+        "home_win_prob": 0.7702,
+        "away_win_prob": 0.2298,
+        "margin_range_80": [
+          -7.2,
+          26.9
+        ],
+        "total_range_80": [
+          215.8,
+          263.6
+        ],
+        "pace": 106.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 121,
+        "away_score": 111,
+        "margin": 10,
+        "total": 232
+      }
+    },
+    {
+      "game_id": "401909881",
+      "start_time": "2026-10-28T23:00:00+00:00",
+      "game_date": "2026-10-28",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 3.45
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -2.03
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 127.4,
+        "away_score": 119.8,
+        "margin": 7.6,
+        "total": 247.2,
+        "spread": -7.6,
+        "home_win_prob": 0.715,
+        "away_win_prob": 0.285,
+        "margin_range_80": [
+          -9.5,
+          24.6
+        ],
+        "total_range_80": [
+          223.3,
+          271.1
+        ],
+        "pace": 110.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 117,
+        "away_score": 129,
+        "margin": -12,
+        "total": 246
+      }
+    },
+    {
+      "game_id": "401909880",
+      "start_time": "2026-10-28T03:00:00+00:00",
+      "game_date": "2026-10-27",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 3.03
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.6
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 4,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.4,
+        "away_score": 115.7,
+        "margin": 1.7,
+        "total": 233.1,
+        "spread": -1.7,
+        "home_win_prob": 0.5498,
+        "away_win_prob": 0.4502,
+        "margin_range_80": [
+          -15.4,
+          18.7
+        ],
+        "total_range_80": [
+          209.2,
+          257.0
+        ],
+        "pace": 104.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 129,
+        "away_score": 136,
+        "margin": -7,
+        "total": 265
+      }
+    },
+    {
+      "game_id": "401909878",
+      "start_time": "2026-10-28T00:00:00+00:00",
+      "game_date": "2026-10-27",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 3.85
+      },
+      "away": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.99
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.0,
+        "away_score": 109.8,
+        "margin": -0.8,
+        "total": 218.8,
+        "spread": 0.8,
+        "home_win_prob": 0.4762,
+        "away_win_prob": 0.5238,
+        "margin_range_80": [
+          -17.9,
+          16.3
+        ],
+        "total_range_80": [
+          194.9,
+          242.8
+        ],
+        "pace": 100.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 111,
+        "away_score": 97,
+        "margin": 14,
+        "total": 208
+      }
+    },
+    {
+      "game_id": "401909879",
+      "start_time": "2026-10-28T00:00:00+00:00",
+      "game_date": "2026-10-27",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 5.08
+      },
+      "away": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -6.64
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 124.3,
+        "away_score": 110.4,
+        "margin": 13.9,
+        "total": 234.7,
+        "spread": -13.9,
+        "home_win_prob": 0.8517,
+        "away_win_prob": 0.1483,
+        "margin_range_80": [
+          -3.2,
+          31.0
+        ],
+        "total_range_80": [
+          210.8,
+          258.6
+        ],
+        "pace": 104.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 130,
+        "away_score": 103,
+        "margin": 27,
+        "total": 233
+      }
+    },
+    {
+      "game_id": "401909877",
+      "start_time": "2026-10-27T23:30:00+00:00",
+      "game_date": "2026-10-27",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 5.85
+      },
+      "away": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -7.79
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.0,
+        "away_score": 106.5,
+        "margin": 13.5,
+        "total": 226.4,
+        "spread": -13.5,
+        "home_win_prob": 0.8445,
+        "away_win_prob": 0.1555,
+        "margin_range_80": [
+          -3.6,
+          30.6
+        ],
+        "total_range_80": [
+          202.5,
+          250.3
+        ],
+        "pace": 102.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 124,
+        "margin": 1,
+        "total": 249
+      }
+    },
+    {
+      "game_id": "401909876",
+      "start_time": "2026-10-27T02:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 2.2
+      },
+      "away": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": -2.43
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.5,
+        "away_score": 112.4,
+        "margin": 6.0,
+        "total": 230.9,
+        "spread": -6.0,
+        "home_win_prob": 0.674,
+        "away_win_prob": 0.326,
+        "margin_range_80": [
+          -11.1,
+          23.1
+        ],
+        "total_range_80": [
+          207.0,
+          254.8
+        ],
+        "pace": 101.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 114,
+        "away_score": 134,
+        "margin": -20,
+        "total": 248
+      }
+    },
+    {
+      "game_id": "401909875",
+      "start_time": "2026-10-27T01:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.1
+      },
+      "away": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": -1.65
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.9,
+        "away_score": 121.2,
+        "margin": -3.3,
+        "total": 239.1,
+        "spread": 3.3,
+        "home_win_prob": 0.4015,
+        "away_win_prob": 0.5985,
+        "margin_range_80": [
+          -20.4,
+          13.7
+        ],
+        "total_range_80": [
+          215.2,
+          263.0
+        ],
+        "pace": 105.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 105,
+        "away_score": 110,
+        "margin": -5,
+        "total": 215
+      }
+    },
+    {
+      "game_id": "401909874",
+      "start_time": "2026-10-27T00:30:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 4.4
+      },
+      "away": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 3.88
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.7,
+        "away_score": 114.9,
+        "margin": 1.9,
+        "total": 231.6,
+        "spread": -1.9,
+        "home_win_prob": 0.556,
+        "away_win_prob": 0.444,
+        "margin_range_80": [
+          -15.2,
+          18.9
+        ],
+        "total_range_80": [
+          207.7,
+          255.5
+        ],
+        "pace": 103.5
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 110,
+        "margin": 10,
+        "total": 230
+      }
+    },
+    {
+      "game_id": "401909873",
+      "start_time": "2026-10-27T00:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 8.08
+      },
+      "away": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -1.91
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.4,
+        "away_score": 105.8,
+        "margin": 9.7,
+        "total": 221.2,
+        "spread": -9.7,
+        "home_win_prob": 0.7661,
+        "away_win_prob": 0.2339,
+        "margin_range_80": [
+          -7.4,
+          26.7
+        ],
+        "total_range_80": [
+          197.3,
+          245.1
+        ],
+        "pace": 101.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 114,
+        "margin": 11,
+        "total": 239
+      }
+    },
+    {
+      "game_id": "401909872",
+      "start_time": "2026-10-27T00:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -5.39
+      },
+      "away": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -2.65
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.3,
+        "away_score": 120.0,
+        "margin": 0.3,
+        "total": 240.4,
+        "spread": -0.3,
+        "home_win_prob": 0.5079,
+        "away_win_prob": 0.4921,
+        "margin_range_80": [
+          -16.8,
+          17.3
+        ],
+        "total_range_80": [
+          216.4,
+          264.3
+        ],
+        "pace": 105.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 110,
+        "away_score": 102,
+        "margin": 8,
+        "total": 212
+      }
+    },
+    {
+      "game_id": "401909871",
+      "start_time": "2026-10-26T23:30:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -1.58
+      },
+      "away": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -3.09
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 122.9,
+        "away_score": 119.9,
+        "margin": 3.0,
+        "total": 242.8,
+        "spread": -3.0,
+        "home_win_prob": 0.5899,
+        "away_win_prob": 0.4101,
+        "margin_range_80": [
+          -14.0,
+          20.1
+        ],
+        "total_range_80": [
+          218.9,
+          266.7
+        ],
+        "pace": 108.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 109,
+        "away_score": 113,
+        "margin": -4,
+        "total": 222
+      }
+    },
+    {
+      "game_id": "401909870",
+      "start_time": "2026-10-26T23:30:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.54
+      },
+      "away": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -5.27
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 123.7,
+        "away_score": 111.8,
+        "margin": 11.8,
+        "total": 235.5,
+        "spread": -11.8,
+        "home_win_prob": 0.813,
+        "away_win_prob": 0.187,
+        "margin_range_80": [
+          -5.2,
+          28.9
+        ],
+        "total_range_80": [
+          211.6,
+          259.4
+        ],
+        "pace": 104.9
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 134,
+        "away_score": 99,
+        "margin": 35,
+        "total": 233
+      }
+    },
+    {
+      "game_id": "401909868",
+      "start_time": "2026-10-26T23:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -1.16
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -6.12
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.2,
+        "away_score": 111.7,
+        "margin": 6.5,
+        "total": 229.9,
+        "spread": -6.5,
+        "home_win_prob": 0.6867,
+        "away_win_prob": 0.3133,
+        "margin_range_80": [
+          -10.6,
+          23.5
+        ],
+        "total_range_80": [
+          205.9,
+          253.8
+        ],
+        "pace": 103.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 110,
+        "away_score": 103,
+        "margin": 7,
+        "total": 213
+      }
+    },
+    {
+      "game_id": "401909869",
+      "start_time": "2026-10-26T23:00:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 1.27
+      },
+      "away": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 5.93
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.8,
+        "away_score": 117.6,
+        "margin": -1.8,
+        "total": 233.3,
+        "spread": 1.8,
+        "home_win_prob": 0.447,
+        "away_win_prob": 0.553,
+        "margin_range_80": [
+          -18.8,
+          15.3
+        ],
+        "total_range_80": [
+          209.4,
+          257.3
+        ],
+        "pace": 106.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 127,
+        "away_score": 125,
+        "margin": 2,
+        "total": 252
+      }
+    },
+    {
+      "game_id": "401909867",
+      "start_time": "2026-10-26T01:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -6.15
+      },
+      "away": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": -2.15
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.9,
+        "away_score": 119.5,
+        "margin": -2.6,
+        "total": 236.3,
+        "spread": 2.6,
+        "home_win_prob": 0.4229,
+        "away_win_prob": 0.5771,
+        "margin_range_80": [
+          -19.7,
+          14.5
+        ],
+        "total_range_80": [
+          212.4,
+          260.2
+        ],
+        "pace": 105.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 112,
+        "away_score": 123,
+        "margin": -11,
+        "total": 235
+      }
+    },
+    {
+      "game_id": "401909866",
+      "start_time": "2026-10-25T23:30:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.78
+      },
+      "away": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 5.34
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.1,
+        "away_score": 119.1,
+        "margin": -5.1,
+        "total": 233.2,
+        "spread": 5.1,
+        "home_win_prob": 0.3522,
+        "away_win_prob": 0.6478,
+        "margin_range_80": [
+          -22.1,
+          12.0
+        ],
+        "total_range_80": [
+          209.3,
+          257.1
+        ],
+        "pace": 107.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 93,
+        "away_score": 106,
+        "margin": -13,
+        "total": 199
+      }
+    },
+    {
+      "game_id": "401909865",
+      "start_time": "2026-10-25T23:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 25,
+        "abbr": "OKC",
+        "name": "Oklahoma City Thunder",
+        "net_rating": 8.13
+      },
+      "away": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": 2.03
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.9,
+        "away_score": 107.9,
+        "margin": 8.0,
+        "total": 223.9,
+        "spread": -8.0,
+        "home_win_prob": 0.7263,
+        "away_win_prob": 0.2737,
+        "margin_range_80": [
+          -9.1,
+          25.1
+        ],
+        "total_range_80": [
+          200.0,
+          247.8
+        ],
+        "pace": 102.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 108,
+        "away_score": 101,
+        "margin": 7,
+        "total": 209
+      }
+    },
+    {
+      "game_id": "401909864",
+      "start_time": "2026-10-25T23:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 4.66
+      },
+      "away": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 3.5
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.5,
+        "away_score": 112.6,
+        "margin": 2.9,
+        "total": 228.1,
+        "spread": -2.9,
+        "home_win_prob": 0.585,
+        "away_win_prob": 0.415,
+        "margin_range_80": [
+          -14.2,
+          19.9
+        ],
+        "total_range_80": [
+          204.2,
+          252.0
+        ],
+        "pace": 105.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 117,
+        "away_score": 94,
+        "margin": 23,
+        "total": 211
+      }
+    },
+    {
+      "game_id": "401909863",
+      "start_time": "2026-10-25T23:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.78
+      },
+      "away": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -1.26
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.6,
+        "away_score": 107.8,
+        "margin": 7.8,
+        "total": 223.4,
+        "spread": -7.8,
+        "home_win_prob": 0.72,
+        "away_win_prob": 0.28,
+        "margin_range_80": [
+          -9.3,
+          24.8
+        ],
+        "total_range_80": [
+          199.5,
+          247.3
+        ],
+        "pace": 102.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 102,
+        "away_score": 111,
+        "margin": -9,
+        "total": 213
+      }
+    },
+    {
+      "game_id": "401909862",
+      "start_time": "2026-10-25T22:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -6.23
+      },
+      "away": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -4.19
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 2,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.6,
+        "away_score": 118.0,
+        "margin": -2.3,
+        "total": 233.6,
+        "spread": 2.3,
+        "home_win_prob": 0.4304,
+        "away_win_prob": 0.5696,
+        "margin_range_80": [
+          -19.4,
+          14.7
+        ],
+        "total_range_80": [
+          209.7,
+          257.5
+        ],
+        "pace": 106.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 109,
+        "away_score": 136,
+        "margin": -27,
+        "total": 245
+      }
+    },
+    {
+      "game_id": "401909861",
+      "start_time": "2026-10-25T21:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.08
+      },
+      "away": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.85
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.9,
+        "away_score": 123.7,
+        "margin": -7.8,
+        "total": 239.5,
+        "spread": 7.8,
+        "home_win_prob": 0.2796,
+        "away_win_prob": 0.7204,
+        "margin_range_80": [
+          -24.8,
+          9.3
+        ],
+        "total_range_80": [
+          215.6,
+          263.4
+        ],
+        "pace": 105.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 123,
+        "away_score": 132,
+        "margin": -9,
+        "total": 255
+      }
+    },
+    {
+      "game_id": "401909860",
+      "start_time": "2026-10-25T02:00:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.44
+      },
+      "away": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": -2.0
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 112.0,
+        "away_score": 108.7,
+        "margin": 3.3,
+        "total": 220.7,
+        "spread": -3.3,
+        "home_win_prob": 0.5977,
+        "away_win_prob": 0.4023,
+        "margin_range_80": [
+          -13.8,
+          20.4
+        ],
+        "total_range_80": [
+          196.8,
+          244.6
+        ],
+        "pace": 100.5
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 131,
+        "away_score": 122,
+        "margin": 9,
+        "total": 253
+      }
+    },
+    {
+      "game_id": "401909859",
+      "start_time": "2026-10-25T01:00:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 7,
+        "abbr": "DEN",
+        "name": "Denver Nuggets",
+        "net_rating": 2.34
+      },
+      "away": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -3.29
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.6,
+        "away_score": 110.3,
+        "margin": 9.3,
+        "total": 229.9,
+        "spread": -9.3,
+        "home_win_prob": 0.7581,
+        "away_win_prob": 0.2419,
+        "margin_range_80": [
+          -7.7,
+          26.4
+        ],
+        "total_range_80": [
+          206.0,
+          253.8
+        ],
+        "pace": 102.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 141,
+        "away_score": 135,
+        "margin": 6,
+        "total": 276
+      }
+    },
+    {
+      "game_id": "401909856",
+      "start_time": "2026-10-25T00:30:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 4.43
+      },
+      "away": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 3.86
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.6,
+        "away_score": 113.2,
+        "margin": 2.4,
+        "total": 228.8,
+        "spread": -2.4,
+        "home_win_prob": 0.571,
+        "away_win_prob": 0.429,
+        "margin_range_80": [
+          -14.7,
+          19.4
+        ],
+        "total_range_80": [
+          204.9,
+          252.7
+        ],
+        "pace": 104.0
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 114,
+        "away_score": 121,
+        "margin": -7,
+        "total": 235
+      }
+    },
+    {
+      "game_id": "401909858",
+      "start_time": "2026-10-25T00:00:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -2.57
+      },
+      "away": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 4.33
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.9,
+        "away_score": 119.4,
+        "margin": -5.5,
+        "total": 233.4,
+        "spread": 5.5,
+        "home_win_prob": 0.3396,
+        "away_win_prob": 0.6604,
+        "margin_range_80": [
+          -22.6,
+          11.6
+        ],
+        "total_range_80": [
+          209.5,
+          257.3
+        ],
+        "pace": 106.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 106,
+        "away_score": 122,
+        "margin": -16,
+        "total": 228
+      }
+    },
+    {
+      "game_id": "401909857",
+      "start_time": "2026-10-25T00:00:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -4.71
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -6.48
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 125.3,
+        "away_score": 121.4,
+        "margin": 3.9,
+        "total": 246.7,
+        "spread": -3.9,
+        "home_win_prob": 0.6152,
+        "away_win_prob": 0.3848,
+        "margin_range_80": [
+          -13.2,
+          21.0
+        ],
+        "total_range_80": [
+          222.7,
+          270.6
+        ],
+        "pace": 111.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 124,
+        "margin": -4,
+        "total": 244
+      }
+    },
+    {
+      "game_id": "401909855",
+      "start_time": "2026-10-24T23:30:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 20,
+        "abbr": "PHI",
+        "name": "Philadelphia 76ers",
+        "net_rating": 0.65
+      },
+      "away": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -5.17
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 1,
+        "home_b2b": false,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 1.81,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 121.6,
+        "away_score": 111.8,
+        "margin": 9.8,
+        "total": 233.4,
+        "spread": -9.8,
+        "home_win_prob": 0.7695,
+        "away_win_prob": 0.2305,
+        "margin_range_80": [
+          -7.2,
+          26.9
+        ],
+        "total_range_80": [
+          209.5,
+          257.3
+        ],
+        "pace": 106.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 127,
+        "away_score": 116,
+        "margin": 11,
+        "total": 243
+      }
+    },
+    {
+      "game_id": "401909854",
+      "start_time": "2026-10-24T23:30:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 5,
+        "abbr": "CLE",
+        "name": "Cleveland Cavaliers",
+        "net_rating": 1.84
+      },
+      "away": {
+        "id": 17,
+        "abbr": "BKN",
+        "name": "Brooklyn Nets",
+        "net_rating": -6.69
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.8,
+        "away_score": 108.2,
+        "margin": 10.5,
+        "total": 227.0,
+        "spread": -10.5,
+        "home_win_prob": 0.7857,
+        "away_win_prob": 0.2143,
+        "margin_range_80": [
+          -6.5,
+          27.6
+        ],
+        "total_range_80": [
+          203.1,
+          250.9
+        ],
+        "pace": 104.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 121,
+        "margin": 4,
+        "total": 246
+      }
+    },
+    {
+      "game_id": "401909853",
+      "start_time": "2026-10-24T22:00:00+00:00",
+      "game_date": "2026-10-24",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": -1.3
+      },
+      "away": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -1.57
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 1,
+        "home_b2b": true,
+        "away_b2b": true
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.4,
+        "away_score": 115.3,
+        "margin": 2.1,
+        "total": 232.7,
+        "spread": -2.1,
+        "home_win_prob": 0.5631,
+        "away_win_prob": 0.4369,
+        "margin_range_80": [
+          -15.0,
+          19.2
+        ],
+        "total_range_80": [
+          208.8,
+          256.6
+        ],
+        "pace": 105.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 115,
+        "away_score": 110,
+        "margin": 5,
+        "total": 225
+      }
+    },
+    {
+      "game_id": "401909852",
+      "start_time": "2026-10-24T02:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 23,
+        "abbr": "SAC",
+        "name": "Sacramento Kings",
+        "net_rating": -6.05
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 2.55
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 110.4,
+        "away_score": 116.7,
+        "margin": -6.3,
+        "total": 227.1,
+        "spread": 6.3,
+        "home_win_prob": 0.3167,
+        "away_win_prob": 0.6833,
+        "margin_range_80": [
+          -23.4,
+          10.7
+        ],
+        "total_range_80": [
+          203.2,
+          251.0
+        ],
+        "pace": 104.7
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 128,
+        "margin": -8,
+        "total": 248
+      }
+    },
+    {
+      "game_id": "401909851",
+      "start_time": "2026-10-24T02:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 2.46
+      },
+      "away": {
+        "id": 12,
+        "abbr": "LAC",
+        "name": "LA Clippers",
+        "net_rating": 2.36
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.5,
+        "away_score": 110.8,
+        "margin": 2.7,
+        "total": 224.3,
+        "spread": -2.7,
+        "home_win_prob": 0.5793,
+        "away_win_prob": 0.4207,
+        "margin_range_80": [
+          -14.4,
+          19.7
+        ],
+        "total_range_80": [
+          200.4,
+          248.2
+        ],
+        "pace": 101.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 117,
+        "margin": 8,
+        "total": 242
+      }
+    },
+    {
+      "game_id": "401909850",
+      "start_time": "2026-10-24T02:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": -1.61
+      },
+      "away": {
+        "id": 29,
+        "abbr": "MEM",
+        "name": "Memphis Grizzlies",
+        "net_rating": -2.54
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.5,
+        "away_score": 113.8,
+        "margin": 3.7,
+        "total": 231.3,
+        "spread": -3.7,
+        "home_win_prob": 0.6083,
+        "away_win_prob": 0.3917,
+        "margin_range_80": [
+          -13.4,
+          20.7
+        ],
+        "total_range_80": [
+          207.4,
+          255.2
+        ],
+        "pace": 105.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 108,
+        "away_score": 111,
+        "margin": -3,
+        "total": 219
+      }
+    },
+    {
+      "game_id": "401909849",
+      "start_time": "2026-10-24T01:30:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 26,
+        "abbr": "UTAH",
+        "name": "Utah Jazz",
+        "net_rating": -6.23
+      },
+      "away": {
+        "id": 3,
+        "abbr": "NO",
+        "name": "New Orleans Pelicans",
+        "net_rating": -3.1
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.4,
+        "away_score": 120.0,
+        "margin": -0.6,
+        "total": 239.5,
+        "spread": 0.6,
+        "home_win_prob": 0.4811,
+        "away_win_prob": 0.5189,
+        "margin_range_80": [
+          -17.7,
+          16.4
+        ],
+        "total_range_80": [
+          215.6,
+          263.4
+        ],
+        "pace": 107.3
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 120,
+        "away_score": 119,
+        "margin": 1,
+        "total": 239
+      }
+    },
+    {
+      "game_id": "401909096",
+      "start_time": "2026-10-24T01:30:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 24,
+        "abbr": "SA",
+        "name": "San Antonio Spurs",
+        "net_rating": 4.73
+      },
+      "away": {
+        "id": 10,
+        "abbr": "HOU",
+        "name": "Houston Rockets",
+        "net_rating": 3.24
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.8,
+        "away_score": 109.5,
+        "margin": 4.3,
+        "total": 223.3,
+        "spread": -4.3,
+        "home_win_prob": 0.6279,
+        "away_win_prob": 0.3721,
+        "margin_range_80": [
+          -12.7,
+          21.4
+        ],
+        "total_range_80": [
+          199.4,
+          247.2
+        ],
+        "pace": 103.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 110,
+        "away_score": 114,
+        "margin": -4,
+        "total": 224
+      }
+    },
+    {
+      "game_id": "401909847",
+      "start_time": "2026-10-24T00:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 14,
+        "abbr": "MIA",
+        "name": "Miami Heat",
+        "net_rating": -0.92
+      },
+      "away": {
+        "id": 8,
+        "abbr": "DET",
+        "name": "Detroit Pistons",
+        "net_rating": 4.47
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -0.19,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 115.1,
+        "away_score": 118.3,
+        "margin": -3.2,
+        "total": 233.4,
+        "spread": 3.2,
+        "home_win_prob": 0.4039,
+        "away_win_prob": 0.5961,
+        "margin_range_80": [
+          -20.3,
+          13.8
+        ],
+        "total_range_80": [
+          209.5,
+          257.3
+        ],
+        "pace": 107.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 111,
+        "away_score": 128,
+        "margin": -17,
+        "total": 239
+      }
+    },
+    {
+      "game_id": "401909844",
+      "start_time": "2026-10-23T23:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 11,
+        "abbr": "IND",
+        "name": "Indiana Pacers",
+        "net_rating": -2.91
+      },
+      "away": {
+        "id": 6,
+        "abbr": "DAL",
+        "name": "Dallas Mavericks",
+        "net_rating": -3.73
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 120.3,
+        "away_score": 116.7,
+        "margin": 3.6,
+        "total": 237.0,
+        "spread": -3.6,
+        "home_win_prob": 0.6067,
+        "away_win_prob": 0.3933,
+        "margin_range_80": [
+          -13.5,
+          20.7
+        ],
+        "total_range_80": [
+          213.1,
+          260.9
+        ],
+        "pace": 107.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 105,
+        "away_score": 121,
+        "margin": -16,
+        "total": 226
+      }
+    },
+    {
+      "game_id": "401909843",
+      "start_time": "2026-10-23T23:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 30,
+        "abbr": "CHA",
+        "name": "Charlotte Hornets",
+        "net_rating": 1.97
+      },
+      "away": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.38
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 118.3,
+        "away_score": 115.0,
+        "margin": 3.3,
+        "total": 233.3,
+        "spread": -3.3,
+        "home_win_prob": 0.5987,
+        "away_win_prob": 0.4013,
+        "margin_range_80": [
+          -13.7,
+          20.4
+        ],
+        "total_range_80": [
+          209.4,
+          257.3
+        ],
+        "pace": 106.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 81,
+        "away_score": 128,
+        "margin": -47,
+        "total": 209
+      }
+    },
+    {
+      "game_id": "401909095",
+      "start_time": "2026-10-23T23:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 2,
+        "abbr": "BOS",
+        "name": "Boston Celtics",
+        "net_rating": 4.36
+      },
+      "away": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 4.91
+      },
+      "rest": {
+        "home_days": 3,
+        "away_days": 3,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 109.8,
+        "away_score": 107.8,
+        "margin": 2.0,
+        "total": 217.6,
+        "spread": -2.0,
+        "home_win_prob": 0.5592,
+        "away_win_prob": 0.4408,
+        "margin_range_80": [
+          -15.1,
+          19.0
+        ],
+        "total_range_80": [
+          193.7,
+          241.5
+        ],
+        "pace": 99.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 107,
+        "away_score": 103,
+        "margin": 4,
+        "total": 210
+      }
+    },
+    {
+      "game_id": "401909845",
+      "start_time": "2026-10-23T23:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 19,
+        "abbr": "ORL",
+        "name": "Orlando Magic",
+        "net_rating": -0.19
+      },
+      "away": {
+        "id": 16,
+        "abbr": "MIN",
+        "name": "Minnesota Timberwolves",
+        "net_rating": 3.49
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 114.7,
+        "away_score": 115.9,
+        "margin": -1.2,
+        "total": 230.5,
+        "spread": 1.2,
+        "home_win_prob": 0.4634,
+        "away_win_prob": 0.5366,
+        "margin_range_80": [
+          -18.3,
+          15.8
+        ],
+        "total_range_80": [
+          206.6,
+          254.4
+        ],
+        "pace": 107.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 93,
+        "away_score": 115,
+        "margin": -22,
+        "total": 208
+      }
+    },
+    {
+      "game_id": "401909846",
+      "start_time": "2026-10-23T23:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -6.42
+      },
+      "away": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 3.35
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 113.1,
+        "away_score": 120.9,
+        "margin": -7.8,
+        "total": 234.0,
+        "spread": 7.8,
+        "home_win_prob": 0.2802,
+        "away_win_prob": 0.7198,
+        "margin_range_80": [
+          -24.8,
+          9.3
+        ],
+        "total_range_80": [
+          210.1,
+          258.0
+        ],
+        "pace": 107.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 102,
+        "away_score": 112,
+        "margin": -10,
+        "total": 214
+      }
+    },
+    {
+      "game_id": "401909848",
+      "start_time": "2026-10-23T20:00:00+00:00",
+      "game_date": "2026-10-23",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 15,
+        "abbr": "MIL",
+        "name": "Milwaukee Bucks",
+        "net_rating": -4.53
+      },
+      "away": {
+        "id": 4,
+        "abbr": "CHI",
+        "name": "Chicago Bulls",
+        "net_rating": -5.25
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.9,
+        "away_score": 116.4,
+        "margin": 3.5,
+        "total": 236.4,
+        "spread": -3.5,
+        "home_win_prob": 0.6033,
+        "away_win_prob": 0.3967,
+        "margin_range_80": [
+          -13.6,
+          20.6
+        ],
+        "total_range_80": [
+          212.5,
+          260.3
+        ],
+        "pace": 107.2
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 125,
+        "away_score": 132,
+        "margin": -7,
+        "total": 257
+      }
+    }
+  ],
+  "ratings": [
+    {
+      "team_id": 10,
+      "abbr": "HOU",
+      "name": "Houston Rockets",
+      "off_rating": 113.72,
+      "def_rating": 107.22,
+      "net_rating": 6.5,
+      "pace": 98.19,
+      "games_played": 7,
+      "schedule_strength": 0.91,
+      "avg_margin": 12.43,
+      "last10_margin": 12.43,
+      "overall": 6.5,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 113.72,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 107.22,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 98.19,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 0.91,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 1
+    },
+    {
+      "team_id": 24,
+      "abbr": "SA",
+      "name": "San Antonio Spurs",
+      "off_rating": 112.17,
+      "def_rating": 106.19,
+      "net_rating": 5.98,
+      "pace": 102.46,
+      "games_played": 6,
+      "schedule_strength": 0.31,
+      "avg_margin": 7.17,
+      "last10_margin": 7.17,
+      "overall": 5.98,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 112.17,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 106.19,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 102.46,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 0.31,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 2
+    },
+    {
+      "team_id": 16,
+      "abbr": "MIN",
+      "name": "Minnesota Timberwolves",
+      "off_rating": 111.54,
+      "def_rating": 105.86,
+      "net_rating": 5.68,
+      "pace": 104.56,
+      "games_played": 7,
+      "schedule_strength": 1.55,
+      "avg_margin": 11.29,
+      "last10_margin": 11.29,
+      "overall": 5.68,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 111.54,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 105.86,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 104.56,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.55,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 3
+    },
+    {
+      "team_id": 8,
+      "abbr": "DET",
+      "name": "Detroit Pistons",
+      "off_rating": 109.98,
+      "def_rating": 104.58,
+      "net_rating": 5.4,
+      "pace": 100.7,
+      "games_played": 6,
+      "schedule_strength": -0.0,
+      "avg_margin": 8.0,
+      "last10_margin": 8.0,
+      "overall": 5.4,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 109.98,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 104.58,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 100.7,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -0.0,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 4
+    },
+    {
+      "team_id": 25,
+      "abbr": "OKC",
+      "name": "Oklahoma City Thunder",
+      "off_rating": 110.1,
+      "def_rating": 105.15,
+      "net_rating": 4.95,
+      "pace": 101.71,
+      "games_played": 6,
+      "schedule_strength": 1.89,
+      "avg_margin": -0.5,
+      "last10_margin": -0.5,
+      "overall": 4.95,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.1,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 105.15,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 101.71,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.89,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 5
+    },
+    {
+      "team_id": 2,
+      "abbr": "BOS",
+      "name": "Boston Celtics",
+      "off_rating": 112.97,
+      "def_rating": 108.03,
+      "net_rating": 4.94,
+      "pace": 97.28,
+      "games_played": 5,
+      "schedule_strength": -2.06,
+      "avg_margin": 9.2,
+      "last10_margin": 9.2,
+      "overall": 4.94,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 112.97,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 108.03,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 97.28,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -2.06,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 6
+    },
+    {
+      "team_id": 18,
+      "abbr": "NY",
+      "name": "New York Knicks",
+      "off_rating": 110.91,
+      "def_rating": 106.86,
+      "net_rating": 4.05,
+      "pace": 97.77,
+      "games_played": 6,
+      "schedule_strength": 0.81,
+      "avg_margin": -0.67,
+      "last10_margin": -0.67,
+      "overall": 4.05,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.91,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 106.86,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 97.77,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 0.81,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 7
+    },
+    {
+      "team_id": 28,
+      "abbr": "TOR",
+      "name": "Toronto Raptors",
+      "off_rating": 109.99,
+      "def_rating": 107.16,
+      "net_rating": 2.83,
+      "pace": 102.71,
+      "games_played": 5,
+      "schedule_strength": -1.55,
+      "avg_margin": 10.6,
+      "last10_margin": 10.6,
+      "overall": 2.83,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 109.99,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 107.16,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 102.71,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -1.55,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 8
+    },
+    {
+      "team_id": 5,
+      "abbr": "CLE",
+      "name": "Cleveland Cavaliers",
+      "off_rating": 112.54,
+      "def_rating": 109.95,
+      "net_rating": 2.59,
+      "pace": 102.86,
+      "games_played": 6,
+      "schedule_strength": -1.96,
+      "avg_margin": 5.0,
+      "last10_margin": 5.0,
+      "overall": 2.59,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 112.54,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.95,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 102.86,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -1.96,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 9
+    },
+    {
+      "team_id": 22,
+      "abbr": "POR",
+      "name": "Portland Trail Blazers",
+      "off_rating": 110.03,
+      "def_rating": 107.68,
+      "net_rating": 2.35,
+      "pace": 104.24,
+      "games_played": 5,
+      "schedule_strength": -2.79,
+      "avg_margin": 11.4,
+      "last10_margin": 11.4,
+      "overall": 2.35,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.03,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 107.68,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 104.24,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -2.79,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 10
+    },
+    {
+      "team_id": 13,
+      "abbr": "LAL",
+      "name": "Los Angeles Lakers",
+      "off_rating": 112.5,
+      "def_rating": 110.25,
+      "net_rating": 2.25,
+      "pace": 101.12,
+      "games_played": 6,
+      "schedule_strength": -0.5,
+      "avg_margin": 5.17,
+      "last10_margin": 5.17,
+      "overall": 2.25,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 112.5,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 110.25,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 101.12,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -0.5,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 11
+    },
+    {
+      "team_id": 7,
+      "abbr": "DEN",
+      "name": "Denver Nuggets",
+      "off_rating": 112.93,
+      "def_rating": 111.34,
+      "net_rating": 1.6,
+      "pace": 97.53,
+      "games_played": 5,
+      "schedule_strength": -0.11,
+      "avg_margin": -1.2,
+      "last10_margin": -1.2,
+      "overall": 1.6,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 112.93,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 111.34,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 97.53,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -0.11,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 12
+    },
+    {
+      "team_id": 1,
+      "abbr": "ATL",
+      "name": "Atlanta Hawks",
+      "off_rating": 110.29,
+      "def_rating": 108.91,
+      "net_rating": 1.38,
+      "pace": 108.31,
+      "games_played": 7,
+      "schedule_strength": 1.41,
+      "avg_margin": 0.86,
+      "last10_margin": 0.86,
+      "overall": 1.38,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.29,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 108.91,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 108.31,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.41,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 13
+    },
+    {
+      "team_id": 9,
+      "abbr": "GS",
+      "name": "Golden State Warriors",
+      "off_rating": 111.25,
+      "def_rating": 110.17,
+      "net_rating": 1.09,
+      "pace": 102.7,
+      "games_played": 6,
+      "schedule_strength": 1.78,
+      "avg_margin": 1.33,
+      "last10_margin": 1.33,
+      "overall": 1.09,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 111.25,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 110.17,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 102.7,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.78,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 14
+    },
+    {
+      "team_id": 29,
+      "abbr": "MEM",
+      "name": "Memphis Grizzlies",
+      "off_rating": 110.33,
+      "def_rating": 109.28,
+      "net_rating": 1.04,
+      "pace": 104.08,
+      "games_played": 6,
+      "schedule_strength": -4.47,
+      "avg_margin": 15.17,
+      "last10_margin": 15.17,
+      "overall": 1.04,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.33,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.28,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 104.08,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -4.47,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 15
+    },
+    {
+      "team_id": 20,
+      "abbr": "PHI",
+      "name": "Philadelphia 76ers",
+      "off_rating": 108.38,
+      "def_rating": 107.55,
+      "net_rating": 0.83,
+      "pace": 103.98,
+      "games_played": 7,
+      "schedule_strength": 0.39,
+      "avg_margin": 3.86,
+      "last10_margin": 3.86,
+      "overall": 0.83,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 108.38,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 107.55,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 103.98,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 0.39,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 16
+    },
+    {
+      "team_id": 6,
+      "abbr": "DAL",
+      "name": "Dallas Mavericks",
+      "off_rating": 109.54,
+      "def_rating": 109.68,
+      "net_rating": -0.13,
+      "pace": 104.43,
+      "games_played": 6,
+      "schedule_strength": 3.3,
+      "avg_margin": 2.5,
+      "last10_margin": 2.5,
+      "overall": -0.13,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 109.54,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.68,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 104.43,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 3.3,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 17
+    },
+    {
+      "team_id": 14,
+      "abbr": "MIA",
+      "name": "Miami Heat",
+      "off_rating": 111.34,
+      "def_rating": 111.53,
+      "net_rating": -0.19,
+      "pace": 109.66,
+      "games_played": 6,
+      "schedule_strength": 1.0,
+      "avg_margin": -3.17,
+      "last10_margin": -3.17,
+      "overall": -0.19,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 111.34,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 111.53,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 109.66,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.0,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 18
+    },
+    {
+      "team_id": 12,
+      "abbr": "LAC",
+      "name": "LA Clippers",
+      "off_rating": 108.96,
+      "def_rating": 109.48,
+      "net_rating": -0.52,
+      "pace": 100.71,
+      "games_played": 5,
+      "schedule_strength": 1.3,
+      "avg_margin": -6.4,
+      "last10_margin": -6.4,
+      "overall": -0.52,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 108.96,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.48,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 100.71,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.3,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 19
+    },
+    {
+      "team_id": 19,
+      "abbr": "ORL",
+      "name": "Orlando Magic",
+      "off_rating": 108.72,
+      "def_rating": 109.65,
+      "net_rating": -0.93,
+      "pace": 103.59,
+      "games_played": 5,
+      "schedule_strength": 3.35,
+      "avg_margin": -8.6,
+      "last10_margin": -8.6,
+      "overall": -0.93,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 108.72,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.65,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 103.59,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 3.35,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 20
+    },
+    {
+      "team_id": 21,
+      "abbr": "PHX",
+      "name": "Phoenix Suns",
+      "off_rating": 110.41,
+      "def_rating": 112.53,
+      "net_rating": -2.12,
+      "pace": 100.61,
+      "games_played": 4,
+      "schedule_strength": 2.5,
+      "avg_margin": -12.5,
+      "last10_margin": -12.5,
+      "overall": -2.12,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 110.41,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 112.53,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 100.61,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 2.5,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 21
+    },
+    {
+      "team_id": 3,
+      "abbr": "NO",
+      "name": "New Orleans Pelicans",
+      "off_rating": 108.55,
+      "def_rating": 110.78,
+      "net_rating": -2.23,
+      "pace": 108.47,
+      "games_played": 6,
+      "schedule_strength": -2.42,
+      "avg_margin": 1.83,
+      "last10_margin": 1.83,
+      "overall": -2.23,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 108.55,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 110.78,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 108.47,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -2.42,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 22
+    },
+    {
+      "team_id": 30,
+      "abbr": "CHA",
+      "name": "Charlotte Hornets",
+      "off_rating": 106.89,
+      "def_rating": 109.25,
+      "net_rating": -2.36,
+      "pace": 93.55,
+      "games_played": 7,
+      "schedule_strength": -1.51,
+      "avg_margin": -8.14,
+      "last10_margin": -8.14,
+      "overall": -2.36,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 106.89,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 109.25,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 93.55,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -1.51,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 23
+    },
+    {
+      "team_id": 11,
+      "abbr": "IND",
+      "name": "Indiana Pacers",
+      "off_rating": 109.07,
+      "def_rating": 113.04,
+      "net_rating": -3.97,
+      "pace": 103.9,
+      "games_played": 6,
+      "schedule_strength": -2.67,
+      "avg_margin": -3.17,
+      "last10_margin": -3.17,
+      "overall": -3.97,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 109.07,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 113.04,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 103.9,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -2.67,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 24
+    },
+    {
+      "team_id": 27,
+      "abbr": "WSH",
+      "name": "Washington Wizards",
+      "off_rating": 107.01,
+      "def_rating": 112.36,
+      "net_rating": -5.34,
+      "pace": 103.69,
+      "games_played": 6,
+      "schedule_strength": -2.1,
+      "avg_margin": 0.83,
+      "last10_margin": 0.83,
+      "overall": -5.34,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 107.01,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 112.36,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 103.69,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -2.1,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 25
+    },
+    {
+      "team_id": 4,
+      "abbr": "CHI",
+      "name": "Chicago Bulls",
+      "off_rating": 107.12,
+      "def_rating": 113.35,
+      "net_rating": -6.23,
+      "pace": 115.89,
+      "games_played": 6,
+      "schedule_strength": 0.73,
+      "avg_margin": -15.83,
+      "last10_margin": -15.83,
+      "overall": -6.23,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 107.12,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 113.35,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 115.89,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 0.73,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 26
+    },
+    {
+      "team_id": 26,
+      "abbr": "UTAH",
+      "name": "Utah Jazz",
+      "off_rating": 107.43,
+      "def_rating": 113.93,
+      "net_rating": -6.5,
+      "pace": 102.91,
+      "games_played": 6,
+      "schedule_strength": 1.74,
+      "avg_margin": -10.17,
+      "last10_margin": -10.17,
+      "overall": -6.5,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 107.43,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 113.93,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 102.91,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.74,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 27
+    },
+    {
+      "team_id": 15,
+      "abbr": "MIL",
+      "name": "Milwaukee Bucks",
+      "off_rating": 107.59,
+      "def_rating": 114.62,
+      "net_rating": -7.03,
+      "pace": 105.34,
+      "games_played": 6,
+      "schedule_strength": -0.94,
+      "avg_margin": -13.17,
+      "last10_margin": -13.17,
+      "overall": -7.03,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 107.59,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 114.62,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 105.34,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": -0.94,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 28
+    },
+    {
+      "team_id": 17,
+      "abbr": "BKN",
+      "name": "Brooklyn Nets",
+      "off_rating": 104.71,
+      "def_rating": 112.0,
+      "net_rating": -7.29,
+      "pace": 107.0,
+      "games_played": 5,
+      "schedule_strength": 1.32,
+      "avg_margin": -11.0,
+      "last10_margin": -11.0,
+      "overall": -7.29,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 104.71,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 112.0,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 107.0,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.32,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 29
+    },
+    {
+      "team_id": 23,
+      "abbr": "SAC",
+      "name": "Sacramento Kings",
+      "off_rating": 107.05,
+      "def_rating": 115.66,
+      "net_rating": -8.61,
+      "pace": 106.55,
+      "games_played": 6,
+      "schedule_strength": 1.28,
+      "avg_margin": -19.0,
+      "last10_margin": -19.0,
+      "overall": -8.61,
+      "overall_unit": "net pts / 100 poss",
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. rating",
+          "value": 107.05,
+          "unit": "pts/100",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. rating",
+          "value": 115.66,
+          "unit": "pts/100",
+          "higher_is_better": false
+        },
+        {
+          "key": "pace",
+          "label": "Pace",
+          "value": 106.55,
+          "unit": "poss/48",
+          "higher_is_better": null
+        },
+        {
+          "key": "sos",
+          "label": "Schedule",
+          "value": 1.28,
+          "unit": "opp net",
+          "higher_is_better": null
+        }
+      ],
+      "rank": 30
+    }
+  ],
+  "performance": {
+    "backtest": {
+      "model_version": "1.1.0",
+      "test_seasons": [
+        2023,
+        2024,
+        2025,
+        2026
+      ],
+      "games": 5282,
+      "margin_mae": 10.971,
+      "total_mae": 14.662,
+      "total_bias": 0.319,
+      "brier": 0.2142,
+      "winner_correct": 0.6598,
+      "baselines": {
+        "home_court_margin_mae": 12.304,
+        "season_to_date_margin_mae": 11.368,
+        "home_court_total_mae": 17.546
+      },
+      "calibration": [
+        {
+          "bin": "-0.0-0.1",
+          "n": 6,
+          "predicted": 0.087,
+          "actual": 0.0
+        },
+        {
+          "bin": "0.1-0.2",
+          "n": 67,
+          "predicted": 0.169,
+          "actual": 0.164
+        },
+        {
+          "bin": "0.2-0.3",
+          "n": 263,
+          "predicted": 0.259,
+          "actual": 0.19
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 597,
+          "predicted": 0.355,
+          "actual": 0.323
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 843,
+          "predicted": 0.454,
+          "actual": 0.431
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 1267,
+          "predicted": 0.55,
+          "actual": 0.566
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 1142,
+          "predicted": 0.646,
+          "actual": 0.643
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 761,
+          "predicted": 0.746,
+          "actual": 0.777
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 302,
+          "predicted": 0.838,
+          "actual": 0.834
+        },
+        {
+          "bin": "0.9-1.0",
+          "n": 34,
+          "predicted": 0.919,
+          "actual": 0.941
+        }
+      ],
+      "market_comparison": "Not run: no historical NBA lines are connected (see docs/data-sources.md)."
+    },
+    "season_to_date": {
+      "games": 88,
+      "margin_mae": 12.11,
+      "total_mae": 15.39,
+      "winner_correct": 0.636,
+      "note": "Walk-forward: each game projected with ratings from earlier games only, computed after the fact."
+    },
+    "ledger": {
+      "tracked": 54,
+      "graded": 0,
+      "by_version": {}
+    }
+  }
+}

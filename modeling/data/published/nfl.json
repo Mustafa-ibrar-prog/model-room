@@ -1,0 +1,6845 @@
+{
+  "schema_version": 1,
+  "league": "nfl",
+  "generated_at": "2026-11-02T07:28:06+00:00",
+  "season": 2026,
+  "season_label": "2026",
+  "week": 9,
+  "model": {
+    "id": "nfl-game",
+    "version": "1.0.1",
+    "params_hash": "e9b90efcff169452",
+    "status": "provisional: first NFL version",
+    "fitted_at": "2026-11-02T07:09:48+00:00",
+    "inputs_hash": "55989f14d2dde2da",
+    "uncertainty": {
+      "margin_sigma": 12.9351,
+      "total_sigma": 13.3504,
+      "method": "80% range = projection \u00b1 1.28 \u00d7 out-of-sample error std. dev. (training seasons)"
+    }
+  },
+  "data": {
+    "sources": [
+      "nflverse"
+    ],
+    "freshness": {
+      "status": "current",
+      "reasons": [],
+      "results_through": "2026-11-01",
+      "last_ingest": "2026-11-02T07:27:46+00:00",
+      "missing_results": []
+    },
+    "injuries": {
+      "connected": true,
+      "note": "nflverse injury reports",
+      "source": "nflverse"
+    },
+    "market": {
+      "connected": true,
+      "sources": [
+        "nflverse"
+      ],
+      "note": "nflverse publishes one line per game without a sportsbook or capture time."
+    }
+  },
+  "upcoming": [
+    {
+      "game_id": "2026_08_CHI_SEA",
+      "start_time": "2026-11-03T01:15:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "SEA",
+        "abbr": "SEA",
+        "name": "Seattle Seahawks"
+      },
+      "away": {
+        "id": "CHI",
+        "abbr": "CHI",
+        "name": "Chicago Bears"
+      },
+      "rest": {
+        "home_days": 8,
+        "away_days": 11
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": -0.28
+      },
+      "quarterbacks": {
+        "home": "Sam Darnold",
+        "away": "Caleb Williams"
+      },
+      "projection": {
+        "home_score": 21.9,
+        "away_score": 18.5,
+        "margin": 3.4,
+        "total": 40.3,
+        "spread": -3.4,
+        "home_win_prob": 0.6032,
+        "away_win_prob": 0.3968,
+        "margin_range_80": [
+          -13.2,
+          20.0
+        ],
+        "total_range_80": [
+          23.2,
+          57.4
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 46.5,
+        "home_ml": -170.0,
+        "away_ml": 142.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 0.4,
+        "total": -6.2,
+        "home_prob_market": 0.6038,
+        "away_prob_market": 0.3962,
+        "home_prob_diff": -0.0006
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_JAX_BAL",
+      "start_time": "2026-11-06T01:15:00+00:00",
+      "game_date": "2026-11-05",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "BAL",
+        "abbr": "BAL",
+        "name": "Baltimore Ravens"
+      },
+      "away": {
+        "id": "JAX",
+        "abbr": "JAX",
+        "name": "Jacksonville Jaguars"
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 4
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -1.56
+      },
+      "quarterbacks": {
+        "home": "Tyler Huntley",
+        "away": "Trevor Lawrence"
+      },
+      "projection": {
+        "home_score": 20.4,
+        "away_score": 22.8,
+        "margin": -2.4,
+        "total": 43.3,
+        "spread": 2.4,
+        "home_win_prob": 0.4279,
+        "away_win_prob": 0.5721,
+        "margin_range_80": [
+          -18.9,
+          14.2
+        ],
+        "total_range_80": [
+          26.1,
+          60.4
+        ]
+      },
+      "market": {
+        "spread": 8.5,
+        "total": 43.5,
+        "home_ml": 320.0,
+        "away_ml": -410.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 6.1,
+        "total": -0.2,
+        "home_prob_market": 0.2285,
+        "away_prob_market": 0.7715,
+        "home_prob_diff": 0.1994
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_CIN_ATL",
+      "start_time": "2026-11-08T14:30:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": true,
+      "home": {
+        "id": "ATL",
+        "abbr": "ATL",
+        "name": "Atlanta Falcons"
+      },
+      "away": {
+        "id": "CIN",
+        "abbr": "CIN",
+        "name": "Cincinnati Bengals"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.78
+      },
+      "quarterbacks": {
+        "home": "Michael Penix Jr.",
+        "away": "Joe Burrow"
+      },
+      "projection": {
+        "home_score": 19.1,
+        "away_score": 21.6,
+        "margin": -2.5,
+        "total": 40.6,
+        "spread": 2.5,
+        "home_win_prob": 0.4241,
+        "away_win_prob": 0.5759,
+        "margin_range_80": [
+          -19.1,
+          14.1
+        ],
+        "total_range_80": [
+          23.5,
+          57.7
+        ]
+      },
+      "market": {
+        "spread": 3.0,
+        "total": 51.5,
+        "home_ml": 140.0,
+        "away_ml": -166.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 0.5,
+        "total": -10.9,
+        "home_prob_market": 0.4004,
+        "away_prob_market": 0.5996,
+        "home_prob_diff": 0.0237
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_CLE_NO",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "NO",
+        "abbr": "NO",
+        "name": "New Orleans Saints"
+      },
+      "away": {
+        "id": "CLE",
+        "abbr": "CLE",
+        "name": "Cleveland Browns"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": 0.01
+      },
+      "quarterbacks": {
+        "home": "Tyler Shough",
+        "away": "Deshaun Watson"
+      },
+      "projection": {
+        "home_score": 22.7,
+        "away_score": 19.7,
+        "margin": 2.9,
+        "total": 42.4,
+        "spread": -2.9,
+        "home_win_prob": 0.5901,
+        "away_win_prob": 0.4099,
+        "margin_range_80": [
+          -13.6,
+          19.5
+        ],
+        "total_range_80": [
+          25.3,
+          59.5
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 43.5,
+        "home_ml": -148.0,
+        "away_ml": 124.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.1,
+        "total": -1.1,
+        "home_prob_market": 0.5721,
+        "away_prob_market": 0.4279,
+        "home_prob_diff": 0.018
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_DAL_IND",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "IND",
+        "abbr": "IND",
+        "name": "Indianapolis Colts"
+      },
+      "away": {
+        "id": "DAL",
+        "abbr": "DAL",
+        "name": "Dallas Cowboys"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.08
+      },
+      "quarterbacks": {
+        "home": "Daniel Jones",
+        "away": "Dak Prescott"
+      },
+      "projection": {
+        "home_score": 28.3,
+        "away_score": 27.0,
+        "margin": 1.3,
+        "total": 55.2,
+        "spread": -1.3,
+        "home_win_prob": 0.5396,
+        "away_win_prob": 0.4604,
+        "margin_range_80": [
+          -15.3,
+          17.9
+        ],
+        "total_range_80": [
+          38.1,
+          72.3
+        ]
+      },
+      "market": {
+        "spread": 6.0,
+        "total": 51.5,
+        "home_ml": 210.0,
+        "away_ml": -258.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 7.3,
+        "total": 3.7,
+        "home_prob_market": 0.3092,
+        "away_prob_market": 0.6908,
+        "home_prob_diff": 0.2304
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_DEN_CAR",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "CAR",
+        "abbr": "CAR",
+        "name": "Carolina Panthers"
+      },
+      "away": {
+        "id": "DEN",
+        "abbr": "DEN",
+        "name": "Denver Broncos"
+      },
+      "rest": {
+        "home_days": 10,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.07
+      },
+      "quarterbacks": {
+        "home": "Bryce Young",
+        "away": "Bo Nix"
+      },
+      "projection": {
+        "home_score": 21.2,
+        "away_score": 22.4,
+        "margin": -1.2,
+        "total": 43.6,
+        "spread": 1.2,
+        "home_win_prob": 0.4619,
+        "away_win_prob": 0.5381,
+        "margin_range_80": [
+          -17.8,
+          15.3
+        ],
+        "total_range_80": [
+          26.5,
+          60.7
+        ]
+      },
+      "market": {
+        "spread": 3.0,
+        "total": 43.5,
+        "home_ml": 130.0,
+        "away_ml": -155.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 1.8,
+        "total": 0.1,
+        "home_prob_market": 0.417,
+        "away_prob_market": 0.583,
+        "home_prob_diff": 0.0449
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_DET_MIA",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "MIA",
+        "abbr": "MIA",
+        "name": "Miami Dolphins"
+      },
+      "away": {
+        "id": "DET",
+        "abbr": "DET",
+        "name": "Detroit Lions"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.13
+      },
+      "quarterbacks": {
+        "home": "Malik Willis",
+        "away": "Jared Goff"
+      },
+      "projection": {
+        "home_score": 22.7,
+        "away_score": 24.7,
+        "margin": -2.1,
+        "total": 47.4,
+        "spread": 2.1,
+        "home_win_prob": 0.437,
+        "away_win_prob": 0.563,
+        "margin_range_80": [
+          -18.6,
+          14.5
+        ],
+        "total_range_80": [
+          30.3,
+          64.5
+        ]
+      },
+      "market": {
+        "spread": 7.0,
+        "total": 49.5,
+        "home_ml": 285.0,
+        "away_ml": -360.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 4.9,
+        "total": -2.1,
+        "home_prob_market": 0.2492,
+        "away_prob_market": 0.7508,
+        "home_prob_diff": 0.1878
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_LA_WAS",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "WAS",
+        "abbr": "WAS",
+        "name": "Washington Commanders"
+      },
+      "away": {
+        "id": "LA",
+        "abbr": "LA",
+        "name": "Los Angeles Rams"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.56
+      },
+      "quarterbacks": {
+        "home": "Jayden Daniels",
+        "away": "Matthew Stafford"
+      },
+      "projection": {
+        "home_score": 20.7,
+        "away_score": 24.9,
+        "margin": -4.1,
+        "total": 45.6,
+        "spread": 4.1,
+        "home_win_prob": 0.3742,
+        "away_win_prob": 0.6258,
+        "margin_range_80": [
+          -20.7,
+          12.4
+        ],
+        "total_range_80": [
+          28.5,
+          62.7
+        ]
+      },
+      "market": {
+        "spread": 5.5,
+        "total": 48.5,
+        "home_ml": 185.0,
+        "away_ml": -225.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 1.4,
+        "total": -2.9,
+        "home_prob_market": 0.3364,
+        "away_prob_market": 0.6636,
+        "home_prob_diff": 0.0378
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_NYG_PHI",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "PHI",
+        "abbr": "PHI",
+        "name": "Philadelphia Eagles"
+      },
+      "away": {
+        "id": "NYG",
+        "abbr": "NYG",
+        "name": "New York Giants"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 14
+      },
+      "adjustments": {
+        "rest_points": -0.01,
+        "injury_points": null,
+        "qb_points": -1.13
+      },
+      "quarterbacks": {
+        "home": "Tanner McKee",
+        "away": "J.J. McCarthy"
+      },
+      "projection": {
+        "home_score": 18.8,
+        "away_score": 18.3,
+        "margin": 0.4,
+        "total": 37.1,
+        "spread": -0.4,
+        "home_win_prob": 0.5134,
+        "away_win_prob": 0.4866,
+        "margin_range_80": [
+          -16.1,
+          17.0
+        ],
+        "total_range_80": [
+          20.0,
+          54.2
+        ]
+      },
+      "market": {
+        "spread": 3.0,
+        "total": 40.5,
+        "home_ml": 124.0,
+        "away_ml": -148.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 3.4,
+        "total": -3.4,
+        "home_prob_market": 0.4279,
+        "away_prob_market": 0.5721,
+        "home_prob_diff": 0.0855
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_NYJ_KC",
+      "start_time": "2026-11-08T18:00:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "KC",
+        "abbr": "KC",
+        "name": "Kansas City Chiefs"
+      },
+      "away": {
+        "id": "NYJ",
+        "abbr": "NYJ",
+        "name": "New York Jets"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.07
+      },
+      "quarterbacks": {
+        "home": "Patrick Mahomes",
+        "away": "Geno Smith"
+      },
+      "projection": {
+        "home_score": 27.4,
+        "away_score": 19.6,
+        "margin": 7.8,
+        "total": 47.1,
+        "spread": -7.8,
+        "home_win_prob": 0.7273,
+        "away_win_prob": 0.2727,
+        "margin_range_80": [
+          -8.8,
+          24.4
+        ],
+        "total_range_80": [
+          29.9,
+          64.2
+        ]
+      },
+      "market": {
+        "spread": -10.0,
+        "total": 46.5,
+        "home_ml": -500.0,
+        "away_ml": 380.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.2,
+        "total": 0.6,
+        "home_prob_market": 0.8,
+        "away_prob_market": 0.2,
+        "home_prob_diff": -0.0727
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_HOU_LAC",
+      "start_time": "2026-11-08T21:05:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "LAC",
+        "abbr": "LAC",
+        "name": "Los Angeles Chargers"
+      },
+      "away": {
+        "id": "HOU",
+        "abbr": "HOU",
+        "name": "Houston Texans"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 14
+      },
+      "adjustments": {
+        "rest_points": -0.01,
+        "injury_points": null,
+        "qb_points": -0.18
+      },
+      "quarterbacks": {
+        "home": "Justin Herbert",
+        "away": "C.J. Stroud"
+      },
+      "projection": {
+        "home_score": 18.3,
+        "away_score": 20.0,
+        "margin": -1.7,
+        "total": 38.4,
+        "spread": 1.7,
+        "home_win_prob": 0.4476,
+        "away_win_prob": 0.5524,
+        "margin_range_80": [
+          -18.3,
+          14.9
+        ],
+        "total_range_80": [
+          21.3,
+          55.5
+        ]
+      },
+      "market": {
+        "spread": 5.5,
+        "total": 41.5,
+        "home_ml": 180.0,
+        "away_ml": -218.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 3.8,
+        "total": -3.1,
+        "home_prob_market": 0.3425,
+        "away_prob_market": 0.6575,
+        "home_prob_diff": 0.1051
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_LV_SF",
+      "start_time": "2026-11-08T21:05:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "SF",
+        "abbr": "SF",
+        "name": "San Francisco 49ers"
+      },
+      "away": {
+        "id": "LV",
+        "abbr": "LV",
+        "name": "Las Vegas Raiders"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": -0.21
+      },
+      "quarterbacks": {
+        "home": "Brock Purdy",
+        "away": "Kirk Cousins"
+      },
+      "projection": {
+        "home_score": 28.7,
+        "away_score": 19.1,
+        "margin": 9.6,
+        "total": 47.8,
+        "spread": -9.6,
+        "home_win_prob": 0.7702,
+        "away_win_prob": 0.2298,
+        "margin_range_80": [
+          -7.0,
+          26.1
+        ],
+        "total_range_80": [
+          30.7,
+          64.9
+        ]
+      },
+      "market": {
+        "spread": -9.5,
+        "total": 51.5,
+        "home_ml": -500.0,
+        "away_ml": 380.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 0.1,
+        "total": -3.7,
+        "home_prob_market": 0.8,
+        "away_prob_market": 0.2,
+        "home_prob_diff": -0.0298
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_ARI_SEA",
+      "start_time": "2026-11-08T21:25:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "SEA",
+        "abbr": "SEA",
+        "name": "Seattle Seahawks"
+      },
+      "away": {
+        "id": "ARI",
+        "abbr": "ARI",
+        "name": "Arizona Cardinals"
+      },
+      "rest": {
+        "home_days": 6,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": 0.33
+      },
+      "quarterbacks": {
+        "home": "Sam Darnold",
+        "away": "Jacoby Brissett"
+      },
+      "projection": {
+        "home_score": 23.5,
+        "away_score": 14.0,
+        "margin": 9.5,
+        "total": 37.5,
+        "spread": -9.5,
+        "home_win_prob": 0.7675,
+        "away_win_prob": 0.2325,
+        "margin_range_80": [
+          -7.1,
+          26.0
+        ],
+        "total_range_80": [
+          20.4,
+          54.6
+        ]
+      },
+      "market": {
+        "spread": -11.5,
+        "total": 44.5,
+        "home_ml": -750.0,
+        "away_ml": 525.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.0,
+        "total": -7.0,
+        "home_prob_market": 0.8465,
+        "away_prob_market": 0.1535,
+        "home_prob_diff": -0.079
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_GB_NE",
+      "start_time": "2026-11-08T21:25:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "NE",
+        "abbr": "NE",
+        "name": "New England Patriots"
+      },
+      "away": {
+        "id": "GB",
+        "abbr": "GB",
+        "name": "Green Bay Packers"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 10
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": -0.11
+      },
+      "quarterbacks": {
+        "home": "Drake Maye",
+        "away": "Jordan Love"
+      },
+      "projection": {
+        "home_score": 23.4,
+        "away_score": 21.1,
+        "margin": 2.3,
+        "total": 44.5,
+        "spread": -2.3,
+        "home_win_prob": 0.5692,
+        "away_win_prob": 0.4308,
+        "margin_range_80": [
+          -14.3,
+          18.8
+        ],
+        "total_range_80": [
+          27.4,
+          61.6
+        ]
+      },
+      "market": {
+        "spread": -2.5,
+        "total": 47.5,
+        "home_ml": -148.0,
+        "away_ml": 124.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.2,
+        "total": -3.0,
+        "home_prob_market": 0.5721,
+        "away_prob_market": 0.4279,
+        "home_prob_diff": -0.0029
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_TB_CHI",
+      "start_time": "2026-11-09T01:20:00+00:00",
+      "game_date": "2026-11-08",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "CHI",
+        "abbr": "CHI",
+        "name": "Chicago Bears"
+      },
+      "away": {
+        "id": "TB",
+        "abbr": "TB",
+        "name": "Tampa Bay Buccaneers"
+      },
+      "rest": {
+        "home_days": 6,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": -0.04
+      },
+      "quarterbacks": {
+        "home": "Caleb Williams",
+        "away": "Baker Mayfield"
+      },
+      "projection": {
+        "home_score": 22.9,
+        "away_score": 19.1,
+        "margin": 3.8,
+        "total": 42.0,
+        "spread": -3.8,
+        "home_win_prob": 0.6148,
+        "away_win_prob": 0.3852,
+        "margin_range_80": [
+          -12.8,
+          20.4
+        ],
+        "total_range_80": [
+          24.8,
+          59.1
+        ]
+      },
+      "market": {
+        "spread": -5.5,
+        "total": 47.5,
+        "home_ml": -245.0,
+        "away_ml": 200.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -1.7,
+        "total": -5.5,
+        "home_prob_market": 0.6806,
+        "away_prob_market": 0.3194,
+        "home_prob_diff": -0.0658
+      },
+      "result": null
+    },
+    {
+      "game_id": "2026_09_BUF_MIN",
+      "start_time": "2026-11-10T01:15:00+00:00",
+      "game_date": "2026-11-09",
+      "status": "scheduled",
+      "season_type": "REG",
+      "week": 9,
+      "neutral": false,
+      "home": {
+        "id": "MIN",
+        "abbr": "MIN",
+        "name": "Minnesota Vikings"
+      },
+      "away": {
+        "id": "BUF",
+        "abbr": "BUF",
+        "name": "Buffalo Bills"
+      },
+      "rest": {
+        "home_days": 8,
+        "away_days": 8
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.39
+      },
+      "quarterbacks": {
+        "home": "Kyler Murray",
+        "away": "Josh Allen"
+      },
+      "projection": {
+        "home_score": 23.0,
+        "away_score": 22.5,
+        "margin": 0.5,
+        "total": 45.5,
+        "spread": -0.5,
+        "home_win_prob": 0.5139,
+        "away_win_prob": 0.4861,
+        "margin_range_80": [
+          -16.1,
+          17.0
+        ],
+        "total_range_80": [
+          28.3,
+          62.6
+        ]
+      },
+      "market": {
+        "spread": 2.5,
+        "total": 46.5,
+        "home_ml": 124.0,
+        "away_ml": -148.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 3.0,
+        "total": -1.0,
+        "home_prob_market": 0.4279,
+        "away_prob_market": 0.5721,
+        "home_prob_diff": 0.086
+      },
+      "result": null
+    }
+  ],
+  "recent": [
+    {
+      "game_id": "2026_08_PHI_WAS",
+      "start_time": "2026-11-02T01:20:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "WAS",
+        "abbr": "WAS",
+        "name": "Washington Commanders"
+      },
+      "away": {
+        "id": "PHI",
+        "abbr": "PHI",
+        "name": "Philadelphia Eagles"
+      },
+      "rest": {
+        "home_days": 13,
+        "away_days": 6
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": 2.48
+      },
+      "quarterbacks": {
+        "home": "Jayden Daniels",
+        "away": "Tanner McKee"
+      },
+      "projection": {
+        "home_score": 21.9,
+        "away_score": 18.5,
+        "margin": 3.4,
+        "total": 40.4,
+        "spread": -3.4,
+        "home_win_prob": 0.6029,
+        "away_win_prob": 0.3971,
+        "margin_range_80": [
+          -13.2,
+          19.9
+        ],
+        "total_range_80": [
+          23.3,
+          57.5
+        ]
+      },
+      "market": {
+        "spread": -6.0,
+        "total": 40.5,
+        "home_ml": -278.0,
+        "away_ml": 225.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.6,
+        "total": -0.1,
+        "home_prob_market": 0.705,
+        "away_prob_market": 0.295,
+        "home_prob_diff": -0.1021
+      },
+      "result": {
+        "home_score": 27,
+        "away_score": 10,
+        "margin": 17,
+        "total": 37
+      }
+    },
+    {
+      "game_id": "2026_08_NE_MIA",
+      "start_time": "2026-11-01T21:25:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "MIA",
+        "abbr": "MIA",
+        "name": "Miami Dolphins"
+      },
+      "away": {
+        "id": "NE",
+        "abbr": "NE",
+        "name": "New England Patriots"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 10
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": -0.26
+      },
+      "quarterbacks": {
+        "home": "Malik Willis",
+        "away": "Drake Maye"
+      },
+      "projection": {
+        "home_score": 21.0,
+        "away_score": 24.8,
+        "margin": -3.8,
+        "total": 45.8,
+        "spread": 3.8,
+        "home_win_prob": 0.3852,
+        "away_win_prob": 0.6148,
+        "margin_range_80": [
+          -20.4,
+          12.8
+        ],
+        "total_range_80": [
+          28.7,
+          62.9
+        ]
+      },
+      "market": {
+        "spread": 7.0,
+        "total": 41.5,
+        "home_ml": 275.0,
+        "away_ml": -345.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 3.2,
+        "total": 4.3,
+        "home_prob_market": 0.2559,
+        "away_prob_market": 0.7441,
+        "home_prob_diff": 0.1293
+      },
+      "result": {
+        "home_score": 19,
+        "away_score": 24,
+        "margin": -5,
+        "total": 43
+      }
+    },
+    {
+      "game_id": "2026_08_KC_DEN",
+      "start_time": "2026-11-01T21:25:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "DEN",
+        "abbr": "DEN",
+        "name": "Denver Broncos"
+      },
+      "away": {
+        "id": "KC",
+        "abbr": "KC",
+        "name": "Kansas City Chiefs"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.35
+      },
+      "quarterbacks": {
+        "home": "Bo Nix",
+        "away": "Patrick Mahomes"
+      },
+      "projection": {
+        "home_score": 22.5,
+        "away_score": 19.8,
+        "margin": 2.8,
+        "total": 42.3,
+        "spread": -2.8,
+        "home_win_prob": 0.585,
+        "away_win_prob": 0.415,
+        "margin_range_80": [
+          -13.8,
+          19.4
+        ],
+        "total_range_80": [
+          25.2,
+          59.4
+        ]
+      },
+      "market": {
+        "spread": -1.5,
+        "total": 41.5,
+        "home_ml": -112.0,
+        "away_ml": -108.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 1.3,
+        "total": 0.8,
+        "home_prob_market": 0.5043,
+        "away_prob_market": 0.4957,
+        "home_prob_diff": 0.0807
+      },
+      "result": {
+        "home_score": 28,
+        "away_score": 24,
+        "margin": 4,
+        "total": 52
+      }
+    },
+    {
+      "game_id": "2026_08_LAC_LA",
+      "start_time": "2026-11-01T21:05:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "LA",
+        "abbr": "LA",
+        "name": "Los Angeles Rams"
+      },
+      "away": {
+        "id": "LAC",
+        "abbr": "LAC",
+        "name": "Los Angeles Chargers"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 14
+      },
+      "adjustments": {
+        "rest_points": -0.01,
+        "injury_points": null,
+        "qb_points": -0.06
+      },
+      "quarterbacks": {
+        "home": "Matthew Stafford",
+        "away": "Justin Herbert"
+      },
+      "projection": {
+        "home_score": 26.3,
+        "away_score": 17.2,
+        "margin": 9.1,
+        "total": 43.5,
+        "spread": -9.1,
+        "home_win_prob": 0.7601,
+        "away_win_prob": 0.2399,
+        "margin_range_80": [
+          -7.4,
+          25.7
+        ],
+        "total_range_80": [
+          26.4,
+          60.6
+        ]
+      },
+      "market": {
+        "spread": -6.5,
+        "total": 46.5,
+        "home_ml": -285.0,
+        "away_ml": 230.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 2.6,
+        "total": -3.0,
+        "home_prob_market": 0.7095,
+        "away_prob_market": 0.2905,
+        "home_prob_diff": 0.0506
+      },
+      "result": {
+        "home_score": 24,
+        "away_score": 9,
+        "margin": 15,
+        "total": 33
+      }
+    },
+    {
+      "game_id": "2026_08_ARI_DAL",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "DAL",
+        "abbr": "DAL",
+        "name": "Dallas Cowboys"
+      },
+      "away": {
+        "id": "ARI",
+        "abbr": "ARI",
+        "name": "Arizona Cardinals"
+      },
+      "rest": {
+        "home_days": 6,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": 0.28
+      },
+      "quarterbacks": {
+        "home": "Dak Prescott",
+        "away": "Jacoby Brissett"
+      },
+      "projection": {
+        "home_score": 29.7,
+        "away_score": 27.1,
+        "margin": 2.6,
+        "total": 56.9,
+        "spread": -2.6,
+        "home_win_prob": 0.5793,
+        "away_win_prob": 0.4207,
+        "margin_range_80": [
+          -14.0,
+          19.2
+        ],
+        "total_range_80": [
+          39.8,
+          74.0
+        ]
+      },
+      "market": {
+        "spread": -7.0,
+        "total": 54.5,
+        "home_ml": -340.0,
+        "away_ml": 270.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -4.4,
+        "total": 2.4,
+        "home_prob_market": 0.7409,
+        "away_prob_market": 0.2591,
+        "home_prob_diff": -0.1616
+      },
+      "result": {
+        "home_score": 30,
+        "away_score": 33,
+        "margin": -3,
+        "total": 63
+      }
+    },
+    {
+      "game_id": "2026_08_TEN_CIN",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "CIN",
+        "abbr": "CIN",
+        "name": "Cincinnati Bengals"
+      },
+      "away": {
+        "id": "TEN",
+        "abbr": "TEN",
+        "name": "Tennessee Titans"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.67
+      },
+      "quarterbacks": {
+        "home": "Joe Burrow",
+        "away": "Cam Ward"
+      },
+      "projection": {
+        "home_score": 28.3,
+        "away_score": 16.7,
+        "margin": 11.6,
+        "total": 45.0,
+        "spread": -11.6,
+        "home_win_prob": 0.8155,
+        "away_win_prob": 0.1845,
+        "margin_range_80": [
+          -5.0,
+          28.2
+        ],
+        "total_range_80": [
+          27.9,
+          62.1
+        ]
+      },
+      "market": {
+        "spread": -13.5,
+        "total": 45.5,
+        "home_ml": -900.0,
+        "away_ml": 600.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -1.9,
+        "total": -0.5,
+        "home_prob_market": 0.863,
+        "away_prob_market": 0.137,
+        "home_prob_diff": -0.0475
+      },
+      "result": {
+        "home_score": 43,
+        "away_score": 36,
+        "margin": 7,
+        "total": 79
+      }
+    },
+    {
+      "game_id": "2026_08_MIN_DET",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "DET",
+        "abbr": "DET",
+        "name": "Detroit Lions"
+      },
+      "away": {
+        "id": "MIN",
+        "abbr": "MIN",
+        "name": "Minnesota Vikings"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.53
+      },
+      "quarterbacks": {
+        "home": "Jared Goff",
+        "away": "Kyler Murray"
+      },
+      "projection": {
+        "home_score": 22.3,
+        "away_score": 21.7,
+        "margin": 0.7,
+        "total": 44.0,
+        "spread": -0.7,
+        "home_win_prob": 0.5205,
+        "away_win_prob": 0.4795,
+        "margin_range_80": [
+          -15.9,
+          17.2
+        ],
+        "total_range_80": [
+          26.9,
+          61.1
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 46.5,
+        "home_ml": -170.0,
+        "away_ml": 142.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.3,
+        "total": -2.5,
+        "home_prob_market": 0.6038,
+        "away_prob_market": 0.3962,
+        "home_prob_diff": -0.0833
+      },
+      "result": {
+        "home_score": 19,
+        "away_score": 15,
+        "margin": 4,
+        "total": 34
+      }
+    },
+    {
+      "game_id": "2026_08_LV_NYJ",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "NYJ",
+        "abbr": "NYJ",
+        "name": "New York Jets"
+      },
+      "away": {
+        "id": "LV",
+        "abbr": "LV",
+        "name": "Las Vegas Raiders"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.3
+      },
+      "quarterbacks": {
+        "home": "Geno Smith",
+        "away": "Kirk Cousins"
+      },
+      "projection": {
+        "home_score": 21.9,
+        "away_score": 20.2,
+        "margin": 1.7,
+        "total": 42.0,
+        "spread": -1.7,
+        "home_win_prob": 0.5532,
+        "away_win_prob": 0.4468,
+        "margin_range_80": [
+          -14.8,
+          18.3
+        ],
+        "total_range_80": [
+          24.9,
+          59.2
+        ]
+      },
+      "market": {
+        "spread": -1.5,
+        "total": 46.5,
+        "home_ml": -125.0,
+        "away_ml": 105.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 0.2,
+        "total": -4.5,
+        "home_prob_market": 0.5325,
+        "away_prob_market": 0.4675,
+        "home_prob_diff": 0.0207
+      },
+      "result": {
+        "home_score": 33,
+        "away_score": 38,
+        "margin": -5,
+        "total": 71
+      }
+    },
+    {
+      "game_id": "2026_08_IND_JAX",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "JAX",
+        "abbr": "JAX",
+        "name": "Jacksonville Jaguars"
+      },
+      "away": {
+        "id": "IND",
+        "abbr": "IND",
+        "name": "Indianapolis Colts"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": -0.09
+      },
+      "quarterbacks": {
+        "home": "Trevor Lawrence",
+        "away": "Daniel Jones"
+      },
+      "projection": {
+        "home_score": 26.3,
+        "away_score": 19.2,
+        "margin": 7.1,
+        "total": 45.5,
+        "spread": -7.1,
+        "home_win_prob": 0.7091,
+        "away_win_prob": 0.2909,
+        "margin_range_80": [
+          -9.5,
+          23.7
+        ],
+        "total_range_80": [
+          28.4,
+          62.6
+        ]
+      },
+      "market": {
+        "spread": -10.0,
+        "total": 45.5,
+        "home_ml": -485.0,
+        "away_ml": 370.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.9,
+        "total": 0.0,
+        "home_prob_market": 0.7958,
+        "away_prob_market": 0.2042,
+        "home_prob_diff": -0.0867
+      },
+      "result": {
+        "home_score": 42,
+        "away_score": 7,
+        "margin": 35,
+        "total": 49
+      }
+    },
+    {
+      "game_id": "2026_08_CLE_PIT",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "PIT",
+        "abbr": "PIT",
+        "name": "Pittsburgh Steelers"
+      },
+      "away": {
+        "id": "CLE",
+        "abbr": "CLE",
+        "name": "Cleveland Browns"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.21
+      },
+      "quarterbacks": {
+        "home": "Aaron Rodgers",
+        "away": "Deshaun Watson"
+      },
+      "projection": {
+        "home_score": 20.0,
+        "away_score": 17.2,
+        "margin": 2.8,
+        "total": 37.1,
+        "spread": -2.8,
+        "home_win_prob": 0.5856,
+        "away_win_prob": 0.4144,
+        "margin_range_80": [
+          -13.8,
+          19.4
+        ],
+        "total_range_80": [
+          20.0,
+          54.3
+        ]
+      },
+      "market": {
+        "spread": -3.5,
+        "total": 38.5,
+        "home_ml": -198.0,
+        "away_ml": 164.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.7,
+        "total": -1.4,
+        "home_prob_market": 0.6369,
+        "away_prob_market": 0.3631,
+        "home_prob_diff": -0.0513
+      },
+      "result": {
+        "home_score": 27,
+        "away_score": 6,
+        "margin": 21,
+        "total": 33
+      }
+    },
+    {
+      "game_id": "2026_08_BAL_BUF",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "BUF",
+        "abbr": "BUF",
+        "name": "Buffalo Bills"
+      },
+      "away": {
+        "id": "BAL",
+        "abbr": "BAL",
+        "name": "Baltimore Ravens"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": -1.22
+      },
+      "quarterbacks": {
+        "home": "Josh Allen",
+        "away": "Lamar Jackson"
+      },
+      "projection": {
+        "home_score": 27.3,
+        "away_score": 25.4,
+        "margin": 1.9,
+        "total": 52.7,
+        "spread": -1.9,
+        "home_win_prob": 0.5579,
+        "away_win_prob": 0.4421,
+        "margin_range_80": [
+          -14.7,
+          18.5
+        ],
+        "total_range_80": [
+          35.6,
+          69.8
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 54.5,
+        "home_ml": -162.0,
+        "away_ml": 136.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -1.1,
+        "total": -1.8,
+        "home_prob_market": 0.5934,
+        "away_prob_market": 0.4066,
+        "home_prob_diff": -0.0355
+      },
+      "result": {
+        "home_score": 36,
+        "away_score": 10,
+        "margin": 26,
+        "total": 46
+      }
+    },
+    {
+      "game_id": "2026_08_ATL_TB",
+      "start_time": "2026-11-01T18:00:00+00:00",
+      "game_date": "2026-11-01",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "TB",
+        "abbr": "TB",
+        "name": "Tampa Bay Buccaneers"
+      },
+      "away": {
+        "id": "ATL",
+        "abbr": "ATL",
+        "name": "Atlanta Falcons"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.6
+      },
+      "quarterbacks": {
+        "home": "Baker Mayfield",
+        "away": "Michael Penix Jr."
+      },
+      "projection": {
+        "home_score": 20.4,
+        "away_score": 18.1,
+        "margin": 2.3,
+        "total": 38.4,
+        "spread": -2.3,
+        "home_win_prob": 0.5692,
+        "away_win_prob": 0.4308,
+        "margin_range_80": [
+          -14.3,
+          18.8
+        ],
+        "total_range_80": [
+          21.3,
+          55.6
+        ]
+      },
+      "market": {
+        "spread": -2.5,
+        "total": 42.5,
+        "home_ml": -130.0,
+        "away_ml": 110.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.2,
+        "total": -4.1,
+        "home_prob_market": 0.5427,
+        "away_prob_market": 0.4573,
+        "home_prob_diff": 0.0265
+      },
+      "result": {
+        "home_score": 16,
+        "away_score": 0,
+        "margin": 16,
+        "total": 16
+      }
+    },
+    {
+      "game_id": "2026_08_CAR_GB",
+      "start_time": "2026-10-30T00:15:00+00:00",
+      "game_date": "2026-10-29",
+      "status": "final",
+      "season_type": "REG",
+      "week": 8,
+      "neutral": false,
+      "home": {
+        "id": "GB",
+        "abbr": "GB",
+        "name": "Green Bay Packers"
+      },
+      "away": {
+        "id": "CAR",
+        "abbr": "CAR",
+        "name": "Carolina Panthers"
+      },
+      "rest": {
+        "home_days": 4,
+        "away_days": 4
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.17
+      },
+      "quarterbacks": {
+        "home": "Jordan Love",
+        "away": "Bryce Young"
+      },
+      "projection": {
+        "home_score": 25.7,
+        "away_score": 21.1,
+        "margin": 4.6,
+        "total": 46.8,
+        "spread": -4.6,
+        "home_win_prob": 0.64,
+        "away_win_prob": 0.36,
+        "margin_range_80": [
+          -11.9,
+          21.2
+        ],
+        "total_range_80": [
+          29.7,
+          63.9
+        ]
+      },
+      "market": {
+        "spread": -3.5,
+        "total": 47.5,
+        "home_ml": -192.0,
+        "away_ml": 160.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 1.1,
+        "total": -0.7,
+        "home_prob_market": 0.6309,
+        "away_prob_market": 0.3691,
+        "home_prob_diff": 0.0091
+      },
+      "result": {
+        "home_score": 27,
+        "away_score": 19,
+        "margin": 8,
+        "total": 46
+      }
+    },
+    {
+      "game_id": "2026_07_DAL_PHI",
+      "start_time": "2026-10-27T00:15:00+00:00",
+      "game_date": "2026-10-26",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "PHI",
+        "abbr": "PHI",
+        "name": "Philadelphia Eagles"
+      },
+      "away": {
+        "id": "DAL",
+        "abbr": "DAL",
+        "name": "Dallas Cowboys"
+      },
+      "rest": {
+        "home_days": 8,
+        "away_days": 8
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.31
+      },
+      "quarterbacks": {
+        "home": "Jalen Hurts",
+        "away": "Dak Prescott"
+      },
+      "projection": {
+        "home_score": 25.7,
+        "away_score": 20.8,
+        "margin": 4.9,
+        "total": 46.5,
+        "spread": -4.9,
+        "home_win_prob": 0.6466,
+        "away_win_prob": 0.3534,
+        "margin_range_80": [
+          -11.7,
+          21.4
+        ],
+        "total_range_80": [
+          29.4,
+          63.7
+        ]
+      },
+      "market": {
+        "spread": 4.5,
+        "total": 43.5,
+        "home_ml": 185.0,
+        "away_ml": -225.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 9.4,
+        "total": 3.0,
+        "home_prob_market": 0.3364,
+        "away_prob_market": 0.6636,
+        "home_prob_diff": 0.3102
+      },
+      "result": {
+        "home_score": 21,
+        "away_score": 38,
+        "margin": -17,
+        "total": 59
+      }
+    },
+    {
+      "game_id": "2026_07_KC_SEA",
+      "start_time": "2026-10-26T00:20:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "SEA",
+        "abbr": "SEA",
+        "name": "Seattle Seahawks"
+      },
+      "away": {
+        "id": "KC",
+        "abbr": "KC",
+        "name": "Kansas City Chiefs"
+      },
+      "rest": {
+        "home_days": 10,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.28
+      },
+      "quarterbacks": {
+        "home": "Sam Darnold",
+        "away": "Patrick Mahomes"
+      },
+      "projection": {
+        "home_score": 20.5,
+        "away_score": 17.6,
+        "margin": 2.8,
+        "total": 38.1,
+        "spread": -2.8,
+        "home_win_prob": 0.5868,
+        "away_win_prob": 0.4132,
+        "margin_range_80": [
+          -13.7,
+          19.4
+        ],
+        "total_range_80": [
+          21.0,
+          55.2
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 43.5,
+        "home_ml": -162.0,
+        "away_ml": 136.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.2,
+        "total": -5.4,
+        "home_prob_market": 0.5934,
+        "away_prob_market": 0.4066,
+        "home_prob_diff": -0.0066
+      },
+      "result": {
+        "home_score": 20,
+        "away_score": 3,
+        "margin": 17,
+        "total": 23
+      }
+    },
+    {
+      "game_id": "2026_07_LA_LV",
+      "start_time": "2026-10-25T20:25:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "LV",
+        "abbr": "LV",
+        "name": "Las Vegas Raiders"
+      },
+      "away": {
+        "id": "LA",
+        "abbr": "LA",
+        "name": "Los Angeles Rams"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.76
+      },
+      "quarterbacks": {
+        "home": "Kirk Cousins",
+        "away": "Matthew Stafford"
+      },
+      "projection": {
+        "home_score": 22.8,
+        "away_score": 26.5,
+        "margin": -3.7,
+        "total": 49.2,
+        "spread": 3.7,
+        "home_win_prob": 0.3874,
+        "away_win_prob": 0.6126,
+        "margin_range_80": [
+          -20.3,
+          12.9
+        ],
+        "total_range_80": [
+          32.1,
+          66.3
+        ]
+      },
+      "market": {
+        "spread": 3.5,
+        "total": 49.5,
+        "home_ml": 150.0,
+        "away_ml": -180.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.2,
+        "total": -0.3,
+        "home_prob_market": 0.3836,
+        "away_prob_market": 0.6164,
+        "home_prob_diff": 0.0038
+      },
+      "result": {
+        "home_score": 21,
+        "away_score": 35,
+        "margin": -14,
+        "total": 56
+      }
+    },
+    {
+      "game_id": "2026_07_GB_DET",
+      "start_time": "2026-10-25T20:25:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "DET",
+        "abbr": "DET",
+        "name": "Detroit Lions"
+      },
+      "away": {
+        "id": "GB",
+        "abbr": "GB",
+        "name": "Green Bay Packers"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": -0.26
+      },
+      "quarterbacks": {
+        "home": "Jared Goff",
+        "away": "Jordan Love"
+      },
+      "projection": {
+        "home_score": 27.6,
+        "away_score": 26.4,
+        "margin": 1.2,
+        "total": 54.1,
+        "spread": -1.2,
+        "home_win_prob": 0.5373,
+        "away_win_prob": 0.4627,
+        "margin_range_80": [
+          -15.4,
+          17.8
+        ],
+        "total_range_80": [
+          37.0,
+          71.2
+        ]
+      },
+      "market": {
+        "spread": -3.5,
+        "total": 55.5,
+        "home_ml": -192.0,
+        "away_ml": 160.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -2.3,
+        "total": -1.4,
+        "home_prob_market": 0.6309,
+        "away_prob_market": 0.3691,
+        "home_prob_diff": -0.0936
+      },
+      "result": {
+        "home_score": 20,
+        "away_score": 17,
+        "margin": 3,
+        "total": 37
+      }
+    },
+    {
+      "game_id": "2026_07_DEN_ARI",
+      "start_time": "2026-10-25T20:05:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "ARI",
+        "abbr": "ARI",
+        "name": "Arizona Cardinals"
+      },
+      "away": {
+        "id": "DEN",
+        "abbr": "DEN",
+        "name": "Denver Broncos"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 10
+      },
+      "adjustments": {
+        "rest_points": -0.0,
+        "injury_points": null,
+        "qb_points": -0.19
+      },
+      "quarterbacks": {
+        "home": "Jacoby Brissett",
+        "away": "Bo Nix"
+      },
+      "projection": {
+        "home_score": 21.9,
+        "away_score": 23.9,
+        "margin": -2.1,
+        "total": 45.8,
+        "spread": 2.1,
+        "home_win_prob": 0.4368,
+        "away_win_prob": 0.5632,
+        "margin_range_80": [
+          -18.6,
+          14.5
+        ],
+        "total_range_80": [
+          28.7,
+          62.9
+        ]
+      },
+      "market": {
+        "spread": 4.5,
+        "total": 44.5,
+        "home_ml": 190.0,
+        "away_ml": -230.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 2.4,
+        "total": 1.3,
+        "home_prob_market": 0.331,
+        "away_prob_market": 0.669,
+        "home_prob_diff": 0.1058
+      },
+      "result": {
+        "home_score": 16,
+        "away_score": 30,
+        "margin": -14,
+        "total": 46
+      }
+    },
+    {
+      "game_id": "2026_07_CIN_BAL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "BAL",
+        "abbr": "BAL",
+        "name": "Baltimore Ravens"
+      },
+      "away": {
+        "id": "CIN",
+        "abbr": "CIN",
+        "name": "Cincinnati Bengals"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 14
+      },
+      "adjustments": {
+        "rest_points": -0.01,
+        "injury_points": null,
+        "qb_points": -2.4
+      },
+      "quarterbacks": {
+        "home": "Tyler Huntley",
+        "away": "Joe Burrow"
+      },
+      "projection": {
+        "home_score": 23.5,
+        "away_score": 22.4,
+        "margin": 1.1,
+        "total": 45.9,
+        "spread": -1.1,
+        "home_win_prob": 0.5345,
+        "away_win_prob": 0.4655,
+        "margin_range_80": [
+          -15.5,
+          17.7
+        ],
+        "total_range_80": [
+          28.8,
+          63.0
+        ]
+      },
+      "market": {
+        "spread": 3.0,
+        "total": 46.5,
+        "home_ml": 136.0,
+        "away_ml": -162.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 4.1,
+        "total": -0.6,
+        "home_prob_market": 0.4066,
+        "away_prob_market": 0.5934,
+        "home_prob_diff": 0.1279
+      },
+      "result": {
+        "home_score": 13,
+        "away_score": 35,
+        "margin": -22,
+        "total": 48
+      }
+    },
+    {
+      "game_id": "2026_07_TB_CAR",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "CAR",
+        "abbr": "CAR",
+        "name": "Carolina Panthers"
+      },
+      "away": {
+        "id": "TB",
+        "abbr": "TB",
+        "name": "Tampa Bay Buccaneers"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.64
+      },
+      "quarterbacks": {
+        "home": "Bryce Young",
+        "away": "Baker Mayfield"
+      },
+      "projection": {
+        "home_score": 23.0,
+        "away_score": 20.1,
+        "margin": 2.9,
+        "total": 43.2,
+        "spread": -2.9,
+        "home_win_prob": 0.5887,
+        "away_win_prob": 0.4113,
+        "margin_range_80": [
+          -13.7,
+          19.5
+        ],
+        "total_range_80": [
+          26.1,
+          60.3
+        ]
+      },
+      "market": {
+        "spread": -3.0,
+        "total": 44.5,
+        "home_ml": -166.0,
+        "away_ml": 140.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.1,
+        "total": -1.3,
+        "home_prob_market": 0.5996,
+        "away_prob_market": 0.4004,
+        "home_prob_diff": -0.0109
+      },
+      "result": {
+        "home_score": 13,
+        "away_score": 43,
+        "margin": -30,
+        "total": 56
+      }
+    },
+    {
+      "game_id": "2026_07_SF_ATL",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "ATL",
+        "abbr": "ATL",
+        "name": "Atlanta Falcons"
+      },
+      "away": {
+        "id": "SF",
+        "abbr": "SF",
+        "name": "San Francisco 49ers"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 6
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.59
+      },
+      "quarterbacks": {
+        "home": "Michael Penix Jr.",
+        "away": "Brock Purdy"
+      },
+      "projection": {
+        "home_score": 23.6,
+        "away_score": 26.5,
+        "margin": -2.9,
+        "total": 50.1,
+        "spread": 2.9,
+        "home_win_prob": 0.4098,
+        "away_win_prob": 0.5902,
+        "margin_range_80": [
+          -19.5,
+          13.6
+        ],
+        "total_range_80": [
+          33.0,
+          67.2
+        ]
+      },
+      "market": {
+        "spread": 2.5,
+        "total": 49.5,
+        "home_ml": 130.0,
+        "away_ml": -155.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.4,
+        "total": 0.6,
+        "home_prob_market": 0.417,
+        "away_prob_market": 0.583,
+        "home_prob_diff": -0.0072
+      },
+      "result": {
+        "home_score": 29,
+        "away_score": 20,
+        "margin": 9,
+        "total": 49
+      }
+    },
+    {
+      "game_id": "2026_07_NYG_HOU",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "HOU",
+        "abbr": "HOU",
+        "name": "Houston Texans"
+      },
+      "away": {
+        "id": "NYG",
+        "abbr": "NYG",
+        "name": "New York Giants"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 1.18
+      },
+      "quarterbacks": {
+        "home": "C.J. Stroud",
+        "away": "J.J. McCarthy"
+      },
+      "projection": {
+        "home_score": 25.5,
+        "away_score": 17.3,
+        "margin": 8.2,
+        "total": 42.8,
+        "spread": -8.2,
+        "home_win_prob": 0.7367,
+        "away_win_prob": 0.2633,
+        "margin_range_80": [
+          -8.4,
+          24.8
+        ],
+        "total_range_80": [
+          25.7,
+          59.9
+        ]
+      },
+      "market": {
+        "spread": -10.0,
+        "total": 42.5,
+        "home_ml": -520.0,
+        "away_ml": 390.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -1.8,
+        "total": 0.3,
+        "home_prob_market": 0.8043,
+        "away_prob_market": 0.1957,
+        "home_prob_diff": -0.0676
+      },
+      "result": {
+        "home_score": 21,
+        "away_score": 27,
+        "margin": -6,
+        "total": 48
+      }
+    },
+    {
+      "game_id": "2026_07_MIA_NYJ",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "NYJ",
+        "abbr": "NYJ",
+        "name": "New York Jets"
+      },
+      "away": {
+        "id": "MIA",
+        "abbr": "MIA",
+        "name": "Miami Dolphins"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 14
+      },
+      "adjustments": {
+        "rest_points": -0.01,
+        "injury_points": null,
+        "qb_points": 0.77
+      },
+      "quarterbacks": {
+        "home": "Geno Smith",
+        "away": "Malik Willis"
+      },
+      "projection": {
+        "home_score": 22.0,
+        "away_score": 19.3,
+        "margin": 2.7,
+        "total": 41.4,
+        "spread": -2.7,
+        "home_win_prob": 0.5826,
+        "away_win_prob": 0.4174,
+        "margin_range_80": [
+          -13.9,
+          19.3
+        ],
+        "total_range_80": [
+          24.3,
+          58.5
+        ]
+      },
+      "market": {
+        "spread": -3.5,
+        "total": 39.5,
+        "home_ml": -218.0,
+        "away_ml": 180.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.8,
+        "total": 1.9,
+        "home_prob_market": 0.6575,
+        "away_prob_market": 0.3425,
+        "home_prob_diff": -0.0749
+      },
+      "result": {
+        "home_score": 25,
+        "away_score": 28,
+        "margin": -3,
+        "total": 53
+      }
+    },
+    {
+      "game_id": "2026_07_IND_MIN",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "MIN",
+        "abbr": "MIN",
+        "name": "Minnesota Vikings"
+      },
+      "away": {
+        "id": "IND",
+        "abbr": "IND",
+        "name": "Indianapolis Colts"
+      },
+      "rest": {
+        "home_days": 14,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.01,
+        "injury_points": null,
+        "qb_points": 0.43
+      },
+      "quarterbacks": {
+        "home": "Kyler Murray",
+        "away": "Daniel Jones"
+      },
+      "projection": {
+        "home_score": 23.9,
+        "away_score": 18.2,
+        "margin": 5.7,
+        "total": 42.2,
+        "spread": -5.7,
+        "home_win_prob": 0.6705,
+        "away_win_prob": 0.3295,
+        "margin_range_80": [
+          -10.9,
+          22.3
+        ],
+        "total_range_80": [
+          25.0,
+          59.3
+        ]
+      },
+      "market": {
+        "spread": -6.5,
+        "total": 41.5,
+        "home_ml": -325.0,
+        "away_ml": 260.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -0.8,
+        "total": 0.7,
+        "home_prob_market": 0.7335,
+        "away_prob_market": 0.2665,
+        "home_prob_diff": -0.063
+      },
+      "result": {
+        "home_score": 16,
+        "away_score": 10,
+        "margin": 6,
+        "total": 26
+      }
+    },
+    {
+      "game_id": "2026_07_CLE_TEN",
+      "start_time": "2026-10-25T17:00:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": false,
+      "home": {
+        "id": "TEN",
+        "abbr": "TEN",
+        "name": "Tennessee Titans"
+      },
+      "away": {
+        "id": "CLE",
+        "abbr": "CLE",
+        "name": "Cleveland Browns"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": -0.31
+      },
+      "quarterbacks": {
+        "home": "Cam Ward",
+        "away": "Deshaun Watson"
+      },
+      "projection": {
+        "home_score": 16.0,
+        "away_score": 19.3,
+        "margin": -3.3,
+        "total": 35.2,
+        "spread": 3.3,
+        "home_win_prob": 0.3992,
+        "away_win_prob": 0.6008,
+        "margin_range_80": [
+          -19.9,
+          13.3
+        ],
+        "total_range_80": [
+          18.1,
+          52.4
+        ]
+      },
+      "market": {
+        "spread": 1.5,
+        "total": 36.5,
+        "home_ml": 110.0,
+        "away_ml": -130.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": -1.8,
+        "total": -1.3,
+        "home_prob_market": 0.4573,
+        "away_prob_market": 0.5427,
+        "home_prob_diff": -0.0581
+      },
+      "result": {
+        "home_score": 24,
+        "away_score": 27,
+        "margin": -3,
+        "total": 51
+      }
+    },
+    {
+      "game_id": "2026_07_PIT_NO",
+      "start_time": "2026-10-25T13:30:00+00:00",
+      "game_date": "2026-10-25",
+      "status": "final",
+      "season_type": "REG",
+      "week": 7,
+      "neutral": true,
+      "home": {
+        "id": "NO",
+        "abbr": "NO",
+        "name": "New Orleans Saints"
+      },
+      "away": {
+        "id": "PIT",
+        "abbr": "PIT",
+        "name": "Pittsburgh Steelers"
+      },
+      "rest": {
+        "home_days": 7,
+        "away_days": 7
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null,
+        "qb_points": 0.17
+      },
+      "quarterbacks": {
+        "home": "Tyler Shough",
+        "away": "Aaron Rodgers"
+      },
+      "projection": {
+        "home_score": 21.0,
+        "away_score": 22.0,
+        "margin": -1.0,
+        "total": 43.1,
+        "spread": 1.0,
+        "home_win_prob": 0.4692,
+        "away_win_prob": 0.5308,
+        "margin_range_80": [
+          -17.6,
+          15.6
+        ],
+        "total_range_80": [
+          26.0,
+          60.2
+        ]
+      },
+      "market": {
+        "spread": 3.0,
+        "total": 43.5,
+        "home_ml": 136.0,
+        "away_ml": -162.0,
+        "books": 0,
+        "captured_at": null,
+        "sources": [
+          "nflverse"
+        ]
+      },
+      "edges": {
+        "spread": 2.0,
+        "total": -0.4,
+        "home_prob_market": 0.4066,
+        "away_prob_market": 0.5934,
+        "home_prob_diff": 0.0626
+      },
+      "result": {
+        "home_score": 10,
+        "away_score": 16,
+        "margin": -6,
+        "total": 26
+      }
+    }
+  ],
+  "ratings": [
+    {
+      "team_id": "LA",
+      "abbr": "LA",
+      "name": "Los Angeles Rams",
+      "games_played": 8,
+      "overall": 4.75,
+      "overall_unit": "net pts / game",
+      "avg_margin": 3.25,
+      "last10_margin": 3.25,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.083,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.04,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.109,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.002,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.487,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.436,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.688,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.5,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.13,
+      "rank": 1
+    },
+    {
+      "team_id": "JAX",
+      "abbr": "JAX",
+      "name": "Jacksonville Jaguars",
+      "games_played": 7,
+      "overall": 4.45,
+      "overall_unit": "net pts / game",
+      "avg_margin": 12.14,
+      "last10_margin": 12.14,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.078,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.037,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.134,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.042,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.473,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.488,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.684,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.71,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.147,
+      "rank": 2
+    },
+    {
+      "team_id": "SEA",
+      "abbr": "SEA",
+      "name": "Seattle Seahawks",
+      "games_played": 7,
+      "overall": 3.7,
+      "overall_unit": "net pts / game",
+      "avg_margin": 6.14,
+      "last10_margin": 6.14,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.02,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.115,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.062,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.117,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.405,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.389,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.545,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.86,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.183,
+      "rank": 3
+    },
+    {
+      "team_id": "BUF",
+      "abbr": "BUF",
+      "name": "Buffalo Bills",
+      "games_played": 7,
+      "overall": 3.53,
+      "overall_unit": "net pts / game",
+      "avg_margin": 7.43,
+      "last10_margin": 7.43,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.108,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.017,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.15,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.002,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.482,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.453,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.724,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.57,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.014,
+      "rank": 4
+    },
+    {
+      "team_id": "SF",
+      "abbr": "SF",
+      "name": "San Francisco 49ers",
+      "games_played": 7,
+      "overall": 3.45,
+      "overall_unit": "net pts / game",
+      "avg_margin": 8.29,
+      "last10_margin": 8.29,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.099,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.01,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.144,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.021,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.541,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.5,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.87,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.14,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.065,
+      "rank": 5
+    },
+    {
+      "team_id": "NE",
+      "abbr": "NE",
+      "name": "New England Patriots",
+      "games_played": 8,
+      "overall": 3.12,
+      "overall_unit": "net pts / game",
+      "avg_margin": 2.75,
+      "last10_margin": 2.75,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.053,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.028,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.139,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.088,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.468,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.412,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.522,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.88,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.008,
+      "rank": 6
+    },
+    {
+      "team_id": "GB",
+      "abbr": "GB",
+      "name": "Green Bay Packers",
+      "games_played": 8,
+      "overall": 3.08,
+      "overall_unit": "net pts / game",
+      "avg_margin": 0.88,
+      "last10_margin": 0.88,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.057,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.022,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.156,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.112,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.407,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.387,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.536,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.25,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.08,
+      "rank": 7
+    },
+    {
+      "team_id": "CHI",
+      "abbr": "CHI",
+      "name": "Chicago Bears",
+      "games_played": 7,
+      "overall": 2.36,
+      "overall_unit": "net pts / game",
+      "avg_margin": 5.29,
+      "last10_margin": 5.29,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.069,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.008,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.129,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.048,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.478,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.44,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.533,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.57,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.062,
+      "rank": 8
+    },
+    {
+      "team_id": "DEN",
+      "abbr": "DEN",
+      "name": "Denver Broncos",
+      "games_played": 8,
+      "overall": 2.15,
+      "overall_unit": "net pts / game",
+      "avg_margin": 0.88,
+      "last10_margin": 0.88,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.013,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.042,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.045,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.051,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.379,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.3,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.682,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.62,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.013,
+      "rank": 9
+    },
+    {
+      "team_id": "KC",
+      "abbr": "KC",
+      "name": "Kansas City Chiefs",
+      "games_played": 7,
+      "overall": 1.64,
+      "overall_unit": "net pts / game",
+      "avg_margin": 5.14,
+      "last10_margin": 5.14,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.057,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.015,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.082,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.015,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.487,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.405,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.577,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.57,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.031,
+      "rank": 10
+    },
+    {
+      "team_id": "BAL",
+      "abbr": "BAL",
+      "name": "Baltimore Ravens",
+      "games_played": 8,
+      "overall": 1.33,
+      "overall_unit": "net pts / game",
+      "avg_margin": -3.0,
+      "last10_margin": -3.0,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.034,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.0,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.086,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.046,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.459,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.4,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.593,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.0,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.031,
+      "rank": 11
+    },
+    {
+      "team_id": "MIN",
+      "abbr": "MIN",
+      "name": "Minnesota Vikings",
+      "games_played": 7,
+      "overall": 1.26,
+      "overall_unit": "net pts / game",
+      "avg_margin": 6.71,
+      "last10_margin": 6.71,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.073,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.105,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.018,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.11,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.371,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.371,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.529,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.71,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.157,
+      "rank": 12
+    },
+    {
+      "team_id": "CIN",
+      "abbr": "CIN",
+      "name": "Cincinnati Bengals",
+      "games_played": 7,
+      "overall": 1.15,
+      "overall_unit": "net pts / game",
+      "avg_margin": 6.86,
+      "last10_margin": 6.86,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.063,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.033,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.113,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.061,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.511,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.529,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.679,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.29,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.033,
+      "rank": 13
+    },
+    {
+      "team_id": "DET",
+      "abbr": "DET",
+      "name": "Detroit Lions",
+      "games_played": 7,
+      "overall": 1.07,
+      "overall_unit": "net pts / game",
+      "avg_margin": 3.29,
+      "last10_margin": 3.29,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.058,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.031,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.12,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.059,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.496,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.39,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.69,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.57,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.092,
+      "rank": 14
+    },
+    {
+      "team_id": "TB",
+      "abbr": "TB",
+      "name": "Tampa Bay Buccaneers",
+      "games_played": 8,
+      "overall": 0.87,
+      "overall_unit": "net pts / game",
+      "avg_margin": 3.38,
+      "last10_margin": 3.38,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.039,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.062,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.034,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.036,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.396,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.384,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.52,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.5,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.168,
+      "rank": 15
+    },
+    {
+      "team_id": "HOU",
+      "abbr": "HOU",
+      "name": "Houston Texans",
+      "games_played": 7,
+      "overall": 0.58,
+      "overall_unit": "net pts / game",
+      "avg_margin": -0.71,
+      "last10_margin": -0.71,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.014,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.029,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.061,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.108,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.43,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.375,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.577,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.43,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.037,
+      "rank": 16
+    },
+    {
+      "team_id": "PIT",
+      "abbr": "PIT",
+      "name": "Pittsburgh Steelers",
+      "games_played": 8,
+      "overall": 0.46,
+      "overall_unit": "net pts / game",
+      "avg_margin": 4.5,
+      "last10_margin": 4.5,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.009,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.003,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.015,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": 0.026,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.42,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.382,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.5,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.0,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.039,
+      "rank": 17
+    },
+    {
+      "team_id": "ATL",
+      "abbr": "ATL",
+      "name": "Atlanta Falcons",
+      "games_played": 8,
+      "overall": -0.54,
+      "overall_unit": "net pts / game",
+      "avg_margin": -2.25,
+      "last10_margin": -2.25,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.044,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.03,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.031,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.049,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.429,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.337,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.636,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.75,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.042,
+      "rank": 18
+    },
+    {
+      "team_id": "NYG",
+      "abbr": "NYG",
+      "name": "New York Giants",
+      "games_played": 7,
+      "overall": -1.18,
+      "overall_unit": "net pts / game",
+      "avg_margin": 0.29,
+      "last10_margin": 0.29,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.014,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.017,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.035,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.068,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.41,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.43,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.667,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.43,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.017,
+      "rank": 19
+    },
+    {
+      "team_id": "CAR",
+      "abbr": "CAR",
+      "name": "Carolina Panthers",
+      "games_played": 7,
+      "overall": -1.35,
+      "overall_unit": "net pts / game",
+      "avg_margin": -2.14,
+      "last10_margin": -2.14,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.018,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.052,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.057,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.056,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.425,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.385,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.667,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.14,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.049,
+      "rank": 20
+    },
+    {
+      "team_id": "DAL",
+      "abbr": "DAL",
+      "name": "Dallas Cowboys",
+      "games_played": 8,
+      "overall": -1.43,
+      "overall_unit": "net pts / game",
+      "avg_margin": 0.75,
+      "last10_margin": 0.75,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": 0.074,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.111,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.121,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.035,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.476,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.475,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.676,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.75,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.132,
+      "rank": 21
+    },
+    {
+      "team_id": "NO",
+      "abbr": "NO",
+      "name": "New Orleans Saints",
+      "games_played": 7,
+      "overall": -1.82,
+      "overall_unit": "net pts / game",
+      "avg_margin": -4.57,
+      "last10_margin": -4.57,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.027,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.02,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.042,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.115,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.425,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.434,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.739,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.71,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.084,
+      "rank": 22
+    },
+    {
+      "team_id": "PHI",
+      "abbr": "PHI",
+      "name": "Philadelphia Eagles",
+      "games_played": 8,
+      "overall": -1.93,
+      "overall_unit": "net pts / game",
+      "avg_margin": -8.12,
+      "last10_margin": -8.12,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.058,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.008,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.019,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.081,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.374,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.373,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.714,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.0,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.089,
+      "rank": 23
+    },
+    {
+      "team_id": "WAS",
+      "abbr": "WAS",
+      "name": "Washington Commanders",
+      "games_played": 7,
+      "overall": -2.28,
+      "overall_unit": "net pts / game",
+      "avg_margin": -3.29,
+      "last10_margin": -3.29,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.01,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.049,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.043,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.083,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.388,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.319,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.55,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.43,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.029,
+      "rank": 24
+    },
+    {
+      "team_id": "IND",
+      "abbr": "IND",
+      "name": "Indianapolis Colts",
+      "games_played": 8,
+      "overall": -2.39,
+      "overall_unit": "net pts / game",
+      "avg_margin": -7.62,
+      "last10_margin": -7.62,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.02,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.041,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.024,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.02,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.424,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.389,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.591,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.88,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.099,
+      "rank": 25
+    },
+    {
+      "team_id": "CLE",
+      "abbr": "CLE",
+      "name": "Cleveland Browns",
+      "games_played": 8,
+      "overall": -2.42,
+      "overall_unit": "net pts / game",
+      "avg_margin": -4.25,
+      "last10_margin": -4.25,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.093,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.031,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.065,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.088,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.419,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.324,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.474,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.25,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.019,
+      "rank": 26
+    },
+    {
+      "team_id": "ARI",
+      "abbr": "ARI",
+      "name": "Arizona Cardinals",
+      "games_played": 8,
+      "overall": -3.1,
+      "overall_unit": "net pts / game",
+      "avg_margin": -7.88,
+      "last10_margin": -7.88,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.031,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.049,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.002,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.073,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.422,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.39,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.469,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.0,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.084,
+      "rank": 27
+    },
+    {
+      "team_id": "MIA",
+      "abbr": "MIA",
+      "name": "Miami Dolphins",
+      "games_played": 7,
+      "overall": -3.17,
+      "overall_unit": "net pts / game",
+      "avg_margin": -9.14,
+      "last10_margin": -9.14,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.012,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.07,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.032,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.062,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.404,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.427,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.588,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.29,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.185,
+      "rank": 28
+    },
+    {
+      "team_id": "LAC",
+      "abbr": "LAC",
+      "name": "Los Angeles Chargers",
+      "games_played": 7,
+      "overall": -3.25,
+      "overall_unit": "net pts / game",
+      "avg_margin": -10.86,
+      "last10_margin": -10.86,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.136,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": -0.052,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.093,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.131,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.342,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.351,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.5,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 2.29,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": -0.051,
+      "rank": 29
+    },
+    {
+      "team_id": "NYJ",
+      "abbr": "NYJ",
+      "name": "New York Jets",
+      "games_played": 8,
+      "overall": -3.78,
+      "overall_unit": "net pts / game",
+      "avg_margin": -2.25,
+      "last10_margin": -2.25,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.028,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.07,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.017,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.075,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.462,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.38,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.458,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.75,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.035,
+      "rank": 30
+    },
+    {
+      "team_id": "LV",
+      "abbr": "LV",
+      "name": "Las Vegas Raiders",
+      "games_played": 8,
+      "overall": -3.99,
+      "overall_unit": "net pts / game",
+      "avg_margin": -1.12,
+      "last10_margin": -1.12,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.043,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.06,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": 0.046,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.142,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.439,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.426,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.545,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 0.75,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.133,
+      "rank": 31
+    },
+    {
+      "team_id": "TEN",
+      "abbr": "TEN",
+      "name": "Tennessee Titans",
+      "games_played": 8,
+      "overall": -6.32,
+      "overall_unit": "net pts / game",
+      "avg_margin": -6.88,
+      "last10_margin": -6.88,
+      "components": [
+        {
+          "key": "off",
+          "label": "Off. EPA/play",
+          "value": -0.074,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "def",
+          "label": "Def. EPA/play",
+          "value": 0.09,
+          "unit": "EPA",
+          "higher_is_better": false
+        },
+        {
+          "key": "pass",
+          "label": "Pass EPA",
+          "value": -0.044,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "rush",
+          "label": "Rush EPA",
+          "value": -0.084,
+          "unit": "EPA",
+          "higher_is_better": true
+        },
+        {
+          "key": "sr",
+          "label": "Success",
+          "value": 0.411,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "third",
+          "label": "3rd down",
+          "value": 0.362,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "rz",
+          "label": "Red zone TD",
+          "value": 0.522,
+          "unit": "share",
+          "higher_is_better": true
+        },
+        {
+          "key": "to",
+          "label": "Turnovers/gm",
+          "value": 1.25,
+          "unit": "per game",
+          "higher_is_better": false
+        }
+      ],
+      "defense_allowed_epa": 0.123,
+      "rank": 32
+    }
+  ],
+  "injuries": [
+    {
+      "team": "ARI",
+      "player": "Jon Gaines II",
+      "position": "G",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ARI",
+      "player": "Walter Nolen",
+      "position": "DT",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Brian Robinson",
+      "position": "RB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BAL",
+      "player": "Jaylinn Hawkins",
+      "position": "S",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BAL",
+      "player": "Olaivavega Ioane",
+      "position": "G",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "Tyrell Shavers",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CAR",
+      "player": "Akayleb Evans",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Triceps",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CAR",
+      "player": "Damien Lewis",
+      "position": "G",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CAR",
+      "player": "Jaelan Phillips",
+      "position": "LB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CAR",
+      "player": "Torricelli Simpkins III",
+      "position": "G",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CHI",
+      "player": "Kyle Monangai",
+      "position": "RB",
+      "status": "Out",
+      "injury": "Thumb",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CIN",
+      "player": "Kyle Dugger",
+      "position": "S",
+      "status": "Out",
+      "injury": "Quadricep",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "Dee Winters",
+      "position": "LB",
+      "status": "Out",
+      "injury": "Calf",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "KaVontae Turpin",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Ribs",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "RJ Harvey",
+      "position": "RB",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "Talanoa Hufanga",
+      "position": "S",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DET",
+      "player": "Kerby Joseph",
+      "position": "S",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Sean Rhyan",
+      "position": "C",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Travis Glover",
+      "position": "G",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Zaire Franklin",
+      "position": "LB",
+      "status": "Out",
+      "injury": "Shin",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "IND",
+      "player": "Anthony Gould",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Concussion",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "IND",
+      "player": "Justin Walley",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "JAX",
+      "player": "Antonio Johnson",
+      "position": "S",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "KC",
+      "player": "Omarr Norman-Lott",
+      "position": "DT",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Brenen Thompson",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Quadricep",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Deane Leonard",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Concussion",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Derwin James",
+      "position": "S",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Kayode Awosika",
+      "position": "G",
+      "status": "Out",
+      "injury": "Fibula",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LV",
+      "player": "Carter Runyon",
+      "position": "TE",
+      "status": "Out",
+      "injury": "Foot",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LV",
+      "player": "Patrick Johnson",
+      "position": "DE",
+      "status": "Out",
+      "injury": "Stinger",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "MIA",
+      "player": "Kadyn Proctor",
+      "position": "T",
+      "status": "Out",
+      "injury": "Concussion",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "Joseph Ossai",
+      "position": "DE",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "Max Mitchell",
+      "position": "T",
+      "status": "Out",
+      "injury": "Concussion",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "T'Vondre Sweat",
+      "position": "DT",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "Britain Covey",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "DeVonta Smith",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "Dontayvion Wicks",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "Jihaad Campbell",
+      "position": "LB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "Jonathan Jones",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PIT",
+      "player": "Brandin Echols",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PIT",
+      "player": "Doneiko Slaughter",
+      "position": "CB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Charles Cross",
+      "position": "T",
+      "status": "Out",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Rashid Shaheed",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Velus Jones Jr.",
+      "position": "RB",
+      "status": "Out",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TB",
+      "player": "Emeka Egbuka",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Foot",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Carnell Tate",
+      "position": "WR",
+      "status": "Out",
+      "injury": "Shoulder",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Tommy Townsend",
+      "position": "P",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Tyjae Spears",
+      "position": "RB",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "WAS",
+      "player": "Daron Payne",
+      "position": "DT",
+      "status": "Out",
+      "injury": "Foot",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "WAS",
+      "player": "Javon Kinlaw",
+      "position": "DT",
+      "status": "Out",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LA",
+      "player": "Joe Cardona",
+      "position": "LS",
+      "status": "Doubtful",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "David Bailey",
+      "position": "DE",
+      "status": "Doubtful",
+      "injury": "Groin",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Uchenna Nwosu",
+      "position": "LB",
+      "status": "Doubtful",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ARI",
+      "player": "Andrew Wingard",
+      "position": "S",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ARI",
+      "player": "Hjalte Froholdt",
+      "position": "C",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ARI",
+      "player": "Max Melton",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Avieon Terrell",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Illness",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Beaux Collins",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Hip",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Billy Bowman Jr.",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Cameron Williams",
+      "position": "T",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Charles Snowden",
+      "position": "DE",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Divine Deablo",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Forearm",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Olamide Zaccheaus",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "ATL",
+      "player": "Samson Ebukam",
+      "position": "DE",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BAL",
+      "player": "Adam Randall",
+      "position": "RB",
+      "status": "Questionable",
+      "injury": "Neck",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BAL",
+      "player": "T.J. Tampa",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "DJ Moore",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "Dalton Kincaid",
+      "position": "TE",
+      "status": "Questionable",
+      "injury": "Chest",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "Dee Alford",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "Greg Gaines",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Calf",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "Spencer Brown",
+      "position": "T",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "BUF",
+      "player": "TJ Parker",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CAR",
+      "player": "Bobby Brown III",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Hand",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CHI",
+      "player": "D'Marco Jackson",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CHI",
+      "player": "Malik Muhammad",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Toe",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CIN",
+      "player": "Joe Giles-Harris",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Calf",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CLE",
+      "player": "Daniel Thomas",
+      "position": "S",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CLE",
+      "player": "Myles Harden",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "CLE",
+      "player": "Tytus Howard",
+      "position": "T",
+      "status": "Questionable",
+      "injury": "Concussion",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "George Pickens",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "Jonathan Bullard",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Calf",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "Kenny Clark",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "Luke Schoonmaker",
+      "position": "TE",
+      "status": "Questionable",
+      "injury": "Groin",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "Marist Liufau",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Forearm",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DAL",
+      "player": "P.J. Locke",
+      "position": "S",
+      "status": "Questionable",
+      "injury": "Foot",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "Brandon Jones",
+      "position": "S",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "Garett Bolles",
+      "position": "T",
+      "status": "Questionable",
+      "injury": "Hip",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "Jaylen Waddle",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Chest",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DEN",
+      "player": "Zach Allen",
+      "position": "DE",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "DET",
+      "player": "Roger McCreary",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Foot",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Anthony Campbell",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Brenton Cox Jr.",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Quadricep",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Devonte Wyatt",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "GB",
+      "player": "Matthew Golden",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "IND",
+      "player": "Andrew Ogletree",
+      "position": "TE",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "IND",
+      "player": "Bryce Boettcher",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Groin",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "JAX",
+      "player": "Jakobi Meyers",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "KC",
+      "player": "L'Jarius Sneed",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "KC",
+      "player": "Mansoor Delane",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "KC",
+      "player": "R Mason Thomas",
+      "position": "DE",
+      "status": "Questionable",
+      "injury": "Not injury related - personal matter",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LA",
+      "player": "Colby Parkinson",
+      "position": "TE",
+      "status": "Questionable",
+      "injury": "Rib",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LA",
+      "player": "Coleman Shelton",
+      "position": "C",
+      "status": "Questionable",
+      "injury": "Hip",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LA",
+      "player": "Jordan Whittington",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LA",
+      "player": "Trent McDuffie",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Groin",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Donte Jackson",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LAC",
+      "player": "Rodney Shelley",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Hamstring",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LV",
+      "player": "Jack Bech",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Forearm",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "LV",
+      "player": "Jackson Powers-Johnson",
+      "position": "G",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "MIA",
+      "player": "Julius Brents",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Neck",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "MIA",
+      "player": "Reese Taylor",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Quadricep",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "MIN",
+      "player": "Jay Ward",
+      "position": "S",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NE",
+      "player": "A.J. Brown",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Ankle",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NE",
+      "player": "Carlton Davis III",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Neck",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NE",
+      "player": "Christian Elliss",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Chest",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NE",
+      "player": "TreVeyon Henderson",
+      "position": "RB",
+      "status": "Questionable",
+      "injury": "Illness",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "Breece Hall",
+      "position": "RB",
+      "status": "Questionable",
+      "injury": "Quadricep",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "NYJ",
+      "player": "Dylan Parham",
+      "position": "G",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PHI",
+      "player": "Jakorian Bennett",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "PIT",
+      "player": "Ben Skowronek",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Calf",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Anthony Bradford",
+      "position": "G",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Brandon Pili",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Back",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Drew Lock",
+      "position": "QB",
+      "status": "Questionable",
+      "injury": "Elbow",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "SEA",
+      "player": "Patrick O'Connell",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Toe",
+      "practice": "Did Not Participate In Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TB",
+      "player": "Kenny Gainwell",
+      "position": "RB",
+      "status": "Questionable",
+      "injury": "Hip",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TB",
+      "player": "Luke Goedeke",
+      "position": "T",
+      "status": "Questionable",
+      "injury": "Calf",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Calvin Ridley",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Hip",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Dorian Mausi",
+      "position": "LB",
+      "status": "Questionable",
+      "injury": "Foot",
+      "practice": "Full Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "Jaylon Jones",
+      "position": "CB",
+      "status": "Questionable",
+      "injury": "Knee",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "TEN",
+      "player": "John Franklin-Myers",
+      "position": "DE",
+      "status": "Questionable",
+      "injury": "Groin",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "WAS",
+      "player": "Jer'Zhan Newton",
+      "position": "DT",
+      "status": "Questionable",
+      "injury": "Pectoral",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "WAS",
+      "player": "John Bates",
+      "position": "TE",
+      "status": "Questionable",
+      "injury": "Shoulder",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    },
+    {
+      "team": "WAS",
+      "player": "Treylon Burks",
+      "position": "WR",
+      "status": "Questionable",
+      "injury": "Foot",
+      "practice": "Limited Participation in Practice",
+      "week": 8,
+      "impact_points": null,
+      "impact_note": "Quarterback changes are modeled through the projected starter; other absences aren't modeled yet."
+    }
+  ],
+  "performance": {
+    "backtest": {
+      "model_version": "1.0.1",
+      "test_seasons": [
+        2023,
+        2024,
+        2025
+      ],
+      "games": 855,
+      "margin_mae": 10.206,
+      "total_mae": 10.353,
+      "total_bias": -1.559,
+      "brier": 0.2217,
+      "winner_correct": 0.6429,
+      "baselines": {
+        "home_court_margin_mae": 11.074,
+        "home_court_total_mae": 10.65
+      },
+      "calibration": [
+        {
+          "bin": "0.2-0.3",
+          "n": 16,
+          "predicted": 0.265,
+          "actual": 0.25
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 72,
+          "predicted": 0.36,
+          "actual": 0.292
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 184,
+          "predicted": 0.456,
+          "actual": 0.386
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 225,
+          "predicted": 0.55,
+          "actual": 0.511
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 215,
+          "predicted": 0.647,
+          "actual": 0.67
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 118,
+          "predicted": 0.742,
+          "actual": 0.788
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 24,
+          "predicted": 0.83,
+          "actual": 0.875
+        }
+      ],
+      "market_comparison": {
+        "note": "nflverse lines; capture time undocumented, so this compares accuracy, not a betting record.",
+        "spread": {
+          "games": 855,
+          "model_mae": 10.206,
+          "market_mae": 9.786,
+          "model_vs_market_corr": 0.9,
+          "side_record_all": {
+            "n": 836,
+            "wins": 401,
+            "win_rate": 0.4797,
+            "min_edge": 0.0,
+            "model_mae": 10.206,
+            "market_mae": 9.786
+          },
+          "side_record_edge_3plus": {
+            "n": 229,
+            "wins": 102,
+            "win_rate": 0.4454,
+            "min_edge": 3.0,
+            "model_mae": 10.206,
+            "market_mae": 9.786
+          }
+        },
+        "total": {
+          "games": 855,
+          "model_mae": 10.353,
+          "market_mae": 10.12,
+          "side_record_all": {
+            "n": 848,
+            "wins": 421,
+            "win_rate": 0.4965,
+            "min_edge": 0.0,
+            "model_mae": 10.353,
+            "market_mae": 10.12
+          }
+        }
+      }
+    },
+    "season_to_date": {
+      "games": 120,
+      "margin_mae": 9.71,
+      "total_mae": 11.06,
+      "winner_correct": 0.6,
+      "note": "Walk-forward: each game projected with plays from earlier dates only, computed after the fact."
+    },
+    "ledger": {
+      "tracked": 16,
+      "graded": 0,
+      "by_version": {}
+    }
+  }
+}
