@@ -23,10 +23,15 @@ import type { EngineBoard, EngineGame } from "@/types/engine";
 
 const UNAVAILABLE: Freshness = { status: "unavailable", reasons: [], resultsThrough: null, lastIngest: null, modelRunAt: null };
 
-function freshness(b: EngineBoard): Freshness {
+/** Projections older than this are shown as delayed, whatever they said when generated. */
+const STALE_AFTER_HOURS = 30;
+
+export function freshness(b: EngineBoard, now: Date = new Date()): Freshness {
+  const ageHours = (now.getTime() - Date.parse(b.generated_at)) / 3_600_000;
+  const stale = Number.isFinite(ageHours) && ageHours > STALE_AFTER_HOURS;
   return {
-    status: b.data.freshness.status,
-    reasons: b.data.freshness.reasons,
+    status: stale ? "delayed" : b.data.freshness.status,
+    reasons: stale ? [`Projections are ${Math.round(ageHours)} hours old`, ...b.data.freshness.reasons] : b.data.freshness.reasons,
     resultsThrough: b.data.freshness.results_through,
     lastIngest: b.data.freshness.last_ingest,
     modelRunAt: b.generated_at,

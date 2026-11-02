@@ -7,7 +7,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getInjuries, getLeagueBoard, getRatings } from "@/server/data";
+import { freshness, getInjuries, getLeagueBoard, getRatings } from "@/server/data";
 import { isLocked } from "@/types/domain";
 
 function game(id: string, withMarket: boolean, final = false) {
@@ -108,5 +108,13 @@ describe("engine boards", () => {
     if (!inj.ok) throw new Error("expected injuries");
     expect(inj.rows[0].status).toBe("Out");
     expect(isLocked(inj.rows[0].impactPoints)).toBe(true);
+  });
+
+  it("marks old projections as delayed when viewed, never current", () => {
+    const b = board as unknown as Parameters<typeof freshness>[0];
+    expect(freshness(b, new Date("2030-01-01T20:00:00Z")).status).toBe("current");
+    const old = freshness(b, new Date("2030-01-03T20:00:00Z"));
+    expect(old.status).toBe("delayed");
+    expect(old.reasons[0]).toMatch(/hours old/);
   });
 });

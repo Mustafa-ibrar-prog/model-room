@@ -13,7 +13,7 @@ import pandas as pd
 from modelroom.common import board as B
 from modelroom.common import ledger
 from modelroom.common.hashing import hash_frame, hash_obj
-from modelroom.common.paths import ledger_path, output_dir, processed_dir, published_board_path
+from modelroom.common.paths import backtest_report, ledger_path, output_dir, processed_dir, published_board_path
 from modelroom.common.publish import write_board
 from modelroom.sources import odds, state
 
@@ -183,8 +183,8 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         } for _, r in upcoming.iterrows()]
         appended = ledger.append(ledger_path("nfl"), recs)
 
-    bt_f = output_dir("nfl") / "backtest.json"
-    bt = json.loads(bt_f.read_text()) if bt_f.exists() else None
+    bt_f = backtest_report("nfl", MODEL_VERSION)
+    bt = json.loads(bt_f.read_text()) if bt_f else None
     season_summary = None
     if len(done):
         am = done["actual_margin"]

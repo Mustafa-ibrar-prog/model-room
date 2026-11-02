@@ -87,6 +87,10 @@ python -m modelroom nba backtest
 python -m modelroom nfl backtest
 ```
 
+## Private online preview
+
+A protected Vercel preview, refreshed daily by a GitHub Action, so you can test from a phone without your PC. Setup and safety notes: [docs/preview-deploy.md](docs/preview-deploy.md).
+
 ## Tests
 
 ```powershell

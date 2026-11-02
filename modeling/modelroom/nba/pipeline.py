@@ -13,7 +13,7 @@ import pandas as pd
 from modelroom.common import board as B
 from modelroom.common import ledger
 from modelroom.common.hashing import hash_frame, hash_obj
-from modelroom.common.paths import ledger_path, output_dir, processed_dir, published_board_path
+from modelroom.common.paths import backtest_report, ledger_path, output_dir, processed_dir, published_board_path
 from modelroom.common.publish import write_board
 from modelroom.sources import odds, state
 
@@ -152,8 +152,8 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
         appended = None
 
     results = games[games["has_box"]][["game_id", "home_score", "away_score"]]
-    report_f = output_dir("nba") / "backtest.json"
-    backtest = json.loads(report_f.read_text()) if report_f.exists() else None
+    report_f = backtest_report("nba", MODEL_VERSION)
+    backtest = json.loads(report_f.read_text()) if report_f else None
     s_err = season_done
     season_summary = None
     if len(s_err):

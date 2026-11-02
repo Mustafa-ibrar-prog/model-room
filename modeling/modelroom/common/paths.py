@@ -27,8 +27,23 @@ def output_dir(league: str) -> Path:
 
 
 def ledger_path(league: str) -> Path:
-    """Append-only prediction ledger. Committed to git."""
-    return MODELING_ROOT / "ledger" / f"{league}.jsonl"
+    """Append-only prediction ledger. Committed to git.
+
+    MODELROOM_LEDGER_DIR overrides the folder (the hosted preview keeps its own
+    ledger so it never conflicts with the one on main)."""
+    base = Path(os.environ["MODELROOM_LEDGER_DIR"]) if os.environ.get("MODELROOM_LEDGER_DIR") else MODELING_ROOT / "ledger"
+    return base / f"{league}.jsonl"
+
+
+def backtest_report(league: str, version: str) -> Path | None:
+    """Latest local backtest output, else the committed report for this model version."""
+    import json
+
+    local = output_dir(league) / "backtest.json"
+    if local.exists() and json.loads(local.read_text()).get("model_version") == version:
+        return local
+    committed = MODELING_ROOT.parent / "docs" / "models" / "results" / f"{league}-backtest-{version}.json"
+    return committed if committed.exists() else None
 
 
 def published_board_path(league: str) -> Path:
