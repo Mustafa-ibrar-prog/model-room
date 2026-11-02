@@ -17,7 +17,7 @@ from modelroom.common.hashing import hash_frame, hash_obj
 from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path, output_dir
 from modelroom.common.publish import write_board
 from modelroom.markets import compare as C
-from modelroom.markets import prices
+from modelroom.markets import evaluation, prices
 from modelroom.markets.teams import NBA_TEAMS
 from modelroom.sources import state
 
@@ -122,6 +122,15 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         by_game.setdefault(x.game_id, []).append(player_entry(x, p, idx_pub.get((x.game_id, x.player_id), []), now, reliability))
         if local_only and idx_all.get((x.game_id, x.player_id)):
             local_games.setdefault(x.game_id, []).append(player_entry(x, p, idx_all[(x.game_id, x.player_id)], now, reliability))
+    def price(x, q):
+        m = MARKETS.get(q.market)
+        if m is None:
+            return None
+        return p.calibrate(q.market, x.prob(m["stat"], float(q.threshold), q.op)), m["stat"]
+
+    starts_iso = {gid: B.iso(t) for gid, t in upcoming.set_index("game_id")["start_time"].items()}
+    evaluated = evaluation.log_run("nba", projs, idx_all, price, lambda x, mk: x.support()[0], reliability, MODEL_VERSION,
+                                   now.isoformat(timespec="seconds"), starts_iso, now)
     games_json = []
     for _, g in upcoming.iterrows():
         players = sorted(by_game.get(g["game_id"], []), key=lambda e: (e["team"], -e["markets"]["points"]["mean"]))
@@ -171,4 +180,4 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                     {**board, "games": [{"game_id": k, "players": v} for k, v in local_games.items()], "note": "Local only."})
     state.record("nba_props_run", model_version=MODEL_VERSION, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs),
-            "quotes_matched": sum(len(v) for v in idx_all.values()), "ledger": appended.__dict__ if appended else None}
+            "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None}

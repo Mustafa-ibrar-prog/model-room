@@ -31,9 +31,43 @@ python -m modelroom markets fetch nfl          # one snapshot from each enabled 
 python -m modelroom nfl props                  # re-run props to compare against the latest snapshot
 ```
 
-Run `markets fetch` as often as you like (e.g. every hour on game days); each run appends a timestamped snapshot to `modeling/data/markets/snapshots/<provider>/nfl/<date>.jsonl`. These files are the history for price movement, exchange-vs-exchange comparison and closing-line value. `data/` is never committed.
+The whole loop in one command (fetch → props → order-book depth for flagged Polymarket contracts → props again):
+
+```powershell
+python -m modelroom markets refresh nfl
+python -m modelroom markets refresh nba
+```
+
+Run `markets fetch` (or `refresh`) as often as you like (e.g. every hour on game days); each run appends a timestamped snapshot to `modeling/data/markets/snapshots/<provider>/nfl/<date>.jsonl`. These files are the history for price movement, exchange-vs-exchange comparison and closing-line value. `data/` is never committed.
 
 Kalshi credentials (`KALSHI_API_KEY_ID`, `KALSHI_PRIVATE_KEY_PATH`) are not needed to read prices and are not used by this code. If trading is ever added, it goes in a separate module with its own key handling.
+
+## Measuring results: ROI and closing-line value
+
+Every props run with prices appends what the model said about each contract to `data/markets/evaluations/<league>.jsonl`, along with the price it saw. After the games:
+
+```powershell
+python -m modelroom markets report nfl     # writes data\markets\reports\nfl.json
+```
+
+The report covers settled contracts only. Players who didn't play are void. It breaks results down by provider, market, edge grade, confidence and model version:
+
+- **Accuracy:** the model's log loss and Brier score next to the market mid's, on the same contracts. This is the honest test of whether the model knows something the market doesn't.
+- **ROI:** one contract on every lean and strong edge, bought at the ask the model saw, after fees.
+- **CLV:** the price you got vs the last price before kickoff. Positive CLV means the market moved toward the model after it flagged the edge.
+- **Market moved toward the model:** the share of contracts where the close moved in the model's direction from the price it saw.
+
+**Backfilling Kalshi history** (local only, no key):
+
+```powershell
+python -m modelroom markets backfill nfl --days 30   # hourly prices of settled Kalshi contracts
+python -m modelroom markets replay nfl               # walk-forward model prices them as of 3 h before each game
+python -m modelroom markets report nfl
+```
+
+Replayed rows carry the model version plus `+replay`, so they're reported separately from live runs.
+
+The backfill makes one request per contract, which is roughly 10,000 per NFL week across all stat series. `--days` and the built-in 3,000-contract cap keep it bounded, and responses are cached, so re-running costs nothing. Polymarket US has no working public history query, so its history starts from your own snapshots.
 
 ## When an edge is shown
 

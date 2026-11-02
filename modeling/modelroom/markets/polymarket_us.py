@@ -130,29 +130,34 @@ def parse_event(ev: dict, league: str, captured_at: str | None = None) -> list[P
     return out
 
 
-def book_depth(c: JsonClient, market_slug: str, max_price_move: float = 0.03) -> dict:
-    """Contracts available within max_price_move of the best price on each side."""
-    d = c.get(f"/v1/markets/{market_slug}/book")
+def parse_book(d: dict) -> dict:
+    """GET /v1/markets/{slug}/book → best bid / ask and the contracts available at exactly those prices.
+
+    Shape (checked 2026-11-02): {"marketData": {"bids": [{"px": {"value": "0.70"}, "qty": "25"}], "offers": [...],
+    "transactTime": ...}}."""
     md = (d or {}).get("marketData") or {}
 
-    def depth(levels, best, better):
-        if not levels or best is None:
-            return 0.0
-        tot = 0.0
-        for lv in levels:
-            px = to_float((lv.get("px") or {}).get("value") if isinstance(lv.get("px"), dict) else lv.get("px"))
+    def levels(side):
+        out = []
+        for lv in md.get(side) or []:
+            px = lv.get("px")
+            px = to_float(px.get("value") if isinstance(px, dict) else px)
             qty = to_float(lv.get("qty"))
-            if px is None or qty is None:
-                continue
-            if abs(px - best) <= max_price_move + 1e-9:
-                tot += qty
-        return tot
+            if px is not None and qty is not None and 0 < px < 1 and qty > 0:
+                out.append((px, qty))
+        return out
 
-    bids, offers = md.get("bids") or [], md.get("offers") or []
-    pxs = lambda lv: to_float((lv.get("px") or {}).get("value") if isinstance(lv.get("px"), dict) else lv.get("px"))  # noqa: E731
-    best_bid = max((pxs(x) for x in bids if pxs(x) is not None), default=None)
-    best_ask = min((pxs(x) for x in offers if pxs(x) is not None), default=None)
-    return {"bid_depth": depth(bids, best_bid, max), "ask_depth": depth(offers, best_ask, min), "transact_time": md.get("transactTime")}
+    bids, offers = levels("bids"), levels("offers")
+    bb = max((p for p, _ in bids), default=None)
+    ba = min((p for p, _ in offers), default=None)
+    return {"yes_bid": bb, "yes_ask": ba,
+            "yes_bid_size": sum(q for p, q in bids if p == bb) if bb is not None else None,
+            "yes_ask_size": sum(q for p, q in offers if p == ba) if ba is not None else None,
+            "transact_time": md.get("transactTime")}
+
+
+def book(c: JsonClient, market_slug: str) -> dict:
+    return parse_book(c.get(f"/v1/markets/{market_slug}/book"))
 
 
 def fetch(league: str, games: pd.DataFrame, cache_dir: Path | None, *, opener=None, log=print) -> tuple[list[PropQuote], dict]:

@@ -22,7 +22,7 @@ from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path
 from modelroom.common.publish import write_board
 from modelroom.markets import compare as C
 from modelroom.markets import config as MC
-from modelroom.markets import manual, matching, snapshots
+from modelroom.markets import evaluation, manual, matching, snapshots
 from modelroom.markets.schema import PropQuote
 from modelroom.sources import odds, state
 
@@ -189,6 +189,16 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         by_game.setdefault(x.game_id, []).append(player_entry(x, p, idx_pub.get((x.game_id, x.player_id), []), now, reliability))
         if local_only and idx_all.get((x.game_id, x.player_id)):
             local_games.setdefault(x.game_id, []).append(player_entry(x, p, idx_all[(x.game_id, x.player_id)], now, reliability))
+    def price(x, q):
+        m = MARKETS.get(q.market)
+        if m is None or x.group not in m["positions"]:
+            return None
+        s = VARIANT_STAT.get((q.market, q.variant), m["stat"])
+        return p.calibrate(q.market, x.prob(s, float(q.threshold), q.op)), m["stat"]
+
+    starts_iso = {gid: B.iso(t) for gid, t in upcoming.set_index("game_id")["start_time"].items()}
+    evaluated = evaluation.log_run("nfl", projs, idx_all, price, lambda x, mk: x.support(mk)[0], reliability, MODEL_VERSION,
+                                   now.isoformat(timespec="seconds"), starts_iso, now)
     games_json = []
     for _, g in upcoming.iterrows():
         players = sorted(by_game.get(g["game_id"], []), key=lambda e: (e["team"], {"QB": 0, "RB": 1, "WR": 2, "TE": 3}.get(e["position"], 9), e["name"]))
@@ -242,4 +252,5 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
                                            "note": "Local only. Includes providers not cleared for publication."})
     state.record("nfl_props_run", model_version=MODEL_VERSION, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs), "quotes": len(quotes),
-            "quotes_matched": sum(1 for q in quotes if q.player_id), "ledger": appended.__dict__ if appended else None}
+            "quotes_matched": sum(1 for q in quotes if q.player_id), "evaluated_contracts": evaluated,
+            "ledger": appended.__dict__ if appended else None}

@@ -209,3 +209,45 @@ def test_nba_adapters_map_teams_and_markets():
     ks = kalshi.parse_events("KXNBAPTS", kx["KXNBAPTS"], "nba")
     assert ks and all(q.market == "points" and q.op == ">" and q.team in ("OKC", "CLE") for q in ks)
     assert all(q.sportradar_player_id for q in ks)
+
+
+def test_settlement_roi_and_clv(tmp_data):
+    """Two flagged contracts: one wins, one loses. ROI is after fees from the entry ask; CLV vs the close."""
+    from modelroom.markets import evaluation, snapshots
+
+    start = "2026-11-08T18:00:00+00:00"
+    def q(mid_id, bid, ask, captured):
+        return PropQuote("kalshi", "nfl", "receptions", ">", 4.5, "X", "SEA", "2026-11-08", "SEA", "ARI", start_time=start,
+                         provider_market_id=mid_id, yes_bid=bid, yes_ask=ask, no_bid=1 - ask, no_ask=1 - bid, fee_rate=0.07,
+                         captured_at=captured, game_id="g", player_id="p1")
+    entry1, entry2 = q("m1", 0.40, 0.42, "2026-11-08T12:00:00+00:00"), q("m2", 0.60, 0.62, "2026-11-08T12:00:00+00:00")
+    entry2.threshold = 6.5
+    snapshots.append([q("m1", 0.50, 0.52, "2026-11-08T17:50:00+00:00"), q("m2", 0.55, 0.57, "2026-11-08T17:50:00+00:00")], "nfl")
+    evaluation.record("nfl", [evaluation.row(entry1, 0.60, "v", "2026-11-08T12:00:00+00:00", start, {"grade": "strong"}, "receptions"),
+                              evaluation.row(entry2, 0.75, "v", "2026-11-08T12:00:00+00:00", start, {"grade": "lean"}, "receptions")])
+    rep = evaluation.report("nfl", outcomes={("g", "p1"): {"receptions": 5.0}})
+    b = rep["overall"]["bets"]
+    fee1, fee2 = 0.07 * 0.42 * 0.58, 0.07 * 0.62 * 0.38
+    assert b["n"] == 2 and b["wins"] == 1
+    assert b["roi"] == pytest.approx(((1 - 0.42 - fee1) + (0 - 0.62 - fee2)) / (0.42 + fee1 + 0.62 + fee2), abs=1e-4)
+    assert b["clv_mean"] == pytest.approx(((0.51 - 0.42) + (0.56 - 0.62)) / 2, abs=1e-4)
+    assert rep["overall"]["accuracy"]["n"] == 2 and set(rep["by_grade"]) == {"strong", "lean"}
+
+
+def test_kalshi_candles_become_timestamped_snapshots(kx):
+    from modelroom.markets import history
+
+    ev = kx["KXNFLRECYDS"]["events"][0]
+    m = ev["markets"][0]
+    candles = [{"end_period_ts": 1793232000, "yes_bid": {"close_dollars": "0.7200"}, "yes_ask": {"close_dollars": "0.8600"}, "volume_fp": "3.00"},
+               {"end_period_ts": 1793235600, "yes_bid": {"close_dollars": "0.0000"}, "yes_ask": {"close_dollars": "0.9000"}}]
+    qs = history.candles_to_quotes("KXNFLRECYDS", m, {k: v for k, v in ev.items() if k != "markets"}, candles, "nfl")
+    assert len(qs) == 2 and qs[0].yes_bid == 0.72 and qs[0].captured_at.startswith("2026-")
+    assert qs[1].yes_bid is None  # an empty side stays empty
+    assert all(q.yes_ask_size is None for q in qs)  # candles have no sizes, so never "strong"
+
+
+def test_polymarket_book_depth_at_best_price():
+    b = polymarket_us.parse_book({"marketData": {"bids": [{"px": {"value": "0.70"}, "qty": "25"}, {"px": {"value": "0.69"}, "qty": "83"}],
+                                                 "offers": [{"px": {"value": "0.86"}, "qty": "180"}, {"px": {"value": "0.87"}, "qty": "1100"}]}})
+    assert b == {"yes_bid": 0.70, "yes_ask": 0.86, "yes_bid_size": 25.0, "yes_ask_size": 180.0, "transact_time": None}
