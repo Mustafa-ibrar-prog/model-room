@@ -11,9 +11,12 @@ NFL and NBA projections from real data: the model's line, total, projected score
 | Website | Reads the engines' published boards. No demo or fictional data anywhere. |
 | NFL player props | **Live**, version 0.1.0, provisional. Own simulation per player; 13 markets; calibrated per market. |
 | Prop market data | Optional, off by default: Polymarket US, Kalshi, manual CSV. Compared after the model, never an input. |
+| NBA player props | **Live**, version 0.1.0, provisional. Minutes × per-minute rates, defense vs position, pace; 7 markets. |
 | Prediction ledger | Every pre-game projection stored, hash-chained, never edited (games and props). |
+| Results history | `python -m modelroom history`: per-date finals, recorded pre-game projections, Hit/Miss per prop line, graded performance. |
+| Logins | Supabase email + password; Free / Plus / Pro checked on the server. Test accounts on the test site only. |
 | Market lines | NFL: nflverse's published line. NBA: optional (Odds API key or manual CSV). |
-| Not built | NBA player props, NBA injury feed, Shopify login and billing (design in `docs/auth-architecture.md`). |
+| Not built | NBA injury feed (players out are inferred from missed games), Shopify billing (plans are assigned manually for now). |
 
 Backtests (held-out seasons, never used for tuning):
 

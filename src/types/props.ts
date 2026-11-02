@@ -120,8 +120,19 @@ export interface PropLineView {
     evNo: number | null;
   } | null;
   /** Every quote seen, including unusable ones, with the reasons. */
-  quotes: { provider: string; mid: number | null; bid: number | null; ask: number | null; usable: boolean; flags: string[]; capturedAt: string }[];
-  edge: { side: "yes" | "no"; provider: string; price: number; ev: number; grade: "strong" | "lean"; reasons: string[] } | null;
+  quotes: {
+    provider: string;
+    mid: number | null;
+    bid: number | null;
+    ask: number | null;
+    spread: number | null;
+    askSize: number | null;
+    usable: boolean;
+    flags: string[];
+    capturedAt: string;
+  }[];
+  /** Expected value per $1 contract at the executable price (the ask), after the exchange fee. */
+  edge: { side: "yes" | "no"; provider: string; price: number; fee: number | null; ev: number; grade: "strong" | "lean"; reasons: string[] } | null;
 }
 
 export interface PropMarketView {

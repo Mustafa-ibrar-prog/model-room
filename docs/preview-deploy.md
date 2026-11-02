@@ -21,7 +21,7 @@ Work on `main`. Every push to `main` updates the test site automatically.
 The workflow is `.github/workflows/preview.yml`.
 
 1. **Within about a minute:** `main` is merged into `preview`, and Vercel rebuilds the test site, which takes 1–2 minutes.
-2. **If the push changed `modeling/`** (an engine or its settings), the workflow first downloads data, validates it, and re-runs every engine: NBA and NFL games, plus NFL and NBA props. That takes about 10 minutes.
+2. **If the push changed `modeling/`** (an engine or its settings), the workflow first downloads data, validates it, and re-runs every engine: NBA and NFL games, plus NFL and NBA props. It then rebuilds the results history and the graded performance record from the ledger (`python -m modelroom history`). That takes about 10 minutes.
 3. **Twice a day** (5:17 AM and 1:47 PM Pacific) it refreshes the data the same way, so the test site always has the latest projections.
 4. **If validation or a model run fails,** the site keeps the last good projections (shown as Delayed after 30 hours), and the run shows a red ✗ in GitHub → Actions.
 

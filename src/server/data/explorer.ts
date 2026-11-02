@@ -98,6 +98,8 @@ export type Explorer =
       ok: true;
       league: League;
       generatedAt: string;
+      /** Request time (ms), for quote ages. */
+      now: number;
       model: { version: string; status: string };
       games: ExplorerGame[];
       game: ExplorerGame | null;
@@ -197,6 +199,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
     ok: true,
     league,
     generatedAt: b.generated_at,
+    now: now.getTime(),
     model: { version: b.model.version, status: b.model.status },
     games,
     game,
