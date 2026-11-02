@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "modelroom"
+version = "0.1.0"
+description = "Model Room NBA and NFL projection engines"
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "pyarrow>=14",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+modelroom = "modelroom.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["modelroom*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "data: needs downloaded real data (run the ingest commands first); skipped when missing",
+]
