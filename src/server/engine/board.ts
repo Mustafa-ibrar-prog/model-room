@@ -76,3 +76,26 @@ export const loadPropsBoard = cache(async function loadPropsBoard(league: League
     return { ok: false, reason: `The ${league.toUpperCase()} prop file could not be read. Re-run the model.` };
   }
 });
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A published history file (data/published/history/<league>/<date|index>.json). */
+export async function loadHistoryFile<T>(league: League, name: string): Promise<T | null> {
+  await connection();
+  if (name !== "index" && !DATE_RE.test(name)) return null; // never build a path from arbitrary input
+  try {
+    const text = await readFile(path.join(publishedDir(), "history", league, `${name}.json`), "utf8");
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
+export async function loadPerformanceFile<T>(league: League): Promise<T | null> {
+  await connection();
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), `performance_${league}.json`), "utf8")) as T;
+  } catch {
+    return null;
+  }
+}
