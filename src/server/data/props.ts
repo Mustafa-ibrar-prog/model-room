@@ -32,10 +32,20 @@ export function lineView(t: EngineThreshold): PropLineView {
           evNo: shown.ev_no,
         }
       : null,
-    quotes: t.quotes.map((q) => ({ provider: q.provider, mid: q.mid, bid: q.yes_bid, ask: q.yes_ask, usable: q.usable, flags: q.flags, capturedAt: q.captured_at })),
+    quotes: t.quotes.map((q) => ({
+      provider: q.provider,
+      mid: q.mid,
+      bid: q.yes_bid,
+      ask: q.yes_ask,
+      spread: q.spread,
+      askSize: q.ask_size,
+      usable: q.usable,
+      flags: q.flags,
+      capturedAt: q.captured_at,
+    })),
     edge:
       side && pick && pick.ev !== null && t.edge_grade?.grade
-        ? { side, provider: pick.provider, price: pick.price, ev: pick.ev, grade: t.edge_grade.grade, reasons: t.edge_grade.reasons }
+        ? { side, provider: pick.provider, price: pick.price, fee: pick.fee, ev: pick.ev, grade: t.edge_grade.grade, reasons: t.edge_grade.reasons }
         : null,
   };
 }

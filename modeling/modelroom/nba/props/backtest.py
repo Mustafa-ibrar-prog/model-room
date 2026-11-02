@@ -47,7 +47,8 @@ class Runner:
 
     def ctx(self, day: str, season: int, s: PropSettings) -> M.Context:
         fkey = tuple(getattr(s, k) for k in FEATURE_KEYS)
-        if self._ctx and next(iter(self._ctx))[2] != fkey:
+        # Keep one season of contexts at a time: holding every season's daily context exhausts memory.
+        if self._ctx and (next(iter(self._ctx))[2] != fkey or next(iter(self._ctx))[1] != season):
             self._ctx.clear()
         key = (day, season, fkey)
         if key not in self._ctx:
@@ -63,6 +64,8 @@ class Runner:
                 ctx = self.ctx(day, season, p.settings)
                 projs = M.project_games(ctx, day_games, p, seed=int(day.replace("-", "")))
                 if day not in self._base:
+                    if len(self._base) > 400:
+                        self._base.clear()
                     self._base[day] = _baseline(self.inp.player_games, self.pg_dates, pd.Timestamp(day), season)
                 base = self._base[day]
                 t, m = score(projs, self.actual, base, season)
