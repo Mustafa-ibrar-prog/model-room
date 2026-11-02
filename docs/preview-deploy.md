@@ -29,6 +29,12 @@ A private copy of Model Room you can open on your phone, refreshed with real dat
 - Vercel won't deploy `main` while `vercel.json` disables it, so no production URL gets built from this project.
 - The production domain stays unassigned until you decide to launch.
 
+## Player props in the preview
+
+The daily refresh also runs `nfl props`. It does **not** fetch Polymarket US or Kalshi prices. The repository is public, the published board is committed to it, and both exchanges' terms forbid republishing their data. Exchange comparison runs on your own machine (`docs/markets.md`).
+
+The `preview` branch is public on GitHub, so anyone can read the projections in `modeling/data/published/`. Make the repository private before those numbers are something you charge for.
+
 ## Limits
 
 - Data refreshes once a day. The status bar under the header shows each league as Current, Delayed or Unavailable. Projections older than 30 hours always show as Delayed.

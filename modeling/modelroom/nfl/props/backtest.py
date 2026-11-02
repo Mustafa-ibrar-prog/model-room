@@ -45,7 +45,10 @@ class Runner:
         self._ctx: dict = {}
 
     def ctx(self, cutoff, season, s: PropSettings) -> F.Context:
-        key = (cutoff, season, tuple(getattr(s, k) for k in FEATURE_KEYS))
+        fkey = tuple(getattr(s, k) for k in FEATURE_KEYS)
+        key = (cutoff, season, fkey)
+        if self._ctx and next(iter(self._ctx))[2] != fkey:
+            self._ctx.clear()  # keep only one feature setting's contexts in memory
         if key not in self._ctx:
             self._ctx[key] = F.build(self.inp.player_games, self.inp.passes, self.inp.rushes, cutoff, season, s)
         return self._ctx[key]
@@ -79,13 +82,25 @@ class Runner:
             out[k] = (tuple(round(float(c), 4) for c in coef), round(float(np.std(y - X @ coef)), 3))
         return VolumeModel(out["pass"][0], out["rush"][0], out["pass"][1], out["rush"][1])
 
-    def walk(self, seasons, p: PropParams) -> pd.DataFrame:
+    def scored(self, seasons, p: PropParams) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """Walk and score week by week, keeping only the scored rows (simulations are dropped as we go)."""
+        ts, ms = [], []
+        for season in sorted(seasons):
+            for wk in sorted(self.inp.games.loc[(self.inp.games["season"] == season) & (self.inp.games["status"] == "final"), "week"].unique()):
+                t, m = score(self.walk([season], p, only_week=int(wk)))
+                ts.append(t)
+                ms.append(m)
+        return pd.concat(ts, ignore_index=True), pd.concat(ms, ignore_index=True)
+
+    def walk(self, seasons, p: PropParams, only_week: int | None = None) -> list[dict]:
         """One row per projected player-game that was actually played, with simulated distributions."""
         pg = self.inp.player_games
         act = pg[(pg["offense_snaps"].fillna(0) > 0) | (pg[["pass_att", "targets", "carries"]].sum(axis=1) > 0)]
         act = act.drop_duplicates(["game_id", "player_id"]).set_index(["game_id", "player_id"])
         recs = []
         for season, week, g in _weeks(self.inp.games, seasons):
+            if only_week is not None and week != only_week:
+                continue
             cutoff = pd.Timestamp(g["game_date"].min())
             ctx = self.ctx(cutoff, season, p.settings)
             ro, inj = I.week_slices(self.inp, season, week)
@@ -263,7 +278,7 @@ def tune(run: Runner, base: PropParams, log=print, rounds: int = 1) -> tuple[Pro
         key = json.dumps(asdict(cand.settings), sort_keys=True) + json.dumps(asdict(cand.volume), sort_keys=True)
         if key in done:
             return done[key]
-        t, _ = score(run.walk(TUNE_SEASONS, cand))
+        t, _ = run.scored(TUNE_SEASONS, cand)
         done[key] = objective(t)
         ckpt.write_text(json.dumps(done))
         return done[key]
@@ -306,9 +321,9 @@ def run(*, do_tune: bool = True, tune_sims: int = 1000, log=print) -> dict:
     # Refit volume with the tuned feature settings on seasons before the test period.
     vol = runner.fit_volume(FIT_SEASONS, final_s)
     p = PropParams(final_s, vol)
-    tune_t, tune_m = score(runner.walk(TUNE_SEASONS, p))
+    tune_t, tune_m = runner.scored(TUNE_SEASONS, p)
     cal = fit_calibration(tune_t)
-    test_raw, test_m = score(runner.walk(TEST_SEASONS, p))
+    test_raw, test_m = runner.scored(TEST_SEASONS, p)
     test_t = apply_calibration(test_raw, cal)
     p = replace(p, calibration=cal)
     # Ablation on the test seasons: does each matchup input help?
@@ -317,10 +332,10 @@ def run(*, do_tune: bool = True, tune_sims: int = 1000, log=print) -> dict:
         if getattr(p.settings, key) == 0:
             continue
         q = replace(p, settings=replace(p.settings, **{key: 0.0}, sims=2000))
-        tt, _ = score(runner.walk(TEST_SEASONS, q))
+        tt, _ = runner.scored(TEST_SEASONS, q)
         ablation[key] = {"without": round(objective(tt), 5)}
     q = replace(p, settings=replace(p.settings, sims=2000))
-    ref = round(objective(score(runner.walk(TEST_SEASONS, q))[0]), 5)  # uncalibrated, same sims as the ablations
+    ref = round(objective(runner.scored(TEST_SEASONS, q)[0]), 5)  # uncalibrated, same sims as the ablations
     for v in ablation.values():
         v["with"] = ref
 
