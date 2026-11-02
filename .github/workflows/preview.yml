@@ -1,0 +1,107 @@
+# Continuous deployment of the public test site (the `preview` branch on Vercel).
+#
+#   push to main      → main is merged into `preview` within about a minute; Vercel rebuilds the test site.
+#                       If the push changed modeling/ (engines, params), projections are regenerated first.
+#   twice a day       → fresh data: download, validate, run every engine, publish.
+#   "Run workflow"    → same as the scheduled run (GitHub app: Actions → Preview → Run workflow).
+#
+# Only `preview` is ever pushed to. main is never modified, and production is not deployed from here.
+# No exchange prices are fetched: this repository is public, and Polymarket US / Kalshi terms don't
+# allow republishing their data. No secrets are used.
+name: Preview
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 13 * * *"   # 5:17 AM PT (overnight results, injury reports)
+    - cron: "47 21 * * *"   # 1:47 PM PT (before evening tip-offs and kickoffs)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: preview
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      MODELROOM_LEDGER_DIR: ${{ github.workspace }}/modeling/preview-ledger
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Bring main into the preview branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin preview >/dev/null; then
+            git fetch origin preview
+            git checkout -B preview origin/preview
+            git merge --no-edit origin/main
+          else
+            git checkout -B preview
+          fi
+
+      - name: Decide whether to regenerate projections
+        id: plan
+        env:
+          BEFORE: ${{ github.event.before }}
+          EVENT: ${{ github.event_name }}
+          SHA: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" != "push" ] || [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "data=yes" >> "$GITHUB_OUTPUT"
+          elif git diff --name-only "$BEFORE" "$SHA" | grep -q '^modeling/'; then
+            echo "data=yes" >> "$GITHUB_OUTPUT"
+          else
+            echo "data=no" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-python@v5
+        if: steps.plan.outputs.data == 'yes'
+        with:
+          python-version: "3.12"
+
+      - name: Download, validate and project
+        id: data
+        if: steps.plan.outputs.data == 'yes'
+        continue-on-error: true
+        working-directory: modeling
+        run: |
+          pip install -e .
+          python -m modelroom nba ingest
+          python -m modelroom nfl ingest
+          python -m modelroom sources validate
+          python -m modelroom nba project
+          python -m modelroom nfl project
+          python -m modelroom nfl props
+          python -m modelroom nba props
+          python -m modelroom ledger verify
+
+      - name: Keep the last good projections if anything failed
+        if: steps.data.outcome == 'failure'
+        run: git checkout -- modeling/data/published modeling/preview-ledger 2>/dev/null || true
+
+      - name: Publish to the preview branch
+        env:
+          DATA: ${{ steps.data.outcome }}
+        run: |
+          if [ "$DATA" = "success" ]; then
+            git add -f modeling/data/published/nba.json modeling/data/published/nfl.json \
+                       modeling/data/published/nfl_props.json modeling/data/published/nba_props.json modeling/preview-ledger
+            git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ)" || echo "No data changes"
+          fi
+          git push origin preview
+
+      - name: Report a data failure
+        if: steps.data.outcome == 'failure'
+        run: |
+          echo "::error::Projections were not regenerated (see 'Download, validate and project'). The site kept the previous ones."
+          exit 1

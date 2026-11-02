@@ -31,6 +31,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to content
         </a>
+        {process.env.VERCEL_ENV === "preview" ? (
+          <div className="bg-edge/15 px-4 py-1.5 text-center text-xs text-edge">
+            Test site: features are still being built and numbers are provisional.
+          </div>
+        ) : null}
         <SiteHeader />
         <Suspense fallback={<DataStatusFallback />}>
           <DataStatus />

@@ -101,9 +101,9 @@ python -m modelroom nfl backtest
 python -m modelroom nfl props-backtest     # about 20 minutes; rewrites nfl\props\params.json
 ```
 
-## Private online preview
+## Test site
 
-A protected Vercel preview, refreshed daily by a GitHub Action, so you can test from a phone without your PC. Setup and safety notes: [docs/preview-deploy.md](docs/preview-deploy.md).
+A public test site (Vercel preview of the `preview` branch), updated automatically on every push to `main` and refreshed with new data twice a day. Setup and safety notes: [docs/preview-deploy.md](docs/preview-deploy.md). Work on `main`; every push updates the test site.
 
 ## Tests
 
