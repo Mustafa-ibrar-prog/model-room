@@ -1,0 +1,6 @@
+# Vercel deploys only the Next.js site. The Python engines run in GitHub Actions;
+# only their published boards are needed at runtime.
+modeling/*
+!modeling/data
+modeling/data/*
+!modeling/data/published
