@@ -83,14 +83,14 @@ def _nba(args) -> int:
         from modelroom.sources import state
 
         summary = ingest.run()
-        from modelroom.nba.props import data as prop_data
-
-        summary["prop_players"] = prop_data.validate(prop_data.build())
         seasons = list(range(ingest.FIRST_SEASON, ingest.current_season() + 1))
         state.record("hoopr_schedule", seasons=summary["seasons"], latest_final=summary["latest_final"])
         state.record("hoopr_team_box", seasons=summary["seasons"])
         injuries.download(seasons)
         injuries.build(seasons)
+        from modelroom.nba.props import data as prop_data
+
+        summary["prop_players"] = prop_data.validate(prop_data.build())  # needs the player box scores just downloaded
         state.record("hoopr_player_box", seasons=summary["seasons"])
         _print(summary)
         return 0
