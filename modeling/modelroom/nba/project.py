@@ -58,7 +58,8 @@ def finalize(df: pd.DataFrame, adj: FittedAdjustments) -> pd.DataFrame:
     out = df.copy()
     inj = out["injury_adj"].fillna(0.0) if "injury_adj" in out else 0.0
     out["proj_margin"] = out["margin_raw"] + out["rest_adj"] + inj
-    out["proj_total"] = out["total_raw"] + adj.total_points
+    offset = out["total_offset"].fillna(adj.total_points) if "total_offset" in out else adj.total_points
+    out["proj_total"] = out["total_raw"] + offset
     out["proj_home_score"] = (out["proj_total"] + out["proj_margin"]) / 2
     out["proj_away_score"] = (out["proj_total"] - out["proj_margin"]) / 2
     out["home_win_prob"] = normal_cdf(out["proj_margin"].to_numpy() / adj.margin_sigma)
@@ -76,3 +77,37 @@ def with_market(df: pd.DataFrame) -> pd.DataFrame:
     out["spread_edge"] = out["market_spread"] - out["model_spread"]
     out["total_edge"] = out["model_total"] - out["market_total"]
     return out
+
+
+def total_offsets(proj: pd.DataFrame, rolling_games: int) -> pd.Series:
+    """Chronological total offset per game (model 1.1.0).
+
+    offset = mean(actual − raw total) over the previous `rolling_games`
+             regular-season games played before this game's date
+           + playoff offset for play-in/playoff games: mean playoff residual minus
+             mean regular-season residual over all earlier seasons.
+    Only results from before each game's date are used.
+    """
+    p = proj.sort_values(["start_time", "game_id"])
+    res = p["actual_total"] - p["total_raw"]
+    post = p["season_type"].isin(["postseason", "play_in"]).to_numpy()
+    dates = pd.to_datetime(p["game_date"]).to_numpy()
+    done = res.notna().to_numpy()
+    reg_mask = done & ~post
+    rd, rr = dates[reg_mask], res.to_numpy()[reg_mask]
+    order = np.argsort(rd, kind="stable")
+    rd, rr = rd[order], rr[order]
+    csum = np.concatenate([[0.0], np.cumsum(rr)])
+    j = np.searchsorted(rd, dates, side="left")
+    i0 = np.maximum(0, j - rolling_games)
+    rolling = np.where(j > 0, (csum[j] - csum[i0]) / np.maximum(j - i0, 1), np.nan)
+
+    seasons = p["season"].to_numpy()
+    post_off = {}
+    for s in np.unique(seasons):
+        prior = (seasons < s) & done
+        a, b = res.to_numpy()[prior & post], res.to_numpy()[prior & ~post]
+        post_off[s] = float(a.mean() - b.mean()) if len(a) and len(b) else 0.0
+    po = np.array([post_off[s] for s in seasons])
+    out = np.where(post, rolling + po, rolling)
+    return pd.Series(out, index=p.index).reindex(proj.index)

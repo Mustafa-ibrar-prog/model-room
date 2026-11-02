@@ -122,3 +122,43 @@ def test_real_ratings_are_sensible():
     assert 105 < r.mu < 125           # league points per 100 possessions
     assert 95 < r.mu_pace < 105       # possessions per 48
     assert 0 < r.home < 3             # home edge per team per 100
+
+
+def test_total_offsets_use_only_earlier_games():
+    from modelroom.nba.project import total_offsets
+
+    p = pd.DataFrame({
+        "game_id": [1, 2, 3, 4],
+        "season": [2030, 2030, 2031, 2031],
+        "season_type": ["regular", "regular", "regular", "postseason"],
+        "start_time": pd.to_datetime(["2030-01-01", "2030-01-02", "2031-01-01", "2031-05-01"], utc=True),
+        "game_date": pd.to_datetime(["2030-01-01", "2030-01-02", "2031-01-01", "2031-05-01"]).date,
+        "total_raw": [200.0, 200.0, 200.0, 200.0],
+        "actual_total": [210.0, 220.0, np.nan, np.nan],
+    })
+    off = total_offsets(p, rolling_games=250)
+    assert np.isnan(off.iloc[0])                    # nothing before the first game
+    assert off.iloc[1] == pytest.approx(10.0)       # only game 1 is earlier
+    assert off.iloc[2] == pytest.approx(15.0)       # games 1-2
+    assert off.iloc[3] == pytest.approx(15.0)       # no earlier playoff history -> no playoff offset
+
+
+@real_nba
+def test_real_board_is_internally_consistent():
+    import json
+
+    from modelroom.common.paths import published_board_path
+
+    f = published_board_path("nba")
+    if not f.exists():
+        pytest.skip("run `python -m modelroom nba project` first")
+    b = json.loads(f.read_text())
+    assert b["schema_version"] == 1 and b["league"] == "nba"
+    assert b["data"]["market"]["connected"] in (True, False)
+    for g in b["upcoming"]:
+        p = g["projection"]
+        assert p["margin"] == pytest.approx(p["home_score"] - p["away_score"], abs=0.11)
+        assert p["spread"] == pytest.approx(-p["margin"], abs=0.11)
+        assert 0 < p["home_win_prob"] < 1
+        if g["market"] is None:
+            assert g["edges"] is None               # no market, no invented edge

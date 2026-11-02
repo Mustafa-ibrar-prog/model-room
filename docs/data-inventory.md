@@ -1,13 +1,13 @@
 # Data-source inventory
 
-Generated 2026-11-02 06:33 UTC by `python -m modelroom sources inventory`. Do not edit by hand.
+Generated 2026-11-02 07:19 UTC by `python -m modelroom sources inventory`. Do not edit by hand.
 
 Status: **collected** = refreshed by an ingest command; **optional** = used only if you set it up; **manual** = you enter it; **reference-only** = checked by hand, not collected (terms); **unavailable** = no permitted access.
 
 | Source | Sport | Status | Official | API key | Historical coverage | Current season | Last successful update |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | nflverse schedules and results (nfldata games.csv) | NFL | collected | no | none | 1999 to 2026, 7,396 final games | 2026: 120 final through 2026-11-01, 152 scheduled | 2026-11-02T06:30:46+00:00 |
-| nflverse play-by-play | NFL | collected | no | none | 2023 to 2026 ingested (168,946 plays) | 2026: 120 games, through week 8 | 2026-11-02T06:30:51+00:00 |
+| nflverse play-by-play | NFL | collected | no | none | 2018 to 2026 ingested (410,376 plays) | 2026: 120 games, through week 8 | 2026-11-02T06:30:51+00:00 |
 | nflverse injury reports | NFL | collected | no | none | 2009 to the current season | 2026: through week 8 | 2026-11-02T06:30:53+00:00 |
 | NFL.com | NFL | reference-only | yes | none | varies by page | n/a | never |
 | hoopR NBA schedules (sportsdataverse, from ESPN) | NBA | collected | no | none | 2015-16 to 2026-27, 14,248 games with box scores | 2026-27: 88 final through 2026-10-31, 1112 scheduled through 2027-04-11 | 2026-11-02T06:30:57+00:00 |

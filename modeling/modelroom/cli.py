@@ -9,6 +9,8 @@
   nba backtest                    provisional walk-forward validation
   nfl ingest [--from DIR]         nflverse games, play-by-play and injuries
   nfl odds | nfl lines            same as NBA
+  nfl backtest                    NFL walk-forward validation (writes params.json)
+  nba project | nfl project       projections -> ledger -> published board for the site
   ledger verify                   check the prediction ledgers' hash chains
 """
 from __future__ import annotations
@@ -117,6 +119,18 @@ def _nfl(args) -> int:
         return 0
     if args.cmd in ("odds", "lines"):
         return _lines("nfl", args.cmd)
+    if args.cmd == "backtest":
+        from modelroom.nfl import backtest
+
+        r = backtest.run()
+        _print({"test": {k: r["test"]["model"][k] for k in ("games", "margin", "total", "win_probability")},
+                "market": {k: {"model_mae": v["model_mae"], "market_mae": v["market_mae"]} for k, v in r["market_comparison"].items() if k != "note"}})
+        return 0
+    if args.cmd == "project":
+        from modelroom.nfl import pipeline
+
+        _print(pipeline.run(days=args.days))
+        return 0
     return 2
 
 
@@ -147,7 +161,8 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 
     f = sub.add_parser("nfl")
-    f.add_argument("cmd", choices=["ingest", "odds", "lines"])
+    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project"])
+    f.add_argument("--days", type=int, default=10, help="project: how many days ahead")
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])

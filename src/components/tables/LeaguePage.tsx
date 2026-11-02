@@ -14,7 +14,7 @@ const COPY: Record<League, { title: string; intro: string }> = {
   },
   nba: {
     title: "NBA",
-    intro: "The next week of games with the model's line, total, projected score and win probability. Market lines appear when a line source is connected.",
+    intro: "The next three days of games with the model's line, total, projected score and win probability. Market lines appear when a line source is connected.",
   },
 };
 
@@ -24,7 +24,7 @@ export function LeaguePage({ league }: { league: League }) {
       <PageHeader title={COPY[league].title} intro={COPY[league].intro} />
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Suspense fallback={<TableSkeleton />}>
-          <GameBoard league={league} />
+          <GameBoard league={league} withinHours={league === "nba" ? 72 : undefined} />
         </Suspense>
       </div>
       <Section title="Recent results" intro="Final scores next to what the model projected before each game.">

@@ -7,12 +7,16 @@ import { isLocked, type GameView, type League } from "@/types/domain";
 import { Gated, LockIcon, Missing, Panel, SourceStamp, Td, Th, Unavailable } from "@/components/ui/primitives";
 
 /** Upcoming games with model projections. Async server component; render inside <Suspense>. */
-export async function GameBoard({ league, limit }: { league: League; limit?: number }) {
+export async function GameBoard({ league, limit, withinHours }: { league: League; limit?: number; withinHours?: number }) {
   const viewer = await getViewer();
   const board = await getLeagueBoard(league, viewer.tier);
   if (!board.ok) return <Unavailable title={`${league.toUpperCase()} projections unavailable`} body={board.reason} />;
 
-  const games = limit ? board.upcoming.slice(0, limit) : board.upcoming;
+  const firstStart = board.upcoming[0]?.startTime ? Date.parse(board.upcoming[0].startTime) : null;
+  const windowed = withinHours && firstStart !== null
+    ? board.upcoming.filter((g) => g.startTime !== null && Date.parse(g.startTime) - firstStart <= withinHours * 3600_000)
+    : board.upcoming;
+  const games = limit ? windowed.slice(0, limit) : windowed;
   if (!games.length) {
     return (
       <Unavailable
@@ -122,6 +126,11 @@ function GameRow({ g }: { g: GameView }) {
                 <span className="px-1 text-faint">/</span>
                 <span className={p.home >= p.away ? "font-600 text-ink" : "text-mute"}>{g.home.abbr} {formatPct(p.home)}</span>
               </div>
+              {!isLocked(g.probabilityEdge) && g.probabilityEdge && (
+                <div className="text-[0.72rem] text-market" title="No-vig probability implied by the moneylines">
+                  Market {g.home.abbr} {formatPct(g.probabilityEdge.homeMarket)} (model {formatSigned(g.probabilityEdge.homeDiff * 100, 0)} pts)
+                </div>
+              )}
               <Gated value={g.ranges}>
                 {(r) =>
                   r.margin ? (

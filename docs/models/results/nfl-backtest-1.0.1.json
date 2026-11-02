@@ -1,0 +1,404 @@
+{
+  "model_id": "nfl-game",
+  "model_version": "1.0.1",
+  "generated_at": "2026-11-02T07:09:48+00:00",
+  "windows": {
+    "history": [
+      2018,
+      2019,
+      2020
+    ],
+    "tuning": [
+      2021,
+      2022
+    ],
+    "test": [
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "settings": {
+    "half_life_games": 8.0,
+    "season_carry": 0.7,
+    "prior_games": 3.0,
+    "home_prior_games": 20.0,
+    "qb_shrink_dropbacks": 600.0
+  },
+  "points_model": {
+    "intercept": 19.8592,
+    "epa_coef": 38.702,
+    "rest_coef": 0.001,
+    "indoor_coef": 2.5479,
+    "home_coef": 2.4582,
+    "margin_sigma": 12.9351,
+    "total_sigma": 13.3504,
+    "qb_replacement_epa": -0.0874
+  },
+  "data": {
+    "source": "nflverse",
+    "games_hash": "4ad29bffa3821cd3"
+  },
+  "test": {
+    "model": {
+      "games": 855,
+      "margin": {
+        "n": 855,
+        "mae": 10.206,
+        "rmse": 13.149,
+        "bias": -0.091
+      },
+      "total": {
+        "n": 855,
+        "mae": 10.353,
+        "rmse": 13.276,
+        "bias": -1.559
+      },
+      "home_score": {
+        "n": 855,
+        "mae": 7.539,
+        "rmse": 9.572,
+        "bias": -0.825
+      },
+      "away_score": {
+        "n": 855,
+        "mae": 7.283,
+        "rmse": 9.108,
+        "bias": -0.734
+      },
+      "win_probability": {
+        "n": 854,
+        "brier": 0.2217,
+        "log_loss": 0.6338,
+        "accuracy": 0.6429
+      },
+      "calibration": [
+        {
+          "bin": "0.2-0.3",
+          "n": 16,
+          "predicted": 0.265,
+          "actual": 0.25
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 72,
+          "predicted": 0.36,
+          "actual": 0.292
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 184,
+          "predicted": 0.456,
+          "actual": 0.386
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 225,
+          "predicted": 0.55,
+          "actual": 0.511
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 215,
+          "predicted": 0.647,
+          "actual": 0.67
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 118,
+          "predicted": 0.742,
+          "actual": 0.788
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 24,
+          "predicted": 0.83,
+          "actual": 0.875
+        }
+      ],
+      "by_season": {
+        "2023": {
+          "margin": {
+            "n": 285,
+            "mae": 10.416,
+            "rmse": 13.573,
+            "bias": -0.627
+          },
+          "total": {
+            "n": 285,
+            "mae": 10.468,
+            "rmse": 13.493,
+            "bias": -1.25
+          }
+        },
+        "2024": {
+          "margin": {
+            "n": 285,
+            "mae": 10.207,
+            "rmse": 13.106,
+            "bias": 0.08
+          },
+          "total": {
+            "n": 285,
+            "mae": 9.981,
+            "rmse": 12.931,
+            "bias": -2.268
+          }
+        },
+        "2025": {
+          "margin": {
+            "n": 285,
+            "mae": 9.996,
+            "rmse": 12.755,
+            "bias": 0.273
+          },
+          "total": {
+            "n": 285,
+            "mae": 10.609,
+            "rmse": 13.397,
+            "bias": -1.159
+          }
+        }
+      },
+      "by_team_margin_mae": {
+        "ARI": 10.33,
+        "ATL": 10.06,
+        "BAL": 12.14,
+        "BUF": 10.52,
+        "CAR": 10.72,
+        "CHI": 8.42,
+        "CIN": 10.37,
+        "CLE": 10.77,
+        "DAL": 13.44,
+        "DEN": 9.82,
+        "DET": 10.86,
+        "GB": 8.57,
+        "HOU": 9.93,
+        "IND": 7.91,
+        "JAX": 11.09,
+        "KC": 8.09,
+        "LA": 8.54,
+        "LAC": 9.95,
+        "LV": 10.02,
+        "MIA": 12.67,
+        "MIN": 9.18,
+        "NE": 10.32,
+        "NO": 11.15,
+        "NYG": 10.97,
+        "NYJ": 10.42,
+        "PHI": 9.71,
+        "PIT": 9.7,
+        "SEA": 9.99,
+        "SF": 10.99,
+        "TB": 9.17,
+        "TEN": 9.84,
+        "WAS": 11.33
+      }
+    },
+    "baselines": {
+      "home_field_only": {
+        "margin": {
+          "n": 855,
+          "mae": 11.074,
+          "rmse": 14.329,
+          "bias": -0.399
+        },
+        "total": {
+          "n": 855,
+          "mae": 10.65,
+          "rmse": 13.606,
+          "bias": -0.208
+        }
+      }
+    }
+  },
+  "market_comparison": {
+    "note": "nflverse lines; capture time undocumented, so this compares accuracy, not a betting record.",
+    "spread": {
+      "games": 855,
+      "model_mae": 10.206,
+      "market_mae": 9.786,
+      "model_vs_market_corr": 0.9,
+      "side_record_all": {
+        "n": 836,
+        "wins": 401,
+        "win_rate": 0.4797,
+        "min_edge": 0.0,
+        "model_mae": 10.206,
+        "market_mae": 9.786
+      },
+      "side_record_edge_3plus": {
+        "n": 229,
+        "wins": 102,
+        "win_rate": 0.4454,
+        "min_edge": 3.0,
+        "model_mae": 10.206,
+        "market_mae": 9.786
+      }
+    },
+    "total": {
+      "games": 855,
+      "model_mae": 10.353,
+      "market_mae": 10.12,
+      "side_record_all": {
+        "n": 848,
+        "wins": 421,
+        "win_rate": 0.4965,
+        "min_edge": 0.0,
+        "model_mae": 10.353,
+        "market_mae": 10.12
+      }
+    }
+  },
+  "tuning_in_sample": {
+    "games": 569,
+    "margin": {
+      "n": 569,
+      "mae": 10.002,
+      "rmse": 12.936,
+      "bias": -0.14
+    },
+    "total": {
+      "n": 569,
+      "mae": 10.65,
+      "rmse": 13.35,
+      "bias": -0.0
+    },
+    "home_score": {
+      "n": 569,
+      "mae": 7.641,
+      "rmse": 9.549,
+      "bias": -0.07
+    },
+    "away_score": {
+      "n": 569,
+      "mae": 7.241,
+      "rmse": 9.033,
+      "bias": 0.07
+    },
+    "win_probability": {
+      "n": 566,
+      "brier": 0.2224,
+      "log_loss": 0.6348,
+      "accuracy": 0.629
+    },
+    "calibration": [
+      {
+        "bin": "0.1-0.2",
+        "n": 1,
+        "predicted": 0.192,
+        "actual": 1.0
+      },
+      {
+        "bin": "0.2-0.3",
+        "n": 15,
+        "predicted": 0.256,
+        "actual": 0.4
+      },
+      {
+        "bin": "0.3-0.4",
+        "n": 67,
+        "predicted": 0.354,
+        "actual": 0.239
+      },
+      {
+        "bin": "0.4-0.5",
+        "n": 96,
+        "predicted": 0.456,
+        "actual": 0.438
+      },
+      {
+        "bin": "0.5-0.6",
+        "n": 170,
+        "predicted": 0.549,
+        "actual": 0.506
+      },
+      {
+        "bin": "0.6-0.7",
+        "n": 135,
+        "predicted": 0.648,
+        "actual": 0.652
+      },
+      {
+        "bin": "0.7-0.8",
+        "n": 73,
+        "predicted": 0.742,
+        "actual": 0.808
+      },
+      {
+        "bin": "0.8-0.9",
+        "n": 9,
+        "predicted": 0.825,
+        "actual": 1.0
+      }
+    ],
+    "by_season": {
+      "2021": {
+        "margin": {
+          "n": 285,
+          "mae": 11.076,
+          "rmse": 14.012,
+          "bias": -0.67
+        },
+        "total": {
+          "n": 285,
+          "mae": 10.884,
+          "rmse": 13.44,
+          "bias": -0.36
+        }
+      },
+      "2022": {
+        "margin": {
+          "n": 284,
+          "mae": 8.925,
+          "rmse": 11.758,
+          "bias": 0.393
+        },
+        "total": {
+          "n": 284,
+          "mae": 10.415,
+          "rmse": 13.26,
+          "bias": 0.361
+        }
+      }
+    },
+    "by_team_margin_mae": {
+      "ARI": 11.55,
+      "ATL": 8.16,
+      "BAL": 7.26,
+      "BUF": 12.13,
+      "CAR": 11.21,
+      "CHI": 9.54,
+      "CIN": 9.67,
+      "CLE": 9.45,
+      "DAL": 12.27,
+      "DEN": 9.25,
+      "DET": 10.63,
+      "GB": 8.97,
+      "HOU": 10.2,
+      "IND": 10.7,
+      "JAX": 11.32,
+      "KC": 8.64,
+      "LA": 10.39,
+      "LAC": 8.44,
+      "LV": 8.93,
+      "MIA": 9.09,
+      "MIN": 8.42,
+      "NE": 13.04,
+      "NO": 10.66,
+      "NYG": 10.64,
+      "NYJ": 10.66,
+      "PHI": 10.94,
+      "PIT": 8.69,
+      "SEA": 8.91,
+      "SF": 10.32,
+      "TB": 10.31,
+      "TEN": 10.78,
+      "WAS": 8.65
+    }
+  },
+  "notes": [
+    "Starting QBs for past games come from games.csv (the actual starter); projected starters are used live.",
+    "Stadium roof type is taken from each stadium's usual roof across the data."
+  ]
+}

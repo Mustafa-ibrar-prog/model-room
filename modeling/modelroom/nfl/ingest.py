@@ -33,6 +33,8 @@ PBP_COLUMNS = [
     "play_type", "pass", "rush", "qb_dropback", "qb_scramble", "sack", "penalty", "two_point_attempt",
     "epa", "success", "wp", "def_wp", "score_differential", "posteam_score", "defteam_score",
     "passer_player_id", "passer_player_name", "rusher_player_id", "cpoe", "air_yards", "yards_gained",
+    "passer_id", "passer", "interception", "fumble_lost", "third_down_converted", "third_down_failed",
+    "fixed_drive", "fixed_drive_result", "game_date",
 ]
 INJURY_COLUMNS = ["season", "week", "game_type", "team", "gsis_id", "full_name", "position",
                   "report_status", "practice_status", "report_primary_injury", "date_modified"]
@@ -125,6 +127,10 @@ def acquire_release_files(kind: str, seasons: list[int], local_dir: Path | None)
     return got
 
 
+def available_pbp_seasons() -> list[int]:
+    return sorted(int(f.stem.rsplit("_", 1)[1]) for f in raw_dir("nfl").glob("play_by_play_*.parquet"))
+
+
 def build_pbp(seasons: list[int]) -> pd.DataFrame:
     parts = []
     for s in seasons:
@@ -187,7 +193,7 @@ def run(*, skip_download: bool = False, local_dir: Path | None = None) -> dict:
             state.record_failure(sid, str(e))
             summary[f"{kind}_error"] = str(e)
 
-    pbp = build_pbp(seasons)
+    pbp = build_pbp(available_pbp_seasons())  # every season on disk (history for backtests + current)
     if len(pbp):
         pbp.to_parquet(out / "pbp.parquet", index=False)
     summary["pbp"] = {"rows": int(len(pbp)), "seasons": sorted(pbp["season"].unique().tolist()) if len(pbp) else []}

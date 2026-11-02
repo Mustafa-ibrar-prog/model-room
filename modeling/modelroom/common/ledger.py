@@ -5,7 +5,7 @@ Rules
 - Lines are only ever appended. Each line stores the previous line's hash, so
   editing or deleting any earlier line breaks verification.
 - Re-running the same model on the same inputs for the same game is a no-op
-  (deduplicated on game_id + model_version + inputs_hash).
+  (deduplicated on game_id + model_version + inputs_hash + params_hash).
 - Grading never touches this file; results are computed into separate reports.
 """
 from __future__ import annotations
@@ -54,15 +54,18 @@ def append(path: Path, predictions: Iterable[dict]) -> AppendResult:
     generated_at and game_start (ISO 8601 with timezone)."""
     existing = read(path)
     verify_records(existing)
-    seen = {(r["game_id"], r["model_version"], r["inputs_hash"]) for r in existing}
+    def key(r):
+        return (r["game_id"], r["model_version"], r["inputs_hash"], r.get("params_hash"))
+
+    seen = {key(r) for r in existing}
     prev = existing[-1]["hash"] if existing else GENESIS
     seq = existing[-1]["seq"] if existing else 0
 
     appended = dup = started = 0
     lines: list[str] = []
     for p in predictions:
-        key = (p["game_id"], p["model_version"], p["inputs_hash"])
-        if key in seen:
+        k = key(p)
+        if k in seen:
             dup += 1
             continue
         if _parse_ts(p["generated_at"]) >= _parse_ts(p["game_start"]):
@@ -73,7 +76,7 @@ def append(path: Path, predictions: Iterable[dict]) -> AppendResult:
         body["hash"] = _line_hash(body)
         lines.append(json.dumps(body, sort_keys=True, separators=(",", ":")))
         prev = body["hash"]
-        seen.add(key)
+        seen.add(k)
         appended += 1
 
     if lines:

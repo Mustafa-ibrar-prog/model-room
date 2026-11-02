@@ -20,6 +20,7 @@ from modelroom.sources import odds, state
 from . import ingest, walkforward
 from .backtest import apply
 from .config import MODEL_ID, MODEL_VERSION, ModelParams
+from .project import total_offsets
 
 RECENT_DAYS = 10
 
@@ -106,7 +107,11 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
     games = games.copy()
     season = int(games.loc[games["status"].isin(["scheduled", "final"]), "season"].max())
 
-    proj, finals, ctx = walkforward.run(games, team_games, params.ratings, project_seasons={season}, include_scheduled=True)
+    history = set(range(int(games["season"].min()) + 1, season + 1))  # needed for the chronological total offset
+    proj, finals, ctx = walkforward.run(games, team_games, params.ratings, project_seasons=history, include_scheduled=True)
+    if params.adjustments.total_rolling_games:
+        proj["total_offset"] = total_offsets(proj, params.adjustments.total_rolling_games)
+    proj = proj[proj["season"] == season]
     proj = proj.merge(games[["game_id", "home_name", "away_name"]], on="game_id", how="left")
     proj = apply(proj, params.adjustments, use_injuries=False)  # no NBA injury feed connected
     current = finals[season]

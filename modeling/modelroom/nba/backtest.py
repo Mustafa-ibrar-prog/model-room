@@ -21,7 +21,9 @@ from modelroom.common.paths import ensure, output_dir
 from . import walkforward
 from .config import MODEL_VERSION, FittedAdjustments, ModelParams, RatingSettings
 from .injuries import absence_values, fit_injury_coefficient
-from .project import REST_ADV_CAP, finalize
+from .project import REST_ADV_CAP, finalize, total_offsets
+
+TOTAL_ROLLING_GAMES = 250  # chosen on 2018-2022 out-of-sample (docs/models/results/nba-total-bias-study.json)
 
 BURN_IN = 2016
 TUNE = list(range(2017, 2023))
@@ -75,7 +77,7 @@ def fit_adjustments(p: pd.DataFrame, injury_k: float | None) -> FittedAdjustment
     coef, *_ = np.linalg.lstsq(X, y.to_numpy(), rcond=None)
     total_points = float(np.mean(p["actual_total"] - p["total_raw"]))
     resid = y.to_numpy() - X @ coef
-    total_resid = p["actual_total"] - p["total_raw"] - total_points
+    total_resid = p["actual_total"] - p["total_raw"] - (p["total_offset"].fillna(total_points) if "total_offset" in p else total_points)
     return FittedAdjustments(
         total_sigma=round(float(np.std(total_resid)), 4),
         b2b_points=round(float(coef[0]), 4),
@@ -148,6 +150,7 @@ def run(games, team_games, *, log=print, player_box=None) -> dict:
 
     log("Projecting tuning and test seasons with chosen settings...")
     proj, _, _ = walkforward.run(games, team_games, settings, project_seasons=set(TUNE + TEST), until_season=TEST[-1])
+    proj["total_offset"] = total_offsets(proj, TOTAL_ROLLING_GAMES)
 
     injury_k = None
     if player_box is not None:
@@ -158,7 +161,7 @@ def run(games, team_games, *, log=print, player_box=None) -> dict:
         log(f"  injury coefficient k = {injury_k:.4f} points per unit of absent value")
 
     train = proj[proj["season"].isin(TUNE)]
-    adj = fit_adjustments(train, injury_k)
+    adj = replace(fit_adjustments(train, injury_k), total_rolling_games=TOTAL_ROLLING_GAMES)
     log(f"  adjustments: {adj}")
 
     test = proj[proj["season"].isin(TEST)]

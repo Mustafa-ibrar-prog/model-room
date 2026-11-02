@@ -6,7 +6,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 MODEL_ID = "nba-game"
-MODEL_VERSION = "1.0.0"
+MODEL_VERSION = "1.1.0"  # 1.1.0: rolling + playoff total offset (1.0.0 used a constant)
 PARAMS_FILE = Path(__file__).with_name("params.json")
 
 
@@ -29,7 +29,8 @@ class FittedAdjustments:
 
     b2b_points: float = 0.0           # margin effect of the opponent being on a back-to-back
     rest_points: float = 0.0          # margin per day of rest advantage (capped at 3)
-    total_points: float = 0.0         # mean total residual (overtime, scoring drift)
+    total_points: float = 0.0         # 1.0.0 constant total offset; kept as the fallback before enough history
+    total_rolling_games: int | None = None  # 1.1.0: offset = mean total residual of the previous N regular-season games
     margin_sigma: float = 12.0        # std. dev. of margin errors, for win probability
     total_sigma: float | None = None  # std. dev. of total errors, for the total's uncertainty range
     injury_points_per_value: float | None = None  # k in docs; None until fitted

@@ -1,0 +1,36 @@
+{
+  "model_id": "nfl-game",
+  "model_version": "1.0.1",
+  "points": {
+    "epa_coef": 38.702,
+    "home_coef": 2.4582,
+    "indoor_coef": 2.5479,
+    "intercept": 19.8592,
+    "margin_sigma": 12.9351,
+    "qb_replacement_epa": -0.0874,
+    "rest_coef": 0.001,
+    "total_sigma": 13.3504
+  },
+  "provenance": {
+    "fitted_at": "2026-11-02T07:09:48+00:00",
+    "games_hash": "4ad29bffa3821cd3",
+    "note": "Same code and data as the 1.0.1 backtest run; version label corrected after the QB-mix fix.",
+    "status": "provisional: first NFL version",
+    "test_seasons": [
+      2023,
+      2024,
+      2025
+    ],
+    "tuning_seasons": [
+      2021,
+      2022
+    ]
+  },
+  "ratings": {
+    "half_life_games": 8.0,
+    "home_prior_games": 20.0,
+    "prior_games": 3.0,
+    "qb_shrink_dropbacks": 600.0,
+    "season_carry": 0.7
+  }
+}

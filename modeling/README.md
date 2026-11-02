@@ -5,8 +5,8 @@ NBA and NFL data collection, validation and projection engines. The website (Nex
 ## Status
 
 - **Data collection and validation:** working for both leagues.
-- **NBA engine:** built and backtested, but **provisional**. It isn't published to the site.
-- **NFL engine:** not started; its data pipeline is ready.
+- **NBA engine 1.1.0:** live on the site, provisional. Backtest: `../docs/models/results/`.
+- **NFL engine 1.0.1:** live on the site, provisional.
 
 See `../docs/data-inventory.md` for every source and `../docs/data-sources.md` for the rules.
 
@@ -52,12 +52,23 @@ python -m modelroom nfl lines             # data\manual\nfl_lines.csv
 
 Copy `templates\lines_template.csv` to `data\manual\<league>_lines.csv` and fill one row per sportsbook line. Required: `game_date`, `home_team`, `away_team`, `sportsbook`, `market` (spread/total/moneyline), and `line` for spreads and totals. `captured_at` needs a timezone, e.g. `2026-11-02T18:30:00-08:00`. Rows that fail validation are listed and skipped.
 
-## Models and backtests
+## Projections, backtests and the ledger
 
 ```powershell
-python -m modelroom nba backtest          # provisional NBA walk-forward validation (~3 min)
-python -m modelroom ledger verify         # check the prediction ledgers
+python -m modelroom nba project           # ratings -> next 7 days -> ledger -> data\published\nba.json
+python -m modelroom nfl project           # next 10 days -> ledger -> data\published\nfl.json
+python -m modelroom nba backtest          # walk-forward tuning + held-out test (~3 min); rewrites params.json
+python -m modelroom nfl backtest          # same for NFL (~5 min)
+python -m modelroom ledger verify         # check the prediction ledgers' hash chains
 ```
+
+The website reads `data\published\<league>.json`. Re-run `project` after each `ingest`.
+
+Ledger rules:
+- A prediction is stored only before kickoff.
+- Lines are never edited, and every record carries the model version, parameter hash and input hash.
+- A model change gets a new version; its predictions are added alongside the old ones.
+- Grading joins the stored predictions to final results without changing the file.
 
 ## Tests
 
@@ -77,8 +88,8 @@ pytest tests\sources                     # data collection and validation only
 modelroom/
   common/     paths, downloads, hashing, metrics, ledger, publishing (no league logic)
   sources/    registry (inventory), validation, reconciliation, odds, Land of Basketball
-  nba/        NBA ingestion and engine
-  nfl/        NFL ingestion (engine next)
+  nba/        NBA ingestion, ratings, projections, backtest, pipeline
+  nfl/        NFL ingestion, EPA ratings, QB adjustment, projections, backtest, pipeline
 data/         gitignored: raw/ (as downloaded), processed/, output/, manual/
 ledger/       append-only prediction ledgers (committed)
 templates/    manual line entry template
