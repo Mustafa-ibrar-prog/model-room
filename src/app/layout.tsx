@@ -7,6 +7,7 @@ import "@fontsource/barlow-condensed/600.css";
 import "@fontsource/barlow-condensed/700.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { AccountLink } from "@/components/auth/AccountLink";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Suspense } from "react";
 import { DataStatus, DataStatusFallback } from "@/components/layout/DataStatus";
@@ -36,7 +37,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Test site: features are still being built and numbers are provisional.
           </div>
         ) : null}
-        <SiteHeader />
+        <SiteHeader
+          account={
+            <Suspense fallback={null}>
+              <AccountLink className="rounded-md px-3 py-2 text-sm font-500 text-mute hover:text-ink" />
+            </Suspense>
+          }
+        />
         <Suspense fallback={<DataStatusFallback />}>
           <DataStatus />
         </Suspense>

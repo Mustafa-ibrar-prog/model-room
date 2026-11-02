@@ -1,6 +1,12 @@
-# Authentication architecture (proposal)
+# Authentication architecture
 
-Status: **recommended, not implemented.** The database is ready for it. Login code ships after this design is approved.
+> **Update 2026-11-02: superseded.** At the owner's request, logins use **Supabase email + password** (free tier), not Shopify customer accounts. The membership tables, security rules and `effective_tier_for()` described below are unchanged and are what the site uses.
+>
+> - Code: `src/server/session.ts`, `src/server/actions/auth.ts`, `src/app/{login,signup,forgot-password,reset-password,account,upgrade}`, `src/proxy.ts`.
+> - Test accounts: `scripts/seed-test-accounts.mjs`, `.github/workflows/supabase-preview.yml`.
+> - Payments aren't connected yet. Paid tiers are granted manually (admin memberships) until a Shopify subscription app is set up. The Shopify sections below remain the plan for billing, not for login.
+
+Original proposal (kept for reference):
 
 ## Goals
 

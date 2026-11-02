@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { UpgradeLink } from "@/components/auth/UpgradeLink";
 import { tierName } from "@/config/tiers";
 import { isLocked, type Gate, type TierId } from "@/types/domain";
 
@@ -68,14 +68,14 @@ export function LockIcon({ className = "h-3.5 w-3.5" }: { className?: string }) 
 /** Table cell content for a value the viewer's plan does not include. */
 export function LockedCell({ requires }: { requires: TierId }) {
   return (
-    <Link
-      href="/pricing"
+    <UpgradeLink
+      requires={requires}
       className="inline-flex items-center gap-1 rounded-sm text-[0.8rem] font-500 text-faint hover:text-ink"
       title={`Included with ${tierName(requires)}`}
     >
       <LockIcon />
       {tierName(requires)}
-    </Link>
+    </UpgradeLink>
   );
 }
 
@@ -104,12 +104,12 @@ export function LockedPanel({ requires, title, body }: { requires: TierId; title
           <LockIcon className="mx-auto h-6 w-6 text-edge" />
           <h3 className="mt-3 font-display text-2xl font-700 text-ink">{title}</h3>
           <p className="mt-2 text-sm leading-relaxed text-mute">{body}</p>
-          <Link
-            href="/pricing"
+          <UpgradeLink
+            requires={requires}
             className="mt-4 inline-block rounded-full bg-model px-4 py-2 text-sm font-600 text-navy-950 hover:bg-model/90"
           >
-            Compare plans
-          </Link>
+            Unlock with {tierName(requires)}
+          </UpgradeLink>
           <p className="mt-2 text-xs text-faint">Included with {tierName(requires)} and above.</p>
         </div>
       </div>
