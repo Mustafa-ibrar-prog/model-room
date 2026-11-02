@@ -2,15 +2,15 @@
 
 NFL and NBA sports analytics: market lines next to model projections for spreads, totals, player props, injury impact and team ratings.
 
-> **Phase 1 status:** interface and architecture only. Every team, player and number in the app is **fictional demonstration data**. No projection engine is implemented, and nothing on the site is a prediction.
+> **Status:** Phase 1 (interface) and Phase 2 (database and membership foundation) are done. Every team, player and number in the app is still **fictional demonstration data**. No projection engine is implemented, and nothing on the site is a prediction. Shopify login is designed ([docs/auth-architecture.md](docs/auth-architecture.md)) but not built.
 
 ## Stack
 
 - [Next.js 16](https://nextjs.org) (App Router, Cache Components) with TypeScript
 - Tailwind CSS v4
-- Supabase for the database and authentication (wired as a stub, not used yet)
+- Supabase Postgres for profiles, memberships and sports data, with Row Level Security on every table
 - Vercel for hosting
-- Shopify for subscriptions (later phase)
+- Shopify customer accounts and subscriptions (designed, not yet connected)
 
 ## Run it
 
@@ -26,11 +26,30 @@ Other scripts:
 npm run build   # production build
 npm start       # serve the production build
 npm run lint
+npm run check:entitlements   # app plan rules match the database
+npm run db:test              # migrations + 94 security tests on a local Postgres
 ```
 
 ### Previewing paid plans
 
 Set `ENABLE_TIER_PREVIEW=true` in `.env.local`. A switcher appears at the bottom of every page to view the site as Free, Plus or Pro. It sets an httpOnly cookie through a server action, and it does nothing when the variable is unset, so keep it off in production.
+
+### Plan preview needs the flag at build time
+
+Pages prerender as Free unless `ENABLE_TIER_PREVIEW=true` is set when you run `next build` (or `next dev`). Once Shopify login ships, pages that read the session render per request automatically.
+
+## Database
+
+Schema, relationships and security rules: [docs/database.md](docs/database.md). Migrations are in `supabase/migrations/`.
+
+```bash
+npx supabase link --project-ref <project-ref>
+npx supabase db push
+```
+
+- Sign-ups through Supabase are turned off. Accounts will be created by the server after a Shopify login.
+- The app reads a signed-in user's tier from `public.effective_tier_for()` (`src/server/membership.ts`). Any error resolves to Free.
+- `SUPABASE_SERVICE_ROLE_KEY` is used only in `src/lib/supabase/admin.ts`, which imports `server-only`.
 
 ## Project structure
 
@@ -52,14 +71,24 @@ src/
   lib/
     entitlements.ts       Which plan unlocks which feature (single source of truth)
     format.ts             Number formatting
-    supabase/server.ts    Supabase server client (returns null until configured)
+    supabase/server.ts    Supabase server client with the public key (returns null until configured)
+    supabase/admin.ts     Service-role client, server only
   server/                 Server-only code (imports "server-only")
     viewer.ts             Who is viewing and which plan they hold
+    session.ts            Signed-in user id (returns null until Shopify login ships)
+    membership.ts         Tier lookup from Supabase
     data/                 Data Access Layer: gates every field before it leaves the server
     providers/            Data providers; demo/ holds the fictional dataset
     actions/              Server actions
   engines/                Modeling engine contracts (no UI imports, no algorithms yet)
   types/domain.ts         Shared domain types
+supabase/
+  migrations/             Database schema, RLS, functions
+  tests/                  Security test suite + Supabase shim for plain Postgres
+docs/
+  database.md             Tables, relationships, rules
+  auth-architecture.md    Shopify customer login and subscription sync design
+scripts/                  db-test.sh, check-entitlements-sync.mjs
 ```
 
 ## How membership gating works
@@ -103,7 +132,8 @@ Import the GitHub repo in Vercel. No environment variables are required for Phas
 
 ## Roadmap
 
-- **Phase 2:** Supabase schema (teams, games, markets, injuries, projections, users, subscriptions), auth, `getViewer()` backed by real sessions.
+- **Phase 2 (done):** Supabase schema, RLS, membership tiers linked to the app's entitlements.
+- **Phase 2b:** Shopify customer login and subscription sync, once the design in `docs/auth-architecture.md` is approved.
 - **Phase 3:** Data ingestion jobs for schedules, lines and injury reports.
 - **Phase 4:** NFL and NBA engines, backtested before going live.
 - **Phase 5:** Shopify subscriptions mapped to plans, watchlists, alerts, history and downloadable reports.

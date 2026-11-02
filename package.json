@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:entitlements": "node scripts/check-entitlements-sync.mjs",
+    "db:test": "bash scripts/db-test.sh"
   },
   "dependencies": {
     "@fontsource/barlow": "^5.3.0",

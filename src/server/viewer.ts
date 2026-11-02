@@ -1,5 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { getTierForUser } from "./membership";
+import { getSessionUserId } from "./session";
 import type { TierId } from "@/types/domain";
 
 export interface Viewer {
@@ -18,14 +20,20 @@ export function isTierPreviewEnabled(): boolean {
 /**
  * Resolve who is viewing and which plan they hold.
  *
- * Phase 1: everyone is an anonymous Free viewer. If ENABLE_TIER_PREVIEW=true,
- * a cookie lets you preview Plus/Pro layouts during development.
+ * 1. Signed-in user: tier comes from Supabase memberships via
+ *    public.effective_tier_for(). Not active until Shopify login ships;
+ *    getSessionUserId() returns null in Phase 2.
+ * 2. ENABLE_TIER_PREVIEW=true: a dev cookie previews Plus/Pro layouts.
+ * 3. Otherwise: anonymous Free.
  *
- * Phase 2+: replace the body with a Supabase session lookup plus a
- * subscription check (see src/lib/supabase/server.ts). Keep the return shape.
  * Callers must render inside <Suspense> because this reads cookies.
  */
 export async function getViewer(): Promise<Viewer> {
+  const userId = await getSessionUserId();
+  if (userId) {
+    return { userId, tier: await getTierForUser(userId), isPreview: false };
+  }
+
   if (isTierPreviewEnabled()) {
     const value = (await cookies()).get(PREVIEW_COOKIE)?.value;
     if (value === "plus" || value === "pro" || value === "free") {
