@@ -9,7 +9,7 @@ import type { EnginePropPlayer, EnginePropsBoard, EngineThreshold, PropGameView,
  * model's backtest record only. Model inputs (shares, coverage and blitz factors) need "props.advanced".
  */
 
-function lineView(t: EngineThreshold): PropLineView {
+export function lineView(t: EngineThreshold): PropLineView {
   const usable = t.quotes.filter((q) => q.usable);
   const shown = usable.length ? [...usable].sort((a, b) => (a.spread ?? 1) - (b.spread ?? 1))[0] : null;
   const side = t.best?.edge ?? null;

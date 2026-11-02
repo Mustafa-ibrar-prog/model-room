@@ -28,7 +28,7 @@ export function PricingTiers() {
             key={plan.id}
             aria-labelledby={`plan-${plan.id}`}
             className={`relative flex flex-col rounded-2xl border p-6 sm:p-7 ${
-              featured ? "border-model/70 bg-navy-850 shadow-[0_0_0_1px_rgb(47_211_181/0.25),0_20px_60px_-30px_rgb(47_211_181/0.45)]" : "border-navy-700 bg-navy-900"
+              featured ? "border-model/70 bg-navy-850 ring-1 ring-model/30" : "border-navy-700 bg-navy-900"
             }`}
           >
             {featured && (
