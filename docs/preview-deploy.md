@@ -1,42 +1,48 @@
-# Private preview on Vercel
+# Test site (Vercel preview)
 
-A private copy of Model Room you can open on your phone, refreshed with real data every morning without your PC.
+The test site is the `preview` branch on Vercel, at a fixed address:
 
-## How it works
+**https://model-room-git-preview-computer-citi.vercel.app**
 
-- **`preview` branch:** `main` plus the engines' published boards (`modeling/data/published/*.json`) and its own prediction ledger (`modeling/preview-ledger/`). Nothing on it is fictional.
-- **GitHub Action** (`.github/workflows/preview-refresh.yml`), daily at 13:17 UTC or on demand:
-  1. Merges `main` into `preview`.
-  2. Downloads data and runs validation. If validation fails, it stops and publishes nothing.
-  3. Runs both engines and pushes the results to `preview`.
-- **Vercel** builds only the `preview` branch: `vercel.json` turns off deployments from `main`. The preview URL is protected by Vercel's Deployment Protection, so only your Vercel login can open it.
-- **No secrets:** the preview needs no API keys or database. Supabase is not used.
+Anyone with the link can open it once Vercel Authentication is turned off for previews (see setup). It is labeled "Test site", and search engines are told not to index it.
 
-## One-time setup (works from an iPhone browser)
+## Where to work
 
-1. **Create the Vercel project.** Go to vercel.com, sign in with GitHub, then **Add New… → Project**. Import **Mustafa-ibrar-prog/model-room**. The framework is detected as Next.js; keep the defaults and tap **Deploy**. That first build is the `main` branch, which has no published projections, so it may show "Unavailable" or be skipped. That's expected.
-2. **Turn on the plan switcher (preview only).** Project → **Settings → Environment Variables**:
-   - Key: `ENABLE_TIER_PREVIEW`
-   - Value: `true`
-   - Environment: **Preview** only. Untick Production and Development.
-3. **Check protection.** **Settings → Deployment Protection → Vercel Authentication** should be on, set to **Standard Protection** (the default). Preview URLs then need your Vercel login.
-4. **Get the preview URL.** **Deployments**, then the latest deployment from the `preview` branch, then **Visit**. If none is listed yet, open the `preview` branch on GitHub and push any commit, or run the workflow (step 5). Bookmark the branch URL Vercel shows, `model-room-git-preview-<your-team>.vercel.app`; it always points at the newest preview build.
-5. **Refresh on demand.** In the GitHub app: **model-room → Actions → Refresh preview data → Run workflow**.
+| Branch | What it is | Who writes to it |
+|---|---|---|
+| `main` | **Development.** All code and model changes go here. | You and Claude |
+| `preview` | `main` + generated projections. This is what Vercel builds for the test site. | Only the GitHub Action (never edit by hand) |
+| production | **Not set up yet.** When you launch, create a `production` branch and point Vercel's production deployments at it. Nothing reaches it unless you merge on purpose. | You, deliberately |
 
-## Keeping production safe
+Work on `main`. Every push to `main` updates the test site automatically.
 
-- `main` is never pushed to by the workflow; it only reads from it.
-- Vercel won't deploy `main` while `vercel.json` disables it, so no production URL gets built from this project.
-- The production domain stays unassigned until you decide to launch.
+## What happens on a push
 
-## Player props in the preview
+The workflow is `.github/workflows/preview.yml`.
 
-The daily refresh also runs `nfl props`. It does **not** fetch Polymarket US or Kalshi prices. The repository is public, the published board is committed to it, and both exchanges' terms forbid republishing their data. Exchange comparison runs on your own machine (`docs/markets.md`).
+1. **Within about a minute:** `main` is merged into `preview`, and Vercel rebuilds the test site, which takes 1–2 minutes.
+2. **If the push changed `modeling/`** (an engine or its settings), the workflow first downloads data, validates it, and re-runs every engine: NBA and NFL games, plus NFL and NBA props. That takes about 10 minutes.
+3. **Twice a day** (5:17 AM and 1:47 PM Pacific) it refreshes the data the same way, so the test site always has the latest projections.
+4. **If validation or a model run fails,** the site keeps the last good projections (shown as Delayed after 30 hours), and the run shows a red ✗ in GitHub → Actions.
 
-The `preview` branch is public on GitHub, so anyone can read the projections in `modeling/data/published/`. Make the repository private before those numbers are something you charge for.
+To refresh by hand: in the GitHub app, open **model-room → Actions → Preview → Run workflow**.
 
-## Limits
+## One-time setup: make the test site public
 
-- Data refreshes once a day. The status bar under the header shows each league as Current, Delayed or Unavailable. Projections older than 30 hours always show as Delayed.
-- The preview's ledger is separate from `main`'s, so test predictions made in the preview don't mix with your local history.
+1. Open vercel.com/computer-citi/model-room/settings/deployment-protection
+2. Under **Vercel Authentication**, switch it **off**, or choose the option that leaves preview deployments unprotected.
+3. Tap **Save**.
+4. Check it: open the test-site link in a Private tab. It should load without a Vercel login.
+
+## Environment and secrets
+
+- **The test site uses no secrets.** No exchange prices are fetched for it: the repository is public, and the Polymarket US and Kalshi terms don't allow republishing their data.
+- **`.env.production` exists on the `preview` branch only.** It turns on the Free / Plus / Pro switcher. It isn't a secret and never exists on `main`.
+- **When logins arrive** (Supabase), its keys go in Vercel → Settings → Environment Variables with only **Preview** ticked. Test accounts and simulated subscriptions will be created only when `VERCEL_ENV` is `preview`. They are never in GitHub.
+- **Never put API keys in the repository.** Locally they go in `.env.local`, which is gitignored.
+
+## Good to know
+
+- The repository is public, so the projections on the `preview` branch can also be read on GitHub. Make the repository private before those numbers are something you charge for.
+- Anyone on the test site can use the plan switcher to see Pro features. That's intended for testing, and it goes away when logins replace it.
 - Vercel's Hobby plan is free for personal, non-commercial use. Move to Pro before charging customers.

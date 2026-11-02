@@ -30,6 +30,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from . import teams as T
 from .http import JsonClient, ProviderError
 from .schema import PropQuote, price, to_float
 
@@ -54,7 +55,6 @@ SERIES = {
 VARIANTS = {"KXNFLFFPTS": "sleeper_ppr"}
 VOID_RULES = {"KXNFLFFPTS": "did not play: scores 0"}
 DEFAULT_VOID = "active but no snap: settles at fair price before game start"
-TEAM_CODES = {"JAC": "JAX", "LAR": "LA"}
 MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
 EVENT_RE = re.compile(r"^[A-Z0-9]+-(\d{2})([A-Z]{3})(\d{2})([A-Z]+)$")
 
@@ -63,7 +63,7 @@ def client(cache_dir: Path | None, opener=None) -> JsonClient:
     return JsonClient(BASE, name=PROVIDER, min_interval_s=MIN_INTERVAL_S, cache_dir=cache_dir, cache_ttl_s=60.0, opener=opener)
 
 
-def parse_event_ticker(ticker: str, sub_title: str | None) -> tuple[str | None, str | None, str | None]:
+def parse_event_ticker(ticker: str, sub_title: str | None, league: str = "nfl") -> tuple[str | None, str | None, str | None]:
     """→ (game_date, away, home). sub_title 'CHI vs SEA (Nov 2)' gives the order and codes."""
     m = EVENT_RE.match(ticker or "")
     gd = None
@@ -76,15 +76,15 @@ def parse_event_ticker(ticker: str, sub_title: str | None) -> tuple[str | None, 
     if sub_title and " vs " in sub_title:
         a, rest = sub_title.split(" vs ", 1)
         h = rest.split(" (")[0]
-        away, home = TEAM_CODES.get(a.strip(), a.strip()), TEAM_CODES.get(h.strip(), h.strip())
+        away, home = T.kalshi_code(league, a.strip()), T.kalshi_code(league, h.strip())
     return gd, away, home
 
 
-def _team_from_ticker(market_ticker: str, event_ticker: str, raw_codes: list[str]) -> str | None:
+def _team_from_ticker(market_ticker: str, event_ticker: str, raw_codes: list[str], league: str) -> str | None:
     rest = market_ticker[len(event_ticker) + 1:] if market_ticker.startswith(event_ticker + "-") else ""
     for code in sorted(raw_codes, key=len, reverse=True):
         if rest.startswith(code):
-            return TEAM_CODES.get(code, code)
+            return T.kalshi_code(league, code)
     return None
 
 
@@ -94,7 +94,7 @@ def parse_events(series: str, payload: dict, league: str) -> list[PropQuote]:
         return []
     out = []
     for ev in payload.get("events") or []:
-        gd, away, home = parse_event_ticker(ev.get("event_ticker", ""), ev.get("sub_title"))
+        gd, away, home = parse_event_ticker(ev.get("event_ticker", ""), ev.get("sub_title"), league)
         raw = []
         if ev.get("sub_title") and " vs " in ev["sub_title"]:
             a, rest = ev["sub_title"].split(" vs ", 1)
@@ -112,7 +112,7 @@ def parse_events(series: str, payload: dict, league: str) -> list[PropQuote]:
             bid, ask = price(m.get("yes_bid_dollars")), price(m.get("yes_ask_dollars"))
             out.append(PropQuote(
                 provider=PROVIDER, league=league, market=key, op=">" if st == "greater" else ">=", threshold=strike,
-                player_name=name, team=_team_from_ticker(m.get("ticker", ""), ev.get("event_ticker", ""), raw),
+                player_name=name, team=_team_from_ticker(m.get("ticker", ""), ev.get("event_ticker", ""), raw, league),
                 game_date=gd, home_team=home, away_team=away, start_time=None,
                 provider_event_id=ev.get("event_ticker"), provider_market_id=m.get("ticker"),
                 sportradar_player_id=cs.get("football_player") or cs.get("basketball_player"),

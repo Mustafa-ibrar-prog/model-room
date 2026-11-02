@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
     "/api/v1/games": ["./modeling/data/published/*.json"],
   },
   partialPrefetching: true,
+  // The public test site must not be indexed by search engines.
+  async headers() {
+    if (process.env.VERCEL_ENV === "production") return [];
+    return [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }];
+  },
   turbopack: {
     rules: {
       "*.css": {
