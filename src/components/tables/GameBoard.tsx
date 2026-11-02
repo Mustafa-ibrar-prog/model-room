@@ -40,7 +40,13 @@ export async function GameBoard({ league, limit, withinHours }: { league: League
         <Legend />
       </div>
 
-      <div className="overflow-x-auto">
+      <ul className="divide-y divide-navy-700/70 md:hidden" aria-label={`${league.toUpperCase()} upcoming games`}>
+        {games.map((g) => (
+          <GameCard key={g.id} g={g} />
+        ))}
+      </ul>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[960px] border-collapse text-[0.95rem]">
           <caption className="sr-only">
             {league.toUpperCase()} upcoming games: model line and total, projected score, win probability, and the market line where one is connected.
@@ -154,6 +160,73 @@ function GameRow({ g }: { g: GameView }) {
         <EdgeCell g={g} />
       </Td>
     </tr>
+  );
+}
+
+/** Phone layout: one card per game, every number visible without sideways scrolling. */
+function GameCard({ g }: { g: GameView }) {
+  const model = favoredLine(g.modelSpread, g.home.abbr, g.away.abbr);
+  const market = g.market?.spread != null ? favoredLine(g.market.spread, g.home.abbr, g.away.abbr) : null;
+  return (
+    <li className="px-4 py-4">
+      <div className="flex items-baseline justify-between gap-3">
+        <div className="font-display text-xl font-600">
+          <span className="text-mute">{g.away.abbr}</span>
+          <span className="px-1 text-faint">@</span>
+          <span className="text-ink">{g.home.abbr}</span>
+        </div>
+        <div className="text-right text-[0.78rem] text-faint">{formatKickoff(g.startTime)}</div>
+      </div>
+      {(g.quarterbacks?.away || g.quarterbacks?.home || g.rest.homeB2b || g.rest.awayB2b || g.neutral) && (
+        <div className="mt-0.5 text-[0.75rem] text-faint">
+          {[
+            g.quarterbacks && (g.quarterbacks.away || g.quarterbacks.home) && `QBs: ${g.quarterbacks.away ?? "TBD"} at ${g.quarterbacks.home ?? "TBD"}`,
+            g.rest.homeB2b && `${g.home.abbr} on a back-to-back`,
+            g.rest.awayB2b && `${g.away.abbr} on a back-to-back`,
+            g.neutral && "Neutral site",
+          ].filter(Boolean).join(". ")}
+        </div>
+      )}
+      <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2.5 text-sm">
+        <div>
+          <dt className="text-[0.75rem] text-faint">Model line</dt>
+          <dd className="font-display text-lg font-600 text-model">{model.text}</dd>
+        </div>
+        <div>
+          <dt className="text-[0.75rem] text-faint">Model total</dt>
+          <dd className="font-display text-lg font-600 text-model">{formatNumber(g.modelTotal)}</dd>
+        </div>
+        <div>
+          <dt className="text-[0.75rem] text-faint">Market line</dt>
+          <dd className="font-display text-lg font-600 text-market">{market ? market.text : <Missing title="No market line for this game" />}</dd>
+        </div>
+        <div>
+          <dt className="text-[0.75rem] text-faint">Market total</dt>
+          <dd className="font-display text-lg font-600 text-market">
+            {g.market?.total != null ? formatNumber(g.market.total) : <Missing title="No market total for this game" />}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[0.75rem] text-faint">Projected score</dt>
+          <dd className="text-ink/90">
+            <Gated value={g.projectedScore}>{(s) => <span>{g.away.abbr} {formatNumber(s.away)}, {g.home.abbr} {formatNumber(s.home)}</span>}</Gated>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[0.75rem] text-faint">Win probability</dt>
+          <dd className="text-ink/90">
+            <Gated value={g.winProbability}>{(p) => <span>{g.away.abbr} {formatPct(p.away)} / {g.home.abbr} {formatPct(p.home)}</span>}</Gated>
+          </dd>
+        </div>
+      </dl>
+      <div className="mt-2.5 flex flex-wrap items-center gap-2 text-sm">
+        <span className="text-[0.75rem] text-faint">Edge</span>
+        <EdgeCell g={g} />
+      </div>
+      <Gated value={g.ranges}>
+        {(r) => (r.margin ? <div className="mt-1.5 text-[0.72rem] text-faint">80% margin range {formatSigned(r.margin[0], 0)} to {formatSigned(r.margin[1], 0)}</div> : null)}
+      </Gated>
+    </li>
   );
 }
 
