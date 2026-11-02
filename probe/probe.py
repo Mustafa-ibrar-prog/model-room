@@ -1,52 +1,48 @@
-"""One-off, read-only probe of Kalshi public market data (no auth) + Polymarket US NFL slate. Round 3."""
-import json, time, urllib.request, urllib.parse, os, collections
-out = {"fetched_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "calls": []}
-os.makedirs("probe/out3", exist_ok=True)
-K = "https://api.elections.kalshi.com/trade-api/v2"
-P = "https://gateway.polymarket.us"
-
-def get(url, params=None, save=None, pause=0.6):
+"""One-off read-only probe round 4: order books and historical prices (Polymarket US, Kalshi)."""
+import json, time, urllib.request, urllib.parse, os
+os.makedirs("probe/out4", exist_ok=True)
+out = {"calls": []}
+P = "https://gateway.polymarket.us"; K = "https://api.elections.kalshi.com/trade-api/v2"
+def get(url, params=None, save=None):
     url = url + ("?" + urllib.parse.urlencode(params, doseq=True) if params else "")
     rec = {"url": url}
     try:
-        req = urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "model-room-probe/1"})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            body = r.read().decode(); rec["status"] = r.status; rec["headers"] = dict(r.headers.items())
+        with urllib.request.urlopen(urllib.request.Request(url, headers={"Accept": "application/json", "User-Agent": "model-room-probe/1"}), timeout=30) as r:
+            body = r.read().decode(); rec["status"] = r.status
     except urllib.error.HTTPError as e:
-        rec["status"] = e.code; body = e.read().decode()[:2000]
+        rec["status"] = e.code; body = e.read().decode()[:3000]
     except Exception as e:
         rec["status"] = None; body = repr(e)
     rec["bytes"] = len(body); out["calls"].append(rec)
-    if save: open(f"probe/out3/{save}.json", "w").write(body)
-    time.sleep(pause)
+    if save: open(f"probe/out4/{save}.json", "w").write(body)
+    time.sleep(1.5)
     try: return json.loads(body)
     except Exception: return None
-
-# Kalshi: all sports series
-series = []
-cursor = None
-d = get(K + "/series", {"category": "Sports"}, save="k_series_sports")
-series = (d or {}).get("series") or []
-nflnba = [s for s in series if any(x in (s.get("ticker", "") + s.get("title", "")).upper() for x in ("NFL", "NBA", "FOOTBALL", "BASKETBALL"))]
-json.dump([{k: s.get(k) for k in ("ticker", "title", "frequency", "tags", "settlement_sources", "contract_url")} for s in nflnba], open("probe/out3/k_series_nflnba.json", "w"), indent=1)
-summary = {"kalshi_series_total": len(series), "kalshi_nfl_nba_series": len(nflnba), "series_events": {}}
-for s in nflnba:
-    t = s["ticker"]
-    if not any(w in (t + s.get("title", "")).upper() for w in ("YD", "YARD", "REC", "TD", "TOUCHDOWN", "PASS", "RUSH", "PTS", "POINT", "REB", "AST", "PRA", "PLAYER", "3PT", "THREE", "STL", "BLK", "INT", "FANTASY")):
-        continue
-    e = get(K + "/events", {"series_ticker": t, "status": "open", "with_nested_markets": "true", "limit": 20}, save=f"k_ev_{t}")
-    evs = (e or {}).get("events") or []
-    ms = [m for ev in evs for m in ev.get("markets", [])]
-    summary["series_events"][t] = {"title": s.get("title"), "open_events": len(evs), "markets": len(ms),
-        "examples": [{k: m.get(k) for k in ("ticker", "title", "subtitle", "yes_sub_title", "floor_strike", "strike_type", "yes_bid", "yes_ask", "yes_bid_dollars", "yes_ask_dollars", "liquidity", "liquidity_dollars", "volume", "open_interest", "close_time", "last_price")} for m in ms[:4]]}
-# orderbook sample
-for t, v in summary["series_events"].items():
-    if v["examples"]:
-        get(K + f"/markets/{v['examples'][0]['ticker']}/orderbook", save=f"k_ob_{t}"); break
-# Polymarket: NFL week slate list via sports endpoints
-get(P + "/v1/sports/nfl/events", {"limit": 50}, save="p_nfl_events_a")
-get(P + "/v1/sports/events", {"limit": 50, "league": "nfl"}, save="p_nfl_events_b")
-get(P + "/v1/events", {"limit": 50, "seriesSlug": "nfl-2025", "active": "true", "closed": "false"}, save="p_nfl_events_c")
-json.dump(summary, open("probe/out3/_summary.json", "w"), indent=1)
-json.dump(out, open("probe/out3/_calls.json", "w"), indent=1)
-print(json.dumps(summary, indent=1)[:5000])
+ev = get(P + "/v1/events/slug/nfl-jax-bal-2026-11-05")
+ev = (ev or {}).get("event", ev) or {}
+pm = [m for m in ev.get("markets", []) if m.get("sportsMarketType") == "football_player_receiving_yards"][:2]
+for i, m in enumerate(pm):
+    get(P + f"/v1/markets/{m['slug']}/book", save=f"pm_book_{i}")
+    get(P + f"/v1/markets/{m['slug']}/bbo", save=f"pm_bbo_{i}")
+for j, params in enumerate(({"slug": pm[0]["slug"]}, {"marketSlug": pm[0]["slug"]}, {"market": pm[0]["slug"]}, {"slug": pm[0]["slug"], "interval": "1h"}) if pm else []):
+    get(P + "/v1/price-history", params, save=f"pm_hist_{j}")
+for slug in ("nfl-gb-pit-2026-10-26", "nfl-was-kc-2026-10-27", "nfl-den-dal-2026-10-26", "nfl-kc-was-2026-10-26"):
+    d = get(P + f"/v1/events/slug/{slug}", save="pm_past_" + slug)
+    d = (d or {}).get("event", d) or {}
+    if d.get("markets"):
+        ms = [m for m in d["markets"] if m.get("sportsMarketType") == "football_player_receiving_yards"][:2]
+        for i, m in enumerate(ms):
+            get(P + f"/v1/markets/{m['slug']}/settlement", save=f"pm_settle_{i}")
+            get(P + "/v1/price-history", {"slug": m["slug"]}, save=f"pm_hist_past_{i}")
+        json.dump([{k: m.get(k) for k in ("slug", "closed", "active", "status", "bestBidQuote", "bestAskQuote", "lastTradePrice", "line")} for m in ms], open("probe/out4/pm_past_markets.json", "w"), indent=1)
+        break
+s = get(K + "/events", {"series_ticker": "KXNFLRECYDS", "status": "settled", "with_nested_markets": "true", "limit": 3}, save="k_settled")
+mk = [m for e in (s or {}).get("events", []) for m in e.get("markets", [])][:2]
+for i, m in enumerate(mk):
+    t = m["ticker"]; end = int(time.time()); start = end - 21 * 86400
+    get(K + f"/series/KXNFLRECYDS/markets/{t}/candlesticks", {"start_ts": start, "end_ts": end, "period_interval": 60}, save=f"k_candles_{i}")
+    get(K + "/markets/trades", {"ticker": t, "limit": 50}, save=f"k_trades_{i}")
+o = get(K + "/events", {"series_ticker": "KXNFLRECYDS", "status": "open", "with_nested_markets": "true", "limit": 1})
+for m in [m for e in (o or {}).get("events", []) for m in e.get("markets", [])][:1]:
+    get(K + f"/markets/{m['ticker']}/orderbook", save="k_orderbook")
+json.dump(out, open("probe/out4/_calls.json", "w"), indent=1)
