@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Wordmark } from "./Logo";
 import { NAV } from "./nav";
 
-export function SiteHeader() {
+export function SiteHeader({ account }: { account?: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -37,6 +37,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-3 md:flex">
+          {account}
           <Link
             href="/pricing"
             aria-current={isActive("/pricing") ? "page" : undefined}
@@ -67,7 +68,8 @@ export function SiteHeader() {
       </div>
 
       {open && (
-        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden">
+        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden" onClick={() => setOpen(false)}>
+          {account ? <div className="mx-auto max-w-7xl px-4 pt-3 font-display text-lg font-600 text-model">{account}</div> : null}
           <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-1 px-4 py-3">
             {[...NAV, { href: "/pricing", label: "Pricing" }].map((item) => (
               <li key={item.href}>

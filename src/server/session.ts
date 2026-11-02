@@ -1,14 +1,28 @@
 import "server-only";
+import { cache } from "react";
+import { authEnabled, isProduction, isTestAccount } from "@/lib/auth-config";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+export interface SessionUser {
+  id: string;
+  email: string | null;
+}
 
 /**
- * The signed-in Model Room user (a Supabase auth user id), or null.
- *
- * Phase 2: no login exists yet, so this always returns null and every
- * visitor is anonymous Free. The Shopify Customer Account login described in
- * docs/auth-architecture.md will implement this by reading Model Room's
- * encrypted session cookie. Callers must already be inside <Suspense>,
- * because that implementation will read cookies.
+ * The signed-in user, verified with Supabase Auth (getUser() checks the token with the auth server,
+ * unlike getSession(), which only decodes the cookie). Null when logged out or when logins aren't
+ * configured. Test accounts are refused in production. Callers must be inside <Suspense> (reads cookies).
  */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+  if (!authEnabled()) return null;
+  const supabase = await createSupabaseServerClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user) return null;
+  if (isProduction() && isTestAccount(data.user.email)) return null;
+  return { id: data.user.id, email: data.user.email ?? null };
+});
+
 export async function getSessionUserId(): Promise<string | null> {
-  return null;
+  return (await getSessionUser())?.id ?? null;
 }

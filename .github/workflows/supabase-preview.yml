@@ -1,0 +1,56 @@
+# Sets up the TEST SITE's Supabase project: applies the database migrations and creates the three test
+# accounts with their plans (no payments). Run it from the GitHub app: Actions → Supabase (test site) →
+# Run workflow. It also runs when a migration changes. Uses repository secrets only; nothing is printed.
+name: Supabase (test site)
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths: ["supabase/migrations/**", "scripts/seed-test-accounts.mjs"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-preview
+  cancel-in-progress: false
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TEST_ACCOUNT_PASSWORD: ${{ secrets.TEST_ACCOUNT_PASSWORD }}
+      MODELROOM_TARGET: preview
+    steps:
+      - name: Check the secrets are set
+        id: check
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_SERVICE_ROLE_KEY" ] || [ -z "$TEST_ACCOUNT_PASSWORD" ]; then
+            echo "::warning::Supabase secrets aren't set yet (see docs/preview-deploy.md). Nothing to do."
+            echo "ready=no" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=yes" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'yes'
+      - uses: supabase/setup-cli@v1
+        if: steps.check.outputs.ready == 'yes'
+        with:
+          version: latest
+      - name: Apply database migrations
+        if: steps.check.outputs.ready == 'yes'
+        run: supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'yes'
+        with:
+          node-version: 22
+      - name: Create the test accounts
+        if: steps.check.outputs.ready == 'yes'
+        run: |
+          npm ci --ignore-scripts
+          node scripts/seed-test-accounts.mjs

@@ -23,3 +23,30 @@ export const getTierForUser = cache(async (userId: string): Promise<TierId> => {
   }
   return TIERS.includes(data as TierId) ? (data as TierId) : "free";
 });
+
+export interface MembershipRow {
+  id: string;
+  tier: TierId;
+  status: string;
+  source: string;
+  current_period_end: string | null;
+  ended_at: string | null;
+  started_at: string;
+  note: string | null;
+}
+
+/** The user's memberships, newest first (server only, service role). */
+export async function getMemberships(userId: string): Promise<MembershipRow[]> {
+  const db = getSupabaseAdmin();
+  if (!db) return [];
+  const { data, error } = await db
+    .from("memberships")
+    .select("id, tier, status, source, current_period_end, ended_at, started_at, note")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    console.error("[membership] list failed", error.message);
+    return [];
+  }
+  return (data ?? []) as MembershipRow[];
+}

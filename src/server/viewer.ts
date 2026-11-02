@@ -1,5 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { authEnabled, isProduction } from "@/lib/auth-config";
 import { getTierForUser } from "./membership";
 import { getSessionUserId } from "./session";
 import type { TierId } from "@/types/domain";
@@ -13,8 +14,12 @@ export interface Viewer {
 
 export const PREVIEW_COOKIE = "mr_preview_tier";
 
+/**
+ * The plan switcher exists only for testing before logins are set up. Once logins are configured it
+ * is off everywhere, so a plan can only come from a real (or test) account's membership.
+ */
 export function isTierPreviewEnabled(): boolean {
-  return process.env.ENABLE_TIER_PREVIEW === "true";
+  return process.env.ENABLE_TIER_PREVIEW === "true" && !authEnabled() && !isProduction();
 }
 
 /**
