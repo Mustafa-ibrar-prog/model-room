@@ -61,10 +61,13 @@ jobs:
         run: |
           python -m modelroom nba project
           python -m modelroom nfl project
+          python -m modelroom nfl props
           python -m modelroom ledger verify
+        # No exchange prices here on purpose: this repository is public, and Polymarket US / Kalshi
+        # terms don't allow republishing their data. Market comparison runs on your own machine.
 
       - name: Publish to the preview branch
         run: |
-          git add -f modeling/data/published/nba.json modeling/data/published/nfl.json modeling/preview-ledger
+          git add -f modeling/data/published/nba.json modeling/data/published/nfl.json modeling/data/published/nfl_props.json modeling/preview-ledger
           git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ)" || echo "No changes to publish"
           git push origin preview
