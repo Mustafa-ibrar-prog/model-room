@@ -23,6 +23,7 @@
   markets backfill nfl --days 30  Kalshi: hourly price history of settled contracts (local only)
   markets replay nfl              price that history with the walk-forward model (then: markets report)
   ledger verify                   check the prediction ledgers' hash chains
+  history                         results history (recorded projections vs results) + performance files
 """
 from __future__ import annotations
 
@@ -206,6 +207,13 @@ def _markets(args) -> int:
     return 0
 
 
+def _history(args) -> int:
+    from modelroom import history
+
+    _print(history.run())
+    return 0
+
+
 def _ledger(args) -> int:
     from modelroom.common import ledger
     from modelroom.common.paths import ledger_path
@@ -244,9 +252,10 @@ def main(argv: list[str] | None = None) -> int:
     mk.add_argument("--days", type=int, default=10)
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
+    sub.add_parser("history", help="results history + performance files for the website")
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history}[args.group]
     return handler(args)
 
 

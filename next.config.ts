@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // The engines' published boards are read from disk at request time; bundle them
   // into the server functions when they exist (the preview branch commits them).
   outputFileTracingIncludes: {
-    "/*": ["./modeling/data/published/*.json"],
+    "/*": ["./modeling/data/published/*.json", "./modeling/data/published/history/**/*.json"],
     "/api/v1/games": ["./modeling/data/published/*.json"],
   },
   partialPrefetching: true,

@@ -84,6 +84,7 @@ jobs:
           python -m modelroom nfl props
           python -m modelroom nba props
           python -m modelroom ledger verify
+          python -m modelroom history
 
       - name: Keep the last good projections if anything failed
         if: steps.data.outcome == 'failure'
@@ -95,7 +96,9 @@ jobs:
         run: |
           if [ "$DATA" = "success" ]; then
             git add -f modeling/data/published/nba.json modeling/data/published/nfl.json \
-                       modeling/data/published/nfl_props.json modeling/data/published/nba_props.json modeling/preview-ledger
+                       modeling/data/published/nfl_props.json modeling/data/published/nba_props.json \
+                       modeling/data/published/performance_nfl.json modeling/data/published/performance_nba.json \
+                       modeling/data/published/history modeling/preview-ledger
             git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ)" || echo "No data changes"
           fi
           git push origin preview
