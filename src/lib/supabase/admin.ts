@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { secretSupabaseKey } from "./keys";
 
 /**
  * Service-role Supabase client. Bypasses Row Level Security.
@@ -15,7 +16,7 @@ let client: SupabaseClient | null | undefined;
 export function getSupabaseAdmin(): SupabaseClient | null {
   if (client !== undefined) return client;
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = secretSupabaseKey(); // sb_secret_… or legacy service_role JWT
   client =
     url && serviceKey
       ? createClient(url, serviceKey, {

@@ -45,8 +45,18 @@ Logins are Supabase email + password. They switch on once these are set:
 | | `SUPABASE_SERVICE_ROLE_KEY` | service_role / secret key (server only) |
 | GitHub → Settings → Secrets → Actions | `SUPABASE_DB_URL` | database connection string with your password |
 | | `SUPABASE_URL` | Project URL |
-| | `SUPABASE_SERVICE_ROLE_KEY` | service_role key |
+| | `SUPABASE_SERVICE_ROLE_KEY` | service_role / secret key |
 | | `TEST_ACCOUNT_PASSWORD` | the test accounts' password |
+
+Both Supabase key formats work. The new format is `sb_publishable_…` for the public key and `sb_secret_…` for the secret one. The older format is a pair of long `eyJ…` keys called anon and service_role. The site refuses a secret key placed in the public variable, and a public key placed in the secret one, so a mix-up switches logins off instead of leaking anything. Use the **Session pooler** connection string for `SUPABASE_DB_URL`: GitHub's runners can't reach the direct `db.<ref>.supabase.co` address, which is IPv6-only.
+
+The workflow checks everything before and after it runs, and prints no secrets:
+- key formats
+- that Auth is reachable and email sign-in is on
+- the database connection
+- migrations applied
+- each test account signing in with the right plan
+- row-level security: a signed-in user sees only their own memberships, and an anonymous visitor sees none
 
 Then:
 

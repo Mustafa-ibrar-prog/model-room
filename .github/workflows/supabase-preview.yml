@@ -7,7 +7,7 @@ on:
   workflow_dispatch: {}
   push:
     branches: [main]
-    paths: ["supabase/migrations/**", "scripts/seed-test-accounts.mjs"]
+    paths: ["supabase/migrations/**", "scripts/seed-test-accounts.mjs", "scripts/verify-supabase.mjs", ".github/workflows/supabase-preview.yml"]
 
 permissions:
   contents: read
@@ -38,19 +38,62 @@ jobs:
           fi
       - uses: actions/checkout@v4
         if: steps.check.outputs.ready == 'yes'
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.ready == 'yes'
+        with:
+          node-version: 22
+      - name: Install
+        if: steps.check.outputs.ready == 'yes'
+        run: npm ci --ignore-scripts
+      - name: Check keys, project URL and Auth (prints no secrets)
+        if: steps.check.outputs.ready == 'yes'
+        run: node scripts/verify-supabase.mjs preflight
+      - name: Check the database connection
+        if: steps.check.outputs.ready == 'yes'
+        run: |
+          sudo apt-get install -y -qq postgresql-client >/dev/null
+          case "$SUPABASE_DB_URL" in
+            *pooler.supabase.com*) echo "ok    using the connection pooler (works from GitHub's IPv4 runners)";;
+            *db.*.supabase.co*) echo "::warning::Direct connection (db.<ref>.supabase.co) is IPv6-only and may fail here. Use the Session pooler string from Supabase → Connect.";;
+          esac
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'ok    database reachable, Postgres ' || current_setting('server_version')"
       - uses: supabase/setup-cli@v1
         if: steps.check.outputs.ready == 'yes'
         with:
           version: latest
       - name: Apply database migrations
         if: steps.check.outputs.ready == 'yes'
-        run: supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
-      - uses: actions/setup-node@v4
-        if: steps.check.outputs.ready == 'yes'
-        with:
-          node-version: 22
+        run: |
+          supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
+          supabase migration list --db-url "$SUPABASE_DB_URL"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
+        run: node scripts/seed-test-accounts.mjs
+      - name: Check the test accounts sign in with the right plans
+        if: steps.check.outputs.ready == 'yes'
+        run: node scripts/verify-supabase.mjs accounts
+      - name: Check row-level security
+        if: steps.check.outputs.ready == 'yes'
         run: |
-          npm ci --ignore-scripts
-          node scripts/seed-test-accounts.mjs
+          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -qtA <<'SQL'
+          do $$
+          declare uid uuid; others int; own int; rls_off int;
+          begin
+            select count(*) into rls_off from pg_tables where schemaname = 'public' and not rowsecurity;
+            if rls_off > 0 then raise exception 'FAIL  % public table(s) have row-level security off', rls_off; end if;
+            select id into uid from auth.users where email = 'free-test@modelroom.test';
+            perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
+            set local role authenticated;
+            select count(*) into others from public.memberships where user_id <> uid;
+            select count(*) into own from public.memberships where user_id = uid;
+            reset role;
+            if others > 0 then raise exception 'FAIL  a signed-in user can read % other membership row(s)', others; end if;
+            raise notice 'ok    every public table has row-level security on; a signed-in user sees only their own memberships (% own rows)', own;
+            perform set_config('request.jwt.claims', null, true);
+            set local role anon;
+            select count(*) into others from public.memberships;
+            reset role;
+            if others > 0 then raise exception 'FAIL  anonymous visitors can read memberships'; end if;
+            raise notice 'ok    anonymous visitors can read no memberships';
+          end $$;
+          SQL

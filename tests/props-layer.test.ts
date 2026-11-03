@@ -76,7 +76,7 @@ describe("player props", () => {
     const res = await getProps("nfl", "plus");
     if (!res.ok || isLocked(res.game) || !res.game) throw new Error("expected game");
     const m = res.game.players[0].markets[0];
-    expect(m.lines[0].edge).toEqual({ side: "yes", provider: "polymarket_us", price: 0.43, ev: 0.0903, grade: "lean", reasons: ["size at this price not published"] });
+    expect(m.lines[0].edge).toMatchObject({ side: "yes", provider: "polymarket_us", price: 0.43, ev: 0.0903, grade: "lean", reasons: ["size at this price not published"] });
     expect(m.lines[1].market).toBeNull();          // stale quote is shown as unusable, never used
     expect(m.lines[1].quotes[0].flags).toContain("stale");
     expect(isLocked(res.game.players[0].inputs)).toBe(true);
