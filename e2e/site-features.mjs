@@ -197,7 +197,7 @@ for (const device of ["desktop", "phone"]) {
   const t = await page.locator("main").innerText();
   check(/Final/.test(t), "/nfl past date shows final scores");
   await go(page, "/nfl");
-  const propsLink = page.locator('a[href*="/props?sport=nfl&game="]').first();
+  const propsLink = page.locator('a[href*="/props?sport=nfl&game="]:visible').first();
   await nav(page, propsLink);
   check(qs(page).get("game") !== null && page.url().includes("/props"), "game row Props link opens that game's props");
   await go(page, "/performance?sport=nba");

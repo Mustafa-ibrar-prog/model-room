@@ -53,7 +53,7 @@ async function Explorer({ searchParams }: { searchParams: SP }) {
             role="tab"
             aria-selected={l === league}
             href={`/props?sport=${l}`}
-            className={`rounded-full px-4 py-1 font-display text-base font-600 uppercase tracking-wider ${l === league ? "bg-model text-navy-950" : "text-mute hover:text-ink"}`}
+            className={`rounded-full px-4 py-1 font-display text-sm font-600 uppercase tracking-wider sm:text-base ${l === league ? "bg-model text-navy-950" : "text-mute hover:text-ink"}`}
           >
             {l}
           </Link>

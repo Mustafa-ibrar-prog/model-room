@@ -38,10 +38,10 @@ export function DataSources() {
           <tbody className="bg-navy-900">
             {SOURCES.map((s) => (
               <tr key={s.name} className="border-t border-navy-700/70 align-top">
-                <td className="px-4 py-3.5">
+                <td className="px-4 py-2.5 sm:py-3.5">
                   <div className="font-600 text-ink">{s.name}</div>
                   <div className="text-xs text-faint">{s.league}</div>
-                  <div className="mt-1 text-sm text-mute sm:hidden">{s.use}</div>
+                  <div className="mt-1 line-clamp-2 text-xs text-mute sm:hidden">{s.use}</div>
                 </td>
                 <td className="hidden px-4 py-3.5 text-mute sm:table-cell">{s.use}</td>
                 <td className="px-4 py-3.5 text-right">
