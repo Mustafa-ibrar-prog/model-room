@@ -62,10 +62,16 @@ jobs:
               echo "::warning::SUPABASE_DB_URL is the direct connection (db.<ref>.supabase.co), which is IPv6-only and unreachable from GitHub. Trying the Session pooler for the same project instead. To skip this, replace the secret with the Session pooler string from Supabase → Connect."
               found=""
               for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1 aws-0-ap-southeast-1 aws-1-ap-southeast-1 aws-0-ap-southeast-2 aws-1-ap-southeast-2 aws-0-ap-northeast-1 aws-1-ap-northeast-1 aws-0-ap-south-1 aws-1-ap-south-1 aws-0-sa-east-1 aws-1-sa-east-1; do
-                url=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py)
-                echo "::add-mask::$url"
-                if try "$url"; then found="$url"; echo "ok    reached the database through the Session pooler ($host)"; break; fi
+                urls=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py 2>/tmp/note) || { cat /tmp/note; exit 1; }
+                [ "$host" = aws-0-us-east-1 ] && cat /tmp/note
+                while IFS= read -r url; do
+                  echo "::add-mask::$url"
+                  err=$(PGCONNECT_TIMEOUT=8 psql "$url" -qtAc "select 1" 2>&1 >/dev/null) && { found="$url"; break; }
+                  case "$err" in *"password authentication failed"*) badpw=1;; esac
+                done <<< "$urls"
+                if [ -n "$found" ]; then echo "ok    reached the database through the Session pooler ($host)"; break; fi
               done
+              [ -n "$found" ] || [ -z "${badpw:-}" ] || { echo "FAIL  found the project's pooler, but the database password in SUPABASE_DB_URL is wrong. Reset it in Supabase → Project Settings → Database and update the secret."; exit 1; }
               [ -n "$found" ] || { echo "FAIL  couldn't reach the database through any Session pooler. Replace SUPABASE_DB_URL with the Session pooler string from Supabase → Connect."; exit 1; }
               echo "DB_URL=$found" >> "$GITHUB_ENV";;
             *)
