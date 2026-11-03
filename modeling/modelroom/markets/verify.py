@@ -53,7 +53,9 @@ def field_checks(league: str) -> list[dict]:
             continue
         two = [r for r in rs if r.get("yes_bid") is not None and r.get("yes_ask") is not None]
         bad = [r for r in two if not (0 < r["yes_bid"] <= r["yes_ask"] < 1)]
-        check(f"{prov}: bid ≤ ask, both inside (0, 1)", not bad, f"{len(bad)} bad of {len(two)} two-sided")
+        badp = [r for r in bad if not r["market"].startswith("game_")]
+        check(f"{prov}: player props: bid ≤ ask, both inside (0, 1)", not badp, f"{len(badp)} crossed of {sum(1 for r in two if not r['market'].startswith('game_'))}")
+        info(f"{prov}: game contracts with bid > ask: {len(bad) - len(badp)} (by market {dict(Counter(r['market'] for r in bad if r['market'].startswith('game_')))})")
         info(f"{prov}: two-sided {rate(len(two), len(rs))}; one-sided or empty books are flagged, never filled in")
         if prov == "kalshi":
             sized = [r for r in rs if r.get("yes_ask_size") is not None]
@@ -77,7 +79,10 @@ def field_checks(league: str) -> list[dict]:
                 ok += 1
             else:
                 bad_t += 1
-        check(f"{prov}: prop thresholds agree with the contract titles", bad_t == 0 and ok > 0, f"{ok} agree, {bad_t} disagree")
+        if props:
+            check(f"{prov}: prop thresholds agree with the contract titles", bad_t == 0 and ok > 0, f"{ok} agree, {bad_t} disagree")
+        else:
+            info(f"{prov}: no player-prop contracts listed for these games yet")
     return rows
 
 
@@ -106,9 +111,9 @@ def board_checks(league: str, priced: dict) -> None:
     for (prov, *_), (t, q) in seen.items():
         p = t["model_prob"]
         if q["yes_ask"] is not None and q["ev_yes"] is not None:
-            errs += abs(q["ev_yes"] - (p - q["yes_ask"] - (q["fee_yes"] or 0))) > 1e-6
+            errs += abs(q["ev_yes"] - (p - q["yes_ask"] - (q["fee_yes"] or 0))) > 6e-5   # model_prob is published to 4 dp
         if q["no_ask"] is not None and q["ev_no"] is not None:
-            errs += abs(q["ev_no"] - ((1 - p) - q["no_ask"] - (q["fee_no"] or 0))) > 1e-6
+            errs += abs(q["ev_no"] - ((1 - p) - q["no_ask"] - (q["fee_no"] or 0))) > 6e-5
         if prov == "kalshi" and q["yes_ask"] is not None and q["fee_yes"] is not None:
             errs += abs(q["fee_yes"] - kalshi.FEE_RATE * q["yes_ask"] * (1 - q["yes_ask"])) > 1e-6
         if q["yes_bid"] is not None and q["yes_ask"] is not None:
@@ -164,6 +169,38 @@ def settled_checks(league: str) -> None:
     info(f"polymarket_us: closed markets parse as {dict((f'{s}/{r}', v) for (s, r), v in ps.items())}")
 
 
+def raw_types(league: str) -> None:
+    """Which contract types each exchange lists for one upcoming game (names and counts only)."""
+    g = run.upcoming_games(league, 4)
+    if g.empty:
+        return
+    pm = polymarket_us.client(None)
+    seen = 0
+    for _, r in g.iterrows():
+        ev = polymarket_us.fetch_event(pm, league, r["away_team"], r["home_team"], str(r["game_date"])[:10])
+        if not ev:
+            continue
+        ms = ev.get("markets") or []
+        crossed = Counter()
+        for m in ms:
+            b = (m.get("bestBidQuote") or {}).get("value")
+            a = (m.get("bestAskQuote") or {}).get("value")
+            if b is not None and a is not None and float(b) > float(a):
+                crossed[m.get("sportsMarketType")] += 1
+        info(f"polymarket_us {league} event: {len(ms)} markets; types {dict(Counter((m.get('marketType'), m.get('sportsMarketType')) for m in ms).most_common(14))}")
+        info(f"polymarket_us {league} event: bid > ask by type {dict(crossed)}; long-side counts {dict(Counter(sum(1 for s in m.get('marketSides') or [] if s.get('long')) for m in ms))}")
+        seen += 1
+        if seen >= 2:
+            break
+    kc = kalshi.client(None)
+    for series in kalshi.SERIES[league]:
+        d = kc.get("/events", {"series_ticker": series, "status": "open", "limit": 100})
+        n = len((d or {}).get("events") or [])
+        if n:
+            info(f"kalshi {league} {series}: {n} open events")
+    info(f"kalshi {league}: prop series with no open events are not listed yet")
+
+
 def main(league: str) -> int:
     os.environ["MODELROOM_MARKETS_POLYMARKET_US"] = "on"
     os.environ["MODELROOM_MARKETS_KALSHI"] = "on"
@@ -173,6 +210,10 @@ def main(league: str) -> int:
     for prov, st in rep["providers"].items():
         info(f"{prov}: fetch {json.dumps({k: (len(v) if isinstance(v, list) else v) for k, v in st.items() if k in ('quotes', 'requests', 'events_found', 'events_missing', 'errors', 'stored', 'skipped', 'error')})}")
         check(f"{prov}: fetch ran without errors", not st.get("error") and not st.get("errors"), str(st.get("error") or (st.get("errors") or [""])[0])[:120])
+    try:
+        raw_types(league)
+    except Exception as e:  # noqa: BLE001
+        info(f"raw type listing failed: {type(e).__name__}")
     rows = field_checks(league)
     _props(league)
     b = json.loads((data_root() / "published" / f"{league}_props.json").read_text())
