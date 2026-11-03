@@ -12,17 +12,19 @@ const TIERS: readonly TierId[] = ["free", "plus", "pro"];
  * in private.effective_tier(). Any failure resolves to "free" so an outage
  * can never unlock paid data. Cached per request.
  */
-export const getTierForUser = cache(async (userId: string): Promise<TierId> => {
+export const getTierLookup = cache(async (userId: string): Promise<{ tier: TierId; problem: string | null }> => {
   const db = getSupabaseAdmin();
-  if (!db) return "free";
+  if (!db) return { tier: "free", problem: "the server key isn't configured (SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY, a secret key)" };
 
   const { data, error } = await db.rpc("effective_tier_for", { p_user: userId });
   if (error) {
     console.error("[membership] tier lookup failed; treating viewer as free", error.message);
-    return "free";
+    return { tier: "free", problem: `plan lookup failed: ${error.message}` };
   }
-  return TIERS.includes(data as TierId) ? (data as TierId) : "free";
+  return { tier: TIERS.includes(data as TierId) ? (data as TierId) : "free", problem: null };
 });
+
+export const getTierForUser = cache(async (userId: string): Promise<TierId> => (await getTierLookup(userId)).tier);
 
 export interface MembershipRow {
   id: string;
