@@ -31,7 +31,7 @@ describe("login configuration", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     expect(authEnabled()).toBe(false);
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://x.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_test";
     expect(authEnabled()).toBe(true);
   });
 });
@@ -44,7 +44,7 @@ describe("plan switcher", () => {
     delete process.env.VERCEL_ENV;
     expect(isTierPreviewEnabled()).toBe(true);
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://x.supabase.co";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_test";
     expect(isTierPreviewEnabled()).toBe(false);
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.VERCEL_ENV = "production";
