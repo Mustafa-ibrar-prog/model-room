@@ -129,7 +129,7 @@ for (const device of ["desktop", "phone"]) {
   const dt = await det.innerText();
   check(/Model/.test(dt) && /Market/.test(dt) && /Polymarket US/.test(dt) && /Kalshi/.test(dt), "detail shows model, market and both exchanges");
   check(/Mean/.test(dt) && /Median/.test(dt) && /80% range/.test(dt) && /confidence/.test(dt), "detail shows mean, median, 80% range and sample size");
-  const marketCell = (await det.locator(".text-faint", { hasText: "Market unavailable" }).count()) + (await det.locator("td.text-market").count());
+  const marketCell = (await det.locator(".text-faint", { hasText: "Market unavailable" }).count()) + (await det.locator("td", { hasText: /\d+\/\d+¢|–\/|\/–/ }).count());
   check(marketCell >= 2, "each exchange shows a price or 'Market unavailable'");
   // Favorites (this browser) and recently viewed.
   const star = page.locator("li[data-fav-id] button[aria-pressed]").first();

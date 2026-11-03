@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatKickoff, formatNumber, formatPct, formatTimestamp } from "@/lib/format";
 import { providerName } from "@/lib/providers";
-import { getExplorer, lineKey, SORTS, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
+import { getExplorer, lineKey, marketMid, SORTS, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
 import { getViewer } from "@/server/viewer";
 import { isLocked, type League } from "@/types/domain";
 import type { PropLineView } from "@/types/props";
@@ -126,11 +126,13 @@ function Contract({ l, href, active }: { l: PropLineView; href: string; active: 
 /** The market's main line next to ours: "Market 25+ at 48% · Model 61%". */
 function MarketLine({ r }: { r: ExplorerRow }) {
   const h = r.headline;
-  if (!h?.market || h.market.mid == null) return null;
-  const gap = Math.round((h.modelProb - h.market.mid) * 100);
+  const mid = h ? marketMid(h) : null;
+  if (!h || mid == null) return null;
+  const gap = Math.round((h.modelProb - mid) * 100);
+  const wide = !h.market;
   return (
     <section aria-label="Market line" className="flex shrink-0 items-center gap-3 rounded-md bg-navy-850 px-2.5 py-1.5 font-mono text-[0.72rem] md:w-44 md:flex-col md:items-start md:gap-0.5">
-      <span className="text-market">Market {lineLabel(h)} · {formatPct(h.market.mid)}</span>
+      <span className="text-market" title={wide ? "Wide or one-sided quote: shown for reference, never used for an edge" : undefined}>Market {lineLabel(h)} · {formatPct(mid)}{wide ? " (wide)" : ""}</span>
       <span className="text-model">Model {formatPct(h.modelProb)}</span>
       {Math.abs(gap) >= 3 ? <span className={Math.abs(gap) >= 8 ? "text-edge" : "text-mute"}>{gap > 0 ? "+" : ""}{gap} pts</span> : null}
     </section>
