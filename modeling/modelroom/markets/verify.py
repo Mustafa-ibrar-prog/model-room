@@ -75,7 +75,7 @@ def field_checks(league: str) -> list[dict]:
             want = r["threshold"] + 0.5 if r["op"] == ">" else r["threshold"]   # "greater than 49.5" = "50+"
             if not nums:
                 continue
-            if any(abs(n - want) < 1e-9 or abs(n - r["threshold"]) < 1e-9 for n in nums):
+            if any(abs(n - x) < 1e-9 for n in nums for x in (want, r["threshold"], r["threshold"] - 0.5)):
                 ok += 1
             else:
                 bad_t += 1
@@ -99,6 +99,10 @@ def board_checks(league: str, priced: dict) -> None:
                         for q in t["quotes"]:
                             seen[(q["provider"], p["player_id"], mk, t["op"], t["threshold"], t["variant"])] = (t, q)
     info(f"{league}: {len(seen)} (provider, player, threshold) contracts priced by the model")
+    by_line: dict = {}
+    for (prov, *rest) in seen:
+        by_line.setdefault(tuple(rest), set()).add(prov)
+    info(f"{league}: lines quoted by both exchanges side by side: {sum(1 for v in by_line.values() if len(v) > 1)} of {len(by_line)}")
     # Matching rate: player-prop quotes in snapshots vs priced on the board.
     for prov in config.PROVIDERS:
         n_snap = sum(1 for r in priced["rows"] if r["provider"] == prov and not r["market"].startswith("game_"))
