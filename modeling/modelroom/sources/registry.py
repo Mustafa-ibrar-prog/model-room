@@ -103,6 +103,16 @@ REGISTRY: tuple[Source, ...] = (
         priority=40, collector="nfl ingest", datasets=("processed/nfl/pass_plays.parquet",),
     ),
     Source(
+        id="nflverse_depth_charts", name="nflverse depth charts", sport="nfl",
+        categories=("depth charts", "starting quarterback"), official=False,
+        api_key="none", status="collected",
+        access="https://github.com/nflverse/nflverse-data/releases/download/depth_charts/depth_charts_<season>.parquet",
+        license="nflverse data, CC-BY 4.0 (NFL.com weekly charts through 2024, ESPN snapshots from 2025); re-check before commercial use",
+        update_frequency="weekly through 2024; several snapshots a day from 2025", historical_coverage="2001 to now",
+        limitations=("weekly charts before 2025 carry no timestamp; the chart for a game's week is assumed published before it",),
+        priority=40, collector="nfl ingest", datasets=("processed/nfl/starters.parquet",),
+    ),
+    Source(
         id="nfl_com", name="NFL.com", sport="nfl",
         categories=("schedules", "scores", "standings", "team stats", "player stats", "rosters", "injuries"),
         official=True, api_key="none", status="reference-only",

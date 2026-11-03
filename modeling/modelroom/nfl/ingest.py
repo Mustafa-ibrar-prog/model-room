@@ -204,8 +204,21 @@ def run(*, skip_download: bool = False, local_dir: Path | None = None) -> dict:
     return summary
 
 
+def qb_source() -> str:
+    """Which starting QB the engines use. "listed" (the schedule's field, the active model) until the
+    projected-starter version passes validation; "projected" / "previous" for backtests (see starters.py)."""
+    v = os.environ.get("MODELROOM_NFL_QB_SOURCE", "listed").strip().lower()
+    return v if v in ("listed", "projected", "previous") else "listed"
+
+
 def load_games() -> pd.DataFrame:
     f = processed_dir("nfl") / "games.parquet"
     if not f.exists():
         raise FileNotFoundError("No NFL data yet. Run: python -m modelroom nfl ingest")
-    return pd.read_parquet(f)
+    g = pd.read_parquet(f)
+    src = qb_source()
+    if src != "listed":
+        from .starters import apply
+
+        g = apply(g, src)
+    return g
