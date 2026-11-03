@@ -26,32 +26,48 @@ function Row({ g, league, now, avail, live }: { g: GameView; league: League; now
   const se = isLocked(g.spreadEdge) ? null : live?.spread && g.modelSpread != null ? live.spread.home - g.modelSpread : g.spreadEdge;
   const te = isLocked(g.totalEdge) ? null : live?.total && g.modelTotal != null ? g.modelTotal - live.total.line : g.totalEdge;
   const cell = "rounded-md bg-navy-850 px-2 py-1.5 text-center";
+  const when = started ? "Started" : formatKickoff(g.startTime).split(", ").slice(-1)[0];
+  const props = (
+    <Link
+      href={`/props?sport=${league}&game=${encodeURIComponent(g.id)}`}
+      className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-navy-800 px-3 py-1 text-sm font-600 text-ink hover:bg-navy-700"
+    >
+      Props{avail?.players ? <span className="font-400 text-mute">{avail.players}</span> : null}
+      <span aria-hidden="true" className="text-faint">›</span>
+    </Link>
+  );
   return (
-    <li className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 border-b border-navy-700/70 px-3 py-2.5 last:border-b-0 @2xl:grid-cols-[4.5rem_minmax(10rem,1.3fr)_repeat(3,minmax(5.5rem,1fr))_7rem]">
-      <div className="order-first col-span-2 flex items-center gap-2 font-mono text-[0.72rem] text-faint @2xl:col-span-1 @2xl:block">
-        <span className={started ? "text-edge" : ""}>{started ? "Started" : formatKickoff(g.startTime).split(", ").slice(-1)[0]}</span>
-        {g.neutral ? <span className="@2xl:block">Neutral</span> : null}
+    <li className="grid grid-cols-1 gap-2 border-b border-navy-700/70 px-3 py-3 last:border-b-0 @2xl:grid-cols-[4.5rem_minmax(9rem,1.3fr)_repeat(3,minmax(5.5rem,1fr))_6.5rem] @2xl:items-center @2xl:gap-x-3 @2xl:py-2.5">
+      <div className="flex items-center justify-between gap-2 @2xl:block">
+        <span className="font-mono text-[0.72rem] text-faint">
+          <span className={started ? "text-edge" : ""}>{when}</span>
+          {g.neutral ? <span className="ml-2 @2xl:ml-0 @2xl:block">Neutral</span> : null}
+        </span>
+        <span className="@2xl:hidden">{props}</span>
       </div>
       <div className="min-w-0 space-y-1">
         {[{ t: g.away, side: "away" as const }, { t: g.home, side: "home" as const }].map(({ t, side }) => (
           <div key={side} className="flex items-center gap-2">
             <TeamBadge league={league} abbr={t.abbr} size="sm" />
-            <span className="min-w-0 flex-1 truncate text-sm text-ink">{t.name}</span>
+            <span className="min-w-0 flex-1 truncate text-sm text-ink">
+              <span className="@2xl:hidden @4xl:inline">{t.name}</span>
+              <span className="hidden @2xl:inline @4xl:hidden">{nickname(t.name)}</span>
+            </span>
             {!isLocked(g.projectedScore) ? <span className="font-mono text-sm text-model">{formatNumber(side === "home" ? g.projectedScore.home : g.projectedScore.away)}</span> : null}
           </div>
         ))}
       </div>
-      <div className="col-span-2 grid grid-cols-3 gap-1.5 @2xl:contents">
+      <div className="grid grid-cols-3 gap-1.5 @2xl:contents">
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Spread</div>
           <div className="font-mono text-sm text-model">{model.text}</div>
-          <div className={`font-mono text-[0.7rem] ${market ? "text-market" : "text-faint"}`}>{market ? `${pm}${market.text}` : "no line"}</div>
+          {market ? <div className="font-mono text-[0.7rem] text-market">{pm}{market.text}</div> : null}
           {se != null && Math.abs(se) >= 1 ? <div className={`font-mono text-[0.66rem] ${Math.abs(se) >= 3 ? "text-edge" : "text-edge/70"}`}>gap {Math.abs(se).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Total</div>
           <div className="font-mono text-sm text-model">{formatNumber(g.modelTotal)}</div>
-          <div className={`font-mono text-[0.7rem] ${mTotal != null ? "text-market" : "text-faint"}`}>{mTotal != null ? `${pm}${formatNumber(mTotal)}` : "no line"}</div>
+          {mTotal != null ? <div className="font-mono text-[0.7rem] text-market">{pm}{formatNumber(mTotal)}</div> : null}
           {te != null && Math.abs(te) >= 1.5 ? <div className={`font-mono text-[0.66rem] ${Math.abs(te) >= 4 ? "text-edge" : "text-edge/70"}`}>{te > 0 ? "over" : "under"} {Math.abs(te).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
@@ -64,18 +80,22 @@ function Row({ g, league, now, avail, live }: { g: GameView; league: League; now
           ) : null}
         </div>
       </div>
-      <div className="col-span-2 flex items-center justify-between gap-2 @2xl:col-span-1 @2xl:block @2xl:text-right">
-        <Link href={`/props?sport=${league}&game=${encodeURIComponent(g.id)}`} className="inline-block rounded-full bg-navy-800 px-3 py-1 text-sm font-600 text-ink hover:bg-navy-700">
-          Props{avail?.players ? ` · ${avail.players}` : ""}
-        </Link>
-        <div className="font-mono text-[0.65rem] text-faint @2xl:mt-1">{avail?.priced ? <span className="text-market">{avail.priced} exchange prices</span> : "no exchange prices"}</div>
+      <div className="hidden text-right @2xl:block">
+        {props}
+        {avail?.priced ? <div className="mt-1 font-mono text-[0.65rem] text-market">{avail.priced} exchange prices</div> : null}
       </div>
     </li>
   );
 }
 
+/** "Chicago Bears" → "Bears"; keeps two-word nicknames that need it. */
+function nickname(name: string): string {
+  const two = ["Trail Blazers", "Red Wings", "Blue Jackets", "Maple Leafs", "Golden Knights"];
+  return two.find((t) => name.endsWith(t)) ?? name.split(" ").slice(-1)[0];
+}
+
 /** Upcoming games as compact rows grouped by day. `day` = only that date (YYYY-MM-DD). */
-export async function GameRows({ league, day, withinHours, limit, note = true }: { league: League; day?: string | null; withinHours?: number; limit?: number; note?: boolean }) {
+export async function GameRows({ league, day, withinHours, limit, note = true, upcomingOnly = false }: { league: League; day?: string | null; withinHours?: number; limit?: number; note?: boolean; upcomingOnly?: boolean }) {
   const viewer = await getViewer();
   const [board, props] = await Promise.all([getLeagueBoard(league, viewer.tier), loadPropsBoard(league)]);
   if (!board.ok) return <Unavailable title={`${league.toUpperCase()} projections unavailable`} body={board.reason} />;
@@ -91,6 +111,7 @@ export async function GameRows({ league, day, withinHours, limit, note = true }:
   const first = board.upcoming[0]?.startTime ? Date.parse(board.upcoming[0].startTime) : null;
   let games = day ? board.upcoming.filter((g) => g.gameDate === day) : board.upcoming;
   if (!day && withinHours && first !== null) games = games.filter((g) => g.startTime && Date.parse(g.startTime) - first <= withinHours * 3600_000);
+  if (upcomingOnly) games = games.filter((g) => !g.startTime || Date.parse(g.startTime) > now);
   if (limit) games = games.slice(0, limit);
   const live = (await ownerLiveMarkets()) ? await liveGameLines(league, games.filter((g) => !g.startTime || Date.parse(g.startTime) > now)) : null;
   if (!games.length) {

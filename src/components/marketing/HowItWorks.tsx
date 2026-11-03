@@ -30,9 +30,10 @@ export function HowItWorks() {
       title="How it works"
       intro="The same five steps run for every NFL and NBA game. Each model version is tested on seasons it never saw before its projections are shown."
     >
-      <ol className="grid gap-px overflow-hidden rounded-xl border border-navy-700 bg-navy-700 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Phones: swipe through the steps. Wider: a grid. */}
+      <ol className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:gap-px sm:overflow-hidden sm:rounded-xl sm:border sm:border-navy-700 sm:bg-navy-700 sm:px-0 sm:pb-0 sm:grid-cols-2 lg:grid-cols-5">
         {STEPS.map((s, i) => (
-          <li key={s.title} className="bg-navy-900 p-5">
+          <li key={s.title} className="w-[78%] shrink-0 snap-start rounded-xl border border-navy-700 bg-navy-900 p-5 sm:w-auto sm:rounded-none sm:border-0">
             <span className="font-display text-3xl font-700 text-model/80">{i + 1}</span>
             <h3 className="mt-2 font-display text-xl font-600 text-ink">{s.title}</h3>
             <p className="mt-2 text-[0.93rem] leading-relaxed text-mute">{s.body}</p>

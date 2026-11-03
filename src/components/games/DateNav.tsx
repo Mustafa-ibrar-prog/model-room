@@ -38,7 +38,7 @@ export function DateNav({
   const arrow = "rounded-full bg-navy-850 px-2.5 py-1.5 text-sm text-mute hover:text-ink";
   const max = upcoming.length ? upcoming[upcoming.length - 1] : today;
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex w-full min-w-0 items-center gap-1.5 overflow-x-auto pb-0.5 [scrollbar-width:none] sm:w-auto sm:flex-wrap sm:overflow-visible sm:pb-0 [&>*]:shrink-0">
       {prev ? <Link href={link(prev)} className={arrow} aria-label={`Previous game day, ${longDate(prev)}`}>‹</Link> : <span className={`${arrow} opacity-40`} aria-hidden="true">‹</span>}
       <Link href={link(yesterday)} className={chip(date === yesterday)}><span className="sm:hidden">Yest.</span><span className="hidden sm:inline">Yesterday</span></Link>
       <Link href={link(today)} className={chip(date === today)}>Today</Link>
@@ -49,7 +49,7 @@ export function DateNav({
         {Object.entries(params).map(([k, v]) => <input key={k} type="hidden" name={k} value={v} />)}
         <label className="sr-only" htmlFor={`date-${base}`}>Pick a date</label>
         <input id={`date-${base}`} type="date" name="date" defaultValue={date ?? today} min={days[0]} max={max}
-          className="w-[9.5rem] rounded-full border border-navy-700 bg-navy-900 px-3 py-1 font-mono text-sm text-ink" />
+          className="w-[8.75rem] rounded-full border border-navy-700 bg-navy-900 px-3 py-1 font-mono text-sm text-ink sm:w-[9.5rem]" />
         <noscript><button type="submit" className={arrow}>Go</button></noscript>
         <AutoSubmit inputs />
       </form>
