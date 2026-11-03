@@ -53,6 +53,7 @@ SERIES = {
     },
 }
 VARIANTS = {"KXNFLFFPTS": "sleeper_ppr"}
+DECIMAL_STATS = {"fantasy_points"}   # every other prop stat is a whole number
 VOID_RULES = {"KXNFLFFPTS": "did not play: scores 0"}
 DEFAULT_VOID = "active but no snap: settles at fair price before game start"
 MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
@@ -110,8 +111,11 @@ def parse_events(series: str, payload: dict, league: str) -> list[PropQuote]:
                 continue
             cs = m.get("custom_strike") or {}
             bid, ask = price(m.get("yes_bid_dollars")), price(m.get("yes_ask_dollars"))
+            op, thr = (">" if st == "greater" else ">="), strike
+            if op == ">" and key not in DECIMAL_STATS and abs(strike * 2 - round(strike * 2)) < 1e-9 and round(strike * 2) % 2 == 1:
+                op, thr = ">=", strike + 0.5   # whole-number stat: "more than 49.5" is the same contract as "50+"
             out.append(PropQuote(
-                provider=PROVIDER, league=league, market=key, op=">" if st == "greater" else ">=", threshold=strike,
+                provider=PROVIDER, league=league, market=key, op=op, threshold=thr,
                 player_name=name, team=_team_from_ticker(m.get("ticker", ""), ev.get("event_ticker", ""), raw, league),
                 game_date=gd, home_team=home, away_team=away, start_time=None,
                 provider_event_id=ev.get("event_ticker"), provider_market_id=m.get("ticker"),

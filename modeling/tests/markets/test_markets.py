@@ -62,9 +62,10 @@ def test_polymarket_missing_side_stays_missing(pm_event):
 # ------------------------------------------------------------------ Kalshi
 def test_kalshi_parses_strikes_and_skips_protected(kx):
     qs = kalshi.parse_events("KXNFLRECYDS", kx["KXNFLRECYDS"], "nfl")
-    assert qs and all(q.market == "receiving_yards" and q.op == ">" for q in qs)
+    # "more than 49.5 yards" on a whole-number stat is the same contract as "50+": normalized so it lines up
+    # with Polymarket's "50+" and the model's ladder.
+    assert qs and all(q.market == "receiving_yards" and q.op == ">=" and q.threshold % 1 == 0 for q in qs)
     q = qs[0]
-    assert q.threshold == 49.5 or q.threshold % 1 == 0.5
     assert q.game_date == "2026-11-02" and {q.home_team, q.away_team} == {"CHI", "SEA"}
     assert q.sportradar_player_id and q.team in ("CHI", "SEA")
     assert q.yes_bid_size is not None
@@ -74,6 +75,7 @@ def test_kalshi_parses_strikes_and_skips_protected(kx):
 def test_kalshi_fantasy_is_a_different_contract(kx):
     qs = kalshi.parse_events("KXNFLFFPTS", kx["KXNFLFFPTS"], "nfl")
     assert qs and all(q.variant == "sleeper_ppr" and "scores 0" in q.void_rule for q in qs)
+    assert all(q.op == ">" for q in qs)          # fantasy points have decimals: "more than 14.5" stays as is
 
 
 def test_kalshi_team_codes():
@@ -207,7 +209,7 @@ def test_nba_adapters_map_teams_and_markets():
     assert {q.team for q in qs} <= {"OKC", "CLE"} and all(q.op == ">=" for q in qs)
     kx = json.loads((FIX / "kalshi_events_nba.json").read_text())
     ks = kalshi.parse_events("KXNBAPTS", kx["KXNBAPTS"], "nba")
-    assert ks and all(q.market == "points" and q.op == ">" and q.team in ("OKC", "CLE") for q in ks)
+    assert ks and all(q.market == "points" and q.op == ">=" and q.threshold % 1 == 0 and q.team in ("OKC", "CLE") for q in ks)
     assert all(q.sportradar_player_id for q in ks)
 
 
