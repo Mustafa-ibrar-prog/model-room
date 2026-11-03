@@ -94,28 +94,8 @@ jobs:
       - name: Check the test accounts sign in with the right plans
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/verify-supabase.mjs accounts
-      - name: Check row-level security
+      - name: Check row-level security and privileges
         if: steps.check.outputs.ready == 'yes'
-        run: |
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtA <<'SQL'
-          do $$
-          declare uid uuid; others int; own int; rls_off int;
-          begin
-            select count(*) into rls_off from pg_tables where schemaname = 'public' and not rowsecurity;
-            if rls_off > 0 then raise exception 'FAIL  % public table(s) have row-level security off', rls_off; end if;
-            select id into uid from auth.users where email = 'free-test@modelroom.test';
-            perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
-            set local role authenticated;
-            select count(*) into others from public.memberships where user_id <> uid;
-            select count(*) into own from public.memberships where user_id = uid;
-            reset role;
-            if others > 0 then raise exception 'FAIL  a signed-in user can read % other membership row(s)', others; end if;
-            raise notice 'ok    every public table has row-level security on; a signed-in user sees only their own memberships (% own rows)', own;
-            perform set_config('request.jwt.claims', null, true);
-            set local role anon;
-            select count(*) into others from public.memberships;
-            reset role;
-            if others > 0 then raise exception 'FAIL  anonymous visitors can read memberships'; end if;
-            raise notice 'ok    anonymous visitors can read no memberships';
-          end $$;
-          SQL
+        # Read-only (rolled back). Fails if RLS is off anywhere, anon has any access to account tables,
+        # signed-in users can write plans, or a signed-in user can see anyone else's membership.
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -qtA -f scripts/check-rls.sql

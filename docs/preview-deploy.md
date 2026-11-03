@@ -56,7 +56,7 @@ The workflow checks everything before and after it runs, and prints no secrets:
 - the database connection
 - migrations applied
 - each test account signing in with the right plan
-- row-level security: a signed-in user sees only their own memberships, and an anonymous visitor sees none
+- row-level security and privileges (`scripts/check-rls.sql`, read-only): RLS is on for every table; anonymous visitors have no access to account tables; signed-in users can read only their own membership and can't write plans
 
 Then:
 
