@@ -29,6 +29,8 @@ The NFL model is less accurate than the market line, and no claim is made that e
 
 NFL props 0.1.0 (2023 to 2025, 502,813 thresholds across 13 markets): log loss 0.418 vs 0.446 for each player's recent hit rate, calibration error 1.1%. That measures probability accuracy only; there's no historical prop-price data, so no ROI or closing-line value yet. Details: `docs/models/nfl-props.md`.
 
+NBA props 0.1.0 (2022-23 to 2025-26, 2,395,644 thresholds across 7 markets): log loss 0.408 vs 0.415 for each player's recent hit rate, calibration error 0.7%. The gain is small for points and PRA, larger for rebounds, steals, blocks and threes. Details: `docs/models/nba-props.md`.
+
 ## Run it locally on Windows
 
 You need **Node.js 22 LTS** (nodejs.org), **Python 3.12** (python.org, tick "Add python.exe to PATH") and **Git**. No database, domain, Shopify or paid API is needed.
