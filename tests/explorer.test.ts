@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getExplorer } from "@/server/data/explorer";
+import { getExplorer, lineKey } from "@/server/data/explorer";
 import { isLocked } from "@/types/domain";
 
 const q = (ev: number | null) => ({
@@ -83,5 +83,29 @@ describe("props explorer", () => {
     if (!plus.ok || !pro.ok || isLocked(plus.rows) || isLocked(pro.rows)) throw new Error("expected rows");
     expect(isLocked(plus.rows[0].inputs)).toBe(true);
     expect(isLocked(pro.rows[0].inputs)).toBe(false);
+  });
+
+  it("opens one contract by its key, and never for Free", async () => {
+    const x = await getExplorer("nfl", "plus", { cat: "receiving_yards" }, now);
+    if (!x.ok || isLocked(x.rows)) throw new Error("expected rows");
+    const r = x.rows[0];
+    const key = lineKey(r.id, r.lines[0]);
+    const d = await getExplorer("nfl", "plus", { cat: "receiving_yards", line: key }, now);
+    if (!d.ok || isLocked(d.detail) || !d.detail) throw new Error("expected detail");
+    expect(d.detail.row.id).toBe(r.id);
+    expect(d.detail.line.threshold).toBe(r.lines[0].threshold);
+    const bad = await getExplorer("nfl", "plus", { cat: "receiving_yards", line: "nope~ge1" }, now);
+    expect(bad.ok && bad.detail).toBe(null);
+    const free = await getExplorer("nfl", "free", { cat: "receiving_yards", line: key }, now);
+    expect(free.ok && isLocked(free.detail)).toBe(true);
+  });
+
+  it("searches every game when no game is picked, and keeps a day's games only", async () => {
+    const s = await getExplorer("nfl", "plus", { cat: "receiving_yards", q: "wide" }, now);
+    if (!s.ok || isLocked(s.rows)) throw new Error("expected rows");
+    expect(s.searchAll).toBe(true);
+    expect(s.rows.map((r) => r.name).sort()).toEqual(["Wide One", "Wide Two"]);
+    const none = await getExplorer("nfl", "plus", { cat: "receiving_yards", date: "2030-02-01" }, now);
+    expect(none.ok && none.games.length).toBe(0);
   });
 });

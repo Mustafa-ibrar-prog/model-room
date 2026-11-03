@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { DateNav } from "@/components/games/DateNav";
-import { PropsExplorer } from "@/components/props/PropsExplorer";
+import { Marketplace } from "@/components/market/Marketplace";
 import { PropsHistory } from "@/components/props/PropsHistory";
 import { etDate, isDate } from "@/lib/dates";
 import { getHistoryIndex } from "@/server/data/history";
+import { getUpcomingDates } from "@/server/data/upcoming";
 import { PageHeader, TableSkeleton } from "@/components/ui/primitives";
 import type { League } from "@/types/domain";
 
@@ -17,11 +18,9 @@ type SP = Promise<Record<string, string | string[] | undefined>>;
 export default function PropsPage({ searchParams }: { searchParams: SP }) {
   return (
     <>
-      <PageHeader
-        title="Player props"
-        intro="Pick a game, then a stat. Every player who matters for it, with the model's projection and the chance of each line, next to exchange prices where they're listed."
-      />
-      <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+      <div className="hidden sm:block"><PageHeader title="Player props" wide /></div>
+      <h1 className="sr-only sm:hidden">Player props</h1>
+      <div className="mx-auto max-w-[96rem] px-4 pb-16 pt-4 sm:px-6 sm:pt-0">
         <Suspense fallback={<TableSkeleton rows={8} />}>
           <Explorer searchParams={searchParams} />
         </Suspense>
@@ -40,33 +39,34 @@ async function Explorer({ searchParams }: { searchParams: SP }) {
   await connection(); // the date is per request
   const today = etDate();
   const raw = one(sp.date);
-  const date = isDate(raw) && raw < today ? raw : null;
-  const index = await getHistoryIndex(league);
+  const date = isDate(raw) ? raw : null;
+  const past = date !== null && date < today;
+  const [index, upcoming] = await Promise.all([getHistoryIndex(league), getUpcomingDates(league)]);
   const dates = (index?.dates ?? []).filter((d) => d.props > 0 || d.games > 0).map((d) => d.date);
   return (
     <>
-      <div role="tablist" aria-label="Sport" className="mb-5 flex gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+      <div role="tablist" aria-label="Sport" className="flex gap-1 rounded-full bg-navy-850 p-1">
         {(["nfl", "nba"] as const).map((l) => (
           <Link
             key={l}
             role="tab"
             aria-selected={l === league}
             href={`/props?sport=${l}`}
-            className={`rounded-md border px-4 py-2 font-display text-base font-600 uppercase tracking-wider ${l === league ? "border-model bg-model text-navy-950" : "border-navy-700 bg-navy-900 text-ink"}`}
+            className={`rounded-full px-4 py-1 font-display text-base font-600 uppercase tracking-wider ${l === league ? "bg-model text-navy-950" : "text-mute hover:text-ink"}`}
           >
             {l}
           </Link>
         ))}
       </div>
-      <div className="mb-5">
-        <DateNav base="/props" params={{ sport: league }} date={date} dates={dates} today={today} />
+        <DateNav base="/props" params={{ sport: league }} date={date} dates={dates} upcoming={upcoming} today={today} />
       </div>
-      {date ? (
+      {past && date ? (
         <PropsHistory league={league} date={date} game={game} cat={one(sp.cat)} q={one(sp.q)} />
       ) : (
-        <PropsExplorer
+        <Marketplace
           league={league}
-          query={{ game, cat: one(sp.cat), q: one(sp.q), sort: one(sp.sort), team: one(sp.team), only: one(sp.only) }}
+          query={{ game, cat: one(sp.cat), q: one(sp.q), sort: one(sp.sort), team: one(sp.team), only: one(sp.only), line: one(sp.line), date: date ?? undefined }}
         />
       )}
     </>

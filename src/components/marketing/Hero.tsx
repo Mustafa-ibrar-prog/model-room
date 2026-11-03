@@ -7,15 +7,15 @@ import { isLocked, type GameView } from "@/types/domain";
 
 export function Hero() {
   return (
-    <section className="mx-auto grid max-w-7xl items-center gap-12 px-4 pb-10 pt-12 sm:px-6 sm:pt-20 lg:grid-cols-[1fr_1.05fr]">
+    <section className="mx-auto grid max-w-7xl items-center gap-8 px-4 pb-6 pt-8 sm:px-6 sm:pt-12 lg:grid-cols-[1fr_1.05fr]">
       <div>
-        <h1 className="font-display text-[3.2rem] font-700 leading-[0.92] tracking-tight text-ink sm:text-[4.6rem]">
+        <h1 className="font-display text-[2.6rem] font-700 leading-[0.95] tracking-tight text-ink sm:text-[3.6rem]">
           Where the market and the model disagree.
         </h1>
-        <p className="mt-5 max-w-lg text-lg leading-relaxed text-mute">
+        <p className="mt-4 max-w-lg text-base leading-relaxed text-mute">
           Model Room projects every NFL and NBA spread and total from play-by-play and box-score data, then shows the gap against the posted line.
         </p>
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/nfl" className="rounded-full bg-model px-5 py-2.5 font-600 text-navy-950 hover:bg-model/90">
             Open the NFL board
           </Link>

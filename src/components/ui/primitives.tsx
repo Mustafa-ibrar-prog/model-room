@@ -3,11 +3,11 @@ import { UpgradeLink } from "@/components/auth/UpgradeLink";
 import { tierName } from "@/config/tiers";
 import { isLocked, type Gate, type TierId } from "@/types/domain";
 
-export function PageHeader({ title, intro, children }: { title: string; intro: string; children?: ReactNode }) {
+export function PageHeader({ title, intro, children, wide = false }: { title: string; intro?: string; children?: ReactNode; wide?: boolean }) {
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-5 pt-6 sm:px-6 sm:pb-6 sm:pt-14">
-      <h1 className="font-display text-4xl font-700 leading-none tracking-tight text-ink sm:text-5xl">{title}</h1>
-      <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-mute sm:mt-3 sm:text-base">{intro}</p>
+    <div className={`mx-auto ${wide ? "max-w-[96rem]" : "max-w-7xl"} px-4 pb-4 pt-5 sm:px-6 sm:pt-8`}>
+      <h1 className="font-display text-3xl font-700 leading-none tracking-tight text-ink sm:text-4xl">{title}</h1>
+      {intro ? <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-mute">{intro}</p> : null}
       {children}
     </div>
   );

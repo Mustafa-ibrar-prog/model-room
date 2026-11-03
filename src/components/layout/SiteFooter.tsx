@@ -21,7 +21,7 @@ export function SiteFooter() {
         <nav aria-label="Boards">
           <h2 className="font-display text-base font-600 text-ink">Boards</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            {NAV.map((item) => (
+            {[...NAV.filter((n) => n.href !== "/"), { href: "/injuries", label: "Injuries" }, { href: "/ratings", label: "Power ratings" }].map((item) => (
               <li key={item.href}>
                 <Link href={item.href} className="text-mute hover:text-ink">
                   {item.label}
