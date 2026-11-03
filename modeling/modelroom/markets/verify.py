@@ -42,7 +42,7 @@ def _num_in(text: str) -> list[float]:
 
 def field_checks(league: str) -> list[dict]:
     snap = snapshots.latest(league)
-    rows = snap.to_dict("records") if len(snap) else []
+    rows = [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in snap.to_dict("records")] if len(snap) else []
     for prov in config.PROVIDERS:
         rs = [r for r in rows if r["provider"] == prov]
         props = [r for r in rs if not r["market"].startswith("game_")]
@@ -54,7 +54,7 @@ def field_checks(league: str) -> list[dict]:
         two = [r for r in rs if r.get("yes_bid") is not None and r.get("yes_ask") is not None]
         bad = [r for r in two if not (0 < r["yes_bid"] <= r["yes_ask"] < 1)]
         badp = [r for r in bad if not r["market"].startswith("game_")]
-        info(f"{prov}: player props with bid > ask in the listing: {len(badp)} of {sum(1 for r in two if not r['market'].startswith('game_'))} (flagged 'crossed book', never priced)")
+        check(f"{prov}: player props: bid ≤ ask, both inside (0, 1)", not badp, f"{len(badp)} crossed of {sum(1 for r in two if not r['market'].startswith('game_'))} two-sided")
         info(f"{prov}: game contracts with bid > ask: {len(bad) - len(badp)} (by market {dict(Counter(r['market'] for r in bad if r['market'].startswith('game_')))})")
         info(f"{prov}: two-sided {rate(len(two), len(rs))}; one-sided or empty books are flagged, never filled in")
         if prov == "kalshi":
@@ -127,6 +127,46 @@ def board_checks(league: str, priced: dict) -> None:
     info(f"{league}: edge grades {dict(grades)}; usable quotes {rate(sum(q['usable'] for _, q in seen.values()), len(seen))}")
     flags = Counter(f for _, q in seen.values() for f in q["flags"])
     info(f"{league}: quote flags {dict(flags.most_common(8))}")
+
+
+def matching_checks(league: str) -> None:
+    """Re-match the snapshot quotes to the board's players and audit how each match was made."""
+    import pandas as pd
+
+    from . import matching
+    from .schema import PropQuote
+
+    b = json.loads((data_root() / "published" / f"{league}_props.json").read_text())
+    players = pd.DataFrame([{"game_id": g["game_id"], "player_id": p["player_id"], "name": p["name"], "team": p["team"],
+                             "sportradar_id": None} for g in b["games"] for p in g["players"]])
+    sched = pd.DataFrame([{"game_id": g["game_id"], "game_date": g["game_date"], "home_team": g["home"]["abbr"], "away_team": g["away"]["abbr"]} for g in b["games"]])
+    if league == "nfl":
+        try:
+            from modelroom.nfl.props import inputs as I
+            ro = I.load({int(b["season"])}).rosters.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")["sportradar_id"]
+            players["sportradar_id"] = players["player_id"].map(ro)
+        except Exception:  # noqa: BLE001
+            pass
+    snap = snapshots.latest(league)
+    fields = PropQuote.__dataclass_fields__
+    qs = [PropQuote(**{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items() if k in fields})
+          for r in snap.to_dict("records") if not str(r["market"]).startswith("game_")]
+    for q in qs:
+        q.game_id = q.player_id = q.match_note = None
+    matching.match_games(qs, sched)
+    matching.match_players(qs, players)
+    team_of = {(r.game_id, r.player_id): r.team for r in players.itertuples()}
+    for prov in config.PROVIDERS:
+        mine = [q for q in qs if q.provider == prov]
+        if not mine:
+            continue
+        how = Counter((q.match_note or "unmatched").split(":")[0] + ": " + (q.match_note or "").split(": ")[-1] for q in mine)
+        info(f"{league} {prov}: how quotes matched {dict(how)}")
+        wrong = [q for q in mine if q.player_id and q.team and team_of.get((q.game_id, q.player_id)) not in (None, q.team)]
+        check(f"{league} {prov}: matched player's team agrees with the exchange's team", not wrong, f"{len(wrong)} disagree")
+        um = Counter((q.player_name, q.market) for q in mine if not q.player_id)
+        if um:
+            info(f"{league} {prov}: unmatched (player, market) examples {[f'{n} / {m}' for (n, m), _ in um.most_common(12)]}")
 
 
 def independence(league: str, with_prices: dict) -> None:
@@ -222,6 +262,10 @@ def main(league: str) -> int:
     with_prices = {(p["player_id"], mk, t["op"], t["threshold"], t["variant"]): t["model_prob"]
                    for g in b["games"] for p in g["players"] for mk, m in p["markets"].items() for t in m["thresholds"]}
     board_checks(league, {"rows": rows})
+    try:
+        matching_checks(league)
+    except Exception as e:  # noqa: BLE001
+        check(f"{league}: matching audit ran", False, f"{type(e).__name__}: {str(e)[:100]}")
     n = games.evaluate(league)
     info(f"{league}: game-market contracts evaluated {n}")
     try:
