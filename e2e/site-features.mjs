@@ -114,7 +114,12 @@ for (const device of ["desktop", "phone"]) {
   const first = (await page.locator("li[data-fav-id] .font-600.text-ink").first().innerText()).trim();
   const term = first.split(" ").pop();
   await page.fill("#q", term);
-  await nav(page, page.locator('form[action="/props"] button[type="submit"]'));
+  {
+    const before = page.url();
+    await page.press("#q", "Enter"); // the search box submits on Enter (phones: the keyboard's Search key)
+    await page.waitForURL((u) => u.toString() !== before, { timeout: 30000 }).catch(() => null);
+    await page.waitForLoadState("networkidle");
+  }
   const found = (await page.locator("li[data-fav-id] .font-600.text-ink").allInnerTexts()).map((s) => s.toLowerCase());
   check(found.length > 0 && found.every((n) => n.includes(term.toLowerCase())), `search "${term}" returns only matching players (${found.length})`);
   check((await page.locator("text=across every NFL game").count()) > 0, "search covers every game");
@@ -205,13 +210,11 @@ if (process.env.TEST_ACCOUNT_PASSWORD) {
   const { ctx, page, errors } = await session("desktop");
   for (const sport of ["nba", "nfl"]) {
     await go(page, `/props?sport=${sport}`);
-    const banner = page.locator("text=Owner view · live Polymarket US prices.");
+    const banner = page.locator("details[data-live]");
     const on = (await banner.count()) > 0;
     check(on, `${sport} props: owner live view is on for the test login`);
     if (on) {
-      const t = await banner.locator("..").innerText();
-      const m = t.match(/\((\d+) found on Polymarket, (\d+) lines matched\)/);
-      console.log(`info  ${sport} owner view: ${m ? `${m[1]} game(s) found, ${m[2]} lines matched` : "counts not shown"}; market-line cells: ${await page.locator('section[aria-label="Market line"]').count()}`);
+      console.log(`info  ${sport} owner view: ${await banner.getAttribute("data-found")} game(s) found, ${await banner.getAttribute("data-matched")} lines matched; market-line cells: ${await page.locator('section[aria-label="Market line"]').count()}`);
     }
     await go(page, `/${sport}`);
     console.log(`info  /${sport} rows with a Polymarket line: ${await page.locator("text=/^PM /").count()}`);
@@ -224,7 +227,7 @@ if (process.env.TEST_ACCOUNT_PASSWORD) {
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await go(page, "/props?sport=nba");
-  check((await page.locator("text=Owner view · live Polymarket US prices.").count()) === 0, "logged out: no live Polymarket prices");
+  check((await page.locator("details[data-live]").count()) === 0, "logged out: no live Polymarket prices");
   await ctx.close();
 }
 
