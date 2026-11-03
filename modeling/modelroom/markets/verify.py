@@ -54,7 +54,7 @@ def field_checks(league: str) -> list[dict]:
         two = [r for r in rs if r.get("yes_bid") is not None and r.get("yes_ask") is not None]
         bad = [r for r in two if not (0 < r["yes_bid"] <= r["yes_ask"] < 1)]
         badp = [r for r in bad if not r["market"].startswith("game_")]
-        check(f"{prov}: player props: bid ≤ ask, both inside (0, 1)", not badp, f"{len(badp)} crossed of {sum(1 for r in two if not r['market'].startswith('game_'))}")
+        info(f"{prov}: player props with bid > ask in the listing: {len(badp)} of {sum(1 for r in two if not r['market'].startswith('game_'))} (flagged 'crossed book', never priced)")
         info(f"{prov}: game contracts with bid > ask: {len(bad) - len(badp)} (by market {dict(Counter(r['market'] for r in bad if r['market'].startswith('game_')))})")
         info(f"{prov}: two-sided {rate(len(two), len(rs))}; one-sided or empty books are flagged, never filled in")
         if prov == "kalshi":
@@ -111,14 +111,16 @@ def board_checks(league: str, priced: dict) -> None:
     for (prov, *_), (t, q) in seen.items():
         p = t["model_prob"]
         if q["yes_ask"] is not None and q["ev_yes"] is not None:
-            errs += abs(q["ev_yes"] - (p - q["yes_ask"] - (q["fee_yes"] or 0))) > 6e-5   # model_prob is published to 4 dp
+            errs += abs(q["ev_yes"] - (p - q["yes_ask"] - (q["fee_yes"] or 0))) > 2e-4   # model probability, fee and EV are each published to 4 dp
         if q["no_ask"] is not None and q["ev_no"] is not None:
-            errs += abs(q["ev_no"] - ((1 - p) - q["no_ask"] - (q["fee_no"] or 0))) > 6e-5
+            errs += abs(q["ev_no"] - ((1 - p) - q["no_ask"] - (q["fee_no"] or 0))) > 2e-4
         if prov == "kalshi" and q["yes_ask"] is not None and q["fee_yes"] is not None:
-            errs += abs(q["fee_yes"] - kalshi.FEE_RATE * q["yes_ask"] * (1 - q["yes_ask"])) > 1e-6
+            errs += abs(q["fee_yes"] - kalshi.FEE_RATE * q["yes_ask"] * (1 - q["yes_ask"])) > 6e-5
         if q["yes_bid"] is not None and q["yes_ask"] is not None:
             errs += abs(q["mid"] - (q["yes_bid"] + q["yes_ask"]) / 2) > 1e-9   # implied probability = midpoint
     check(f"{league}: implied = midpoint, fee = θ·ask·(1−ask), edge = model − ask − fee, on every priced side", errs == 0, f"{errs} mismatches")
+    crossed_used = sum(1 for (t, q) in seen.values() if q["yes_bid"] is not None and q["yes_ask"] is not None and q["yes_bid"] > q["yes_ask"] and q["usable"])
+    check(f"{league}: crossed listings are never usable", crossed_used == 0, f"{crossed_used} used")
     strong_bad = sum(1 for (t, q) in seen.values() if t["edge_grade"].get("grade") == "strong" and not q["usable"])
     check(f"{league}: no strong edge from an unusable quote", strong_bad == 0)
     grades = Counter((t["edge_grade"] or {}).get("grade") or "none" for (t, q) in seen.values())

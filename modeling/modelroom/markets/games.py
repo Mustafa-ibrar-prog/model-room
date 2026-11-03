@@ -36,6 +36,15 @@ KALSHI_SERIES = {
 PM_TYPES = {"moneyline": "game_winner", "spreads": "game_spread", "totals": "game_total"}
 
 
+def _full_game(key: str, smt: str) -> bool:
+    """Only whole-game contracts: not halves, quarters or one team's points (sportsMarketType, checked 2026-11-03)."""
+    if key == "game_spread":
+        return smt.endswith("full_game_spread")
+    if key == "game_total":
+        return smt.endswith("full_game_total") and "team_points" not in smt
+    return smt == "moneyline" or smt.endswith("full_game_winner")
+
+
 def _phi(z: float) -> float:
     return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
@@ -88,7 +97,7 @@ def parse_polymarket(ev: dict, league: str, home: str | None, away: str | None, 
     out = []
     for m in ev.get("markets") or []:
         key = PM_TYPES.get(m.get("marketType"))
-        if key is None:
+        if key is None or not _full_game(key, m.get("sportsMarketType") or ""):
             continue
         sides = m.get("marketSides") or []
         long = next((s for s in sides if s.get("long")), None)
