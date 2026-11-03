@@ -113,6 +113,62 @@ for (const [email, tier] of [["free-test@modelroom.test", "free"], ["plus-test@m
   await ctx.close();
 }
 
+// 3. Plan switching on a test account: changes persist, the server sees them, and survive a new login.
+{
+  const email = "free-test@modelroom.test";
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  const login = async () => {
+    await page.goto(`${BASE}/login`, { waitUntil: "networkidle" });
+    await page.fill('input[name="email"]', email);
+    await page.fill('input[name="password"]', PASSWORD);
+    await Promise.all([page.waitForURL(/\/account/, { timeout: 30000 }).catch(() => null), page.click('form button[type="submit"]')]);
+  };
+  const planOnAccount = async () => {
+    await page.goto(`${BASE}/account`, { waitUntil: "networkidle" });
+    await page.locator("main dd.font-display").first().waitFor({ timeout: 20000 }).catch(() => null);
+    return (await page.locator("main dd.font-display").first().innerText().catch(() => "")).trim().toLowerCase();
+  };
+  const press = async (label) => {
+    await page.goto(`${BASE}/account`, { waitUntil: "networkidle" });
+    await page.locator(`button:has-text("${label}")`).click();
+    await page.locator('[role="status"]').waitFor({ timeout: 20000 });
+    return (await page.locator('[role="status"]').innerText()).trim();
+  };
+  await login();
+  const steps = [
+    ["Switch to Plus", "plus", true],
+    ["Switch to Pro", "pro", true],
+    ["Cancel", "pro", true],     // cancelled keeps access until the period ends
+    ["Expire now", "free", false],
+    ["Switch to Plus", "plus", true],
+    ["Downgrade to Free", "free", false],
+  ];
+  for (const [label, want, propsOpen] of steps) {
+    const msg = await press(label);
+    const plan = await planOnAccount();
+    check(plan === want, `switching: "${label}" → account shows ${want} (got ${plan || "nothing"}; ${msg})`);
+    const { body } = await text(page, "/props?sport=nfl");
+    const open = !body.includes(LOCK_PROPS);
+    if (!body.includes("No upcoming games")) check(open === propsOpen, `switching: after "${label}", server ${propsOpen ? "unlocks" : "locks"} player props`);
+    if (label === "Cancel") {
+      await page.goto(`${BASE}/account`, { waitUntil: "networkidle" });
+      check((await page.locator("main").innerText()).includes("Cancelled"), `switching: status shows Cancelled`);
+    }
+  }
+  // Persistence: Plus, then sign out and back in.
+  await press("Switch to Plus");
+  await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await page.locator("header details summary").first().click();
+  await page.locator("header details button:has-text('Log out')").click();
+  await page.locator("header >> text=Log in").first().waitFor({ timeout: 20000 }).catch(() => null);
+  await login();
+  check((await planOnAccount()) === "plus", "switching: plan survives signing out and back in");
+  await press("Downgrade to Free"); // leave the account as it started
+  check((await planOnAccount()) === "free", "switching: free-test restored to Free");
+  await ctx.close();
+}
+
 await browser.close();
 if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
 console.log("all checks passed");

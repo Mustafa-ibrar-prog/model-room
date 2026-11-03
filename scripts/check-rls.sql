@@ -39,6 +39,13 @@ begin
     end if;
   end loop;
   raise notice 'ok    signed-in users may read memberships but not write them';
+  if has_function_privilege('anon', 'public.test_simulate_membership(text)', 'EXECUTE') then
+    raise exception 'FAIL  anonymous visitors can call test_simulate_membership';
+  end if;
+  if has_table_privilege('authenticated', 'private.app_settings', 'SELECT') or has_table_privilege('authenticated', 'private.app_settings', 'UPDATE') then
+    raise exception 'FAIL  signed-in users can read or change private.app_settings';
+  end if;
+  raise notice 'ok    test plan switching: not callable anonymously; its on/off switch is not reachable from the API';
 
   select id into free_id from auth.users where email = 'free-test@modelroom.test';
   select id into plus_id from auth.users where email = 'plus-test@modelroom.test';
