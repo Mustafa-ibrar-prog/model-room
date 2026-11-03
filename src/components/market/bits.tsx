@@ -38,7 +38,7 @@ const FLAG: Record<string, string> = { stale: "Stale", thin: "Thin", "thin at as
 export const flagText = (flags: string[]) => [...new Set(flags.map((f) => FLAG[f] ?? f))].join(", ");
 
 /**
- * The signature mark: one 0–100% track with the model (teal) and the market (blue) on it; the stretch
+ * The signature mark: one 0–100% track with the model (blue) and the market (white) on it; the stretch
  * between them is orange when it's an edge after fees, gray otherwise. No market: the model tick alone.
  */
 export function GapBar({ model, market, edge, className = "" }: { model: number; market: number | null; edge: boolean; className?: string }) {

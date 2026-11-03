@@ -1,4 +1,4 @@
-/** Model Room mark: market bar (blue), model bar (teal), and the gap between them (orange). */
+/** Model Room mark: market bar (white), model bar (blue), and the gap between them (orange). */
 export function LogoMark({ className = "h-7 w-7" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden="true">
