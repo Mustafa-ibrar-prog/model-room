@@ -51,12 +51,28 @@ jobs:
       - name: Check the database connection
         if: steps.check.outputs.ready == 'yes'
         run: |
-          sudo apt-get install -y -qq postgresql-client >/dev/null
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1
+          try() { PGCONNECT_TIMEOUT=8 psql "$1" -qtAc "select 1" >/dev/null 2>&1; }
           case "$SUPABASE_DB_URL" in
-            *pooler.supabase.com*) echo "ok    using the connection pooler (works from GitHub's IPv4 runners)";;
-            *db.*.supabase.co*) echo "::warning::Direct connection (db.<ref>.supabase.co) is IPv6-only and may fail here. Use the Session pooler string from Supabase → Connect.";;
+            *pooler.supabase.com*)
+              try "$SUPABASE_DB_URL" || { echo "FAIL  can't connect with SUPABASE_DB_URL (check the password in the string)"; exit 1; }
+              echo "ok    database reachable through the connection pooler"
+              echo "DB_URL=$SUPABASE_DB_URL" >> "$GITHUB_ENV";;
+            *db.*.supabase.co*)
+              echo "::warning::SUPABASE_DB_URL is the direct connection (db.<ref>.supabase.co), which is IPv6-only and unreachable from GitHub. Trying the Session pooler for the same project instead. To skip this, replace the secret with the Session pooler string from Supabase → Connect."
+              found=""
+              for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1 aws-0-ap-southeast-1 aws-1-ap-southeast-1 aws-0-ap-southeast-2 aws-1-ap-southeast-2 aws-0-ap-northeast-1 aws-1-ap-northeast-1 aws-0-ap-south-1 aws-1-ap-south-1 aws-0-sa-east-1 aws-1-sa-east-1; do
+                url=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py)
+                echo "::add-mask::$url"
+                if try "$url"; then found="$url"; echo "ok    reached the database through the Session pooler ($host)"; break; fi
+              done
+              [ -n "$found" ] || { echo "FAIL  couldn't reach the database through any Session pooler. Replace SUPABASE_DB_URL with the Session pooler string from Supabase → Connect."; exit 1; }
+              echo "DB_URL=$found" >> "$GITHUB_ENV";;
+            *)
+              try "$SUPABASE_DB_URL" || { echo "FAIL  can't connect with SUPABASE_DB_URL"; exit 1; }
+              echo "DB_URL=$SUPABASE_DB_URL" >> "$GITHUB_ENV";;
           esac
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'ok    database reachable, Postgres ' || current_setting('server_version')"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'ok    Postgres ' || current_setting('server_version')" 2>/dev/null || psql "$(grep '^DB_URL=' "$GITHUB_ENV" | tail -1 | cut -d= -f2-)" -qtAc "select 'ok    Postgres ' || current_setting('server_version')"
       - uses: supabase/setup-cli@v1
         if: steps.check.outputs.ready == 'yes'
         with:
@@ -64,8 +80,8 @@ jobs:
       - name: Apply database migrations
         if: steps.check.outputs.ready == 'yes'
         run: |
-          supabase db push --db-url "$SUPABASE_DB_URL" --include-all --yes
-          supabase migration list --db-url "$SUPABASE_DB_URL"
+          supabase db push --db-url "$DB_URL" --include-all --yes
+          supabase migration list --db-url "$DB_URL"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/seed-test-accounts.mjs
@@ -75,7 +91,7 @@ jobs:
       - name: Check row-level security
         if: steps.check.outputs.ready == 'yes'
         run: |
-          psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -qtA <<'SQL'
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtA <<'SQL'
           do $$
           declare uid uuid; others int; own int; rls_off int;
           begin
