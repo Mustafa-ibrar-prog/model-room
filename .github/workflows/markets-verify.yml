@@ -1,0 +1,38 @@
+# Live check of the Polymarket US and Kalshi integrations, run by hand (Actions → Verify market
+# integrations → Run workflow). Runs in a throwaway runner: exchange data is fetched, checked and
+# discarded. Nothing is committed, uploaded as an artifact or published, and the log carries counts and
+# pass/fail only (no prices), per the providers' terms.
+name: Verify market integrations
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      MODELROOM_LEDGER_DIR: ${{ github.workspace }}/throwaway-ledger
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Download data and build the projections (no exchange data)
+        working-directory: modeling
+        run: |
+          pip install -e . -q
+          python -m modelroom nba ingest > /dev/null
+          python -m modelroom nfl ingest > /dev/null
+          python -m modelroom nba project > /dev/null
+          python -m modelroom nfl project > /dev/null
+      - name: Verify NFL markets
+        working-directory: modeling
+        run: python -m modelroom.markets.verify nfl
+      - name: Verify NBA markets
+        if: always()
+        working-directory: modeling
+        run: python -m modelroom.markets.verify nba

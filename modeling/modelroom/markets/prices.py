@@ -50,5 +50,5 @@ def load(league: str, games: pd.DataFrame, players: pd.DataFrame) -> tuple[dict,
         return idx
 
     unmatched = [{"provider": q.provider, "player": q.player_name, "market": q.market, "threshold": q.threshold, "note": q.match_note}
-                 for q in pub if q.player_id is None][:200]
+                 for q in pub if q.player_id is None and not q.market.startswith("game_")][:200]
     return index(pub), index(quotes), info, unmatched

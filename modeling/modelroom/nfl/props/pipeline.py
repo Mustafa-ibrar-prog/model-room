@@ -208,7 +208,7 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
                            "away": {"abbr": g["away_team"], "name": TEAM_NAMES.get(g["away_team"], g["away_team"])},
                            "players": players})
     unmatched = [{"provider": q.provider, "player": q.player_name, "market": q.market, "threshold": q.threshold, "note": q.match_note}
-                 for q in pub_quotes if q.player_id is None][:200]
+                 for q in pub_quotes if q.player_id is None and not q.market.startswith("game_")][:200]
 
     inputs_hash = hash_frame(inp.player_games[inp.player_games["season"] >= season - 3], ["game_id", "player_id", "targets", "carries", "pass_att"])
     params_hash = hash_obj(p.to_json())
