@@ -130,7 +130,9 @@ def fetch(league: str, games: pd.DataFrame | None, cache_dir: Path | None, *, op
     c = client(cache_dir, opener)
     quotes: list[PropQuote] = []
     errors = []
-    for series in SERIES[league]:
+    from . import games as G
+
+    for series in [*SERIES[league], *G.KALSHI_SERIES[league]]:
         cursor = None
         for _page in range(20):
             try:
@@ -138,7 +140,7 @@ def fetch(league: str, games: pd.DataFrame | None, cache_dir: Path | None, *, op
             except ProviderError as e:
                 errors.append(str(e))
                 break
-            quotes += parse_events(series, d or {}, league)
+            quotes += parse_events(series, d or {}, league) if series in SERIES[league] else G.parse_kalshi(series, d or {}, league)
             cursor = (d or {}).get("cursor")
             if not cursor:
                 break

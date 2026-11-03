@@ -127,7 +127,13 @@ def parse_event(ev: dict, league: str, captured_at: str | None = None) -> list[P
         if not m.get("active", True) or m.get("closed"):
             q.status = "closed"
         out.append(q)
-    return out
+    from . import games as G
+
+    game_qs = G.parse_polymarket(ev, league, home, away, game_date)
+    if captured_at:
+        for q in game_qs:
+            q.captured_at = captured_at
+    return out + game_qs
 
 
 def parse_book(d: dict) -> dict:
