@@ -24,8 +24,16 @@ const TIMEOUT_MS = 4_000;
 const MAX_SPREAD = 0.06;
 const MIN_EV = 0.02;
 
+/**
+ * Local design work only (`next dev` on a laptop, never a deployment): MODELROOM_PM_FIXTURE points at a
+ * recorded event file, which stands in for the gateway and turns the owner view on.
+ */
+const devFixture = (): string | null =>
+  process.env.NODE_ENV === "development" && !process.env.VERCEL && process.env.MODELROOM_PM_FIXTURE ? process.env.MODELROOM_PM_FIXTURE : null;
+
 export async function ownerLiveMarkets(): Promise<boolean> {
   if (isProduction() || process.env.MODELROOM_OWNER_LIVE_MARKETS === "off") return false;
+  if (devFixture()) return true;
   const user = await getSessionUser();
   const email = user?.email?.toLowerCase();
   if (!email) return false;
@@ -67,6 +75,14 @@ const hits = new Map<string, { at: number; ev: PmEvent }>();
 const misses = new Map<string, number>();
 
 async function getSlug(slug: string): Promise<PmEvent | null> {
+  const fx = devFixture();
+  if (fx) {
+    const { readFile } = await import("node:fs/promises");
+    const d = JSON.parse(await readFile(fx, "utf8")) as { event?: PmEvent } & PmEvent;
+    const ev = d.event ?? d;
+    const teams = (ev.slug ?? "").split("-").slice(1, 3).sort().join("-");
+    return slug.split("-").slice(1, 3).sort().join("-") === teams ? ev : null;
+  }
   const now = Date.now();
   const h = hits.get(slug);
   if (h && now - h.at < TTL_MS) return h.ev;

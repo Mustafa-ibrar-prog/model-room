@@ -12,7 +12,6 @@ import { age, cents, EdgeTag, flagText, fmt, GapBar, lineLabel, PROVIDERS, quote
 import { FavoritesScope, FavoriteStar, RecentlyViewed, TrackView } from "./local";
 
 const CONF = { ok: { label: "High", cls: "text-model" }, limited: { label: "Medium", cls: "text-mute" }, insufficient: { label: "Low", cls: "text-faint" } } as const;
-const SHORT: Record<string, string> = { polymarket_us: "PM", kalshi: "K" };
 
 export function propsHref(league: League, q: ExplorerQuery, patch: Partial<ExplorerQuery>): string {
   const all = { ...q, ...patch };
@@ -65,23 +64,20 @@ function GameRail({ league, x }: { league: League; x: Extract<Explorer, { ok: tr
 
 function GameChips({ league, x }: { league: League; x: Extract<Explorer, { ok: true }> }) {
   return (
-    <nav aria-label="Games" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 lg:hidden">
+    <nav aria-label="Games" className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 xl:hidden">
       {x.games.map((g) => {
         const on = g.id === x.game?.id && !x.searchAll;
         return (
           <Link
             key={g.id}
-            href={propsHref(league, { cat: x.query.cat, sort: x.query.sort, only: x.query.only }, { game: g.id })}
+            href={propsHref(league, { cat: x.query.cat, sort: x.query.sort, only: x.query.only, date: x.query.date }, { game: g.id })}
             scroll={false}
             aria-current={on ? "page" : undefined}
-            className={`shrink-0 rounded-lg border px-2.5 py-1.5 ${on ? "border-model bg-model/10" : "border-navy-700 bg-navy-900"}`}
+            className={`flex shrink-0 items-center gap-1.5 rounded-full border py-1 pl-1 pr-2.5 ${on ? "border-model bg-model/15" : "border-navy-700 bg-navy-900 hover:border-navy-600"}`}
           >
-            <span className="flex items-center gap-1">
-              <TeamBadge league={league} abbr={g.away.abbr} size="sm" />
-              <span className="text-[0.7rem] text-faint">@</span>
-              <TeamBadge league={league} abbr={g.home.abbr} size="sm" />
-            </span>
-            <span className="mt-0.5 block text-center font-mono text-[0.65rem] text-faint">{dayLabel(g.gameDate).split(", ")[0]} {time(g)}</span>
+            <TeamBadge league={league} abbr={g.away.abbr} size="sm" />
+            <TeamBadge league={league} abbr={g.home.abbr} size="sm" />
+            <span className={`font-mono text-[0.68rem] ${on ? "text-ink" : "text-faint"}`}>{x.games.some((o) => o.gameDate !== g.gameDate) ? `${dayLabel(g.gameDate).split(", ")[0]} ` : ""}{time(g)}</span>
           </Link>
         );
       })}
@@ -89,87 +85,103 @@ function GameChips({ league, x }: { league: League; x: Extract<Explorer, { ok: t
   );
 }
 
-// ------------------------------------------------------------------ contracts
-function Contract({ l, href, active }: { l: PropLineView; href: string; active: boolean }) {
-  const qb = quoteBy(l);
-  const implied = l.market?.mid ?? null;
+// ------------------------------------------------------------------ player cards
+/** Who is quoting this line ("Polymarket", "Kalshi"), for the market label. */
+function quotedBy(l: PropLineView): string | null {
+  const q = l.quotes.find((v) => v.usable && v.mid != null) ?? l.quotes.find((v) => v.mid != null && !v.flags.includes("crossed book"));
+  return q ? providerName(q.provider).replace(" US", "") : null;
+}
+
+/** The line that matters most for this player: the market's main line, or the model's coin-flip line. */
+function MainLine({ l, href, active, stat }: { l: PropLineView; href: string; active: boolean; stat: string }) {
+  const mid = marketMid(l);
+  const by = quotedBy(l);
+  const gap = mid != null ? Math.round((l.modelProb - mid) * 100) : null;
   return (
     <Link
       href={href}
       scroll={false}
       aria-current={active ? "true" : undefined}
-      className={`block w-[7.75rem] shrink-0 rounded-md border px-2 py-1.5 transition-colors ${active ? "border-model bg-model/10" : "border-navy-700 bg-navy-900 hover:border-navy-600"}`}
+      className={`block min-w-0 flex-1 rounded-md border px-3 py-2 transition-colors md:max-w-[19rem] ${active ? "border-model bg-model/10" : "border-navy-700 bg-navy-850 hover:border-navy-600"}`}
     >
-      <div className="flex items-baseline justify-between">
-        <span className="font-mono text-[0.72rem] text-ink">{lineLabel(l)}</span>
-        <span className="font-display text-base font-700 leading-none text-model">{formatPct(l.modelProb)}</span>
-      </div>
-      <GapBar model={l.modelProb} market={implied} edge={Boolean(l.edge)} className="my-1.5" />
-      <div className="flex items-center justify-between gap-1 font-mono text-[0.64rem]">
-        {Object.keys(qb).length ? (
-          <span className="flex gap-1.5">
-            {PROVIDERS.filter((p) => qb[p]).map((p) => (
-              <span key={p} className={qb[p]!.usable ? "text-market" : "text-faint line-through"} title={`${providerName(p)} ${qb[p]!.usable ? "" : `(${flagText(qb[p]!.flags)})`}`}>
-                {SHORT[p]} {qb[p]!.mid != null ? `${cents(qb[p]!.mid)}¢` : "–"}
-              </span>
-            ))}
+      <section aria-label={mid != null ? "Market line" : "Main line"}>
+        <div className="flex items-center justify-between gap-2">
+          <span className="truncate text-sm">
+            <span className="font-mono font-700 text-ink">{lineLabel(l)}</span> <span className="text-mute">{stat}</span>
           </span>
-        ) : (
-          <span className="text-faint">No market</span>
-        )}
-        <EdgeTag l={l} compact />
-      </div>
+          {l.edge ? <EdgeTag l={l} compact /> : gap != null && Math.abs(gap) >= 3 ? <span className="font-mono text-[0.7rem] text-mute">{gap > 0 ? "+" : ""}{gap} pts</span> : null}
+        </div>
+        <div className="mt-1 grid grid-cols-2 gap-3">
+          <div>
+            <div className="text-[0.65rem] text-faint">Model</div>
+            <div className="font-display text-2xl font-700 leading-none text-model">{formatPct(l.modelProb)}</div>
+          </div>
+          <div>
+            <div className="text-[0.65rem] text-faint">{by ? `${by}${l.market ? "" : " (wide)"}` : "Market"}</div>
+            {mid != null ? (
+              <div className="font-display text-2xl font-700 leading-none text-market">{formatPct(mid)}</div>
+            ) : (
+              <div className="pt-1.5 text-xs text-faint">No line listed</div>
+            )}
+          </div>
+        </div>
+        <GapBar model={l.modelProb} market={mid} edge={Boolean(l.edge)} className="mt-2" />
+      </section>
     </Link>
   );
 }
 
-/** The market's main line next to ours: "Market 25+ at 48% · Model 61%". */
-function MarketLine({ r }: { r: ExplorerRow }) {
-  const h = r.headline;
-  const mid = h ? marketMid(h) : null;
-  if (!h || mid == null) return null;
-  const gap = Math.round((h.modelProb - mid) * 100);
-  const wide = !h.market;
+/** Every other line, as a small pill: line, model %, market % when there is one. */
+function LinePill({ l, href, active }: { l: PropLineView; href: string; active: boolean }) {
+  const mid = marketMid(l);
   return (
-    <section aria-label="Market line" className="flex shrink-0 items-center gap-3 rounded-md bg-navy-850 px-2.5 py-1.5 font-mono text-[0.72rem] md:w-44 md:flex-col md:items-start md:gap-0.5">
-      <span className="text-market" title={wide ? "Wide or one-sided quote: shown for reference, never used for an edge" : undefined}>Market {lineLabel(h)} · {formatPct(mid)}{wide ? " (wide)" : ""}</span>
-      <span className="text-model">Model {formatPct(h.modelProb)}</span>
-      {Math.abs(gap) >= 3 ? <span className={Math.abs(gap) >= 8 ? "text-edge" : "text-mute"}>{gap > 0 ? "+" : ""}{gap} pts</span> : null}
-    </section>
+    <Link
+      href={href}
+      scroll={false}
+      aria-current={active ? "true" : undefined}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${active ? "border-model bg-model/15" : "border-navy-700 bg-navy-900 hover:border-navy-600"}`}
+    >
+      <span className="font-mono text-mute">{lineLabel(l)}</span>
+      <span className="font-mono text-model">{formatPct(l.modelProb)}</span>
+      {mid != null ? <span className="font-mono text-market">{formatPct(mid)}</span> : null}
+      {l.edge ? <span className="h-1.5 w-1.5 rounded-full bg-edge" aria-label="edge" /> : null}
+    </Link>
   );
 }
 
-function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null }) {
+function PlayerRow({ r, league, q, activeKey, stat }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null; stat: string }) {
   const c = CONF[r.support];
+  const href = (l: PropLineView) => propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: lineKey(r.id, l) });
+  const main = r.headline;
+  const others = r.lines.filter((l) => l !== main);
   return (
-    <li data-fav-id={`${league}:${r.id}`} className="rounded-lg border border-navy-700 bg-navy-900 px-3 py-2.5">
-      <div className="flex flex-col gap-2 md:flex-row md:items-center">
-        <div className="flex min-w-0 items-center gap-2 md:w-56 md:shrink-0">
+    <li data-fav-id={`${league}:${r.id}`} className="rounded-lg border border-navy-700 bg-navy-900 p-3">
+      <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-4">
+        <div className="flex min-w-0 items-center gap-2 md:w-72 md:shrink-0">
           <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
           <TeamBadge league={league} abbr={r.team} size="sm" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="truncate font-600 text-ink">{r.name}</div>
             <div className="flex flex-wrap gap-x-2 text-[0.72rem] text-faint">
-              <span>{r.position} · {r.matchup}</span>
+              <span>{r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}</span>
               {r.injuryStatus ? <span className="text-edge">{r.injuryStatus}</span> : null}
             </div>
           </div>
-          <section aria-label="Model Room projection" className="ml-auto text-right md:hidden">
+          <section aria-label="Model Room projection" className="shrink-0 text-right">
+            <div className="text-[0.6rem] text-faint">Projection</div>
             <div className="font-display text-xl font-700 leading-none text-model">{fmt(r.median)}</div>
-            <div className={`text-[0.65rem] ${c.cls}`}>{c.label} confidence</div>
+            <div className={`text-[0.62rem] ${c.cls}`}>{c.label} confidence</div>
           </section>
         </div>
-        <section aria-label="Model Room projection" className="hidden w-24 shrink-0 md:block">
-          <div className="font-display text-xl font-700 leading-none text-model">{fmt(r.median)}</div>
-          <div className="text-[0.65rem] text-faint">median · <span className={c.cls}>{c.label}</span></div>
-        </section>
-        <MarketLine r={r} />
-        <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
-          {r.lines.map((l) => {
-            const k = lineKey(r.id, l);
-            return <Contract key={k} l={l} href={propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: k })} active={k === activeKey} />;
-          })}
-        </div>
+        {main ? <MainLine l={main} href={href(main)} active={lineKey(r.id, main) === activeKey} stat={stat} /> : null}
+        {others.length ? (
+          <div className="-mx-3 flex gap-1.5 overflow-x-auto px-3 md:mx-0 md:flex-1 md:flex-wrap md:px-0">
+            {others.map((l) => {
+              const k = lineKey(r.id, l);
+              return <LinePill key={k} l={l} href={href(l)} active={k === activeKey} />;
+            })}
+          </div>
+        ) : null}
       </div>
     </li>
   );
@@ -179,7 +191,8 @@ function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League
 function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League; x: Extract<Explorer, { ok: true }>; explicit: boolean }) {
   const { row: r, line: l } = d;
   const qb = quoteBy(l);
-  const implied = l.market?.mid ?? null;
+  const implied = marketMid(l);
+  const wide = implied != null && !l.market;
   const diff = implied != null ? Math.round((l.modelProb - implied) * 100) : null;
   const ms = d.marketStats;
   const k = l.threshold;
@@ -188,10 +201,13 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
   const closeHref = propsHref(league, { ...x.query }, { line: undefined });
   const title = `${r.name} ${lineLabel(l)} ${x.category.label.toLowerCase()}`;
   return (
+    <div className={explicit ? "fixed inset-0 z-50 flex flex-col justify-end bg-black/60 lg:static lg:z-auto lg:block lg:bg-transparent" : "hidden lg:block"}>
+    {explicit ? <Link href={closeHref} scroll={false} aria-label="Close details" className="min-h-[8vh] flex-1 lg:hidden" /> : null}
     <aside
       aria-label="Contract detail"
-      className={`${explicit ? "fixed inset-0 z-50 overflow-y-auto bg-navy-950 p-4 lg:static lg:z-auto lg:bg-transparent lg:p-0" : "hidden lg:block"} lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto`}
+      className={`${explicit ? "max-h-[90vh] overflow-y-auto rounded-t-2xl border-t border-navy-600 bg-navy-950 p-3 pb-8 shadow-2xl lg:max-h-none lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none" : ""} lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto`}
     >
+      {explicit ? <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-navy-600 lg:hidden" aria-hidden="true" /> : null}
       <TrackView item={{ href: propsHref(league, { game: r.gameId, cat: x.category.key }, { line: d.key }), label: title, sub: `${r.matchup} · ${league.toUpperCase()}` }} />
       <div className="space-y-3 rounded-lg border border-navy-700 bg-navy-900 p-4">
         <div className="flex items-start gap-2">
@@ -223,7 +239,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
             <div className="font-display text-2xl font-700 text-model">{formatPct(l.modelProb)}</div>
           </div>
           <div className={`rounded-md p-2 ${implied != null ? "bg-market/10" : "bg-navy-850"}`}>
-            <div className={`text-[0.65rem] font-600 uppercase tracking-wider ${implied != null ? "text-market" : "text-faint"}`}>Market</div>
+            <div className={`text-[0.65rem] font-600 uppercase tracking-wider ${implied != null ? "text-market" : "text-faint"}`}>Market{wide ? " (wide)" : ""}</div>
             <div className={`font-display text-2xl font-700 ${implied != null ? "text-market" : "text-faint"}`}>{implied != null ? formatPct(implied) : "–"}</div>
           </div>
           <div className="rounded-md bg-navy-850 p-2">
@@ -327,6 +343,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
         <p className="text-[0.65rem] text-faint">Model run {formatTimestamp(x.generatedAt)}. The model never sees exchange prices.</p>
       </div>
     </aside>
+    </div>
   );
 }
 
@@ -346,32 +363,28 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
     : null;
   const activeKey = explicit ? query.line ?? null : detail?.key ?? null;
   const sel = "rounded-md border border-navy-700 bg-navy-900 px-2 py-1.5 text-sm text-ink";
-  const providers = x.providers.filter((p) => p.provider !== "manual" || p.quotes > 0);
+
+  const statLabel = x.category.label.toLowerCase();
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-mute">
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-model" />Model<span className="hidden sm:inline"> Room</span></span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-market" />Market<span className="hidden sm:inline"> (PM = Polymarket US, K = Kalshi)</span></span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-edge" />Edge<span className="hidden sm:inline"> after fees</span></span>
-        <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-navy-600" />N/A</span>
-        <span className="ml-auto hidden text-faint sm:inline">
-          {providers.length ? providers.map((p) => `${providerName(p.provider)} ${p.quotes} prices`).join(" · ") : "No exchange prices connected"}
-        </span>
-      </div>
-
+    <div className="space-y-3">
       {x.live ? (
-        <p className="rounded-md border border-market/40 bg-market/10 px-3 py-2 text-xs text-mute">
-          <span className="font-600 text-market">Owner view · live Polymarket US prices.</span>{" "}
-          Fetched {formatTimestamp(x.live.fetchedAt)} for {x.live.games === 1 ? "this game" : `${x.live.games} games`} ({x.live.found} found on Polymarket, {x.live.matched} lines matched).
-          Only your test-site login sees these; nothing is stored, and production never shows them. Contract sizes aren&apos;t in the listing, so edges are leans at most.
-        </p>
+        <details data-live data-found={x.live.found} data-matched={x.live.matched} className="group rounded-md border border-navy-700 bg-navy-900 px-3 py-2 text-xs">
+          <summary className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-good" aria-hidden="true" />
+            <span className="font-600 text-ink">Owner view · live Polymarket US prices</span>
+            <span className="hidden text-faint sm:inline">· {formatTimestamp(x.live.fetchedAt)} · {x.live.matched} lines</span>
+            <span className="ml-auto text-faint group-open:hidden">About</span>
+          </summary>
+          <p className="mt-1.5 text-mute">
+            Fetched {formatTimestamp(x.live.fetchedAt)} for {x.live.games === 1 ? "this game" : `${x.live.games} games`}: {x.live.found} found on Polymarket, {x.live.matched} lines matched.
+            Only your test-site login sees these; nothing is stored, and production never shows them. Contract sizes aren&apos;t in the listing, so edges are leans at most.
+          </p>
+        </details>
       ) : null}
 
-      <GameChips league={league} x={x} />
-
-      <div className="grid gap-4 lg:grid-cols-[14rem_minmax(0,1fr)_22rem]">
-        <div className="hidden space-y-5 lg:block">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_23rem] xl:grid-cols-[13rem_minmax(0,1fr)_24rem]">
+        <div className="hidden space-y-5 xl:block">
           <GameRail league={league} x={x} />
           <div>
             <h3 className="px-2 pb-1 text-xs text-faint">Recently viewed</h3>
@@ -380,18 +393,26 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
         </div>
 
         <div className="min-w-0 space-y-3">
-          {x.searchAll ? (
-            <h2 className="font-display text-xl font-600 text-ink">Search: “{query.q}” across every {league.toUpperCase()} game</h2>
-          ) : game ? (
-            <div className="flex flex-wrap items-center gap-2">
-              <TeamBadge league={league} abbr={game.away.abbr} />
-              <span className="font-display text-xl font-600 text-ink">{game.away.name} <span className="text-faint">at</span> {game.home.name}</span>
-              <TeamBadge league={league} abbr={game.home.abbr} />
-              <span className="ml-auto text-sm text-mute">{formatKickoff(game.startTime)}</span>
-            </div>
-          ) : null}
+          <GameChips league={league} x={x} />
 
-          <nav aria-label="Prop categories" className="-mx-1 flex gap-1 overflow-x-auto px-1">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            {x.searchAll ? (
+              <h2 className="font-display text-lg font-600 text-ink">“{query.q}” across every {league.toUpperCase()} game</h2>
+            ) : game ? (
+              <h2 className="font-display text-lg font-600 text-ink sm:text-xl">
+                <span className="sm:hidden">{game.away.abbr} @ {game.home.abbr}</span>
+                <span className="hidden sm:inline">{game.away.name} <span className="text-faint">at</span> {game.home.name}</span>
+                <span className="ml-2 font-sans text-sm font-400 text-mute">{formatKickoff(game.startTime)}</span>
+              </h2>
+            ) : null}
+            <span className="hidden items-center gap-3 text-[0.7rem] text-mute md:flex">
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-model" />Model</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-market" />Market</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-edge" />Edge after fees</span>
+            </span>
+          </div>
+
+          <nav aria-label="Prop categories" className="-mx-4 flex gap-1 overflow-x-auto px-4 sm:mx-0 sm:px-0">
             {x.categories.map((c) => {
               const on = c.key === x.category.key;
               return (
@@ -403,32 +424,32 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             })}
           </nav>
 
-          <form action="/props" className="flex flex-wrap items-end gap-2">
+          <form action="/props" className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="sport" value={league} />
             {query.game ? <input type="hidden" name="game" value={query.game} /> : null}
             {query.date ? <input type="hidden" name="date" value={query.date} /> : null}
             <input type="hidden" name="cat" value={x.category.key} />
             <label className="sr-only" htmlFor="q">Search players or teams</label>
-            <input id="q" name="q" defaultValue={x.query.q ?? ""} placeholder="Search players or teams" className={`${sel} w-full sm:w-56`} />
+            <input id="q" name="q" type="search" enterKeyHint="search" defaultValue={x.query.q ?? ""} placeholder="Search players or teams" className={`${sel} w-full sm:w-auto sm:min-w-56 sm:flex-1 lg:max-w-xs`} />
             {game && !x.searchAll ? (
-              <select name="team" aria-label="Team" defaultValue={x.query.team ?? ""} className={sel}>
+              <select name="team" aria-label="Team" defaultValue={x.query.team ?? ""} className={`${sel} min-w-0 flex-1 text-[0.8rem] sm:flex-none sm:text-sm`}>
                 <option value="">Both teams</option>
                 <option value={game.away.abbr}>{game.away.abbr}</option>
                 <option value={game.home.abbr}>{game.home.abbr}</option>
               </select>
             ) : null}
-            <select name="only" aria-label="Show" defaultValue={x.query.only ?? ""} className={sel}>
+            <select name="only" aria-label="Show" defaultValue={x.query.only ?? ""} className={`${sel} min-w-0 flex-1 text-[0.8rem] sm:flex-none sm:text-sm`}>
               <option value="">All players</option>
-              <option value="priced">With exchange prices</option>
+              <option value="priced">With market prices</option>
               <option value="edges">With an edge</option>
               <option value="strong">Strong edges only</option>
               <option value="ok">High confidence</option>
             </select>
-            <select name="sort" aria-label="Sort" defaultValue={x.sort} className={sel}>
+            <select name="sort" aria-label="Sort" defaultValue={x.sort} className={`${sel} min-w-0 flex-1 text-[0.8rem] sm:flex-none sm:text-sm`}>
               {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
             </select>
-            <button type="submit" className="rounded-full bg-model px-4 py-1.5 text-sm font-600 text-navy-950">Go</button>
-            {x.query.q ? <Link href={propsHref(league, { cat: x.query.cat, game: query.game }, {})} className="text-sm text-mute hover:text-ink">Clear search</Link> : null}
+            <button type="submit" className="sr-only">Search</button>
+            {x.query.q ? <Link href={propsHref(league, { cat: x.query.cat, game: query.game, date: query.date }, {})} className="text-sm text-mute hover:text-ink">Clear search</Link> : null}
             <AutoSubmit />
           </form>
 
@@ -436,11 +457,11 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             <LockedPanel requires={rows.requires} title="Player props are part of Plus" body={`Every player's projection, probabilities and exchange comparison for ${x.games.length} upcoming games.`} />
           ) : rows.length === 0 ? (
             <p className="px-1 py-6 text-center text-sm text-mute">
-              {x.totalPlayers ? "No players match. Try another search or filter." : `No ${x.category.label.toLowerCase()} projections for this game.`}
+              {x.totalPlayers ? "No players match. Try another search or filter." : `No ${statLabel} projections for this game.`}
             </p>
           ) : (
             <FavoritesScope>
-              <ul className="space-y-1.5">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} />)}</ul>
+              <ul className="space-y-2">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} stat={statLabel} />)}</ul>
             </FavoritesScope>
           )}
         </div>
