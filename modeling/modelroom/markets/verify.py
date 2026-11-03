@@ -125,8 +125,13 @@ def board_checks(league: str, priced: dict) -> None:
     check(f"{league}: implied = midpoint, fee = θ·ask·(1−ask), edge = model − ask − fee, on every priced side", errs == 0, f"{errs} mismatches")
     crossed_used = sum(1 for (t, q) in seen.values() if q["yes_bid"] is not None and q["yes_ask"] is not None and q["yes_bid"] > q["yes_ask"] and q["usable"])
     check(f"{league}: crossed listings are never usable", crossed_used == 0, f"{crossed_used} used")
-    strong_bad = sum(1 for (t, q) in seen.values() if t["edge_grade"].get("grade") == "strong" and not q["usable"])
-    check(f"{league}: no strong edge from an unusable quote", strong_bad == 0)
+    strong_bad = 0
+    for (t, _q) in seen.values():
+        if (t.get("edge_grade") or {}).get("grade") in ("strong", "lean") and t.get("best") and t["best"].get("edge"):
+            side = t["best"]["edge"]
+            prov = (t["best"].get(side) or {}).get("provider")
+            strong_bad += not any(q["provider"] == prov and q["usable"] for q in t["quotes"])
+    check(f"{league}: every edge comes from a usable quote on the exchange it names", strong_bad == 0, f"{strong_bad} not")
     grades = Counter((t["edge_grade"] or {}).get("grade") or "none" for (t, q) in seen.values())
     info(f"{league}: edge grades {dict(grades)}; usable quotes {rate(sum(q['usable'] for _, q in seen.values()), len(seen))}")
     flags = Counter(f for _, q in seen.values() for f in q["flags"])
