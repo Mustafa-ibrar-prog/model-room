@@ -3,6 +3,7 @@ import { favoredLine, formatKickoff, formatNumber, formatPct } from "@/lib/forma
 import { getLeagueBoard } from "@/server/data";
 import { loadPropsBoard } from "@/server/engine/board";
 import { getViewer } from "@/server/viewer";
+import { liveGameLines, ownerLiveMarkets, type LiveGameLines } from "@/server/markets/polymarketLive";
 import { isLocked, type GameView, type League } from "@/types/domain";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { Gated, Unavailable } from "@/components/ui/primitives";
@@ -14,12 +15,16 @@ function dayKey(g: GameView): string {
 
 type Avail = { players: number; lines: number; priced: number };
 
-function Row({ g, league, now, avail }: { g: GameView; league: League; now: number; avail: Avail | undefined }) {
+function Row({ g, league, now, avail, live }: { g: GameView; league: League; now: number; avail: Avail | undefined; live?: LiveGameLines }) {
   const model = favoredLine(g.modelSpread, g.home.abbr, g.away.abbr);
-  const market = g.market?.spread != null ? favoredLine(g.market.spread, g.home.abbr, g.away.abbr) : null;
+  // Owner view on the test site: Polymarket US's main line (live) stands in for the market line.
+  const mSpread = live?.spread ? live.spread.home : g.market?.spread ?? null;
+  const mTotal = live?.total ? live.total.line : g.market?.total ?? null;
+  const pm = live?.spread || live?.total ? "PM " : "";
+  const market = mSpread != null ? favoredLine(mSpread, g.home.abbr, g.away.abbr) : null;
   const started = g.startTime ? Date.parse(g.startTime) <= now : false;
-  const se = !isLocked(g.spreadEdge) ? g.spreadEdge : null;
-  const te = !isLocked(g.totalEdge) ? g.totalEdge : null;
+  const se = isLocked(g.spreadEdge) ? null : live?.spread && g.modelSpread != null ? live.spread.home - g.modelSpread : g.spreadEdge;
+  const te = isLocked(g.totalEdge) ? null : live?.total && g.modelTotal != null ? g.modelTotal - live.total.line : g.totalEdge;
   const cell = "rounded-md bg-navy-850 px-2 py-1.5 text-center";
   return (
     <li className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-2 border-b border-navy-700/70 px-3 py-2.5 last:border-b-0 @2xl:grid-cols-[4.5rem_minmax(10rem,1.3fr)_repeat(3,minmax(5.5rem,1fr))_7rem]">
@@ -40,13 +45,13 @@ function Row({ g, league, now, avail }: { g: GameView; league: League; now: numb
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Spread</div>
           <div className="font-mono text-sm text-model">{model.text}</div>
-          <div className={`font-mono text-[0.7rem] ${market ? "text-market" : "text-faint"}`}>{market ? market.text : "no line"}</div>
+          <div className={`font-mono text-[0.7rem] ${market ? "text-market" : "text-faint"}`}>{market ? `${pm}${market.text}` : "no line"}</div>
           {se != null && Math.abs(se) >= 1 ? <div className={`font-mono text-[0.66rem] ${Math.abs(se) >= 3 ? "text-edge" : "text-edge/70"}`}>gap {Math.abs(se).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Total</div>
           <div className="font-mono text-sm text-model">{formatNumber(g.modelTotal)}</div>
-          <div className={`font-mono text-[0.7rem] ${g.market?.total != null ? "text-market" : "text-faint"}`}>{g.market?.total != null ? formatNumber(g.market.total) : "no line"}</div>
+          <div className={`font-mono text-[0.7rem] ${mTotal != null ? "text-market" : "text-faint"}`}>{mTotal != null ? `${pm}${formatNumber(mTotal)}` : "no line"}</div>
           {te != null && Math.abs(te) >= 1.5 ? <div className={`font-mono text-[0.66rem] ${Math.abs(te) >= 4 ? "text-edge" : "text-edge/70"}`}>{te > 0 ? "over" : "under"} {Math.abs(te).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
@@ -54,6 +59,9 @@ function Row({ g, league, now, avail }: { g: GameView; league: League; now: numb
           <Gated value={g.winProbability}>
             {(p) => <div className="font-mono text-sm text-model">{p.home >= p.away ? `${g.home.abbr} ${formatPct(p.home)}` : `${g.away.abbr} ${formatPct(p.away)}`}</div>}
           </Gated>
+          {live?.homeWin != null ? (
+            <div className="font-mono text-[0.7rem] text-market">PM {live.homeWin >= 0.5 ? `${g.home.abbr} ${formatPct(live.homeWin)}` : `${g.away.abbr} ${formatPct(1 - live.homeWin)}`}</div>
+          ) : null}
         </div>
       </div>
       <div className="col-span-2 flex items-center justify-between gap-2 @2xl:col-span-1 @2xl:block @2xl:text-right">
@@ -84,6 +92,7 @@ export async function GameRows({ league, day, withinHours, limit, note = true }:
   let games = day ? board.upcoming.filter((g) => g.gameDate === day) : board.upcoming;
   if (!day && withinHours && first !== null) games = games.filter((g) => g.startTime && Date.parse(g.startTime) - first <= withinHours * 3600_000);
   if (limit) games = games.slice(0, limit);
+  const live = (await ownerLiveMarkets()) ? await liveGameLines(league, games.filter((g) => !g.startTime || Date.parse(g.startTime) > now)) : null;
   if (!games.length) {
     const nextDay = board.upcoming.find((g) => !day || g.gameDate > day)?.gameDate;
     return (
@@ -100,11 +109,12 @@ export async function GameRows({ league, day, withinHours, limit, note = true }:
       {[...days.entries()].map(([d, gs]) => (
         <section key={d}>
           <h3 className="mb-1.5 text-sm font-600 text-mute">{d}</h3>
-          <ul className="@container overflow-hidden rounded-lg border border-navy-700 bg-navy-900">{gs.map((g) => <Row key={g.id} g={g} league={league} now={now} avail={avail.get(g.id)} />)}</ul>
+          <ul className="@container overflow-hidden rounded-lg border border-navy-700 bg-navy-900">{gs.map((g) => <Row key={g.id} g={g} league={league} now={now} avail={avail.get(g.id)} live={live?.get(g.id)} />)}</ul>
         </section>
       ))}
       {note ? <p className="text-xs text-faint">
         Teal is the model, blue the market line (favored team shown). Gaps of 3+ points on the spread or 4+ on the total are highlighted. Model {board.model.version}.
+        {live ? " PM = Polymarket US main line, live (owner view on the test site only; not stored)." : ""}
       </p> : null}
     </div>
   );

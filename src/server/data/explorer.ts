@@ -4,6 +4,7 @@ import { loadPropsBoard } from "@/server/engine/board";
 import type { Gate, League, TierId } from "@/types/domain";
 import type { EnginePropPlayer, EnginePropsBoard, PropBacktestSummary, PropLineView } from "@/types/props";
 import { lineView } from "./props";
+import { ownerLiveMarkets, withLivePolymarket, type LiveInfo } from "@/server/markets/polymarketLive";
 
 /**
  * Props explorer: sport → game → category → the players that matter for that category.
@@ -133,15 +134,18 @@ export type Explorer =
       /** Searching across every game of the sport (q given, no game picked). */
       searchAll: boolean;
       detail: Gate<ContractDetail | null>;
+      /** Set when live Polymarket US prices were merged in (owner view on the test site only). */
+      live: LiveInfo | null;
     };
 
 const SUPPORT_RANK = { ok: 0, limited: 1, insufficient: 2 } as const;
 
 function headline(lines: PropLineView[]): PropLineView | null {
   if (!lines.length) return null;
-  const priced = lines.filter((l) => l.market);
-  const pool = priced.length ? priced : lines;
-  return [...pool].sort((a, b) => Math.abs(a.modelProb - 0.5) - Math.abs(b.modelProb - 0.5))[0];
+  // With prices: the market's main line (priced closest to 50¢). Without: the model's coin-flip line.
+  const priced = lines.filter((l) => l.market?.mid != null);
+  if (priced.length) return [...priced].sort((a, b) => Math.abs(a.market!.mid! - 0.5) - Math.abs(b.market!.mid! - 0.5))[0];
+  return [...lines].sort((a, b) => Math.abs(a.modelProb - 0.5) - Math.abs(b.modelProb - 0.5))[0];
 }
 
 function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: string): ExplorerRow | null {
@@ -191,7 +195,15 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
   const res = await loadPropsBoard(league); // reads at request time (connection()), so the clock below is per request
   if (!res.ok) return { ok: false, reason: res.reason };
   const now = at ?? new Date();
-  const b = res.board;
+  let b = res.board;
+  let live: LiveInfo | null = null;
+  if (canAccess(tier, "props.projections") && (await ownerLiveMarkets())) {
+    const day = query.date ? b.games.filter((g) => g.game_date === query.date) : b.games;
+    const q0 = (query.q ?? "").trim();
+    const pick = day.find((g) => g.game_id === query.game) ?? day.find((g) => !g.start_time || Date.parse(g.start_time) > now.getTime()) ?? day[0];
+    const ids = new Set((q0 && !query.game ? day : pick ? [pick] : []).map((g) => g.game_id));
+    ({ board: b, info: live } = await withLivePolymarket(league, b, ids, now));
+  }
   const dayGames = query.date ? b.games.filter((g) => g.game_date === query.date) : b.games;
   const games: ExplorerGame[] = dayGames.map((g) => ({
     id: g.game_id,
@@ -253,5 +265,6 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
     totalPlayers: total,
     searchAll,
     detail,
+    live,
   };
 }

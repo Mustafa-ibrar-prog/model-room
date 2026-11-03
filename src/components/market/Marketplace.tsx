@@ -123,6 +123,20 @@ function Contract({ l, href, active }: { l: PropLineView; href: string; active: 
   );
 }
 
+/** The market's main line next to ours: "Market 25+ at 48% · Model 61%". */
+function MarketLine({ r }: { r: ExplorerRow }) {
+  const h = r.headline;
+  if (!h?.market || h.market.mid == null) return null;
+  const gap = Math.round((h.modelProb - h.market.mid) * 100);
+  return (
+    <section aria-label="Market line" className="flex shrink-0 items-center gap-3 rounded-md bg-navy-850 px-2.5 py-1.5 font-mono text-[0.72rem] md:w-44 md:flex-col md:items-start md:gap-0.5">
+      <span className="text-market">Market {lineLabel(h)} · {formatPct(h.market.mid)}</span>
+      <span className="text-model">Model {formatPct(h.modelProb)}</span>
+      {Math.abs(gap) >= 3 ? <span className={Math.abs(gap) >= 8 ? "text-edge" : "text-mute"}>{gap > 0 ? "+" : ""}{gap} pts</span> : null}
+    </section>
+  );
+}
+
 function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null }) {
   const c = CONF[r.support];
   return (
@@ -147,6 +161,7 @@ function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League
           <div className="font-display text-xl font-700 leading-none text-model">{fmt(r.median)}</div>
           <div className="text-[0.65rem] text-faint">median · <span className={c.cls}>{c.label}</span></div>
         </section>
+        <MarketLine r={r} />
         <div className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-0.5">
           {r.lines.map((l) => {
             const k = lineKey(r.id, l);
@@ -342,6 +357,14 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
           {providers.length ? providers.map((p) => `${providerName(p.provider)} ${p.quotes} prices`).join(" · ") : "No exchange prices connected"}
         </span>
       </div>
+
+      {x.live ? (
+        <p className="rounded-md border border-market/40 bg-market/10 px-3 py-2 text-xs text-mute">
+          <span className="font-600 text-market">Owner view · live Polymarket US prices.</span>{" "}
+          Fetched {formatTimestamp(x.live.fetchedAt)} for {x.live.games === 1 ? "this game" : `${x.live.games} games`} ({x.live.found} found on Polymarket, {x.live.matched} lines matched).
+          Only your test-site login sees these; nothing is stored, and production never shows them. Contract sizes aren&apos;t in the listing, so edges are leans at most.
+        </p>
+      ) : null}
 
       <GameChips league={league} x={x} />
 

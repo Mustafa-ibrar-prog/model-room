@@ -16,6 +16,7 @@ from modelroom.common import ledger
 from modelroom.common.hashing import hash_frame, hash_obj
 from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path, output_dir
 from modelroom.common.publish import write_board
+from modelroom.common import grid as G
 from modelroom.common import recent
 from modelroom.markets import compare as C
 from modelroom.markets import evaluation, prices
@@ -90,7 +91,8 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list, now: dateti
         markets[mkey] = {"label": m["label"], "mean": round(float(np.mean(sims)), 2), "median": round(float(np.median(sims)), 1),
                          "sd": round(float(np.std(sims)), 2),
                          "range_80": [round(float(np.quantile(sims, 0.1)), 1), round(float(np.quantile(sims, 0.9)), 1)],
-                         "support": support, "support_note": note, "thresholds": th}
+                         "support": support, "support_note": note, "thresholds": th,
+                         "grid": G.build(sims, stat, lambda r, _m=mkey: p.calibrate(_m, r))}
     return {"player_id": x.player_id, "name": x.name, "team": x.team, "opp": x.opp, "position": x.group, "game_id": x.game_id,
             "injury_status": None, "markets": markets, "inputs": {k: v for k, v in x.inputs.items() if k != "sample"}}
 
