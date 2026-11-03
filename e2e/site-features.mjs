@@ -200,6 +200,34 @@ for (const device of ["desktop", "phone"]) {
   await ctx.close();
 }
 
+// ------------------------------------------------------------------ owner live view (counts only: no prices in public logs)
+if (process.env.TEST_ACCOUNT_PASSWORD) {
+  const { ctx, page, errors } = await session("desktop");
+  for (const sport of ["nba", "nfl"]) {
+    await go(page, `/props?sport=${sport}`);
+    const banner = page.locator("text=Owner view · live Polymarket US prices.");
+    const on = (await banner.count()) > 0;
+    check(on, `${sport} props: owner live view is on for the test login`);
+    if (on) {
+      const t = await banner.locator("..").innerText();
+      const m = t.match(/\((\d+) found on Polymarket, (\d+) lines matched\)/);
+      console.log(`info  ${sport} owner view: ${m ? `${m[1]} game(s) found, ${m[2]} lines matched` : "counts not shown"}; market-line cells: ${await page.locator('section[aria-label="Market line"]').count()}`);
+    }
+    await go(page, `/${sport}`);
+    console.log(`info  /${sport} rows with a Polymarket line: ${await page.locator("text=/^PM /").count()}`);
+  }
+  check(errors.length === 0, `owner view: no script errors${errors.length ? ` (${errors[0]})` : ""}`);
+  await ctx.close();
+}
+{
+  // Logged out: never live prices.
+  const ctx = await browser.newContext();
+  const page = await ctx.newPage();
+  await go(page, "/props?sport=nba");
+  check((await page.locator("text=Owner view · live Polymarket US prices.").count()) === 0, "logged out: no live Polymarket prices");
+  await ctx.close();
+}
+
 await browser.close();
 console.log(failed ? `${failed} check(s) failed` : "all checks passed");
 process.exit(failed ? 1 : 0);
