@@ -27,7 +27,7 @@ async function Signup({ searchParams }: { searchParams: Promise<{ next?: string 
           { name: "email", label: "Email", type: "email", autoComplete: "email" },
           { name: "password", label: "Password (8+ characters)", type: "password", autoComplete: "new-password" },
         ]}
-        footer={[{ text: "Already have an account?", href: `/login?next=${encodeURIComponent(next)}`, link: "Sign in" }]}
+        footer={[{ text: "Already have an account?", href: `/login?next=${encodeURIComponent(next)}`, link: "Log in" }]}
       />
     </AuthShell>
   );

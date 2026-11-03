@@ -1,5 +1,5 @@
 import "server-only";
-import { publicSupabaseKey } from "@/lib/supabase/keys";
+import { publicSupabaseKey, supabaseUrl } from "@/lib/supabase/keys";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
  * getViewer() to read the session and subscription tier.
  */
 export async function createSupabaseServerClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = supabaseUrl();
   const anonKey = publicSupabaseKey();
   if (!url || !anonKey) return null;
 
