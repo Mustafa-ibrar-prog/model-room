@@ -146,7 +146,15 @@ def _nfl(args) -> int:
 
         summary = ingest.run(local_dir=Path(args.from_dir) if args.from_dir else None)
         summary["players"] = player_data.run(download_current=None if args.from_dir else ingest.current_season())
+        from modelroom.nfl import starters
+
+        summary["starters"] = starters.summary(starters.build())
         _print(summary)
+        return 0
+    if args.cmd == "starters":
+        from modelroom.nfl import starters
+
+        _print(starters.summary(starters.build()))
         return 0
     if args.cmd in ("odds", "lines"):
         return _lines("nfl", args.cmd)
@@ -245,7 +253,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 
     f = sub.add_parser("nfl")
-    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest"])
+    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest", "starters"])
     f.add_argument("--days", type=int, default=10, help="project: how many days ahead")
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 

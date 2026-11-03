@@ -26,7 +26,7 @@ def game_projections(seasons: set[int], *, use_cache: bool = True) -> pd.DataFra
     params = ModelParams.load()
     prep = walkforward.prepare()
     games = ingest.load_games()
-    key = f"{params.to_json()['model_version']}-{len(prep.tg)}-{int((games['status'] == 'final').sum())}-{len(games)}"
+    key = f"{params.to_json()['model_version']}-{len(prep.tg)}-{int((games['status'] == 'final').sum())}-{len(games)}-qb:{ingest.qb_source()}"
     cache = ensure(output_dir("nfl")) / "prop_game_inputs.parquet"
     if use_cache and cache.exists():
         c = pd.read_parquet(cache)

@@ -8,6 +8,7 @@ Raw (unchanged, data/raw/nfl/)
   ftn_charting_<season>.parquet      FTN charting via nflverse, 2022+ (blitzers, pass rushers, play action)
   pbp_participation_<season>.parquet nflverse participation (man/zone coverage, pressure), through last season
   injuries_<season>.parquet          injury reports (older seasons added for the prop backtest)
+  depth_charts_<season>.parquet      depth charts: weekly through 2024, timestamped (ESPN) snapshots from 2025
 
 Processed (data/processed/nfl/)
   player_games.parquet   one row per player per game with box-score stats, shares and snaps
@@ -54,7 +55,7 @@ def download(seasons: list[int], current: int) -> dict:
     plan = []
     for s in seasons:
         plan += [("snap_counts", f"snap_counts_{s}.parquet", s), ("weekly_rosters", f"roster_weekly_{s}.parquet", s),
-                 ("injuries", f"injuries_{s}.parquet", s)]
+                 ("injuries", f"injuries_{s}.parquet", s), ("depth_charts", f"depth_charts_{s}.parquet", s)]
         if s >= FTN_FIRST_SEASON:
             plan.append(("ftn_charting", f"ftn_charting_{s}.parquet", s))
         if s >= PARTICIPATION_FIRST_SEASON:
@@ -74,7 +75,8 @@ def download(seasons: list[int], current: int) -> dict:
             else:
                 missing.append(name)
     for kind, sid in (("snap_counts", "nflverse_snap_counts"), ("weekly_rosters", "nflverse_rosters"),
-                      ("ftn_charting", "ftn_charting"), ("pbp_participation", "nflverse_participation")):
+                      ("ftn_charting", "ftn_charting"), ("pbp_participation", "nflverse_participation"),
+                      ("depth_charts", "nflverse_depth_charts")):
         if got.get(kind):
             state.record(sid, files=got[kind])
     return {"files": {k: len(v) for k, v in got.items()}, "not_published": missing}
