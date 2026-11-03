@@ -3,56 +3,65 @@ import { Suspense } from "react";
 import { Hero } from "@/components/marketing/Hero";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { DataSources } from "@/components/marketing/DataSources";
-import { GameBoard } from "@/components/tables/GameBoard";
+import { TopGaps } from "@/components/marketing/TopGaps";
+import { GameRows } from "@/components/games/GameRows";
 import { ModelPerformance } from "@/components/tables/ModelPerformance";
-import { ResultsBoard } from "@/components/tables/ResultsBoard";
-import { Section, TableSkeleton } from "@/components/ui/primitives";
+import { TableSkeleton } from "@/components/ui/primitives";
 
 const more = (href: string, label: string) => (
-  <Link href={href} className="text-sm font-600 text-model hover:underline">
-    {label}
-  </Link>
+  <Link href={href} className="text-sm font-600 text-model hover:underline">{label}</Link>
 );
+
+function Block({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <section className="min-w-0">
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-xl font-700 text-ink">{title}</h2>
+        {action}
+      </div>
+      {children}
+    </section>
+  );
+}
 
 export default function HomePage() {
   return (
     <>
       <Hero />
-
-      <Section title="Next NFL games" intro="Model line and total next to the published market line." action={more("/nfl", "Full NFL board")}>
-        <Suspense fallback={<TableSkeleton rows={4} />}>
-          <GameBoard league="nfl" limit={5} />
-        </Suspense>
-      </Section>
-
-      <Section title="Next NBA games" intro="Model projections for the next games on the schedule." action={more("/nba", "Full NBA board")}>
-        <Suspense fallback={<TableSkeleton rows={4} />}>
-          <GameBoard league="nba" limit={6} />
-        </Suspense>
-      </Section>
-
-      <Section title="Recent results">
-        <div className="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
-          <Suspense fallback={<TableSkeleton rows={5} />}>
-            <ResultsBoard league="nfl" limit={6} />
-          </Suspense>
-          <Suspense fallback={<TableSkeleton rows={5} />}>
-            <ResultsBoard league="nba" limit={6} />
-          </Suspense>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 sm:px-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="space-y-8">
+          <Block title="Next NFL games" action={more("/nfl", "All NFL")}>
+            <Suspense fallback={<TableSkeleton rows={4} />}><GameRows league="nfl" limit={5} note={false} /></Suspense>
+          </Block>
+          <Block title="Next NBA games" action={more("/nba", "All NBA")}>
+            <Suspense fallback={<TableSkeleton rows={4} />}><GameRows league="nba" limit={5} note={false} /></Suspense>
+          </Block>
         </div>
-      </Section>
-
-      <Section title="How the models are doing" intro="Measured on held-out seasons, then tracked game by game.">
-        <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
-          <Suspense fallback={<TableSkeleton rows={4} />}>
-            <ModelPerformance league="nfl" compact />
-          </Suspense>
-          <Suspense fallback={<TableSkeleton rows={4} />}>
-            <ModelPerformance league="nba" compact />
-          </Suspense>
+        <div className="space-y-8">
+          <Block title="Biggest model vs market gaps">
+            <Suspense fallback={<TableSkeleton rows={5} />}><TopGaps /></Suspense>
+            <p className="mt-2 text-xs text-faint">Points between the model (teal) and the posted line (blue). Orange: 3+ on a spread, 4+ on a total.</p>
+          </Block>
+          <Block title="Player props" action={more("/props", "Open props")}>
+            <div className="grid grid-cols-2 gap-2">
+              <Link href="/props?sport=nfl" className="rounded-lg border border-navy-700 bg-navy-900 p-3 hover:border-model">
+                <div className="font-display text-lg font-700 text-ink">NFL props</div>
+                <div className="text-xs text-mute">Passing, rushing, receiving, TDs, fantasy</div>
+              </Link>
+              <Link href="/props?sport=nba" className="rounded-lg border border-navy-700 bg-navy-900 p-3 hover:border-model">
+                <div className="font-display text-lg font-700 text-ink">NBA props</div>
+                <div className="text-xs text-mute">Points, rebounds, assists, PRA, steals, blocks</div>
+              </Link>
+            </div>
+          </Block>
+          <Block title="How the models are doing" action={more("/performance", "Performance")}>
+            <div className="space-y-4">
+              <Suspense fallback={<TableSkeleton rows={3} />}><ModelPerformance league="nfl" compact /></Suspense>
+              <Suspense fallback={<TableSkeleton rows={3} />}><ModelPerformance league="nba" compact /></Suspense>
+            </div>
+          </Block>
         </div>
-      </Section>
-
+      </div>
       <HowItWorks />
       <DataSources />
     </>

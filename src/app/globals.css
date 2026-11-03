@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
- * Model Room tokens: a ledger-style analytics look, light and dark.
+ * Model Room tokens: a dark trading-desk look (light variant via data-theme="light").
  * Color carries meaning everywhere:
  *   blue   = the market (posted lines, exchange prices)
  *   teal   = the model (Model Room's numbers)
@@ -10,6 +10,25 @@
  *   navy-950 page, navy-900 surface, navy-850/800 soft fills, navy-700/600 lines.
  */
 :root {
+  /* Dark is the house look. A light variant stays available via data-theme="light". */
+  color-scheme: dark;
+  --mr-bg: #0c131b;
+  --mr-surface: #131d28;
+  --mr-soft: #18242f;
+  --mr-soft-2: #1d2a38;
+  --mr-line: #233142;
+  --mr-line-2: #31445a;
+  --mr-ink: #e7edf3;
+  --mr-mute: #a3b2c3;
+  --mr-faint: #7d8fa3;
+  --mr-model: #4fc3c9;
+  --mr-market: #7aa7ff;
+  --mr-edge: #f0a35e;
+  --mr-danger: #ef7d75;
+  --mr-good: #5ccf93;
+  --mr-pending: #e9c46a;
+}
+:root[data-theme="light"] {
   color-scheme: light;
   --mr-bg: #f3f5f8;
   --mr-surface: #ffffff;
@@ -26,44 +45,6 @@
   --mr-danger: #b3362f;
   --mr-good: #1a7a4c;
   --mr-pending: #8a6a00;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --mr-bg: #0e151d;
-    --mr-surface: #16202b;
-    --mr-soft: #1a2633;
-    --mr-soft-2: #1e2b3a;
-    --mr-line: #263444;
-    --mr-line-2: #34465a;
-    --mr-ink: #e7edf3;
-    --mr-mute: #a3b2c3;
-    --mr-faint: #7d8fa3;
-    --mr-model: #4fc3c9;
-    --mr-market: #7aa7ff;
-    --mr-edge: #f0a35e;
-    --mr-danger: #ef7d75;
-    --mr-good: #5ccf93;
-  --mr-pending: #e9c46a;
-    --mr-pending: #e9c46a;
-  }
-}
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --mr-bg: #0e151d;
-  --mr-surface: #16202b;
-  --mr-soft: #1a2633;
-  --mr-soft-2: #1e2b3a;
-  --mr-line: #263444;
-  --mr-line-2: #34465a;
-  --mr-ink: #e7edf3;
-  --mr-mute: #a3b2c3;
-  --mr-faint: #7d8fa3;
-  --mr-model: #4fc3c9;
-  --mr-market: #7aa7ff;
-  --mr-edge: #f0a35e;
-  --mr-danger: #ef7d75;
-  --mr-good: #5ccf93;
 }
 
 @theme {

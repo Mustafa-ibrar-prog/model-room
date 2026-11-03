@@ -16,6 +16,7 @@ from modelroom.common import ledger
 from modelroom.common.hashing import hash_frame, hash_obj
 from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path, output_dir
 from modelroom.common.publish import write_board
+from modelroom.common import recent
 from modelroom.markets import compare as C
 from modelroom.markets import evaluation, prices
 from modelroom.markets.teams import NBA_TEAMS
@@ -158,6 +159,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                          "generated_at": generated_at, "sims": p.settings.sims, "seed": seeds.get(dates[x.game_id])})
         appended = ledger.append(ledger_path("nba_props"), recs)
 
+    recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool))
     board = {
         "league": "nba", "kind": "player_props", "generated_at": generated_at, "season": season, "week": None,
         "model": {"id": MODEL_ID, "version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,

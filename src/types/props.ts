@@ -60,6 +60,8 @@ export interface EnginePropPlayer {
   injury_status: string | null;
   markets: Record<string, EnginePropMarket>;
   inputs: Record<string, number | string | null>;
+  /** Last few games before the run (newest first): context only, never an input to the board's numbers. */
+  recent?: { games: { date: string; opp: string }[]; values: Record<string, (number | null)[]> };
 }
 
 export interface EnginePropsBoard {
@@ -95,7 +97,7 @@ export interface PropBacktestSummary {
   thresholds: number;
   overall: { n: number; brier: number; log_loss: number } | null;
   overall_vs_baseline: { model: { log_loss: number; brier: number }; baseline: { log_loss: number; brier: number } } | null;
-  by_market: Record<string, { log_loss: number; brier: number; n: number; baseline_log_loss: number | null; model_log_loss_same_rows: number | null; mean_mae: number; recent_avg_mae: number | null }>;
+  by_market: Record<string, { log_loss: number; brier: number; n: number; baseline_log_loss: number | null; model_log_loss_same_rows: number | null; mean_mae: number; recent_avg_mae: number | null; ece?: number }>;
   calibration: { bin: string; n: number; predicted: number; actual: number }[] | null;
   notes: string[];
 }

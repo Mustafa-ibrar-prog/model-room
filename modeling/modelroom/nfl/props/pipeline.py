@@ -22,6 +22,7 @@ from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path
 from modelroom.common.publish import write_board
 from modelroom.markets import compare as C
 from modelroom.markets import config as MC
+from modelroom.common import recent
 from modelroom.markets import evaluation, manual, matching, snapshots
 from modelroom.markets.schema import PropQuote
 from modelroom.sources import odds, state
@@ -232,6 +233,10 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         appended = ledger.append(ledger_path("nfl_props"), recs)
 
     last_ingest = state.read().get("nflverse_games", {}).get("last_success")
+    pgr = inp.player_games.assign(rush_rec_yds=inp.player_games["rush_yds"] + inp.player_games["rec_yds"],
+                                  td_any=inp.player_games["rush_td"] + inp.player_games["rec_td"])
+    played = (pgr["offense_snaps"].fillna(0) > 0) | (pgr[["pass_att", "targets", "carries"]].sum(axis=1) > 0)
+    recent.attach(games_json, pgr, {k: m["stat"] for k, m in MARKETS.items()}, today, played)
     board = {
         "league": "nfl", "kind": "player_props", "generated_at": generated_at, "season": season, "week": week,
         "model": {"id": MODEL_ID, "version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,

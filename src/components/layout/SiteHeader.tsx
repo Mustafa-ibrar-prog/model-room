@@ -39,13 +39,6 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
         <div className="ml-auto hidden items-center gap-2 md:flex">
           <Link
             href="/pricing"
-            aria-current={isActive("/pricing") ? "page" : undefined}
-            className="rounded-md px-3 py-2 text-sm font-500 text-mute hover:text-ink"
-          >
-            Pricing
-          </Link>
-          <Link
-            href="/pricing"
             className="rounded-full bg-model px-4 py-2 text-sm font-600 text-navy-950 hover:bg-model/90"
           >
             See plans
@@ -71,7 +64,7 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
         <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
           {mobileAccount ? <div className="mx-auto max-w-7xl px-4 pt-3">{mobileAccount}</div> : null}
           <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-1 px-4 py-3">
-            {[...NAV, { href: "/pricing", label: "Pricing" }].map((item) => (
+            {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
