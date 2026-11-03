@@ -72,7 +72,7 @@ jobs:
               try "$SUPABASE_DB_URL" || { echo "FAIL  can't connect with SUPABASE_DB_URL"; exit 1; }
               echo "DB_URL=$SUPABASE_DB_URL" >> "$GITHUB_ENV";;
           esac
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'ok    Postgres ' || current_setting('server_version')" 2>/dev/null || psql "$(grep '^DB_URL=' "$GITHUB_ENV" | tail -1 | cut -d= -f2-)" -qtAc "select 'ok    Postgres ' || current_setting('server_version')"
+          psql "$(grep '^DB_URL=' "$GITHUB_ENV" | tail -1 | cut -d= -f2-)" -qtAc "select 'ok    Postgres ' || current_setting('server_version')"
       - uses: supabase/setup-cli@v1
         if: steps.check.outputs.ready == 'yes'
         with:
