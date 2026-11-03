@@ -36,9 +36,9 @@ async function propsCheck(page, tier, who) {
   const noGames = body.includes("No upcoming games");
   if (tier === "free") {
     check(body.includes(LOCK_PROPS) || noGames, `${who}: player props locked (Plus required)`);
-    check(!body.includes("Model Room projection"), `${who}: no player projections sent to the page`);
+    check((await page.locator('section[aria-label="Model Room projection"]').count()) === 0, `${who}: no player projections sent to the page`);
   } else if (!noGames) {
-    check(!body.includes(LOCK_PROPS) && body.includes("Model Room projection"), `${who}: player projections shown`);
+    check(!body.includes(LOCK_PROPS) && (await page.locator('section[aria-label="Model Room projection"]').count()) > 0, `${who}: player projections shown`);
     const inputsLocked = (await page.locator(`text=${LOCK_INPUTS}`).count()) > 0;
     check(tier === "plus" ? inputsLocked : !inputsLocked, `${who}: model inputs ${tier === "plus" ? "locked (Pro only)" : "available"}`);
   } else ok(`${who}: no NFL games in the props window to check`);
@@ -90,9 +90,12 @@ for (const [email, tier] of [["free-test@modelroom.test", "free"], ["plus-test@m
   ok(`${who}: logged in`);
   const acct = await page.locator("main").innerText();
   const name = { free: "Free", plus: "Plus", pro: "Pro" }[tier];
-  check(acct.includes(email) && acct.includes(name), `${who}: account page shows ${name}`);
+  const plan = (await page.locator("main dd.font-display").first().innerText().catch(() => "")).trim();
+  check(acct.includes(email) && plan.toLowerCase() === tier, `${who}: account page shows ${name} (got ${plan || "nothing"})`);
+  const setup = await page.locator('[data-testid="setup-check"]').innerText().catch(() => null);
+  if (setup) console.log(`info  ${who}: ${setup}`);
   const menu = page.locator("header details summary").first();
-  check((await menu.count()) > 0 && (await menu.innerText()).includes(name), `${who}: header Account menu shows ${name}`);
+  check((await menu.count()) > 0 && (await menu.innerText()).toLowerCase().includes(tier), `${who}: header Account menu shows ${name}`);
   await propsCheck(page, tier, who);
   // Pricing reflects the plan.
   const pricing = await text(page, "/pricing");
@@ -100,9 +103,10 @@ for (const [email, tier] of [["free-test@modelroom.test", "free"], ["plus-test@m
   // Log out from the menu.
   await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
   await page.locator("header details summary").first().click();
-  await Promise.all([page.waitForLoadState("networkidle"), page.locator("header details button:has-text('Log out')").click()]);
+  await page.locator("header details button:has-text('Log out')").click();
+  const out = await page.locator("header >> text=Log in").first().waitFor({ timeout: 20000 }).then(() => true).catch(() => false);
   await page.goto(`${BASE}/`, { waitUntil: "networkidle" });
-  check((await page.locator("header >> text=Log in").count()) > 0, `${who}: logged out`);
+  check(out && (await page.locator("header >> text=Log in").count()) > 0 && (await page.locator("header details").count()) === 0, `${who}: logged out`);
   const after = await text(page, "/props?sport=nfl");
   check(after.body.includes(LOCK_PROPS) || after.body.includes("No upcoming games"), `${who}: after logout, Plus features are locked again`);
   await ctx.close();

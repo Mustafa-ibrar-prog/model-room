@@ -7,7 +7,7 @@ import { tierName } from "@/config/tiers";
 import { authEnabled, isProduction, isTestAccount } from "@/lib/auth-config";
 import { formatTimestamp } from "@/lib/format";
 import { signOut } from "@/server/actions/auth";
-import { getMemberships, getTierForUser } from "@/server/membership";
+import { getMemberships, getTierLookup } from "@/server/membership";
 import { getSessionUser } from "@/server/session";
 
 export const metadata: Metadata = { title: "Account" };
@@ -33,7 +33,7 @@ async function Account() {
   }
   const user = await getSessionUser();
   if (!user) redirect("/login?next=/account");
-  const [tier, memberships] = await Promise.all([getTierForUser(user.id), getMemberships(user.id)]);
+  const [{ tier, problem }, memberships] = await Promise.all([getTierLookup(user.id), getMemberships(user.id)]);
   const live = memberships.find((m) => ["active", "trialing", "past_due", "cancelled"].includes(m.status));
   const testControls = !isProduction() && isTestAccount(user.email);
   return (
@@ -59,6 +59,14 @@ async function Account() {
           </button>
         </form>
       </Panel>
+      {problem && !isProduction() ? (
+        <Panel className="border-edge/50 p-5">
+          <h2 className="font-display text-xl font-600 text-ink">Setup check</h2>
+          <p data-testid="setup-check" className="mt-1 text-sm text-mute">
+            Your plan is shown as Free because {problem}. Test site only; no key values are shown.
+          </p>
+        </Panel>
+      ) : null}
       {testControls ? (
         <Panel className="p-5">
           <h2 className="font-display text-xl font-600 text-ink">Test account controls</h2>
