@@ -88,6 +88,7 @@ for (const [email, tier] of [["free-test@modelroom.test", "free"], ["plus-test@m
     continue;
   }
   ok(`${who}: logged in`);
+  await page.locator("main dd.font-display").first().waitFor({ timeout: 20000 }).catch(() => null);
   const acct = await page.locator("main").innerText();
   const name = { free: "Free", plus: "Plus", pro: "Pro" }[tier];
   const plan = (await page.locator("main dd.font-display").first().innerText().catch(() => "")).trim();

@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
+import { supabaseConfigReport } from "@/lib/supabase/keys";
 import type { TierId } from "@/types/domain";
 
 const TIERS: readonly TierId[] = ["free", "plus", "pro"];
@@ -14,7 +15,10 @@ const TIERS: readonly TierId[] = ["free", "plus", "pro"];
  */
 export const getTierLookup = cache(async (userId: string): Promise<{ tier: TierId; problem: string | null }> => {
   const db = getSupabaseAdmin();
-  if (!db) return { tier: "free", problem: "the server key isn't configured (SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY, a secret key)" };
+  if (!db) {
+    const why = supabaseConfigReport().lines.filter((l) => /server key|SECRET_KEY|SERVICE_ROLE/i.test(l)).join("; ");
+    return { tier: "free", problem: `the server can't read plans: ${why || "server key not configured"}` };
+  }
 
   const { data, error } = await db.rpc("effective_tier_for", { p_user: userId });
   if (error) {
