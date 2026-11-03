@@ -22,6 +22,7 @@ from modelroom.common.paths import MODELING_ROOT, data_root, ensure, ledger_path
 from modelroom.common.publish import write_board
 from modelroom.markets import compare as C
 from modelroom.markets import config as MC
+from modelroom.common import grid as G
 from modelroom.common import recent
 from modelroom.markets import evaluation, manual, matching, snapshots
 from modelroom.markets.schema import PropQuote
@@ -127,7 +128,8 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list[PropQuote], 
         markets[mkey] = {"label": m["label"], "mean": round(float(np.mean(sims)), 2), "median": round(float(np.median(sims)), 1),
                          "sd": round(float(np.std(sims)), 2),
                          "range_80": [round(float(np.quantile(sims, 0.1)), 1), round(float(np.quantile(sims, 0.9)), 1)],
-                         "support": support, "support_note": support_note, "thresholds": th}
+                         "support": support, "support_note": support_note, "thresholds": th,
+                         "grid": G.build(sims, stat, lambda r, _m=mkey: p.calibrate(_m, r))}
     return {"player_id": x.player_id, "name": x.name, "team": x.team, "opp": x.opp, "position": x.group,
             "game_id": x.game_id, "injury_status": x.inputs.get("injury_status"), "markets": markets, "inputs": x.inputs}
 

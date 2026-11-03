@@ -48,6 +48,8 @@ export interface EnginePropMarket {
   support_note: string;
   range_80: [number, number];
   thresholds: EngineThreshold[];
+  /** Calibrated P(stat >= k) for k = k0, k0+step, …; prices lines the board doesn't list. */
+  grid?: { k0: number; step: number; p: number[] };
 }
 
 export interface EnginePropPlayer {
