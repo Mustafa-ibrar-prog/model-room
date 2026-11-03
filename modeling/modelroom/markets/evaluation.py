@@ -54,7 +54,7 @@ def row(q: PropQuote, model_prob: float, model_version: str, generated_at: str, 
         "model_prob": round(model_prob, 4), "model_version": model_version, "generated_at": generated_at,
         "yes_bid": q.yes_bid, "yes_ask": q.yes_ask, "no_ask": q.no_ask, "yes_ask_size": q.yes_ask_size, "yes_bid_size": q.yes_bid_size,
         "fee_rate": q.fee_rate, "captured_at": q.captured_at, "game_start": game_start, "void_rule": q.void_rule,
-        "grade": (grade or {}).get("grade"),
+        "grade": (grade or {}).get("grade"), "kind": "prop", "event_id": q.provider_event_id, "team": q.team,
     }
 
 

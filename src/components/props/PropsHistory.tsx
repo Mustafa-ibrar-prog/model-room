@@ -3,6 +3,9 @@ import { formatNumber, formatPct, formatTimestamp } from "@/lib/format";
 import { longDate } from "@/lib/dates";
 import { CATEGORIES } from "@/server/data/explorer";
 import { getHistoryDay } from "@/server/data/history";
+import { getMarketResultsForDate } from "@/server/data/marketResults";
+import { ResultRow, StatusChip } from "@/components/results/SettlementBits";
+import type { MarketResult } from "@/types/marketResults";
 import { getViewer } from "@/server/viewer";
 import { isLocked, type League } from "@/types/domain";
 import { LockedPanel, Unavailable } from "@/components/ui/primitives";
@@ -13,7 +16,7 @@ import { LockedPanel, Unavailable } from "@/components/ui/primitives";
  */
 export async function PropsHistory({ league, date, game, cat, q }: { league: League; date: string; game?: string; cat?: string; q?: string }) {
   const viewer = await getViewer();
-  const h = await getHistoryDay(league, date, viewer.tier);
+  const [h, settled] = await Promise.all([getHistoryDay(league, date, viewer.tier), getMarketResultsForDate(league, date, viewer.tier)]);
   if (!h.available || !h.games.length) return <Unavailable title={`No ${league.toUpperCase()} games on ${longDate(date)}`} body="Pick another day." />;
   const cats = CATEGORIES[league];
   const category = cats.find((c) => c.key === cat) ?? cats[0];
@@ -46,13 +49,18 @@ export async function PropsHistory({ league, date, game, cat, q }: { league: Lea
       {isLocked(h.props) ? (
         <LockedPanel requires={h.props.requires} title="Prop results are on Pro" body="Pro shows every projection recorded before the game, the stat each player actually put up, and Hit or Miss on every line." />
       ) : (
-        <Rows rows={h.props.filter((p) => p.game_id === selected.game_id && p.markets[category.key] && (!q || p.player.toLowerCase().includes(q.toLowerCase())))} cat={category.key} final={Boolean(selected.final)} />
+        <Rows
+          rows={h.props.filter((p) => p.game_id === selected.game_id && p.markets[category.key] && (!q || p.player.toLowerCase().includes(q.toLowerCase())))}
+          cat={category.key}
+          final={Boolean(selected.final)}
+          settled={isLocked(settled) ? [] : settled.filter((r) => r.kind === "prop" && r.game_id === selected.game_id && r.market === category.key)}
+        />
       )}
     </div>
   );
 }
 
-function Rows({ rows, cat, final }: { rows: import("@/types/history").HistoryProp[]; cat: string; final: boolean }) {
+function Rows({ rows, cat, final, settled }: { rows: import("@/types/history").HistoryProp[]; cat: string; final: boolean; settled: MarketResult[] }) {
   if (!rows.length) {
     return <Unavailable title="Nothing recorded for this game" body="No prop projection was written before this game started, so there's nothing to grade. Prop records begin with the first model run." />;
   }
@@ -64,7 +72,9 @@ function Rows({ rows, cat, final }: { rows: import("@/types/history").HistoryPro
     <div className="space-y-3">
       {graded.length ? (
         <p className="text-sm text-mute">
-          {graded.length} lines graded: {hits} hit ({formatPct(hits / graded.length)}) against an average model probability of {formatPct(avgP!)}.
+          {graded.length} lines checked against the box score: {hits} hit ({formatPct(hits / graded.length)}) against an average model probability of
+          {" "}{formatPct(avgP!)}. Hit / Miss here is the projection against the actual stat, not a market result; exchange markets are graded only on their
+          official settlement, shown under each player.
         </p>
       ) : (
         <p className="text-sm text-mute">{final ? "No graded lines yet: player stats for this game aren't in." : "Results appear once the game is final."}</p>
@@ -93,6 +103,15 @@ function Rows({ rows, cat, final }: { rows: import("@/types/history").HistoryPro
                   </span>
                 ))}
               </div>
+              {settled.some((s) => s.player_id === r.player_id) ? (
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-1.5 text-[0.68rem] text-faint">
+                    Exchange markets:{" "}
+                    {settled.filter((s) => s.player_id === r.player_id).map((s) => <StatusChip key={s.id} status={s.status} compact />)}
+                  </div>
+                  <ul className="space-y-1">{settled.filter((s) => s.player_id === r.player_id).map((s) => <ResultRow key={s.id} r={s} />)}</ul>
+                </div>
+              ) : null}
               <div className="text-xs text-faint">Recorded {formatTimestamp(r.generated_at)}, model {r.model_version}</div>
             </li>
           );

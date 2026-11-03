@@ -99,3 +99,13 @@ export async function loadPerformanceFile<T>(league: League): Promise<T | null> 
     return null;
   }
 }
+
+/** data/published/market_results_<league>.json: market-settled grading (publishable providers only). */
+export async function loadMarketResultsFile<T>(league: League): Promise<T | null> {
+  await connection();
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), `market_results_${league}.json`), "utf8")) as T;
+  } catch {
+    return null;
+  }
+}

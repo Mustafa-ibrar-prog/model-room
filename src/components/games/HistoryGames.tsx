@@ -2,6 +2,8 @@ import Link from "next/link";
 import { favoredLine, formatNumber, formatPct, formatTimestamp } from "@/lib/format";
 import { longDate } from "@/lib/dates";
 import { getHistoryDay } from "@/server/data/history";
+import { getMarketResultsForDate } from "@/server/data/marketResults";
+import { ResultRow } from "@/components/results/SettlementBits";
 import { getViewer } from "@/server/viewer";
 import { isLocked, type League } from "@/types/domain";
 import { TeamBadge } from "@/components/ui/TeamBadge";
@@ -10,7 +12,8 @@ import { LockedCell, Unavailable } from "@/components/ui/primitives";
 /** A past date: final scores, and (Pro) what the model recorded before each game. */
 export async function HistoryGames({ league, date }: { league: League; date: string }) {
   const viewer = await getViewer();
-  const h = await getHistoryDay(league, date, viewer.tier);
+  const [h, settled] = await Promise.all([getHistoryDay(league, date, viewer.tier), getMarketResultsForDate(league, date, viewer.tier)]);
+  const gameMarkets = isLocked(settled) ? [] : settled.filter((r) => r.kind === "game");
   if (!h.available || !h.games.length) {
     return <Unavailable title={`No ${league.toUpperCase()} games on ${longDate(date)}`} body="Pick another day with the arrows or the calendar." />;
   }
@@ -58,6 +61,9 @@ export async function HistoryGames({ league, date }: { league: League; date: str
                 ) : (
                   <span>No projection recorded before this game.</span>
                 )}
+                {gameMarkets.some((r) => r.game_id === g.game_id) ? (
+                  <ul className="mt-2 space-y-1">{gameMarkets.filter((r) => r.game_id === g.game_id).map((r) => <ResultRow key={r.id} r={r} />)}</ul>
+                ) : null}
                 {g.final ? (
                   <Link href={`/props?sport=${league}&date=${date}&game=${encodeURIComponent(g.game_id)}`} className="mt-1 block font-600 text-model hover:underline">
                     Props results

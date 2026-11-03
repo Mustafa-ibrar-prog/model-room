@@ -101,15 +101,26 @@ def depth(league: str, max_requests: int = 60, log=print) -> dict:
     return {"flagged": int(len(want)), "books_fetched": len(out), "requests": c.calls, "errors": errors}
 
 
+def settle(league: str) -> dict:
+    """Official settlement: ask each provider about started games' priced markets, then grade."""
+    from . import grading, settlement
+
+    return {"settlement": settlement.check(league), "grading": grading.run(league)}
+
+
 def refresh(league: str, days: int = 10, log=print) -> dict:
-    """The whole local market loop: prices → props → depth for flagged contracts → props again."""
+    """The whole local market loop: prices → props → game markets → depth → props again → settlement."""
     if league == "nfl":
         from modelroom.nfl.props import pipeline as props
     else:
         from modelroom.nba.props import pipeline as props
     report = {"fetch": fetch(league, days=days, log=log)}
     report["props"] = props.run()
+    from . import games
+
+    report["game_markets"] = {"evaluated": games.evaluate(league)}
     report["depth"] = depth(league, log=log)
     if report["depth"].get("books_fetched"):
         report["props_after_depth"] = props.run()
+    report["settle"] = settle(league)
     return report

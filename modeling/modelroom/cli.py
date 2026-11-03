@@ -19,6 +19,7 @@
   markets fetch nfl [--provider]  store a snapshot from each enabled provider (Polymarket US, Kalshi)
   markets depth nfl               order-book depth for Polymarket contracts the last props run flagged
   markets refresh nfl             fetch -> props -> depth -> props (the whole local loop)
+  markets settle nfl              ask the exchanges which priced markets have officially settled; grade them
   markets report nfl              settle past contracts: model vs market accuracy, ROI, closing-line value
   markets backfill nfl --days 30  Kalshi: hourly price history of settled contracts (local only)
   markets replay nfl              price that history with the walk-forward model (then: markets report)
@@ -187,6 +188,9 @@ def _markets(args) -> int:
     if args.cmd == "refresh":
         _print(markets.refresh(args.league))
         return 0
+    if args.cmd == "settle":
+        _print(markets.settle(args.league))
+        return 0
     if args.cmd == "report":
         from modelroom.markets import evaluation
 
@@ -246,7 +250,7 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 
     mk = sub.add_parser("markets")
-    mk.add_argument("cmd", choices=["status", "fetch", "depth", "refresh", "report", "backfill", "replay"])
+    mk.add_argument("cmd", choices=["status", "fetch", "depth", "refresh", "settle", "report", "backfill", "replay"])
     mk.add_argument("league", nargs="?", default="nfl", choices=["nfl", "nba"])
     mk.add_argument("--provider", default="all", choices=["all", "polymarket_us", "kalshi"])
     mk.add_argument("--days", type=int, default=10)

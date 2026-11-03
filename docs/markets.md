@@ -92,3 +92,25 @@ So:
 - With `MODELROOM_ENV=production`, every provider is off until `MODELROOM_MARKETS_REDISTRIBUTION_OK=true` is set after written permission.
 - Kalshi prices are kept out of the published board even when Kalshi is on. They go to a local file (`data/output/nfl/props_compare_local.json`) unless `MODELROOM_MARKETS_KALSHI_PUBLISH=on`.
 - The hosted preview doesn't fetch exchange prices, because the GitHub repository is public and the published board is committed there.
+
+## Settlement grading (official exchange settlement)
+
+`python -m modelroom markets settle nfl|nba` asks each enabled exchange which priced markets have officially settled, records what it says, and grades the model's predictions. `markets refresh` runs it at the end of every loop, so it's automatic wherever the market loop is scheduled.
+
+- **What counts as a prediction:** the last one the model made before the game started, with the price seen then. Records live in `data/markets/evaluations/<league>.jsonl` and are never rewritten. The engines never see a price or a settlement.
+- **What counts as settled:**
+  - **Kalshi:** `status` is `finalized` with `result` yes/no; `settlement_ts` is recorded as the settlement time. `determined`, `amended` and `disputed` mean a result exists but the settlement window is still open, so the market stays **Pending**. A settlement value between 0 and 1 counts as **Void**.
+  - **Polymarket US:** `status` is `MARKET_STATUS_RESOLVED`, and the long side settled at 1 or 0. A settlement in between means the market settled at its last fair price (for example, the player never took a snap), which counts as **Void**. A missing or contradictory value stays **Pending**; outcomes are never guessed. Polymarket publishes no settlement time, so its `updatedAt` at resolution is recorded instead.
+  - **Manual CSV prices** have no settlement feed, so they are never graded.
+- **Grades:** each market is graded on its own.
+  - **Correct (green):** the side the model put above 50% is the side that settled.
+  - **Incorrect (red):** the other side settled.
+  - **Void / refunded (gray).**
+  - **Pending settlement (yellow).**
+  - The game ending, or a box score, never grades anything; the actual stat or final score is shown only as context.
+- **Corrections:** observations are append-only (`data/markets/settlements/<league>.jsonl`). A changed result is written as a correction, and the earlier observation is kept.
+- **Game markets:** winner, spread and total, from the Kalshi series `KX{NFL,NBA}{GAME,SPREAD,TOTAL}` and the Polymarket US moneyline / spreads / totals markets. The model's probability is:
+  - **Winner:** the engine's own win probability.
+  - **Spread and total:** a normal approximation from its projected margin or total and the published 80% range. These aren't separately calibrated, so they can only ever be "lean", never "strong".
+- **What the site shows:** `data/published/market_results_<league>.json` holds only providers whose data may be published (see markets.config). Kalshi stays local unless `MODELROOM_MARKETS_KALSHI_PUBLISH=on`. The test site's CI never fetches exchange data, because the repo is public and the providers' terms don't allow republishing it, so its record stays empty and says why.
+- **Accuracy, not profit:** no trades are placed, so no ROI is claimed. The older `markets report` is a local research tool that settles against box scores and reports hypothetical ROI; it doesn't feed the site.

@@ -8,7 +8,14 @@ import { loadPropsBoard } from "@/server/engine/board";
 import type { League } from "@/types/domain";
 import type { ProbBlock } from "@/types/history";
 import { ModelPerformance } from "@/components/tables/ModelPerformance";
-import { PageHeader, Panel, Section, TableSkeleton, Unavailable } from "@/components/ui/primitives";
+import { ResultRow, StatusLegend } from "@/components/results/SettlementBits";
+import { AutoSubmit } from "@/components/props/AutoSubmit";
+import { LockedPanel, PageHeader, Panel, Section, TableSkeleton, Unavailable } from "@/components/ui/primitives";
+import { providerName } from "@/lib/providers";
+import { getMarketResults, type MarketResultsView } from "@/server/data/marketResults";
+import { getViewer } from "@/server/viewer";
+import { isLocked } from "@/types/domain";
+import type { ResultBlock } from "@/types/marketResults";
 
 export const metadata: Metadata = { title: "Model performance" };
 
@@ -82,10 +89,109 @@ function BlockTable({ rows, first }: { rows: (ProbBlock & { key: string })[]; fi
   );
 }
 
+const one = (v: string | string[] | undefined) => (typeof v === "string" ? v : undefined);
+
+function ResultsTable({ first, rows }: { first: string; rows: [string, ResultBlock][] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[34rem] text-sm">
+        <thead className="text-faint">
+          <tr><th className={th}>{first}</th><th className={th}>Settled</th><th className={th}>Correct</th><th className={th}>Incorrect</th><th className={th}>Void</th><th className={th}>Pending</th><th className={th}>Hit rate</th><th className={th}>Brier</th></tr>
+        </thead>
+        <tbody>
+          {rows.map(([k, b]) => (
+            <tr key={k} className="border-t border-navy-700/70">
+              <td className={td}>{k}</td><td className={td}>{b.settled}</td><td className={`${td} text-good`}>{b.won}</td><td className={`${td} text-danger`}>{b.lost}</td>
+              <td className={td}>{b.void}</td><td className={`${td} text-pending`}>{b.pending}</td><td className={td}>{b.win_pct != null ? formatPct(b.win_pct, 1) : "–"}</td><td className={td}>{num(b.brier)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SettledRecord({ league, v }: { league: League; v: MarketResultsView }) {
+  const o = v.overall;
+  const sel = "rounded-md border border-navy-700 bg-navy-900 px-2 py-1.5 text-sm text-ink";
+  const withheld = Object.entries(v.withheld);
+  if (!v.available || o.predictions === 0) {
+    return (
+      <div className="space-y-3">
+        <StatusLegend />
+        <Unavailable
+          title="No market-settled predictions yet"
+          body={
+            withheld.length
+              ? `Settled predictions exist for ${withheld.map(([p, n]) => `${providerName(p)} (${n})`).join(", ")}, but that provider's data can't be published under its terms, so they're kept off this site.`
+              : "Grading starts once exchange prices are connected: each prediction made against a Polymarket US or Kalshi market is graded when that exchange settles it. Exchange data isn't connected on this site yet."
+          }
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      <StatusLegend />
+      <form action="/performance" className="flex flex-wrap items-end gap-3">
+        <input type="hidden" name="sport" value={league} />
+        <label className="flex flex-col gap-1 text-xs text-faint">From<input type="date" name="from" defaultValue={v.query.from} className={sel} /></label>
+        <label className="flex flex-col gap-1 text-xs text-faint">To<input type="date" name="to" defaultValue={v.query.to} className={sel} /></label>
+        <label className="flex flex-col gap-1 text-xs text-faint">Provider
+          <select name="provider" defaultValue={v.query.provider ?? ""} className={sel}><option value="">All</option>{v.providerKeys.map((p) => <option key={p} value={p}>{providerName(p)}</option>)}</select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-faint">Market
+          <select name="market" defaultValue={v.query.market ?? ""} className={sel}><option value="">All</option>{v.markets.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}</select>
+        </label>
+        <label className="flex flex-col gap-1 text-xs text-faint">Show
+          <select name="status" defaultValue={v.query.status ?? ""} className={sel}><option value="">All</option><option value="won">Correct</option><option value="lost">Incorrect</option><option value="void">Void</option><option value="pending">Pending</option></select>
+        </label>
+        <button type="submit" className="rounded-full bg-model px-4 py-1.5 text-sm font-600 text-navy-950">Apply</button>
+        <AutoSubmit inputs />
+      </form>
+      <Panel className="p-5">
+        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-6">
+          <div><dt className="text-xs text-faint">Settled</dt><dd className="font-display text-2xl font-600 text-ink">{o.settled}</dd></div>
+          <div><dt className="text-xs text-faint">Correct</dt><dd className="font-display text-2xl font-600 text-good">{o.won}</dd></div>
+          <div><dt className="text-xs text-faint">Incorrect</dt><dd className="font-display text-2xl font-600 text-danger">{o.lost}</dd></div>
+          <div><dt className="text-xs text-faint">Void / refunded</dt><dd className="font-display text-2xl font-600 text-mute">{o.void}</dd></div>
+          <div><dt className="text-xs text-faint">Pending</dt><dd className="font-display text-2xl font-600 text-pending">{o.pending}</dd></div>
+          <div><dt className="text-xs text-faint">Hit rate</dt><dd className="font-display text-2xl font-600 text-ink">{o.win_pct != null ? formatPct(o.win_pct, 1) : "–"}</dd></div>
+        </dl>
+        {o.n_scored ? (
+          <p className="mt-3 text-sm text-mute">
+            On {o.n_scored} settled Yes/No markets: model Brier {num(o.brier)}, log loss {num(o.log_loss)}
+            {o.market ? `; the market's own price at the time: Brier ${num(o.market.brier)}, log loss ${num(o.market.log_loss)} (n ${o.market.n})` : ""}. Lower is better.
+          </p>
+        ) : null}
+        <p className="mt-2 text-xs text-faint">
+          &quot;Correct&quot; means the side the model favoured (over 50%) is the side the exchange settled. This is prediction accuracy, not betting profit: no
+          trades were placed, so no ROI is claimed.
+        </p>
+      </Panel>
+      <Panel className="p-5"><ResultsTable first="Market" rows={Object.entries(v.byMarket)} /></Panel>
+      <Panel className="p-5"><ResultsTable first="Provider" rows={Object.entries(v.byProvider).map(([k, b]) => [providerName(k), b])} /></Panel>
+      <Panel className="p-5"><ResultsTable first="Month" rows={Object.entries(v.byMonth).reverse()} /></Panel>
+      {v.calibration.length ? <Panel className="p-5"><Calibration rows={v.calibration} /></Panel> : null}
+      {isLocked(v.records) ? (
+        <LockedPanel requires={v.records.requires} title="Every settled prediction is on Pro" body="Open any settled prediction to compare the original projection, the market price then, and the exchange's official result." />
+      ) : (
+        <ul className="space-y-1.5">{v.records.map((r) => <ResultRow key={r.id} r={r} />)}</ul>
+      )}
+      {withheld.length ? <p className="text-xs text-faint">Not shown under provider terms: {withheld.map(([p, n]) => `${providerName(p)} ${n}`).join(", ")}.</p> : null}
+    </div>
+  );
+}
+
 async function Body({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const league: League = sp.sport === "nba" ? "nba" : "nfl";
-  const [props, live] = await Promise.all([loadPropsBoard(league), getPerformance(league)]);
+  const viewer = await getViewer();
+  const [props, live, settled] = await Promise.all([
+    loadPropsBoard(league),
+    getPerformance(league),
+    getMarketResults(league, viewer.tier, { from: one(sp.from), to: one(sp.to), provider: one(sp.provider), market: one(sp.market), status: one(sp.status) }),
+  ]);
   const bt = props.ok ? props.board.performance.backtest : null;
   return (
     <>
@@ -146,7 +252,11 @@ async function Body({ searchParams }: { searchParams: SP }) {
         )}
       </Section>
 
-      <Section title="Live record" intro="Projections recorded before each game this season and last, graded once the game was final.">
+      <Section title="Settled market record" intro="Predictions made against real Polymarket US and Kalshi markets, graded on each market's official settlement.">
+        <SettledRecord league={league} v={settled} />
+      </Section>
+
+      <Section title="Live record (box scores)" intro="Every projection recorded before each game this season and last, scored against the final box score. This measures projection accuracy, separately from market settlement.">
         {!live || (!live.games && !live.props) ? (
           <Unavailable title="Nothing graded yet" body="The live record fills in as games recorded by the model go final." />
         ) : (
