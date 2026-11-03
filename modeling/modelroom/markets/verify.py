@@ -43,7 +43,7 @@ def _num_in(text: str) -> list[float]:
 def field_checks(league: str) -> list[dict]:
     snap = snapshots.latest(league)
     rows = [{k: (None if isinstance(v, float) and v != v else v) for k, v in r.items()} for r in snap.to_dict("records")] if len(snap) else []
-    for prov in config.PROVIDERS:
+    for prov in config.enabled_providers():
         rs = [r for r in rows if r["provider"] == prov]
         props = [r for r in rs if not r["market"].startswith("game_")]
         gm = [r for r in rs if r["market"].startswith("game_")]
@@ -104,7 +104,7 @@ def board_checks(league: str, priced: dict) -> None:
         by_line.setdefault(tuple(rest), set()).add(prov)
     info(f"{league}: lines quoted by both exchanges side by side: {sum(1 for v in by_line.values() if len(v) > 1)} of {len(by_line)}")
     # Matching rate: player-prop quotes in snapshots vs priced on the board.
-    for prov in config.PROVIDERS:
+    for prov in config.enabled_providers():
         n_snap = sum(1 for r in priced["rows"] if r["provider"] == prov and not r["market"].startswith("game_"))
         n_board = sum(1 for k in seen if k[0] == prov)
         check(f"{league} {prov}: player-prop quotes matched to a projected player", n_snap == 0 or n_board / n_snap >= 0.6, rate(n_board, n_snap))
@@ -165,7 +165,7 @@ def matching_checks(league: str) -> None:
     matching.match_games(qs, sched)
     matching.match_players(qs, players)
     team_of = {(r.game_id, r.player_id): r.team for r in players.itertuples()}
-    for prov in config.PROVIDERS:
+    for prov in config.enabled_providers():
         mine = [q for q in qs if q.provider == prov]
         if not mine:
             continue
@@ -200,16 +200,17 @@ def _props(league: str) -> None:
 
 
 def settled_checks(league: str) -> None:
-    c = kalshi.client(None)
     states: Counter = Counter()
-    for series in list(kalshi.SERIES[league])[:3] + list(games.KALSHI_SERIES[league])[:2]:
+    c = kalshi.client(None)
+    for series in ([] if in_ci() else list(kalshi.SERIES[league])[:3] + list(games.KALSHI_SERIES[league])[:2]):
         d = c.get("/events", {"series_ticker": series, "status": "settled", "with_nested_markets": "true", "limit": 5})
         for ev in (d or {}).get("events") or []:
             for m in ev.get("markets") or []:
                 o = settlement.parse_kalshi(m)
                 states[(o["state"], o["result"])] += 1
     graded = sum(v for (s, r), v in states.items() if s == "settled")
-    check(f"{league} kalshi: settled contracts parse to a final result", graded > 0, f"{graded} of {sum(states.values())}; states {dict((f'{s}/{r}', v) for (s, r), v in states.items())}")
+    if not in_ci():
+        check(f"{league} kalshi: settled contracts parse to a final result", graded > 0, f"{graded} of {sum(states.values())}; states {dict((f'{s}/{r}', v) for (s, r), v in states.items())}")
     pm = polymarket_us.client(None)
     d = pm.get("/v1/events", {"closed": "true", "limit": 10})
     ps: Counter = Counter()
@@ -243,6 +244,8 @@ def raw_types(league: str) -> None:
         seen += 1
         if seen >= 2:
             break
+    if in_ci():
+        return
     kc = kalshi.client(None)
     for series in kalshi.SERIES[league]:
         d = kc.get("/events", {"series_ticker": series, "status": "open", "limit": 100})
@@ -252,9 +255,19 @@ def raw_types(league: str) -> None:
     info(f"kalshi {league}: prop series with no open events are not listed yet")
 
 
+def in_ci() -> bool:
+    return os.environ.get("GITHUB_ACTIONS", "").lower() == "true" or os.environ.get("CI", "").lower() == "true"
+
+
 def main(league: str) -> int:
     os.environ["MODELROOM_MARKETS_POLYMARKET_US"] = "on"
-    os.environ["MODELROOM_MARKETS_KALSHI"] = "on"
+    # Kalshi is checked on your own computer only until Kalshi confirms in writing that fetch-and-discard
+    # testing on hosted runners is permitted (Developer Agreement §3). In CI it is never contacted.
+    if in_ci():
+        os.environ.pop("MODELROOM_MARKETS_KALSHI", None)
+        info("kalshi: skipped on hosted runners (local-only until written clarification); run scripts/verify-markets-local")
+    else:
+        os.environ["MODELROOM_MARKETS_KALSHI"] = "on"
     for k in ("MODELROOM_ENV", "MODELROOM_MARKETS_KALSHI_PUBLISH", "MODELROOM_MARKETS_REDISTRIBUTION_OK"):
         os.environ.pop(k, None)
     rep = run.fetch(league, days=10, log=lambda *_: None)

@@ -117,8 +117,17 @@ So:
 
 ## Live integration check
 
-Run it from Actions → **Verify market integrations** → Run workflow. It runs in a throwaway GitHub runner and goes through these steps:
-1. Fetches both exchanges and checks every field (bid ≤ ask, sizes, fee, quote age).
+**Kalshi: local only.** Kalshi is checked only on your own computer, until Kalshi confirms in writing that fetch-and-discard testing on hosted runners is allowed. The check refuses to contact Kalshi when it detects a CI runner. To check it, from the `modeling` folder:
+
+```
+..\scripts\verify-markets-local.ps1 nfl        (Windows PowerShell)
+../scripts/verify-markets-local.sh nfl          (macOS / Linux)
+```
+
+Exchange data stays in `modeling/data/markets`, which is never committed. Afterwards the script rebuilds your local props board without prices, so no price is left in your local published files.
+
+**Polymarket US: GitHub or local.** From GitHub, use Actions → **Verify market integrations** → Run workflow. It runs in a throwaway runner and goes through these steps:
+1. Fetches the exchange and checks every field (bid ≤ ask, sizes, fee, quote age).
 2. Checks each threshold against the contract's own title.
 3. Runs the props model with the prices, audits how each quote was matched to a player, and re-derives implied probability, fee and edge.
 4. Runs the model again without prices and confirms the probabilities are identical.

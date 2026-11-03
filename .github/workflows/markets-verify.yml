@@ -1,8 +1,11 @@
-# Live check of the Polymarket US and Kalshi integrations, run by hand (Actions → Verify market
-# integrations → Run workflow). Runs in a throwaway runner: exchange data is fetched, checked and
-# discarded. Nothing is committed, uploaded as an artifact or published, and the log carries counts and
-# pass/fail only (no prices), per the providers' terms.
-name: Verify market integrations
+# Live check of the Polymarket US integration, run by hand (Actions → Verify market integrations → Run
+# workflow). Runs in a throwaway runner: data is fetched, checked and discarded. Nothing is committed,
+# uploaded or published; the log carries counts and pass/fail only.
+#
+# KALSHI IS PAUSED HERE: it is never contacted from GitHub until Kalshi confirms in writing that
+# fetch-and-discard testing on hosted runners is allowed. Check Kalshi on your own computer with
+# scripts/verify-markets-local.ps1 (or .sh). modelroom.markets.verify refuses Kalshi in CI on its own.
+name: Verify market integrations (Polymarket only; Kalshi local)
 
 on:
   workflow_dispatch: {}
