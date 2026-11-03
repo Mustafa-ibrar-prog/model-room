@@ -102,7 +102,17 @@ export function supabaseConfigReport(): { ok: boolean; lines: string[] } {
     );
   }
   const sec = SECRET_KEY_VARS.map((n) => ({ n, k: clean(process.env[n]) })).filter((x) => x.k);
-  if (!sec.length) lines.push(`Server key: missing (set ${SECRET_KEY_VARS[1]}; needed for plans)`);
+  // A secret key stored under some other name: say where (name only), so it can be moved.
+  const known = new Set<string>([...URL_VARS, ...PUBLIC_KEY_VARS, ...SECRET_KEY_VARS]);
+  const stray = Object.keys(process.env).filter((n) => !known.has(n) && /SUPABASE/i.test(n) && ["secret", "legacy-service"].includes(keyKind(clean(process.env[n]))));
+  for (const n of stray) {
+    lines.push(
+      n.startsWith("NEXT_PUBLIC_")
+        ? `${n} holds a SECRET key under a NEXT_PUBLIC_ name, which Next.js can send to browsers. Delete it, rotate that key in Supabase, and use ${SECRET_KEY_VARS[1]}`
+        : `A secret key is set as ${n}; rename it to ${SECRET_KEY_VARS[1]}`,
+    );
+  }
+  if (!sec.length) lines.push(`Server key: missing (set ${SECRET_KEY_VARS[1]} for the Preview environment; needed for plans)`);
   for (const { n, k } of sec) {
     const kind = keyKind(k);
     lines.push(kind === "secret" || kind === "legacy-service" ? `Server key: ${kind === "secret" ? "secret (sb_secret_…)" : "legacy service_role"} key in ${n}` : `${n} isn't a secret key`);
