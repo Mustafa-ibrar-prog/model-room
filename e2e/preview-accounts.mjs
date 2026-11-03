@@ -132,8 +132,9 @@ for (const [email, tier] of [["free-test@modelroom.test", "free"], ["plus-test@m
   const press = async (label) => {
     await page.goto(`${BASE}/account`, { waitUntil: "networkidle" });
     await page.locator(`button:has-text("${label}")`).click();
-    await page.locator('[role="status"]').waitFor({ timeout: 20000 });
-    return (await page.locator('[role="status"]').innerText()).trim();
+    const status = page.locator('[data-testid="test-controls-status"]');
+    await status.waitFor({ timeout: 20000 });
+    return (await status.innerText()).trim();
   };
   await login();
   const steps = [
