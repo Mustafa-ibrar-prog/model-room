@@ -44,3 +44,8 @@ jobs:
       - run: npm ci --ignore-scripts && npx playwright install --with-deps chromium
       - name: Log in as each test account and check plan access
         run: node e2e/preview-accounts.mjs
+      - name: Every feature, desktop and phone (signed in as pro-test)
+        if: always()
+        env:
+          BASE: ${{ env.PREVIEW_URL }}
+        run: node e2e/site-features.mjs
