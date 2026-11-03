@@ -9,7 +9,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
-import { AccountLink } from "@/components/auth/AccountLink";
+import { AccountMenu } from "@/components/auth/AccountMenu";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Suspense } from "react";
 import { DataStatus, DataStatusFallback } from "@/components/layout/DataStatus";
@@ -45,7 +45,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteHeader
           account={
             <Suspense fallback={null}>
-              <AccountLink className="rounded-md px-3 py-2 text-sm font-500 text-mute hover:text-ink" />
+              <AccountMenu variant="desktop" />
+            </Suspense>
+          }
+          mobileAccount={
+            <Suspense fallback={null}>
+              <AccountMenu variant="mobile" />
             </Suspense>
           }
         />

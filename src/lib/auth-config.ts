@@ -2,11 +2,11 @@
  * Login configuration. Safe anywhere (no secrets): only checks whether the public Supabase settings exist
  * and which environment this is.
  */
-import { publicSupabaseKey } from "./supabase/keys";
+import { publicSupabaseKey, supabaseUrl } from "./supabase/keys";
 
 /** Logins are on when the Supabase project URL and a public key (publishable or legacy anon) are configured. */
 export function authEnabled(): boolean {
-  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && publicSupabaseKey());
+  return Boolean(supabaseUrl() && publicSupabaseKey());
 }
 
 /** Vercel production deployment (customers). Test accounts never work here. */

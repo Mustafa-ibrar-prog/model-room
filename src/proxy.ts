@@ -1,5 +1,5 @@
 import { createServerClient } from "@supabase/ssr";
-import { publicSupabaseKey } from "@/lib/supabase/keys";
+import { publicSupabaseKey, supabaseUrl } from "@/lib/supabase/keys";
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * (src/server/viewer.ts), never here.
  */
 export async function proxy(request: NextRequest) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const url = supabaseUrl();
   const key = publicSupabaseKey();
   let response = NextResponse.next({ request });
   if (!url || !key) return response;

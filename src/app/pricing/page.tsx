@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { PricingTiers } from "@/components/marketing/PricingTiers";
+import { authEnabled } from "@/lib/auth-config";
+import { getViewer } from "@/server/viewer";
 import { PageHeader, Section } from "@/components/ui/primitives";
 
 export const metadata: Metadata = { title: "Pricing" };
@@ -57,15 +60,22 @@ function Cell({ v }: { v: boolean | string }) {
   );
 }
 
+async function Tiers() {
+  const viewer = await getViewer();
+  return <PricingTiers viewer={{ authOn: authEnabled(), signedIn: Boolean(viewer.userId), tier: viewer.tier }} />;
+}
+
 export default function PricingPage() {
   return (
     <>
       <PageHeader
         title="Plans"
-        intro="Start on Free and move up when you want the full board. Paid plans are not on sale yet. Checkout opens when the projection engines go live."
+        intro="Start on Free and move up when you want the full board. Online checkout isn't open yet: paid plans are switched on by hand for now."
       />
       <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
-        <PricingTiers />
+        <Suspense fallback={<PricingTiers />}>
+          <Tiers />
+        </Suspense>
       </div>
 
       <Section title="Compare plans">

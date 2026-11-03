@@ -1,0 +1,46 @@
+# Logs in to the TEST SITE with the three test accounts in a real browser and checks plan access.
+# Runs after each Preview deploy, or by hand (Actions → Preview logins → Run workflow). Never production.
+name: Preview logins
+
+on:
+  workflow_dispatch: {}
+  workflow_run:
+    workflows: ["Preview"]
+    types: [completed]
+
+permissions:
+  contents: read
+  statuses: read
+
+concurrency:
+  group: preview-e2e
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PREVIEW_URL: https://model-room-git-preview-computer-citi.vercel.app
+      TEST_ACCOUNT_PASSWORD: ${{ secrets.TEST_ACCOUNT_PASSWORD }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Wait for Vercel to finish deploying the preview branch
+        run: |
+          sha=$(gh api repos/${{ github.repository }}/commits/preview -q .sha)
+          for i in $(seq 1 60); do
+            state=$(gh api repos/${{ github.repository }}/commits/$sha/status -q '[.statuses[] | select(.context=="Vercel")][0].state // "none"')
+            echo "Vercel: $state"
+            [ "$state" = success ] && exit 0
+            [ "$state" = failure ] || [ "$state" = error ] && { echo "::error::Vercel deploy failed"; exit 1; }
+            sleep 15
+          done
+          echo "::error::Timed out waiting for Vercel"; exit 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts && npx playwright install --with-deps chromium
+      - name: Log in as each test account and check plan access
+        run: node e2e/preview-accounts.mjs

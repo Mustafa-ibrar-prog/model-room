@@ -6,7 +6,7 @@ import { useState, type ReactNode } from "react";
 import { Wordmark } from "./Logo";
 import { NAV } from "./nav";
 
-export function SiteHeader({ account }: { account?: ReactNode }) {
+export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mobileAccount?: ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -36,8 +36,7 @@ export function SiteHeader({ account }: { account?: ReactNode }) {
           </ul>
         </nav>
 
-        <div className="ml-auto hidden items-center gap-3 md:flex">
-          {account}
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           <Link
             href="/pricing"
             aria-current={isActive("/pricing") ? "page" : undefined}
@@ -51,6 +50,7 @@ export function SiteHeader({ account }: { account?: ReactNode }) {
           >
             See plans
           </Link>
+          {account}
         </div>
 
         <button
@@ -68,8 +68,8 @@ export function SiteHeader({ account }: { account?: ReactNode }) {
       </div>
 
       {open && (
-        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden" onClick={() => setOpen(false)}>
-          {account ? <div className="mx-auto max-w-7xl px-4 pt-3 font-display text-lg font-600 text-model">{account}</div> : null}
+        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
+          {mobileAccount ? <div className="mx-auto max-w-7xl px-4 pt-3">{mobileAccount}</div> : null}
           <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-1 px-4 py-3">
             {[...NAV, { href: "/pricing", label: "Pricing" }].map((item) => (
               <li key={item.href}>

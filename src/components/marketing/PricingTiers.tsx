@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { PLANS } from "@/config/tiers";
+import { PLANS, TIER_ORDER, tierName } from "@/config/tiers";
+import type { TierId } from "@/types/domain";
 import { formatPrice } from "@/lib/format";
 
 function Check({ className = "" }: { className?: string }) {
@@ -18,7 +19,28 @@ function Cross() {
   );
 }
 
-export function PricingTiers() {
+/** Who is looking, as resolved on the server: decides each plan's button. */
+export interface PricingViewer {
+  authOn: boolean;
+  signedIn: boolean;
+  tier: TierId;
+}
+
+function Cta({ plan, featured, viewer }: { plan: TierId; featured: boolean; viewer: PricingViewer }) {
+  const solid = `block rounded-full px-4 py-2.5 text-center font-600 ${featured ? "bg-model text-navy-950 hover:bg-model/90" : "bg-navy-800 text-ink hover:bg-navy-700"}`;
+  const quiet = "block rounded-full border border-navy-600 px-4 py-2.5 text-center font-600 text-ink hover:border-mute";
+  const done = "block w-full cursor-default rounded-full border border-navy-700 px-4 py-2.5 text-center font-600 text-mute";
+  const have = TIER_ORDER.indexOf(viewer.tier) >= TIER_ORDER.indexOf(plan);
+  if (viewer.signedIn && viewer.tier === plan) return <span className={done}>Your plan</span>;
+  if (plan === "free") return <Link href="/nfl" className={quiet}>{viewer.signedIn ? "Included" : "Use Free now"}</Link>;
+  if (viewer.signedIn && have) return <span className={done}>Included in {tierName(viewer.tier)}</span>;
+  if (!viewer.authOn) return <span className={done}>Checkout opens soon</span>;
+  const upgrade = `/upgrade?requires=${plan}&next=${encodeURIComponent("/pricing")}`;
+  if (!viewer.signedIn) return <Link href={`/signup?next=${encodeURIComponent(upgrade)}`} className={solid}>Sign up for {tierName(plan)}</Link>;
+  return <Link href={upgrade} className={solid}>Get {tierName(plan)}</Link>;
+}
+
+export function PricingTiers({ viewer = { authOn: false, signedIn: false, tier: "free" } }: { viewer?: PricingViewer }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
       {PLANS.map((plan) => {
@@ -66,21 +88,7 @@ export function PricingTiers() {
             </ul>
 
             <div className="mt-7">
-              {plan.id === "free" ? (
-                <Link href="/nfl" className="block rounded-full border border-navy-600 px-4 py-2.5 text-center font-600 text-ink hover:border-mute">
-                  Use Free now
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  disabled
-                  className={`w-full cursor-not-allowed rounded-full px-4 py-2.5 font-600 ${
-                    featured ? "bg-model/30 text-ink" : "bg-navy-800 text-mute"
-                  }`}
-                >
-                  Checkout opens soon
-                </button>
-              )}
+              <Cta plan={plan.id} featured={featured} viewer={viewer} />
             </div>
           </article>
         );

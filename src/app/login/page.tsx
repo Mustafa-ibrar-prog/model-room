@@ -5,7 +5,7 @@ import { AuthShell } from "@/components/auth/AuthShell";
 import { safeNext } from "@/lib/auth-config";
 import { signIn } from "@/server/actions/auth";
 
-export const metadata: Metadata = { title: "Sign in" };
+export const metadata: Metadata = { title: "Log in" };
 
 const REQUIRES: Record<string, string> = { plus: "Plus", pro: "Pro" };
 
@@ -27,11 +27,11 @@ async function Login({ searchParams }: { searchParams: Promise<{ next?: string; 
       ? `That's part of ${plan}. Sign in to an account with ${plan}, and you'll go straight back to it.`
       : "Free features don't need an account.";
   return (
-    <AuthShell title="Sign in" intro={intro}>
+    <AuthShell title="Log in" intro={intro}>
       <AuthForm
         action={signIn}
         next={next}
-        submit="Sign in"
+        submit="Log in"
         fields={[
           { name: "email", label: "Email", type: "email", autoComplete: "email" },
           { name: "password", label: "Password", type: "password", autoComplete: "current-password" },
