@@ -27,7 +27,7 @@ export function TestSubscriptionControls() {
             onClick={() =>
               start(async () => {
                 const r = await simulateSubscription(b.id);
-                setMsg(r.ok ? "Done. Your plan below is now what the server sees." : (r.error ?? "That didn't work."));
+                setMsg(r.ok ? `Done. The server now sees: ${(r.tier ?? "free").replace(/^./, (c) => c.toUpperCase())}.` : (r.error ?? "That didn't work."));
                 router.refresh();
               })
             }

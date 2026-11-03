@@ -88,6 +88,11 @@ jobs:
         run: |
           supabase db push --db-url "$DB_URL" --include-all --yes
           supabase migration list --db-url "$DB_URL"
+      - name: Switch on test-account plan switching for this (test site) database
+        if: steps.check.outputs.ready == 'yes'
+        # Only this workflow sets it, and it only ever targets the test site's project. A production
+        # database never has the flag, so public.test_simulate_membership() refuses there.
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "insert into private.app_settings (key, value) values ('test_account_controls', 'on') on conflict (key) do update set value = excluded.value"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/seed-test-accounts.mjs
