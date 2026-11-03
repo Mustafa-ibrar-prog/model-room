@@ -1,0 +1,277 @@
+{
+  "generated_at": "2026-11-03T07:12:46+00:00",
+  "note": "Same tuned settings for every variant; only the starting QB differs. Nothing here changes the live model.",
+  "starters": {
+    "team_games": 4998,
+    "by_source": {
+      "depth chart": 4478,
+      "last start (weekly chart disagreed)": 518,
+      "recent volume": 1,
+      "none": 1
+    },
+    "past": {
+      "n": 4694,
+      "projected_matches_actual": 0.9288,
+      "schedule_field_matches_actual": 0.9642,
+      "by_season": {
+        "2018": 0.9551,
+        "2019": 0.9232,
+        "2020": 0.9312,
+        "2021": 0.9211,
+        "2022": 0.9173,
+        "2023": 0.9123,
+        "2024": 0.9,
+        "2025": 0.9544,
+        "2026": 0.9708
+      },
+      "by_source": {
+        "depth chart": {
+          "n": 4444,
+          "correct": 0.9451
+        },
+        "last start (weekly chart disagreed)": {
+          "n": 248,
+          "correct": 0.6411
+        },
+        "none": {
+          "n": 1,
+          "correct": 0.0
+        },
+        "recent volume": {
+          "n": 1,
+          "correct": 1.0
+        }
+      },
+      "previous_starter_matches_actual": 0.8639
+    },
+    "upcoming": {
+      "n": 304,
+      "differs_from_schedule": [
+        {
+          "game_id": "2026_09_ARI_SEA",
+          "team": "ARI",
+          "schedule": "Jacoby Brissett",
+          "projected": "Gardner Minshew",
+          "source": "depth chart"
+        }
+      ]
+    },
+    "test_seasons": {
+      "team_games": 1710,
+      "projected_differs_from_listed": 132,
+      "projected_differs_from_previous_starter": 157,
+      "starter_changes_actual": 258,
+      "starter_changes_caught_by_projected": 132,
+      "accuracy": {
+        "projected": 0.9222,
+        "previous_starter": 0.8491,
+        "listed (after-the-fact)": 0.9485
+      }
+    }
+  },
+  "game_engine": {
+    "listed": {
+      "games": 855,
+      "margin": {
+        "n": 855,
+        "mae": 10.206,
+        "rmse": 13.149,
+        "bias": -0.091
+      },
+      "total": {
+        "n": 855,
+        "mae": 10.353,
+        "rmse": 13.276,
+        "bias": -1.559
+      },
+      "win_probability": {
+        "n": 854,
+        "brier": 0.2217,
+        "log_loss": 0.6338,
+        "accuracy": 0.6429
+      },
+      "calibration": [
+        {
+          "bin": "0.2-0.3",
+          "n": 16,
+          "predicted": 0.265,
+          "actual": 0.25
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 72,
+          "predicted": 0.36,
+          "actual": 0.292
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 184,
+          "predicted": 0.456,
+          "actual": 0.386
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 225,
+          "predicted": 0.55,
+          "actual": 0.511
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 215,
+          "predicted": 0.647,
+          "actual": 0.67
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 118,
+          "predicted": 0.742,
+          "actual": 0.788
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 24,
+          "predicted": 0.83,
+          "actual": 0.875
+        }
+      ]
+    },
+    "previous": {
+      "games": 855,
+      "margin": {
+        "n": 855,
+        "mae": 10.296,
+        "rmse": 13.275,
+        "bias": -0.089
+      },
+      "total": {
+        "n": 855,
+        "mae": 10.335,
+        "rmse": 13.27,
+        "bias": -1.59
+      },
+      "win_probability": {
+        "n": 854,
+        "brier": 0.2241,
+        "log_loss": 0.6388,
+        "accuracy": 0.6311
+      },
+      "calibration": [
+        {
+          "bin": "0.2-0.3",
+          "n": 17,
+          "predicted": 0.261,
+          "actual": 0.353
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 75,
+          "predicted": 0.358,
+          "actual": 0.267
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 184,
+          "predicted": 0.454,
+          "actual": 0.418
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 214,
+          "predicted": 0.55,
+          "actual": 0.514
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 219,
+          "predicted": 0.647,
+          "actual": 0.639
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 118,
+          "predicted": 0.744,
+          "actual": 0.788
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 27,
+          "predicted": 0.83,
+          "actual": 0.852
+        }
+      ]
+    },
+    "projected": {
+      "games": 855,
+      "margin": {
+        "n": 855,
+        "mae": 10.249,
+        "rmse": 13.179,
+        "bias": -0.113
+      },
+      "total": {
+        "n": 855,
+        "mae": 10.39,
+        "rmse": 13.33,
+        "bias": -1.576
+      },
+      "win_probability": {
+        "n": 854,
+        "brier": 0.2226,
+        "log_loss": 0.6359,
+        "accuracy": 0.6405
+      },
+      "calibration": [
+        {
+          "bin": "0.2-0.3",
+          "n": 17,
+          "predicted": 0.26,
+          "actual": 0.353
+        },
+        {
+          "bin": "0.3-0.4",
+          "n": 72,
+          "predicted": 0.358,
+          "actual": 0.264
+        },
+        {
+          "bin": "0.4-0.5",
+          "n": 189,
+          "predicted": 0.456,
+          "actual": 0.397
+        },
+        {
+          "bin": "0.5-0.6",
+          "n": 220,
+          "predicted": 0.551,
+          "actual": 0.514
+        },
+        {
+          "bin": "0.6-0.7",
+          "n": 212,
+          "predicted": 0.646,
+          "actual": 0.665
+        },
+        {
+          "bin": "0.7-0.8",
+          "n": 119,
+          "predicted": 0.743,
+          "actual": 0.79
+        },
+        {
+          "bin": "0.8-0.9",
+          "n": 25,
+          "predicted": 0.834,
+          "actual": 0.84
+        }
+      ]
+    },
+    "changed_vs_listed": {
+      "games": 855,
+      "projections_changed": 118
+    },
+    "changed_vs_previous": {
+      "games": 855,
+      "projections_changed": 124
+    }
+  }
+}
