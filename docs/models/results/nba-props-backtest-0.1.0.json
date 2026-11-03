@@ -1,0 +1,1220 @@
+{
+  "model_id": "nba-props",
+  "model_version": "0.1.0",
+  "generated_at": "2026-11-03T00:15:55+00:00",
+  "tuning_seasons": [
+    2021,
+    2022
+  ],
+  "test_seasons": [
+    2023,
+    2024,
+    2025,
+    2026
+  ],
+  "settings": {
+    "minutes_half_life": 3.0,
+    "rate_half_life": 20.0,
+    "season_carry": 0.5,
+    "def_half_life": 20.0,
+    "rate_prior_minutes": 250.0,
+    "def_prior_minutes": 1500.0,
+    "minutes_sd": 7.0,
+    "scoring_sd": 0.35,
+    "rebound_sd": 0.35,
+    "assist_sd": 0.35,
+    "stock_sd": 0.4,
+    "matchup_strength": 0.5,
+    "pace_strength": 1.0,
+    "usage_boost": 1.0,
+    "blowout_strength": 0.02,
+    "missed_games_out": 2,
+    "sims": 3000
+  },
+  "calibration": {
+    "assists": [
+      0.09,
+      1.1738
+    ],
+    "blocks": [
+      0.023,
+      1.0469
+    ],
+    "points": [
+      -0.0149,
+      1.2356
+    ],
+    "pra": [
+      -0.0209,
+      1.1838
+    ],
+    "rebounds": [
+      0.1008,
+      1.2247
+    ],
+    "steals": [
+      0.0564,
+      1.0711
+    ],
+    "threes": [
+      -0.0248,
+      1.0722
+    ]
+  },
+  "tuning": {
+    "objective": 0.41459,
+    "history": [
+      {
+        "settings": {
+          "minutes_half_life": 6.0,
+          "rate_half_life": 20.0,
+          "season_carry": 0.5,
+          "def_half_life": 20.0,
+          "rate_prior_minutes": 250.0,
+          "def_prior_minutes": 1500.0,
+          "minutes_sd": 5.0,
+          "scoring_sd": 0.25,
+          "rebound_sd": 0.25,
+          "assist_sd": 0.25,
+          "stock_sd": 0.25,
+          "matchup_strength": 1.0,
+          "pace_strength": 1.0,
+          "usage_boost": 0.5,
+          "blowout_strength": 0.02,
+          "missed_games_out": 2,
+          "sims": 800
+        },
+        "objective": 0.4398
+      },
+      {
+        "change": {
+          "minutes_sd": 3.5
+        },
+        "objective": 0.44591
+      },
+      {
+        "change": {
+          "minutes_sd": 7.0
+        },
+        "objective": 0.43069
+      },
+      {
+        "change": {
+          "scoring_sd": 0.15
+        },
+        "objective": 0.43652
+      },
+      {
+        "change": {
+          "scoring_sd": 0.35
+        },
+        "objective": 0.42352
+      },
+      {
+        "change": {
+          "rebound_sd": 0.15
+        },
+        "objective": 0.42598
+      },
+      {
+        "change": {
+          "rebound_sd": 0.35
+        },
+        "objective": 0.42081
+      },
+      {
+        "change": {
+          "assist_sd": 0.15
+        },
+        "objective": 0.42282
+      },
+      {
+        "change": {
+          "assist_sd": 0.35
+        },
+        "objective": 0.41825
+      },
+      {
+        "change": {
+          "stock_sd": 0.1
+        },
+        "objective": 0.41894
+      },
+      {
+        "change": {
+          "stock_sd": 0.4
+        },
+        "objective": 0.41672
+      },
+      {
+        "change": {
+          "matchup_strength": 0.0
+        },
+        "objective": 0.41642
+      },
+      {
+        "change": {
+          "matchup_strength": 0.5
+        },
+        "objective": 0.41621
+      },
+      {
+        "change": {
+          "matchup_strength": 1.0
+        },
+        "objective": 0.41672
+      },
+      {
+        "change": {
+          "pace_strength": 0.0
+        },
+        "objective": 0.41663
+      },
+      {
+        "change": {
+          "pace_strength": 0.5
+        },
+        "objective": 0.41642
+      },
+      {
+        "change": {
+          "usage_boost": 0.0
+        },
+        "objective": 0.41812
+      },
+      {
+        "change": {
+          "usage_boost": 1.0
+        },
+        "objective": 0.4153
+      },
+      {
+        "change": {
+          "minutes_half_life": 3.0
+        },
+        "objective": 0.41499
+      },
+      {
+        "change": {
+          "minutes_half_life": 10.0
+        },
+        "objective": 0.41546
+      },
+      {
+        "change": {
+          "rate_half_life": 10.0
+        },
+        "objective": 0.41517
+      },
+      {
+        "change": {
+          "rate_half_life": 40.0
+        },
+        "objective": 0.41553
+      },
+      {
+        "change": {
+          "rate_prior_minutes": 100.0
+        },
+        "objective": 0.41753
+      },
+      {
+        "change": {
+          "rate_prior_minutes": 600.0
+        },
+        "objective": 0.4157
+      }
+    ]
+  },
+  "test": {
+    "thresholds": 2395644,
+    "player_games": 72593,
+    "markets": {
+      "assists": {
+        "model": {
+          "n": 288215,
+          "brier": 0.1296,
+          "log_loss": 0.4035,
+          "accuracy": 0.8103
+        },
+        "ece": 0.0074,
+        "by_support": {
+          "insufficient": {
+            "n": 1327,
+            "brier": 0.1236,
+            "log_loss": 0.3864,
+            "accuracy": 0.8139,
+            "ece": 0.058
+          },
+          "limited": {
+            "n": 3874,
+            "brier": 0.132,
+            "log_loss": 0.4075,
+            "accuracy": 0.8059,
+            "ece": 0.0412
+          },
+          "ok": {
+            "n": 283014,
+            "brier": 0.1296,
+            "log_loss": 0.4035,
+            "accuracy": 0.8104,
+            "ece": 0.0078
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 288215,
+            "brier": 0.1296,
+            "log_loss": 0.4035,
+            "accuracy": 0.8103
+          },
+          "baseline": {
+            "n": 288215,
+            "brier": 0.1309,
+            "log_loss": 0.4109,
+            "accuracy": 0.8115
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 101373,
+            "predicted": 0.043,
+            "actual": 0.044
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 39002,
+            "predicted": 0.145,
+            "actual": 0.154
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 23640,
+            "predicted": 0.247,
+            "actual": 0.263
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 19795,
+            "predicted": 0.35,
+            "actual": 0.372
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 19231,
+            "predicted": 0.45,
+            "actual": 0.462
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 18311,
+            "predicted": 0.549,
+            "actual": 0.537
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 17331,
+            "predicted": 0.65,
+            "actual": 0.641
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 16597,
+            "predicted": 0.749,
+            "actual": 0.752
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 16119,
+            "predicted": 0.85,
+            "actual": 0.856
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 16816,
+            "predicted": 0.945,
+            "actual": 0.959
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 1.56,
+          "model_bias": -0.011,
+          "recent_avg_mae": 1.537
+        }
+      },
+      "blocks": {
+        "model": {
+          "n": 169900,
+          "brier": 0.136,
+          "log_loss": 0.4236,
+          "accuracy": 0.8051
+        },
+        "ece": 0.0033,
+        "by_support": {
+          "insufficient": {
+            "n": 841,
+            "brier": 0.1322,
+            "log_loss": 0.417,
+            "accuracy": 0.8193,
+            "ece": 0.0307
+          },
+          "limited": {
+            "n": 2390,
+            "brier": 0.1285,
+            "log_loss": 0.407,
+            "accuracy": 0.8226,
+            "ece": 0.0137
+          },
+          "ok": {
+            "n": 166669,
+            "brier": 0.1362,
+            "log_loss": 0.4238,
+            "accuracy": 0.8048,
+            "ece": 0.0032
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 169900,
+            "brier": 0.136,
+            "log_loss": 0.4236,
+            "accuracy": 0.8051
+          },
+          "baseline": {
+            "n": 169900,
+            "brier": 0.1404,
+            "log_loss": 0.4391,
+            "accuracy": 0.802
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 62990,
+            "predicted": 0.048,
+            "actual": 0.05
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 31000,
+            "predicted": 0.148,
+            "actual": 0.149
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 26843,
+            "predicted": 0.248,
+            "actual": 0.244
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 19417,
+            "predicted": 0.347,
+            "actual": 0.353
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 12431,
+            "predicted": 0.446,
+            "actual": 0.451
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 8416,
+            "predicted": 0.547,
+            "actual": 0.555
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 5101,
+            "predicted": 0.644,
+            "actual": 0.648
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 2576,
+            "predicted": 0.745,
+            "actual": 0.749
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 1027,
+            "predicted": 0.837,
+            "actual": 0.865
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 99,
+            "predicted": 0.919,
+            "actual": 0.949
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 0.587,
+          "model_bias": 0.005,
+          "recent_avg_mae": 0.577
+        }
+      },
+      "points": {
+        "model": {
+          "n": 450603,
+          "brier": 0.1192,
+          "log_loss": 0.375,
+          "accuracy": 0.8302
+        },
+        "ece": 0.0148,
+        "by_support": {
+          "insufficient": {
+            "n": 2083,
+            "brier": 0.1191,
+            "log_loss": 0.3754,
+            "accuracy": 0.8329,
+            "ece": 0.0977
+          },
+          "limited": {
+            "n": 6085,
+            "brier": 0.1208,
+            "log_loss": 0.3785,
+            "accuracy": 0.8302,
+            "ece": 0.0506
+          },
+          "ok": {
+            "n": 442435,
+            "brier": 0.1192,
+            "log_loss": 0.375,
+            "accuracy": 0.8302,
+            "ece": 0.0151
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 450603,
+            "brier": 0.1192,
+            "log_loss": 0.375,
+            "accuracy": 0.8302
+          },
+          "baseline": {
+            "n": 450603,
+            "brier": 0.1189,
+            "log_loss": 0.3778,
+            "accuracy": 0.8319
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 158944,
+            "predicted": 0.04,
+            "actual": 0.034
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 55783,
+            "predicted": 0.145,
+            "actual": 0.154
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 35675,
+            "predicted": 0.248,
+            "actual": 0.27
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 28687,
+            "predicted": 0.349,
+            "actual": 0.388
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 24104,
+            "predicted": 0.449,
+            "actual": 0.487
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 21096,
+            "predicted": 0.55,
+            "actual": 0.591
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 21856,
+            "predicted": 0.651,
+            "actual": 0.679
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 25465,
+            "predicted": 0.752,
+            "actual": 0.748
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 32708,
+            "predicted": 0.852,
+            "actual": 0.84
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 46285,
+            "predicted": 0.951,
+            "actual": 0.942
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 5.379,
+          "model_bias": 0.382,
+          "recent_avg_mae": 5.222
+        }
+      },
+      "pra": {
+        "model": {
+          "n": 520368,
+          "brier": 0.1277,
+          "log_loss": 0.3987,
+          "accuracy": 0.8164
+        },
+        "ece": 0.0129,
+        "by_support": {
+          "insufficient": {
+            "n": 2444,
+            "brier": 0.1299,
+            "log_loss": 0.4051,
+            "accuracy": 0.8151,
+            "ece": 0.1038
+          },
+          "limited": {
+            "n": 7102,
+            "brier": 0.128,
+            "log_loss": 0.3971,
+            "accuracy": 0.8151,
+            "ece": 0.0475
+          },
+          "ok": {
+            "n": 510822,
+            "brier": 0.1277,
+            "log_loss": 0.3987,
+            "accuracy": 0.8164,
+            "ece": 0.0135
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 520368,
+            "brier": 0.1277,
+            "log_loss": 0.3987,
+            "accuracy": 0.8164
+          },
+          "baseline": {
+            "n": 520368,
+            "brier": 0.1268,
+            "log_loss": 0.3995,
+            "accuracy": 0.819
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 159160,
+            "predicted": 0.042,
+            "actual": 0.038
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 65998,
+            "predicted": 0.146,
+            "actual": 0.153
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 43650,
+            "predicted": 0.248,
+            "actual": 0.27
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 35236,
+            "predicted": 0.349,
+            "actual": 0.381
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 30815,
+            "predicted": 0.449,
+            "actual": 0.487
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 28548,
+            "predicted": 0.55,
+            "actual": 0.58
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 29832,
+            "predicted": 0.65,
+            "actual": 0.666
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 32750,
+            "predicted": 0.751,
+            "actual": 0.755
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 39071,
+            "predicted": 0.852,
+            "actual": 0.846
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 55308,
+            "predicted": 0.951,
+            "actual": 0.943
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 6.894,
+          "model_bias": 0.384,
+          "recent_avg_mae": 6.718
+        }
+      },
+      "rebounds": {
+        "model": {
+          "n": 402686,
+          "brier": 0.1254,
+          "log_loss": 0.3932,
+          "accuracy": 0.8215
+        },
+        "ece": 0.0072,
+        "by_support": {
+          "insufficient": {
+            "n": 1899,
+            "brier": 0.1386,
+            "log_loss": 0.4321,
+            "accuracy": 0.8046,
+            "ece": 0.0557
+          },
+          "limited": {
+            "n": 5596,
+            "brier": 0.1324,
+            "log_loss": 0.4106,
+            "accuracy": 0.8109,
+            "ece": 0.0207
+          },
+          "ok": {
+            "n": 395191,
+            "brier": 0.1252,
+            "log_loss": 0.3928,
+            "accuracy": 0.8217,
+            "ece": 0.0071
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 402686,
+            "brier": 0.1254,
+            "log_loss": 0.3932,
+            "accuracy": 0.8215
+          },
+          "baseline": {
+            "n": 402686,
+            "brier": 0.1281,
+            "log_loss": 0.4038,
+            "accuracy": 0.8185
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 125738,
+            "predicted": 0.042,
+            "actual": 0.04
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 49014,
+            "predicted": 0.146,
+            "actual": 0.15
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 33856,
+            "predicted": 0.247,
+            "actual": 0.266
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 27383,
+            "predicted": 0.348,
+            "actual": 0.363
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 22726,
+            "predicted": 0.449,
+            "actual": 0.463
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 20754,
+            "predicted": 0.55,
+            "actual": 0.565
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 21570,
+            "predicted": 0.65,
+            "actual": 0.658
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 24536,
+            "predicted": 0.752,
+            "actual": 0.745
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 32120,
+            "predicted": 0.853,
+            "actual": 0.847
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 44989,
+            "predicted": 0.95,
+            "actual": 0.945
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 2.06,
+          "model_bias": 0.013,
+          "recent_avg_mae": 2.053
+        }
+      },
+      "steals": {
+        "model": {
+          "n": 214682,
+          "brier": 0.1589,
+          "log_loss": 0.4822,
+          "accuracy": 0.7611
+        },
+        "ece": 0.006,
+        "by_support": {
+          "insufficient": {
+            "n": 1071,
+            "brier": 0.1519,
+            "log_loss": 0.4673,
+            "accuracy": 0.7638,
+            "ece": 0.0293
+          },
+          "limited": {
+            "n": 3209,
+            "brier": 0.1559,
+            "log_loss": 0.4756,
+            "accuracy": 0.7569,
+            "ece": 0.0273
+          },
+          "ok": {
+            "n": 210402,
+            "brier": 0.159,
+            "log_loss": 0.4824,
+            "accuracy": 0.7612,
+            "ece": 0.0062
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 214682,
+            "brier": 0.1589,
+            "log_loss": 0.4822,
+            "accuracy": 0.7611
+          },
+          "baseline": {
+            "n": 214682,
+            "brier": 0.1649,
+            "log_loss": 0.5008,
+            "accuracy": 0.7535
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 57718,
+            "predicted": 0.056,
+            "actual": 0.059
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 44957,
+            "predicted": 0.147,
+            "actual": 0.157
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 25652,
+            "predicted": 0.244,
+            "actual": 0.25
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 16091,
+            "predicted": 0.35,
+            "actual": 0.358
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 20737,
+            "predicted": 0.453,
+            "actual": 0.464
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 24598,
+            "predicted": 0.549,
+            "actual": 0.551
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 17382,
+            "predicted": 0.645,
+            "actual": 0.648
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 6856,
+            "predicted": 0.737,
+            "actual": 0.744
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 665,
+            "predicted": 0.825,
+            "actual": 0.818
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 26,
+            "predicted": 0.914,
+            "actual": 1.0
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 0.776,
+          "model_bias": -0.008,
+          "recent_avg_mae": 0.787
+        }
+      },
+      "threes": {
+        "model": {
+          "n": 349190,
+          "brier": 0.1392,
+          "log_loss": 0.4324,
+          "accuracy": 0.8004
+        },
+        "ece": 0.0045,
+        "by_support": {
+          "insufficient": {
+            "n": 1675,
+            "brier": 0.1238,
+            "log_loss": 0.3868,
+            "accuracy": 0.8275,
+            "ece": 0.0775
+          },
+          "limited": {
+            "n": 4999,
+            "brier": 0.1314,
+            "log_loss": 0.4084,
+            "accuracy": 0.811,
+            "ece": 0.0385
+          },
+          "ok": {
+            "n": 342516,
+            "brier": 0.1393,
+            "log_loss": 0.433,
+            "accuracy": 0.8001,
+            "ece": 0.0053
+          }
+        },
+        "baseline_same_rows": {
+          "model": {
+            "n": 349190,
+            "brier": 0.1392,
+            "log_loss": 0.4324,
+            "accuracy": 0.8004
+          },
+          "baseline": {
+            "n": 349190,
+            "brier": 0.1413,
+            "log_loss": 0.4405,
+            "accuracy": 0.7978
+          }
+        },
+        "calibration": [
+          {
+            "bin": "-0.0-0.1",
+            "n": 111247,
+            "predicted": 0.049,
+            "actual": 0.051
+          },
+          {
+            "bin": "0.1-0.2",
+            "n": 57982,
+            "predicted": 0.145,
+            "actual": 0.143
+          },
+          {
+            "bin": "0.2-0.3",
+            "n": 35837,
+            "predicted": 0.247,
+            "actual": 0.258
+          },
+          {
+            "bin": "0.3-0.4",
+            "n": 28297,
+            "predicted": 0.348,
+            "actual": 0.357
+          },
+          {
+            "bin": "0.4-0.5",
+            "n": 23163,
+            "predicted": 0.449,
+            "actual": 0.456
+          },
+          {
+            "bin": "0.5-0.6",
+            "n": 20060,
+            "predicted": 0.55,
+            "actual": 0.555
+          },
+          {
+            "bin": "0.6-0.7",
+            "n": 22242,
+            "predicted": 0.651,
+            "actual": 0.653
+          },
+          {
+            "bin": "0.7-0.8",
+            "n": 23196,
+            "predicted": 0.749,
+            "actual": 0.753
+          },
+          {
+            "bin": "0.8-0.9",
+            "n": 19920,
+            "predicted": 0.848,
+            "actual": 0.854
+          },
+          {
+            "bin": "0.9-1.0",
+            "n": 7246,
+            "predicted": 0.927,
+            "actual": 0.928
+          }
+        ],
+        "mean_projection": {
+          "n": 72593,
+          "model_mae": 1.043,
+          "model_bias": 0.04,
+          "recent_avg_mae": 1.016
+        }
+      }
+    },
+    "by_confidence": [
+      {
+        "distance_from_50": "(-0.001, 0.1]",
+        "n": 294990,
+        "brier": 0.2471,
+        "log_loss": 0.6873,
+        "accuracy": 0.5465,
+        "predicted": 0.497,
+        "actual": 0.515
+      },
+      {
+        "distance_from_50": "(0.1, 0.2]",
+        "n": 310220,
+        "brier": 0.2287,
+        "log_loss": 0.6498,
+        "accuracy": 0.6431,
+        "predicted": 0.48,
+        "actual": 0.495
+      },
+      {
+        "distance_from_50": "(0.2, 0.3]",
+        "n": 357129,
+        "brier": 0.1903,
+        "log_loss": 0.5681,
+        "accuracy": 0.7428,
+        "predicted": 0.433,
+        "actual": 0.442
+      },
+      {
+        "distance_from_50": "(0.3, 0.4]",
+        "n": 485366,
+        "brier": 0.1277,
+        "log_loss": 0.4219,
+        "accuracy": 0.8483,
+        "predicted": 0.352,
+        "actual": 0.354
+      },
+      {
+        "distance_from_50": "(0.4, 0.5]",
+        "n": 947939,
+        "brier": 0.0423,
+        "log_loss": 0.1747,
+        "accuracy": 0.955,
+        "predicted": 0.207,
+        "actual": 0.205
+      }
+    ],
+    "overall": {
+      "n": 2395644,
+      "brier": 0.131,
+      "log_loss": 0.4081,
+      "accuracy": 0.811,
+      "ece": 0.0074
+    },
+    "by_support": {
+      "insufficient": {
+        "n": 11340,
+        "brier": 0.13,
+        "log_loss": 0.406,
+        "accuracy": 0.8138,
+        "ece": 0.069
+      },
+      "limited": {
+        "n": 33255,
+        "brier": 0.1311,
+        "log_loss": 0.4072,
+        "accuracy": 0.8104,
+        "ece": 0.0305
+      },
+      "ok": {
+        "n": 2351049,
+        "brier": 0.131,
+        "log_loss": 0.4081,
+        "accuracy": 0.811,
+        "ece": 0.0079
+      }
+    },
+    "overall_vs_baseline": {
+      "model": {
+        "n": 2395644,
+        "brier": 0.131,
+        "log_loss": 0.4081,
+        "accuracy": 0.811
+      },
+      "baseline": {
+        "n": 2395644,
+        "brier": 0.1325,
+        "log_loss": 0.4154,
+        "accuracy": 0.8103
+      }
+    },
+    "calibration": [
+      {
+        "bin": "-0.0-0.1",
+        "n": 777170,
+        "predicted": 0.044,
+        "actual": 0.043
+      },
+      {
+        "bin": "0.1-0.2",
+        "n": 343736,
+        "predicted": 0.146,
+        "actual": 0.151
+      },
+      {
+        "bin": "0.2-0.3",
+        "n": 225153,
+        "predicted": 0.247,
+        "actual": 0.262
+      },
+      {
+        "bin": "0.3-0.4",
+        "n": 174906,
+        "predicted": 0.348,
+        "actual": 0.369
+      },
+      {
+        "bin": "0.4-0.5",
+        "n": 153207,
+        "predicted": 0.449,
+        "actual": 0.469
+      },
+      {
+        "bin": "0.5-0.6",
+        "n": 141783,
+        "predicted": 0.55,
+        "actual": 0.564
+      },
+      {
+        "bin": "0.6-0.7",
+        "n": 135314,
+        "predicted": 0.65,
+        "actual": 0.659
+      },
+      {
+        "bin": "0.7-0.8",
+        "n": 131976,
+        "predicted": 0.75,
+        "actual": 0.75
+      },
+      {
+        "bin": "0.8-0.9",
+        "n": 141630,
+        "predicted": 0.851,
+        "actual": 0.847
+      },
+      {
+        "bin": "0.9-1.0",
+        "n": 170769,
+        "predicted": 0.949,
+        "actual": 0.944
+      }
+    ]
+  },
+  "test_objective": 0.41552,
+  "test_uncalibrated": {
+    "objective": 0.41798,
+    "overall": {
+      "n": 2395644,
+      "brier": 0.1315,
+      "log_loss": 0.411,
+      "accuracy": 0.8109,
+      "ece": 0.0212
+    }
+  },
+  "ablation_test_log_loss": {
+    "matchup_strength": {
+      "without": 0.41797,
+      "with": 0.41781
+    },
+    "pace_strength": {
+      "without": 0.41853,
+      "with": 0.41781
+    },
+    "usage_boost": {
+      "without": 0.42039,
+      "with": 0.41781
+    }
+  },
+  "notes": [
+    "Each game day is projected with games before that day only; graded on players who played.",
+    "Players projected under 18 minutes and thresholds below 2% or above 98% are not scored.",
+    "Baseline: share of the player's last 20 games (this season and last) that cleared the threshold, smoothed.",
+    "There is no NBA injury feed: a rotation player who missed his team's last two games is treated as out; otherwise players are assumed available.",
+    "Each game day is simulated with a fixed seed (the date as YYYYMMDD) per game and team, so every number reproduces.",
+    "No historical prop prices: ROI and closing-line value need stored market snapshots."
+  ],
+  "runtime_s": 4279.5
+}
