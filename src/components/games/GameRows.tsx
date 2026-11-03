@@ -113,7 +113,7 @@ export async function GameRows({ league, day, withinHours, limit, note = true }:
         </section>
       ))}
       {note ? <p className="text-xs text-faint">
-        Teal is the model, blue the market line (favored team shown). Gaps of 3+ points on the spread or 4+ on the total are highlighted. Model {board.model.version}.
+        Blue is the model, white the market line (favored team shown). Gaps of 3+ points on the spread or 4+ on the total are highlighted. Model {board.model.version}.
         {live ? " PM = Polymarket US main line, live (owner view on the test site only; not stored)." : ""}
       </p> : null}
     </div>

@@ -40,7 +40,7 @@ export default function HomePage() {
         <div className="space-y-8">
           <Block title="Biggest model vs market gaps">
             <Suspense fallback={<TableSkeleton rows={5} />}><TopGaps /></Suspense>
-            <p className="mt-2 text-xs text-faint">Points between the model (teal) and the posted line (blue). Orange: 3+ on a spread, 4+ on a total.</p>
+            <p className="mt-2 text-xs text-faint">Points between the model (blue) and the posted line (white). Orange: 3+ on a spread, 4+ on a total.</p>
           </Block>
           <Block title="Player props" action={more("/props", "Open props")}>
             <div className="grid grid-cols-2 gap-2">
