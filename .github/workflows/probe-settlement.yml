@@ -1,0 +1,12 @@
+# One-off: what settled markets look like on Polymarket US and Kalshi. Prints field names and status
+# values only (no prices or outcomes). Run by hand: Actions → Probe settlement fields → Run workflow.
+name: Probe settlement fields
+on: { workflow_dispatch: {} }
+permissions: { contents: read }
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/probe-settlement.py
