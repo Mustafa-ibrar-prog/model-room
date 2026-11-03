@@ -114,3 +114,16 @@ So:
   - **Spread and total:** a normal approximation from its projected margin or total and the published 80% range. These aren't separately calibrated, so they can only ever be "lean", never "strong".
 - **What the site shows:** `data/published/market_results_<league>.json` holds only providers whose data may be published (see markets.config). Kalshi stays local unless `MODELROOM_MARKETS_KALSHI_PUBLISH=on`. The test site's CI never fetches exchange data, because the repo is public and the providers' terms don't allow republishing it, so its record stays empty and says why.
 - **Accuracy, not profit:** no trades are placed, so no ROI is claimed. The older `markets report` is a local research tool that settles against box scores and reports hypothetical ROI; it doesn't feed the site.
+
+## Live integration check
+
+Run it from Actions → **Verify market integrations** → Run workflow. It runs in a throwaway GitHub runner and goes through these steps:
+1. Fetches both exchanges and checks every field (bid ≤ ask, sizes, fee, quote age).
+2. Checks each threshold against the contract's own title.
+3. Runs the props model with the prices, audits how each quote was matched to a player, and re-derives implied probability, fee and edge.
+4. Runs the model again without prices and confirms the probabilities are identical.
+5. Parses recently settled markets.
+
+The log shows counts and pass/fail only. Nothing is committed, uploaded or published.
+
+Normalization worth knowing: on whole-number stats, Kalshi's "more than 49.5" is stored as "50+", the same contract as Polymarket's "50+". Fantasy points keep "more than 14.5", because scores have decimals. A listing with its bid above its ask is flagged "crossed book" and never priced.
