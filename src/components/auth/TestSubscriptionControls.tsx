@@ -37,7 +37,7 @@ export function TestSubscriptionControls() {
           </button>
         ))}
       </div>
-      {msg ? <p role="status" className="mt-2 text-sm text-mute">{msg}</p> : null}
+      {msg ? <p role="status" data-testid="test-controls-status" className="mt-2 text-sm text-mute">{msg}</p> : null}
     </div>
   );
 }
