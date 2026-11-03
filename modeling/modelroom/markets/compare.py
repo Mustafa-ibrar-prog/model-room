@@ -80,6 +80,8 @@ def quote_flags(q: PropQuote, now: datetime, *, max_age_min: float = MAX_AGE_MIN
     if q.yes_bid is None or q.yes_ask is None:
         if not q.provider.startswith("manual:"):
             f.append("one-sided")
+    elif q.yes_bid > q.yes_ask + 1e-9:
+        f.append("crossed book")   # bid above ask in the listing: a stale or inconsistent snapshot, never priced
     elif q.yes_ask - q.yes_bid > MAX_SPREAD + 1e-9:
         f.append("wide spread")
     if q.yes_ask_size is not None and q.yes_ask_size < MIN_SIZE:

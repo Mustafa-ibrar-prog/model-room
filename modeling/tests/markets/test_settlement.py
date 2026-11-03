@@ -165,3 +165,19 @@ def test_kalshi_game_markets_and_model_probability():
     assert games.model_prob(win, g) == pytest.approx(0.40)
     tot = PropQuote(provider="kalshi", league="nfl", market="game_total", op=">", threshold=46.5, player_name="", team=None, game_date="2026-11-02")
     assert games.model_prob(tot, g) < 0.4
+
+
+def test_crossed_listing_is_never_usable():
+    from modelroom.markets import compare as C
+    q = PropQuote(provider="polymarket_us", league="nfl", market="receptions", op=">=", threshold=5, player_name="X", team=None,
+                  game_date="2026-11-08", yes_bid=0.55, yes_ask=0.50, fee_rate=0.02, captured_at=datetime.now(timezone.utc).isoformat())
+    v = C.view(q, 0.7, datetime.now(timezone.utc))
+    assert not v.usable and "crossed book" in v.flags
+
+
+def test_polymarket_game_markets_are_full_game_only():
+    assert games._full_game("game_spread", "football_team_full_game_spread")
+    assert not games._full_game("game_spread", "football_team_first_half_spread")
+    assert games._full_game("game_total", "basketball_team_full_game_total")
+    assert not games._full_game("game_total", "football_team_points_full_game_total")
+    assert games._full_game("game_winner", "basketball_team_full_game_winner") and games._full_game("game_winner", "moneyline")
