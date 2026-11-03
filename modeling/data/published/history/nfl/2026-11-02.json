@@ -9,8 +9,11 @@
       "start_time": "2026-11-03T01:15:00+00:00",
       "home": "SEA",
       "away": "CHI",
-      "status": "scheduled",
-      "final": null,
+      "status": "final",
+      "final": {
+        "home": 17,
+        "away": 34
+      },
       "pregame": {
         "generated_at": "2026-11-02T22:13:57+00:00",
         "model_version": "1.0.1",
@@ -20,7 +23,11 @@
         "pred_total": 40.34,
         "home_win_prob": 0.6032
       },
-      "result": null
+      "result": {
+        "margin_error": 20.4,
+        "total_error": -10.7,
+        "winner_correct": false
+      }
     }
   ],
   "props": [
@@ -31,7 +38,7 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": false,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
@@ -419,24 +426,24 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.77,
           "sd": 0.92,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.5543,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.1846,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -445,52 +452,52 @@
           "mean": 23.73,
           "sd": 14.16,
           "support": "ok",
-          "actual": null,
+          "actual": 23.8,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.9734,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.9322,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.8927,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.844,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.7598,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.6587,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.588,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.4247,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.2829,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -499,37 +506,37 @@
           "mean": 33.29,
           "sd": 20.76,
           "support": "ok",
-          "actual": null,
+          "actual": 43.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9777,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.9206,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.8174,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.6876,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.5483,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.3101,
-              "hit": null
+              "hit": true
             }
           ]
         },
@@ -538,67 +545,67 @@
           "mean": 111.49,
           "sd": 78.84,
           "support": "ok",
-          "actual": null,
+          "actual": 118.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9947,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.9831,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.9633,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.9322,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.8843,
-              "hit": null
+              "hit": true
             },
             {
               "k": 60.0,
               "p": 0.8311,
-              "hit": null
+              "hit": true
             },
             {
               "k": 70.0,
               "p": 0.7677,
-              "hit": null
+              "hit": true
             },
             {
               "k": 80.0,
               "p": 0.6963,
-              "hit": null
+              "hit": true
             },
             {
               "k": 90.0,
               "p": 0.6247,
-              "hit": null
+              "hit": true
             },
             {
               "k": 100.0,
               "p": 0.5504,
-              "hit": null
+              "hit": true
             },
             {
               "k": 125.0,
               "p": 0.3772,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.2393,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -607,57 +614,57 @@
           "mean": 7.77,
           "sd": 4.06,
           "support": "ok",
-          "actual": null,
+          "actual": 6.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9992,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.9918,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.9728,
-              "hit": null
+              "hit": true
             },
             {
               "k": 4.0,
               "p": 0.9346,
-              "hit": null
+              "hit": true
             },
             {
               "k": 5.0,
               "p": 0.8673,
-              "hit": null
+              "hit": true
             },
             {
               "k": 6.0,
               "p": 0.7769,
-              "hit": null
+              "hit": true
             },
             {
               "k": 7.0,
               "p": 0.6657,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.5377,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.4125,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.3067,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -666,37 +673,37 @@
           "mean": 113.35,
           "sd": 79.52,
           "support": "ok",
-          "actual": null,
+          "actual": 118.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.9809,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.9032,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.7602,
-              "hit": null
+              "hit": true
             },
             {
               "k": 100.0,
               "p": 0.5779,
-              "hit": null
+              "hit": true
             },
             {
               "k": 125.0,
               "p": 0.3969,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.2489,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -705,62 +712,62 @@
           "mean": 1.86,
           "sd": 10.24,
           "support": "insufficient",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.0282,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0163,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0098,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.006,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0039,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0026,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0014,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.001,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0006,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0004,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -773,24 +780,24 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.23,
           "sd": 0.5,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.2005,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.0261,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -799,52 +806,52 @@
           "mean": 8.25,
           "sd": 7.74,
           "support": "ok",
-          "actual": null,
+          "actual": 7.7,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.623,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.4336,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.3241,
-              "hit": null
+              "hit": false
             },
             {
               "k": 12.0,
               "p": 0.2399,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.1492,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.0923,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.066,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0257,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0116,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -853,37 +860,37 @@
           "mean": 18.0,
           "sd": 16.04,
           "support": "ok",
-          "actual": null,
+          "actual": 7.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.7508,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.5706,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.404,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.2764,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.1805,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0794,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -892,67 +899,67 @@
           "mean": 37.9,
           "sd": 39.96,
           "support": "ok",
-          "actual": null,
+          "actual": 7.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.842,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.6889,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.5366,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.4018,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.2929,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.2028,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.144,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.1019,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0725,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0501,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0204,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0096,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -961,57 +968,57 @@
           "mean": 3.07,
           "sd": 2.59,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9377,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.7729,
-              "hit": null
+              "hit": false
             },
             {
               "k": 3.0,
               "p": 0.568,
-              "hit": null
+              "hit": false
             },
             {
               "k": 4.0,
               "p": 0.3764,
-              "hit": null
+              "hit": false
             },
             {
               "k": 5.0,
               "p": 0.2295,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.1317,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.0722,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.038,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0204,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0112,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1020,37 +1027,37 @@
           "mean": 37.93,
           "sd": 40.0,
           "support": "ok",
-          "actual": null,
+          "actual": 7.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.6253,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.2949,
-              "hit": null
+              "hit": false
             },
             {
               "k": 75.0,
               "p": 0.118,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0465,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0182,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0083,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1059,62 +1066,62 @@
           "mean": 0.03,
           "sd": 1.64,
           "support": "insufficient",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -1127,24 +1134,24 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.24,
           "sd": 0.52,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.1999,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0289,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1153,52 +1160,52 @@
           "mean": 7.65,
           "sd": 7.28,
           "support": "ok",
-          "actual": null,
+          "actual": 4.300000000000001,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.5867,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.3923,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.2954,
-              "hit": null
+              "hit": false
             },
             {
               "k": 12.0,
               "p": 0.2105,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.1264,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.0721,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0487,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0195,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0083,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1207,37 +1214,37 @@
           "mean": 13.87,
           "sd": 12.3,
           "support": "ok",
-          "actual": null,
+          "actual": 17.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.6525,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.4262,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.2486,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.1454,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0846,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0272,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1246,67 +1253,67 @@
           "mean": 30.5,
           "sd": 32.93,
           "support": "ok",
-          "actual": null,
+          "actual": 23.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.8028,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.6084,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.4322,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.2933,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.1903,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.1235,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.082,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0528,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.035,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0236,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.009,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0031,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1315,57 +1322,57 @@
           "mean": 3.06,
           "sd": 2.67,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9265,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.7626,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.5571,
-              "hit": null
+              "hit": false
             },
             {
               "k": 4.0,
               "p": 0.3689,
-              "hit": null
+              "hit": false
             },
             {
               "k": 5.0,
               "p": 0.2272,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.1345,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.077,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.0419,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0231,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0124,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1374,37 +1381,37 @@
           "mean": 31.76,
           "sd": 33.69,
           "support": "ok",
-          "actual": null,
+          "actual": 23.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.5498,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.2028,
-              "hit": null
+              "hit": false
             },
             {
               "k": 75.0,
               "p": 0.0675,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0247,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0089,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.003,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -1417,24 +1424,24 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.35,
           "sd": 0.65,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.2826,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0598,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1443,52 +1450,52 @@
           "mean": 7.68,
           "sd": 7.16,
           "support": "ok",
-          "actual": null,
+          "actual": 5.9,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.5847,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.4009,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.2945,
-              "hit": null
+              "hit": false
             },
             {
               "k": 12.0,
               "p": 0.2152,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.1276,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.0746,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0505,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0183,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0063,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1497,37 +1504,37 @@
           "mean": 6.24,
           "sd": 9.57,
           "support": "ok",
-          "actual": null,
+          "actual": 6.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.2475,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.1256,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0644,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0372,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.021,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0075,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1536,67 +1543,67 @@
           "mean": 10.04,
           "sd": 17.56,
           "support": "ok",
-          "actual": null,
+          "actual": 6.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.3283,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.1522,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0729,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0369,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0202,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0116,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0059,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0036,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0022,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0013,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0003,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1605,57 +1612,57 @@
           "mean": 1.39,
           "sd": 1.87,
           "support": "ok",
-          "actual": null,
+          "actual": 3.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.6477,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.3489,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.1738,
-              "hit": null
+              "hit": true
             },
             {
               "k": 4.0,
               "p": 0.084,
-              "hit": null
+              "hit": false
             },
             {
               "k": 5.0,
               "p": 0.0418,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.0203,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.0103,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.0057,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0031,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0017,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1664,37 +1671,37 @@
           "mean": 41.85,
           "sd": 39.96,
           "support": "ok",
-          "actual": null,
+          "actual": 29.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.6922,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.3459,
-              "hit": null
+              "hit": false
             },
             {
               "k": 75.0,
               "p": 0.1473,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0584,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0229,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0078,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1703,32 +1710,32 @@
           "mean": 7.49,
           "sd": 6.83,
           "support": "ok",
-          "actual": null,
+          "actual": 6.0,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.7462,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.3443,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.1067,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0261,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0045,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1737,62 +1744,62 @@
           "mean": 31.81,
           "sd": 35.96,
           "support": "ok",
-          "actual": null,
+          "actual": 23.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.8264,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.6619,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.4998,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.3585,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.2553,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.1817,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.1254,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0848,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0573,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0378,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0139,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -1805,24 +1812,24 @@
       "team": "SEA",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.07,
           "sd": 0.29,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.0536,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0056,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1831,52 +1838,52 @@
           "mean": 13.5,
           "sd": 7.56,
           "support": "ok",
-          "actual": null,
+          "actual": 17.52,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.9295,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.8073,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.6971,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.5686,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.3814,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.24,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.1694,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0595,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.018,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1885,17 +1892,17 @@
           "mean": 0.83,
           "sd": 0.92,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.5312,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.2206,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1904,32 +1911,32 @@
           "mean": 28.91,
           "sd": 7.91,
           "support": "ok",
-          "actual": null,
+          "actual": 34.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.6769,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.4352,
-              "hit": null
+              "hit": true
             },
             {
               "k": 35.0,
               "p": 0.221,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0803,
-              "hit": null
+              "hit": false
             },
             {
               "k": 45.0,
               "p": 0.0238,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1938,47 +1945,47 @@
           "mean": 18.44,
           "sd": 5.68,
           "support": "ok",
-          "actual": null,
+          "actual": 17.0,
           "thresholds": [
             {
               "k": 14.0,
               "p": 0.7862,
-              "hit": null
+              "hit": true
             },
             {
               "k": 16.0,
               "p": 0.663,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.5171,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.376,
-              "hit": null
+              "hit": false
             },
             {
               "k": 22.0,
               "p": 0.2504,
-              "hit": null
+              "hit": false
             },
             {
               "k": 24.0,
               "p": 0.1522,
-              "hit": null
+              "hit": false
             },
             {
               "k": 26.0,
               "p": 0.0838,
-              "hit": null
+              "hit": false
             },
             {
               "k": 28.0,
               "p": 0.0438,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -1987,22 +1994,22 @@
           "mean": 1.32,
           "sd": 1.18,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.7288,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.3456,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.1099,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2011,52 +2018,52 @@
           "mean": 218.37,
           "sd": 108.19,
           "support": "ok",
-          "actual": null,
+          "actual": 188.0,
           "thresholds": [
             {
               "k": 150.0,
               "p": 0.8182,
-              "hit": null
+              "hit": true
             },
             {
               "k": 175.0,
               "p": 0.684,
-              "hit": null
+              "hit": true
             },
             {
               "k": 200.0,
               "p": 0.5266,
-              "hit": null
+              "hit": false
             },
             {
               "k": 225.0,
               "p": 0.3797,
-              "hit": null
+              "hit": false
             },
             {
               "k": 250.0,
               "p": 0.2572,
-              "hit": null
+              "hit": false
             },
             {
               "k": 275.0,
               "p": 0.171,
-              "hit": null
+              "hit": false
             },
             {
               "k": 300.0,
               "p": 0.1163,
-              "hit": null
+              "hit": false
             },
             {
               "k": 325.0,
               "p": 0.0755,
-              "hit": null
+              "hit": false
             },
             {
               "k": 350.0,
               "p": 0.0472,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2065,32 +2072,32 @@
           "mean": 1.7,
           "sd": 3.56,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.0775,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0144,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.0028,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0004,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2099,62 +2106,62 @@
           "mean": 7.39,
           "sd": 18.44,
           "support": "ok",
-          "actual": null,
+          "actual": 20.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.2173,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.1162,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.0627,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0359,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0214,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0135,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0089,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0056,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0033,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0021,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0008,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -2167,24 +2174,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.18,
           "sd": 0.45,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.1598,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0181,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2193,52 +2200,52 @@
           "mean": 7.19,
           "sd": 7.2,
           "support": "ok",
-          "actual": null,
+          "actual": 7.300000000000001,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.5493,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.3585,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.2637,
-              "hit": null
+              "hit": false
             },
             {
               "k": 12.0,
               "p": 0.1852,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.114,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.0679,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.048,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0185,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.007,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2247,37 +2254,37 @@
           "mean": 15.47,
           "sd": 14.82,
           "support": "ok",
-          "actual": null,
+          "actual": 9.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.6731,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.4823,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.322,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.2067,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.1315,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0513,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2286,67 +2293,67 @@
           "mean": 31.98,
           "sd": 36.14,
           "support": "ok",
-          "actual": null,
+          "actual": 14.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.7824,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.6099,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.4377,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.3097,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.2121,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.1461,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.1014,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0694,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0481,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0337,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0148,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0053,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2355,57 +2362,57 @@
           "mean": 2.81,
           "sd": 2.58,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9095,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.7165,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.5013,
-              "hit": null
+              "hit": false
             },
             {
               "k": 4.0,
               "p": 0.316,
-              "hit": null
+              "hit": false
             },
             {
               "k": 5.0,
               "p": 0.1876,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.1103,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.063,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.0351,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0183,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0105,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2414,37 +2421,37 @@
           "mean": 32.74,
           "sd": 36.68,
           "support": "ok",
-          "actual": null,
+          "actual": 53.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.5486,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.2191,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.0832,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.033,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0144,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0047,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2453,62 +2460,62 @@
           "mean": 0.76,
           "sd": 6.31,
           "support": "insufficient",
-          "actual": null,
+          "actual": 39.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.0093,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.0046,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.0021,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.0013,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0007,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0006,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0004,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0003,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0002,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0002,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -2521,24 +2528,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.31,
           "sd": 0.59,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.2667,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.0417,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2547,52 +2554,52 @@
           "mean": 12.06,
           "sd": 9.7,
           "support": "ok",
-          "actual": null,
+          "actual": 18.6,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.7933,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.641,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.5357,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.4382,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.3109,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.2173,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.1676,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0828,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0404,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2601,37 +2608,37 @@
           "mean": 23.08,
           "sd": 18.54,
           "support": "ok",
-          "actual": null,
+          "actual": 23.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.8563,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.7126,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.5523,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.4048,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.2946,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.1473,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2640,67 +2647,67 @@
           "mean": 55.48,
           "sd": 51.99,
           "support": "ok",
-          "actual": null,
+          "actual": 56.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9263,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.8359,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.7282,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.6117,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.5018,
-              "hit": null
+              "hit": true
             },
             {
               "k": 60.0,
               "p": 0.3953,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.3115,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.2392,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.1838,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.1407,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0706,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0337,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2709,57 +2716,57 @@
           "mean": 4.19,
           "sd": 3.11,
           "support": "ok",
-          "actual": null,
+          "actual": 7.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9734,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.8888,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.7496,
-              "hit": null
+              "hit": true
             },
             {
               "k": 4.0,
               "p": 0.5851,
-              "hit": null
+              "hit": true
             },
             {
               "k": 5.0,
               "p": 0.4194,
-              "hit": null
+              "hit": true
             },
             {
               "k": 6.0,
               "p": 0.282,
-              "hit": null
+              "hit": true
             },
             {
               "k": 7.0,
               "p": 0.1787,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.112,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0666,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0381,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2768,37 +2775,37 @@
           "mean": 59.93,
           "sd": 54.31,
           "support": "ok",
-          "actual": null,
+          "actual": 56.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.8312,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.5621,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.319,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.1665,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0819,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0392,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2807,62 +2814,62 @@
           "mean": 4.45,
           "sd": 15.66,
           "support": "insufficient",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.0982,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0535,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.031,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0198,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0126,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0079,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0052,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0037,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0027,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0014,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0006,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -2875,24 +2882,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.35,
           "sd": 0.62,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.2905,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0519,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2901,52 +2908,52 @@
           "mean": 11.43,
           "sd": 8.89,
           "support": "ok",
-          "actual": null,
+          "actual": 11.5,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.7952,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.6287,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.5143,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.4084,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.279,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.1864,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.1408,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0635,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0281,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2955,37 +2962,37 @@
           "mean": 18.39,
           "sd": 13.46,
           "support": "ok",
-          "actual": null,
+          "actual": 15.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.8219,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.6204,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.4142,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.2554,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.1517,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0512,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -2994,67 +3001,67 @@
           "mean": 48.1,
           "sd": 42.11,
           "support": "ok",
-          "actual": null,
+          "actual": 65.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9317,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.8319,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.6956,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.5577,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.4244,
-              "hit": null
+              "hit": true
             },
             {
               "k": 60.0,
               "p": 0.3179,
-              "hit": null
+              "hit": true
             },
             {
               "k": 70.0,
               "p": 0.2273,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.165,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.1177,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0834,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.035,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0147,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3063,57 +3070,57 @@
           "mean": 4.54,
           "sd": 3.17,
           "support": "ok",
-          "actual": null,
+          "actual": 7.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9791,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.9152,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.8049,
-              "hit": null
+              "hit": true
             },
             {
               "k": 4.0,
               "p": 0.6545,
-              "hit": null
+              "hit": true
             },
             {
               "k": 5.0,
               "p": 0.4905,
-              "hit": null
+              "hit": true
             },
             {
               "k": 6.0,
               "p": 0.3331,
-              "hit": null
+              "hit": true
             },
             {
               "k": 7.0,
               "p": 0.2179,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.1353,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0815,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0469,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3122,37 +3129,37 @@
           "mean": 48.18,
           "sd": 42.13,
           "support": "ok",
-          "actual": null,
+          "actual": 65.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.7844,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.4334,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.1903,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0795,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0319,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0129,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -3165,24 +3172,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.22,
           "sd": 0.53,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.1759,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0319,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3191,52 +3198,52 @@
           "mean": 16.98,
           "sd": 8.88,
           "support": "ok",
-          "actual": null,
+          "actual": 13.98,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.9698,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.9022,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.8311,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.7393,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.5796,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.4195,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.3226,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.1481,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0649,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3245,17 +3252,17 @@
           "mean": 0.63,
           "sd": 0.8,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.4488,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.1524,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3264,32 +3271,32 @@
           "mean": 31.93,
           "sd": 7.93,
           "support": "ok",
-          "actual": null,
+          "actual": 34.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.7939,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.5823,
-              "hit": null
+              "hit": true
             },
             {
               "k": 35.0,
               "p": 0.3422,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.153,
-              "hit": null
+              "hit": false
             },
             {
               "k": 45.0,
               "p": 0.0529,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3298,47 +3305,47 @@
           "mean": 19.98,
           "sd": 5.7,
           "support": "ok",
-          "actual": null,
+          "actual": 24.0,
           "thresholds": [
             {
               "k": 14.0,
               "p": 0.8647,
-              "hit": null
+              "hit": true
             },
             {
               "k": 16.0,
               "p": 0.7601,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.628,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.4838,
-              "hit": null
+              "hit": true
             },
             {
               "k": 22.0,
               "p": 0.3407,
-              "hit": null
+              "hit": true
             },
             {
               "k": 24.0,
               "p": 0.2263,
-              "hit": null
+              "hit": true
             },
             {
               "k": 26.0,
               "p": 0.138,
-              "hit": null
+              "hit": false
             },
             {
               "k": 28.0,
               "p": 0.0764,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3347,22 +3354,22 @@
           "mean": 1.38,
           "sd": 1.19,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.7553,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.3577,
-              "hit": null
+              "hit": false
             },
             {
               "k": 3.0,
               "p": 0.1195,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3371,52 +3378,52 @@
           "mean": 226.72,
           "sd": 107.88,
           "support": "ok",
-          "actual": null,
+          "actual": 247.0,
           "thresholds": [
             {
               "k": 150.0,
               "p": 0.8595,
-              "hit": null
+              "hit": true
             },
             {
               "k": 175.0,
               "p": 0.7282,
-              "hit": null
+              "hit": true
             },
             {
               "k": 200.0,
               "p": 0.5804,
-              "hit": null
+              "hit": true
             },
             {
               "k": 225.0,
               "p": 0.4274,
-              "hit": null
+              "hit": true
             },
             {
               "k": 250.0,
               "p": 0.2981,
-              "hit": null
+              "hit": false
             },
             {
               "k": 275.0,
               "p": 0.2061,
-              "hit": null
+              "hit": false
             },
             {
               "k": 300.0,
               "p": 0.1328,
-              "hit": null
+              "hit": false
             },
             {
               "k": 325.0,
               "p": 0.083,
-              "hit": null
+              "hit": false
             },
             {
               "k": 350.0,
               "p": 0.0505,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3425,32 +3432,32 @@
           "mean": 5.04,
           "sd": 6.2,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.4562,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.1529,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.043,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0112,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0021,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3459,62 +3466,62 @@
           "mean": 23.48,
           "sd": 34.76,
           "support": "ok",
-          "actual": null,
+          "actual": 1.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.6459,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.4671,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.3307,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.2333,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.1651,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.1159,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0785,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0542,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0388,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0276,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0111,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -3527,24 +3534,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.25,
           "sd": 0.52,
           "support": "ok",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.2142,
-              "hit": null
+              "hit": false
             },
             {
               "k": 2.0,
               "p": 0.0298,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3553,52 +3560,52 @@
           "mean": 9.98,
           "sd": 8.51,
           "support": "ok",
-          "actual": null,
+          "actual": 12.700000000000001,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.723,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.5437,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.4322,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.3341,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.2151,
-              "hit": null
+              "hit": false
             },
             {
               "k": 18.0,
               "p": 0.1396,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0995,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0419,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0186,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3607,37 +3614,37 @@
           "mean": 22.03,
           "sd": 18.44,
           "support": "ok",
-          "actual": null,
+          "actual": 24.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.8377,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.6925,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.5214,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.3742,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.2678,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.1255,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3646,67 +3653,67 @@
           "mean": 49.08,
           "sd": 47.79,
           "support": "ok",
-          "actual": null,
+          "actual": 87.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9046,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.7989,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.669,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.5445,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.4292,
-              "hit": null
+              "hit": true
             },
             {
               "k": 60.0,
               "p": 0.3309,
-              "hit": null
+              "hit": true
             },
             {
               "k": 70.0,
               "p": 0.2485,
-              "hit": null
+              "hit": true
             },
             {
               "k": 80.0,
               "p": 0.1854,
-              "hit": null
+              "hit": true
             },
             {
               "k": 90.0,
               "p": 0.1362,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0996,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0445,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0208,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3715,57 +3722,57 @@
           "mean": 3.58,
           "sd": 2.73,
           "support": "ok",
-          "actual": null,
+          "actual": 4.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.962,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.8478,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.68,
-              "hit": null
+              "hit": true
             },
             {
               "k": 4.0,
               "p": 0.4861,
-              "hit": null
+              "hit": true
             },
             {
               "k": 5.0,
               "p": 0.3173,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.1873,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.1071,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.0611,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.0305,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0167,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3774,37 +3781,37 @@
           "mean": 49.14,
           "sd": 47.83,
           "support": "ok",
-          "actual": null,
+          "actual": 87.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.7524,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.4383,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.2134,
-              "hit": null
+              "hit": true
             },
             {
               "k": 100.0,
               "p": 0.0957,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0412,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0186,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3813,62 +3820,62 @@
           "mean": 0.06,
           "sd": 1.56,
           "support": "insufficient",
-          "actual": null,
+          "actual": 0.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.0003,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.0002,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0001,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0,
-              "hit": null
+              "hit": false
             }
           ]
         }
@@ -3881,24 +3888,24 @@
       "team": "CHI",
       "generated_at": "2026-11-02T21:34:30+00:00",
       "model_version": "0.1.0",
-      "played": null,
+      "played": true,
       "markets": {
         "anytime_td": {
           "label": "Anytime TD",
           "mean": 0.73,
           "sd": 0.92,
           "support": "ok",
-          "actual": null,
+          "actual": 3.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.5199,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.1741,
-              "hit": null
+              "hit": true
             }
           ]
         },
@@ -3907,52 +3914,52 @@
           "mean": 15.63,
           "sd": 9.96,
           "support": "ok",
-          "actual": null,
+          "actual": 27.9,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.9162,
-              "hit": null
+              "hit": true
             },
             {
               "k": 8.0,
               "p": 0.8154,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.7293,
-              "hit": null
+              "hit": true
             },
             {
               "k": 12.0,
               "p": 0.6344,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.4927,
-              "hit": null
+              "hit": true
             },
             {
               "k": 18.0,
               "p": 0.3552,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.2814,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.1442,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.0716,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -3961,37 +3968,37 @@
           "mean": 10.41,
           "sd": 11.13,
           "support": "ok",
-          "actual": null,
+          "actual": 8.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.4757,
-              "hit": null
+              "hit": false
             },
             {
               "k": 15.0,
               "p": 0.2546,
-              "hit": null
+              "hit": false
             },
             {
               "k": 20.0,
               "p": 0.1364,
-              "hit": null
+              "hit": false
             },
             {
               "k": 25.0,
               "p": 0.0726,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.0416,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.0154,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -4000,67 +4007,67 @@
           "mean": 20.15,
           "sd": 24.3,
           "support": "ok",
-          "actual": null,
+          "actual": 10.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.6571,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.4091,
-              "hit": null
+              "hit": false
             },
             {
               "k": 30.0,
               "p": 0.2383,
-              "hit": null
+              "hit": false
             },
             {
               "k": 40.0,
               "p": 0.1377,
-              "hit": null
+              "hit": false
             },
             {
               "k": 50.0,
               "p": 0.0767,
-              "hit": null
+              "hit": false
             },
             {
               "k": 60.0,
               "p": 0.0443,
-              "hit": null
+              "hit": false
             },
             {
               "k": 70.0,
               "p": 0.0257,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.0145,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.009,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.0055,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.0017,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0004,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -4069,57 +4076,57 @@
           "mean": 2.85,
           "sd": 2.69,
           "support": "ok",
-          "actual": null,
+          "actual": 2.0,
           "thresholds": [
             {
               "k": 1.0,
               "p": 0.9008,
-              "hit": null
+              "hit": true
             },
             {
               "k": 2.0,
               "p": 0.712,
-              "hit": null
+              "hit": true
             },
             {
               "k": 3.0,
               "p": 0.5017,
-              "hit": null
+              "hit": false
             },
             {
               "k": 4.0,
               "p": 0.3198,
-              "hit": null
+              "hit": false
             },
             {
               "k": 5.0,
               "p": 0.1974,
-              "hit": null
+              "hit": false
             },
             {
               "k": 6.0,
               "p": 0.117,
-              "hit": null
+              "hit": false
             },
             {
               "k": 7.0,
               "p": 0.0658,
-              "hit": null
+              "hit": false
             },
             {
               "k": 8.0,
               "p": 0.0379,
-              "hit": null
+              "hit": false
             },
             {
               "k": 9.0,
               "p": 0.022,
-              "hit": null
+              "hit": false
             },
             {
               "k": 10.0,
               "p": 0.0125,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -4128,37 +4135,37 @@
           "mean": 84.3,
           "sd": 55.72,
           "support": "ok",
-          "actual": null,
+          "actual": 79.0,
           "thresholds": [
             {
               "k": 25.0,
               "p": 0.9648,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.8246,
-              "hit": null
+              "hit": true
             },
             {
               "k": 75.0,
               "p": 0.5839,
-              "hit": null
+              "hit": true
             },
             {
               "k": 100.0,
               "p": 0.3502,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.1856,
-              "hit": null
+              "hit": false
             },
             {
               "k": 150.0,
               "p": 0.0889,
-              "hit": null
+              "hit": false
             }
           ]
         },
@@ -4167,32 +4174,32 @@
           "mean": 15.89,
           "sd": 9.06,
           "support": "ok",
-          "actual": null,
+          "actual": 27.0,
           "thresholds": [
             {
               "k": 5.0,
               "p": 0.9841,
-              "hit": null
+              "hit": true
             },
             {
               "k": 10.0,
               "p": 0.899,
-              "hit": null
+              "hit": true
             },
             {
               "k": 15.0,
               "p": 0.6813,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.3876,
-              "hit": null
+              "hit": true
             },
             {
               "k": 25.0,
               "p": 0.1429,
-              "hit": null
+              "hit": true
             }
           ]
         },
@@ -4201,62 +4208,62 @@
           "mean": 64.14,
           "sd": 50.12,
           "support": "ok",
-          "actual": null,
+          "actual": 69.0,
           "thresholds": [
             {
               "k": 10.0,
               "p": 0.9804,
-              "hit": null
+              "hit": true
             },
             {
               "k": 20.0,
               "p": 0.9397,
-              "hit": null
+              "hit": true
             },
             {
               "k": 30.0,
               "p": 0.8745,
-              "hit": null
+              "hit": true
             },
             {
               "k": 40.0,
               "p": 0.7878,
-              "hit": null
+              "hit": true
             },
             {
               "k": 50.0,
               "p": 0.6851,
-              "hit": null
+              "hit": true
             },
             {
               "k": 60.0,
               "p": 0.5801,
-              "hit": null
+              "hit": true
             },
             {
               "k": 70.0,
               "p": 0.4727,
-              "hit": null
+              "hit": false
             },
             {
               "k": 80.0,
               "p": 0.3729,
-              "hit": null
+              "hit": false
             },
             {
               "k": 90.0,
               "p": 0.29,
-              "hit": null
+              "hit": false
             },
             {
               "k": 100.0,
               "p": 0.2179,
-              "hit": null
+              "hit": false
             },
             {
               "k": 125.0,
               "p": 0.1034,
-              "hit": null
+              "hit": false
             }
           ]
         }
