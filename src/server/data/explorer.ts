@@ -140,11 +140,16 @@ export type Explorer =
 
 const SUPPORT_RANK = { ok: 0, limited: 1, insufficient: 2 } as const;
 
+/** Market midpoint for a line: the usable quote's, else any two-sided quote's (wide or thin, for reference only). */
+export function marketMid(l: PropLineView): number | null {
+  return l.market?.mid ?? l.quotes.find((q) => q.mid != null && !q.flags.includes("crossed book"))?.mid ?? null;
+}
+
 function headline(lines: PropLineView[]): PropLineView | null {
   if (!lines.length) return null;
   // With prices: the market's main line (priced closest to 50¢). Without: the model's coin-flip line.
-  const priced = lines.filter((l) => l.market?.mid != null);
-  if (priced.length) return [...priced].sort((a, b) => Math.abs(a.market!.mid! - 0.5) - Math.abs(b.market!.mid! - 0.5))[0];
+  const priced = lines.filter((l) => marketMid(l) != null);
+  if (priced.length) return [...priced].sort((a, b) => Math.abs(marketMid(a)! - 0.5) - Math.abs(marketMid(b)! - 0.5))[0];
   return [...lines].sort((a, b) => Math.abs(a.modelProb - 0.5) - Math.abs(b.modelProb - 0.5))[0];
 }
 
