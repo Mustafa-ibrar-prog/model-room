@@ -8,10 +8,11 @@ Standard library only, so the scheduler's every-few-minutes check runs in second
 Slots (all Pacific time):
   morning   07:00 PT every day             injury reports, questionable / doubtful / out, depth charts
   midday    12:00 PT every day             updated designations, lineup changes
+  afternoon 16:00 PT every day             late reports before evening games
   inactives kickoff − 90 min, each NFL kickoff time   official NFL inactive lists (when a source is connected)
   pregame   start − 30 min, each game start time (NFL and NBA)   late scratches, confirmed lineups
 
-A slot is due from its time until its window closes (morning / midday: 3 hours; inactives: until the pregame
+A slot is due from its time until its window closes (morning / midday / afternoon: 3 hours; inactives: until the pregame
 slot; pregame: until the game starts). Games sharing a start time share one slot. A slot that succeeded is
 never run again (no duplicate refreshes); a failed one is retried on the next check while its window is open.
 Every attempt is appended to modeling/preview-ledger/refresh_log.jsonl (append-only; nothing is rewritten).
@@ -29,7 +30,7 @@ PT = ZoneInfo("America/Los_Angeles")
 ROOT = Path(__file__).resolve().parents[1]
 LOG = Path(os.environ.get("MODELROOM_LEDGER_DIR", ROOT / "preview-ledger")) / "refresh_log.jsonl"
 PUBLISHED = ROOT / "data" / "published"
-DAILY = (("morning", 7, 0), ("midday", 12, 0))
+DAILY = (("morning", 7, 0), ("midday", 12, 0), ("afternoon", 16, 0))
 DAILY_WINDOW = timedelta(hours=3)
 INACTIVES_BEFORE = timedelta(minutes=90)
 PREGAME_BEFORE = timedelta(minutes=30)
@@ -108,7 +109,7 @@ def status(now: datetime | None = None) -> dict:
     rows = log_entries()
     ok = [r for r in rows if r.get("status") == "success"]
     bad = [r for r in rows if r.get("status") == "failed"][-10:]
-    return {"last_success": ok[-1] if ok else None, "recent_failures": bad, "schedule": "07:00 PT, 12:00 PT, NFL kickoff − 90 min, every game − 30 min"}
+    return {"last_success": ok[-1] if ok else None, "recent_failures": bad, "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min"}
 
 
 def main(argv=None) -> int:

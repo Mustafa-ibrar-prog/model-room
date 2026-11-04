@@ -15,7 +15,7 @@ on:
     branches: [main]
   schedule:
     # A cheap check every 10 minutes; the deploy job runs only when a refresh slot is due (see
-    # modeling/modelroom/refresh_plan.py): 7:00 AM PT, 12:00 PM PT, NFL kickoff − 90 min (inactive lists),
+    # modeling/modelroom/refresh_plan.py): 7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min (inactive lists),
     # and 30 min before every game. GitHub can start scheduled runs late; each slot stays open for a window
     # so a late start still refreshes, and a slot that succeeded is never run twice.
     - cron: "*/10 * * * *"
@@ -123,6 +123,7 @@ jobs:
           # Sportsbook lines (DraftKings, FanDuel and other US books) from The Odds API, only when the
           # ODDS_API_KEY secret is set. Free tier = 500 credits a month; each league costs 3 credits a call, so
           # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
+          # The 4:00 PM injury refresh reuses the midday prices (a third fetch would exceed the free 500).
           # Snapshots are kept on the preview branch (append-only) so past games keep the line they had.
           for lg in nba nfl; do
             mkdir -p data/processed/$lg

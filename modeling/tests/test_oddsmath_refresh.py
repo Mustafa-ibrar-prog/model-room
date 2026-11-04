@@ -57,3 +57,4 @@ def test_refresh_slots_and_no_duplicates(tmp_path, monkeypatch):
     R.record(["morning:2026-11-08"], "success")
     assert not R.due(t("2026-11-08T15:30:00"))                                      # done → never twice
     assert not R.due(t("2026-11-08T18:30:00"))                                      # game started: window closed
+    assert [s["kind"] for s in R.due(t("2026-11-09T00:05:00"))] == ["afternoon"]   # 4:05 PM PT, its own slot
