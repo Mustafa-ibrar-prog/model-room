@@ -148,6 +148,8 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     avg_ru = agg_share["team_carries"] / agg_share["w"]
     P["target_share"] = _shrink(agg_share["targets"], agg_share["team_pass_att"], g.map(prior_t).fillna(0.02), s.share_prior_games * avg_pa.fillna(lg_pa))
     P["carry_share"] = _shrink(agg_share["carries"], agg_share["team_carries"], g.map(prior_c).fillna(0.01), s.share_prior_games * avg_ru.fillna(lg_ru))
+    if s.share_model == "role":
+        P = _role_share(P, played, season, depth_now or {})
 
     L = league
     P["catch_rate"] = _shrink(agg["receptions"], agg["targets"], g.map(L["cr"]).fillna(L["cr"]["WR"]), s.rate_prior)
@@ -209,6 +211,36 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
 PLAY_RATE = {(1, 0): 0.40, (1, 1): 0.807, (2, 0): 0.37, (2, 1): 0.490, (2, 2): 0.881, (3, 0): 0.37, (3, 1): 0.296,
              (3, 2): 0.567, (3, 3): 0.937, (4, 0): 0.372, (4, 1): 0.556, (4, 2): 0.695, (4, 3): 0.844, (4, 4): 0.962}
 PLAY_RATE_NEW = 0.347
+
+
+def role_features(played: pd.DataFrame, season: int) -> pd.DataFrame:
+    """Per player: mean per-game target / carry share over his last 5 games played, and over this season."""
+    pp = played.assign(tsh=played["targets"] / played["team_pass_att"].replace(0, np.nan),
+                       csh=played["carries"] / played["team_carries"].replace(0, np.nan)).sort_values("game_date")
+    last5 = pp.groupby("player_id").tail(5).groupby("player_id")[["tsh", "csh"]].mean().add_prefix("last5_")
+    seas = pp[pp["season"] == season].groupby("player_id")[["tsh", "csh"]].mean().add_prefix("season_")
+    return last5.join(seas, how="outer")
+
+
+def _role_share(P: pd.DataFrame, played: pd.DataFrame, season: int, depth_now: dict) -> pd.DataFrame:
+    from .config import SHARE_MODEL
+
+    R = role_features(played, season).reindex(P.index)
+    rank = pd.Series({pid: min(float(depth_now.get(pid, 9.0)), 4.0) for pid in P.index}, dtype=float).reindex(P.index).fillna(4.0)
+    for kind, col, lab in (("t", "target_share", "tsh"), ("c", "carry_share", "csh")):
+        new = P[col].copy()
+        for grp, co in SHARE_MODEL.get(kind, {}).items():
+            m = P["group"] == grp
+            if not m.any():
+                continue
+            h = P.loc[m, col]
+            l5 = R.loc[m, f"last5_{lab}"].fillna(h)
+            se = R.loc[m, f"season_{lab}"].fillna(h)
+            d = rank[m].map(lambda r: co[3 + int(r) - 1] if r <= 3 else 0.0)
+            new[m] = (co[0] * h + co[1] * (l5 - h) + co[2] * (se - h) + d).clip(lower=0.0005)
+        P[col + "_history"] = P[col]
+        P[col] = new
+    return P
 
 
 def promoted_flags(pg: pd.DataFrame) -> pd.Series:

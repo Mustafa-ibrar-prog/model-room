@@ -55,6 +55,19 @@ class PropSettings:
     redist_decay: float = 0.5           # weight multiplier per extra depth step below the missing player
     redist_up: float = 0.3              # weight for players ranked above him (relative to the next man down)
     redist_up_decay: float = 0.5        # weight multiplier per extra step for players ranked above him
+    share_model: str = "history"        # "history": recency-weighted share (0.1); "role": that share corrected
+                                        # with his last-5-game and this-season share and his depth-chart rank now
+                                        # (coefficients SHARE_MODEL, fit on 2021-22)
+    gameday_inactives: bool = False     # True: projections made after the official inactive lists (~90 min
+                                        # before kickoff): gameday inactives are removed; Questionable players
+                                        # who are active are known to be active
+    target_total_rate: bool = False     # True: receivers' shares add up to the share of pass attempts that
+                                        # historically reach RBs/WRs/TEs (~95%), not 100%
+    share_normalize: bool = True        # False (share_model="role"): role shares are absolute (share of team
+                                        # attempts if he plays), not rescaled so the roster sums to 100%
+    questionable_model: str = "none"    # "none": a Questionable player is projected as fully active (0.1);
+                                        # "split": (1) chance he plays, (2) his role if he plays, (3) where his
+                                        # share goes if he doesn't, each measured separately on 2021-22
     redist_targets: bool = True         # False: carries only (targets keep the 0.1 allocation)
     redist_concentration: float = 1.0   # >1: missing opportunity goes to the bigger roles more than in proportion
     target_total_factor: float = 1.0    # team-total calibration (fit on 2021-22): projected targets / carries to the
@@ -68,6 +81,18 @@ class PropSettings:
     sims: int = 4000
 
 
+# Role-aware share (share_model="role"): share = a*history + b*(last5 - history) + c*(season - history)
+# + d[depth rank 1, 2, 3] (rank 4+/unlisted = 0), per position group; targets "t", carries "c". Fit on 2021-22
+# skill players who played (share of team pass attempts / carries).
+SHARE_MODEL: dict = {
+    "t": {"WR": [0.8725, 0.1899, 0.2329, 0.031, 0.0077, 0.0038], "TE": [0.9797, 0.109, 0.2398, 0.0123, 0.0015, 0.0001],
+          "RB": [0.9127, 0.1231, 0.0434, 0.0096, 0.0086, 0.0006]},
+    "c": {"RB": [0.9577, 0.2799, 0.3336, 0.0221, 0.0194, -0.0055]},
+}
+# Questionable (questionable_model="split"): his share if he plays = share x QUESTIONABLE_ROLE[group];
+# measured on 2021-22 Questionable players who played.
+QUESTIONABLE_ROLE: dict = {"WR": 0.906, "TE": 0.842, "RB": 1.003}
+
 # P(plays) = sigmoid(a[depth] + b * logit(recent appearance rate) + q * Questionable); depth 1, 2, 3+ (or
 # unlisted). Fit on 2021-22 skill players not ruled Out/Doubtful; calibrated within 2 points on 2023-25.
 PLAY_MODEL = {"a": {1: 1.9017, 2: 0.6419, 3: 0.0867}, "b": 0.7252, "q": -1.6071}
@@ -76,7 +101,7 @@ PLAY_MODEL = {"a": {1: 1.9017, 2: 0.6419, 3: 0.0867}, "b": 0.7252, "q": -1.6071}
 ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_rush", "shock_kind", "availability_weight",
                   "opp_redistribution", "redist_decay", "redist_up", "redist_up_decay", "redist_in_group", "questionable_factor",
                   "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
-                  "target_total_factor", "carry_total_factor")
+                  "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate")
 
 
 @dataclass(frozen=True)

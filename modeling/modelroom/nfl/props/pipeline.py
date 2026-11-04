@@ -162,13 +162,17 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     upcoming = B.upcoming_window(gp[gp["status"] == "scheduled"], now, days)
     week = int(upcoming["week"].mode().iloc[0]) if len(upcoming) else None
     today = pd.Timestamp(pd.Timestamp(now).tz_convert("America/New_York").date())
-    ctx = F.build(inp.player_games, inp.passes, inp.rushes, today, season, p.settings)
+    kw = {}
+    if p.settings.share_model == "role" and len(upcoming):  # depth chart as of now: the role each player holds this week
+        kw = {"depth_now": DEPTH.ranks(season, int(upcoming["week"].min()), now)}
+    ctx = F.build(inp.player_games, inp.passes, inp.rushes, today, season, p.settings, **kw)
     projs: list[M.PlayerProjection] = []
     seeds = {}
     for wk, g in upcoming.groupby("week"):
         ro, inj = I.week_slices(inp, season, int(wk))
         seeds[int(wk)] = int(season * 100 + wk)
-        dep = DEPTH.ranks(season, int(wk), now) if p.settings.opp_redistribution == "depth" else None
+        need = p.settings.opp_redistribution == "depth" or p.settings.questionable_model == "split" or p.settings.share_model == "role"
+        dep = DEPTH.ranks(season, int(wk), now) if need else None
         projs += M.project_games(ctx, g, ro, inj, p, seed=seeds[int(wk)], depth=dep)
     projs = [x for x in projs if eligible(x)]
 

@@ -75,3 +75,27 @@ def test_monitor_ranks_every_version_the_same_way():
     assert rep["versions"]["0.1.0"]["by_depth"]["WR1"]["targets"] == {"n": 0}
     assert rep["versions"]["0.1.0"]["by_depth"]["WR1"]["receptions"]["proj"] == 4.5
     assert rep["versions"]["0.1.0"]["markets"]["receptions"]["calibration"]["over_leans"]["hit"] == 1.0
+
+
+def _ctx():
+    P = pd.DataFrame({"group": ["WR", "WR", "TE"]}, index=["a", "b", "c"])
+    return SimpleNamespace(players=P, cutoff=pd.Timestamp("2025-10-01"))
+
+
+def test_gameday_drops_players_on_the_inactive_list():
+    roster = pd.DataFrame({"team": ["X"] * 3, "gsis_id": ["a", "b", "c"], "status": ["ACT", "INA", "ACT"]})
+    assert set(M.candidates(_ctx(), "X", roster, None).index) == {"a", "b", "c"}          # 0.1.0 behaviour
+    assert set(M.candidates(_ctx(), "X", roster, None, gameday=True).index) == {"a", "c"}  # after inactives
+
+
+def test_questionable_split_keeps_the_team_total_and_stays_in_group():
+    c = pd.DataFrame({"group": ["WR", "WR", "TE"], "injury_status": ["Questionable", None, None],
+                      "out": [False, False, False], "p_play": [0.9, 0.9, 0.9]}, index=["a", "b", "c"])
+    t = pd.Series([0.3, 0.2, 0.1], index=c.index)
+    s = SimpleNamespace(play_model="depth", gameday_inactives=True, redist_decay=0.5, questionable_factor=0.8)
+    s = __import__("dataclasses").make_dataclass("S", list(vars(s)))(**vars(s))
+    t2, c2, info = M._questionable_split(c, c, c, t, pd.Series(dtype=float), s, {"a": 1, "b": 2, "c": 1})
+    assert t2.sum() == pytest.approx(t.sum())
+    assert t2["c"] == pytest.approx(0.1)            # other group untouched
+    assert t2["a"] < 0.3 and t2["b"] > 0.2          # role-if-active trimmed, rest to the next WR
+    assert info["a"]["play_chance"] == 1.0           # active after the inactive list → known to play

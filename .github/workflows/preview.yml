@@ -16,6 +16,15 @@ on:
   schedule:
     - cron: "17 13 * * *"   # 5:17 AM PT (overnight results, injury reports)
     - cron: "47 21 * * *"   # 1:47 PM PT (before evening tip-offs and kickoffs)
+    # NFL pregame refreshes, ~5-10 min after the official inactive lists (released 90 min before kickoff).
+    # Cron is UTC, so each window is listed twice: Eastern standard time (Nov-Mar) and daylight time (Sep-Oct).
+    # GitHub can start scheduled runs late (sometimes by hours), so these are best effort.
+    - cron: "37 16 * * 0"   # Sun 1:00 PM ET kickoffs (EST)
+    - cron: "37 15 * * 0"   #   ... (EDT)
+    - cron: "3 20 * * 0"    # Sun 4:05 / 4:25 PM ET kickoffs (EST)
+    - cron: "3 19 * * 0"    #   ... (EDT)
+    - cron: "57 23 * * 0,1,4" # Sun / Mon / Thu night games (EST)
+    - cron: "57 22 * * 0,1,4" #   ... (EDT)
   workflow_dispatch: {}
 
 permissions:
