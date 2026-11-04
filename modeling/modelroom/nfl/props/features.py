@@ -92,6 +92,12 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     hr = hr.assign(group=pd.MultiIndex.from_arrays([hr["game_id"], hr["rusher_player_id"]]).map(pos))
 
     defense, league = _defense(hp, hr, tg, season, s)
+    # Targets per team pass attempt (throwaways, spikes and batted balls have no target): the share of
+    # attempts the receivers split between them.
+    tt = played.groupby(["game_id", "team"])["targets"].sum()
+    pa = tg.set_index(["game_id", "team"])["team_pass_att"]
+    pa = pa[~pa.index.duplicated()].reindex(tt.index)
+    league["target_rate"] = float(tt.sum() / pa.sum()) if pa.sum() > 0 else 1.0
 
     # ---------------------------------------------------------------- players
     w = _recency(played, "player_id", s.half_life_games, s.season_carry, season)
@@ -99,6 +105,12 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     cols = ["targets", "receptions", "rec_yds", "rec_td", "carries", "rush_yds", "rush_td", "team_pass_att", "team_carries",
             "pass_att", "pass_cmp", "pass_yds", "pass_td", "ints", "scrambles"]
     agg = _wsum(played, "player_id", w, cols)
+    if s.share_half_life_games > 0:  # shares on their own (shorter) recency: roles change faster than skill
+        ws_ = _recency(played, "player_id", s.share_half_life_games, s.season_carry, season)
+        sh = _wsum(played, "player_id", ws_, ["targets", "carries", "team_pass_att", "team_carries"])
+        agg_share = sh
+    else:
+        agg_share = agg
     snap = played.assign(sp=played["offense_pct"]).dropna(subset=["sp"])
     wl = _recency(snap, "player_id", s.half_life_games, s.season_carry, season)
     ws = _recency(snap, "player_id", 2.0, 0.2, season)
@@ -120,14 +132,14 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
 
     # Position priors (share per appearance), from the same window.
     g = P["group"]
-    tshare_raw = agg["targets"] / agg["team_pass_att"].replace(0, np.nan)
-    cshare_raw = agg["carries"] / agg["team_carries"].replace(0, np.nan)
+    tshare_raw = agg_share["targets"] / agg_share["team_pass_att"].replace(0, np.nan)
+    cshare_raw = agg_share["carries"] / agg_share["team_carries"].replace(0, np.nan)
     prior_t = tshare_raw.groupby(g).median()
     prior_c = cshare_raw.groupby(g).median()
-    avg_pa = agg["team_pass_att"] / agg["w"]
-    avg_ru = agg["team_carries"] / agg["w"]
-    P["target_share"] = _shrink(agg["targets"], agg["team_pass_att"], g.map(prior_t).fillna(0.02), s.share_prior_games * avg_pa.fillna(lg_pa))
-    P["carry_share"] = _shrink(agg["carries"], agg["team_carries"], g.map(prior_c).fillna(0.01), s.share_prior_games * avg_ru.fillna(lg_ru))
+    avg_pa = agg_share["team_pass_att"] / agg_share["w"]
+    avg_ru = agg_share["team_carries"] / agg_share["w"]
+    P["target_share"] = _shrink(agg_share["targets"], agg_share["team_pass_att"], g.map(prior_t).fillna(0.02), s.share_prior_games * avg_pa.fillna(lg_pa))
+    P["carry_share"] = _shrink(agg_share["carries"], agg_share["team_carries"], g.map(prior_c).fillna(0.01), s.share_prior_games * avg_ru.fillna(lg_ru))
 
     L = league
     P["catch_rate"] = _shrink(agg["receptions"], agg["targets"], g.map(L["cr"]).fillna(L["cr"]["WR"]), s.rate_prior)
@@ -150,9 +162,41 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     P["n_carries"] = raw["carries"].reindex(P.index).fillna(0).astype(int)
     P["n_pass_att"] = raw["pass_att"].reindex(P.index).fillna(0).astype(int)
 
+    P["p_play"] = _play_rate(played, tg, P)
+
     P = P.join(_coverage_splits(hp, played, season, s, L))
     P = P.join(_blitz_splits(hp, season, s, L))
     return Context(cutoff, season, P, defense, teams, L, _pools(hp, hr))
+
+
+# P(plays | played k of his team's last n games since joining), measured on 2021-22 skill-position rosters
+# (QB/RB/WR/TE, not ruled Out or Doubtful): tuning seasons, so the test seasons never inform it.
+PLAY_RATE = {(1, 0): 0.40, (1, 1): 0.807, (2, 0): 0.37, (2, 1): 0.490, (2, 2): 0.881, (3, 0): 0.37, (3, 1): 0.296,
+             (3, 2): 0.567, (3, 3): 0.937, (4, 0): 0.372, (4, 1): 0.556, (4, 2): 0.695, (4, 3): 0.844, (4, 4): 0.962}
+PLAY_RATE_NEW = 0.347
+
+
+def _play_rate(played: pd.DataFrame, tg: pd.DataFrame, P: pd.DataFrame, k: int = 4) -> pd.Series:
+    """Chance a rostered player actually plays, from how many of his team's last k games he played
+    (counting only games since he first appeared for that team). Gameday inactives and healthy scratches
+    are on the active roster but never touch the ball; without this their share is taken from the
+    players who do play."""
+    last = tg.sort_values("game_date").groupby("team").tail(k)[["game_id", "team", "game_date"]]
+    pt = played[["player_id", "team", "game_id", "game_date"]]
+    first = pt.groupby(["player_id", "team"])["game_date"].min()
+    out = {}
+    games_by_team = {t: d for t, d in last.groupby("team")}
+    played_ids = set(zip(pt["player_id"], pt["game_id"]))
+    for pid, team in P["team_last"].items():
+        d = games_by_team.get(team)
+        if d is None:
+            continue
+        f = first.get((pid, team))
+        d = d[d["game_date"] >= f] if f is not None else d.iloc[0:0]
+        n = len(d)
+        y = sum((pid, g) in played_ids for g in d["game_id"])
+        out[pid] = PLAY_RATE.get((n, y), PLAY_RATE_NEW)
+    return pd.Series(out).reindex(P.index).fillna(PLAY_RATE_NEW)
 
 
 def _defense(hp: pd.DataFrame, hr: pd.DataFrame, tg: pd.DataFrame, season: int, s: PropSettings) -> tuple[pd.DataFrame, dict]:

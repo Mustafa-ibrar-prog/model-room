@@ -28,8 +28,10 @@ from . import inputs as I
 from . import model as M
 from .config import FIT_SEASONS, MARKETS, MODEL_VERSION, TEST_SEASONS, TUNE_SEASONS, PropParams, PropSettings, VolumeModel
 
-FEATURE_KEYS = ("half_life_games", "season_carry", "def_half_life_games", "share_prior_games", "rate_prior", "td_prior", "def_prior_games")
+FEATURE_KEYS = ("half_life_games", "season_carry", "def_half_life_games", "share_prior_games", "rate_prior", "td_prior", "def_prior_games",
+                "share_half_life_games")
 BASELINE_GAMES = 16
+KEEP_ALL = False  # True: keep every ladder row (the candidate comparison filters rows on the baseline instead)
 
 
 def _weeks(games: pd.DataFrame, seasons) -> list[tuple[int, int, pd.DataFrame]]:
@@ -131,12 +133,23 @@ def eligible(x: M.PlayerProjection) -> bool:
     return x.mean("targets") >= 2.5 or x.mean("carries") >= 6
 
 
+def eligible_history(x: M.PlayerProjection, hist) -> bool:
+    """Same bar as eligible(), judged on the player's own recent games, so every model is scored on the
+    same player-games."""
+    if hist is None or len(hist) == 0:
+        return False
+    h = hist.tail(8)
+    if x.group == "QB":
+        return float(h["pass_att"].mean()) >= 15
+    return float(h["targets"].mean()) >= 2.5 or float(h["carries"].mean()) >= 6
+
+
 def score(recs: list[dict]) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Threshold rows (prob, baseline prob, outcome) and mean rows (projection vs actual)."""
     trows, mrows = [], []
     for r in recs:
         x: M.PlayerProjection = r["proj"]
-        if not eligible(x):
+        if not (eligible_history(x, r["base"]) if KEEP_ALL else eligible(x)):
             continue
         a = r["actual"]
         actual = {"rush_rec_yds": a["rush_yds"] + a["rec_yds"], "td_any": a["rush_td"] + a["rec_td"]}
@@ -153,7 +166,7 @@ def score(recs: list[dict]) -> tuple[pd.DataFrame, pd.DataFrame]:
                           "baseline": float(np.mean(hv)) if hv is not None and len(hv) else np.nan})
             for k in m["ladder"]:
                 p = x.prob(stat, k)
-                if p < 0.02 or p > 0.98:
+                if not KEEP_ALL and (p < 0.02 or p > 0.98):
                     continue
                 if hv is not None and len(hv):
                     hits = float(np.sum(np.asarray(hv) >= k))

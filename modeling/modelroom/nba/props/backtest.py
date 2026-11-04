@@ -26,8 +26,9 @@ from .config import MARKETS, MODEL_VERSION, TEST_SEASONS, TUNE_SEASONS, PropPara
 
 OBJECTIVE_SEASONS = (2022,)  # settings are chosen on 2021-22 alone (2020-21 was a shortened, mostly fan-less season)
 
-FEATURE_KEYS = ("minutes_half_life", "rate_half_life", "season_carry", "def_half_life", "rate_prior_minutes", "def_prior_minutes")
+FEATURE_KEYS = ("minutes_half_life", "rate_half_life", "season_carry", "def_half_life", "rate_prior_minutes", "def_prior_minutes", "rate_prior_kind")
 BASELINE_GAMES = 20
+KEEP_ALL = False  # True: keep every ladder row (the candidate comparison filters rows on the baseline instead)
 MIN_PROJECTED_MINUTES = 18.0  # roughly the players exchanges list
 
 
@@ -77,7 +78,7 @@ class Runner:
 def _baseline(pg, dates, cutoff, season) -> dict:
     h = pg[(dates < cutoff) & (pg["season"] >= season - 1) & pg["played"]]
     h = h.sort_values("game_date").groupby("player_id").tail(BASELINE_GAMES)
-    stats = [m["stat"] for m in MARKETS.values()]
+    stats = [m["stat"] for m in MARKETS.values()] + ["minutes"]
     return {pid: {s: d[s].to_numpy(float) for s in stats} for pid, d in h.groupby("player_id")}
 
 
@@ -89,10 +90,11 @@ def score(projs, actual, base, season) -> tuple[pd.DataFrame, pd.DataFrame]:
     trows, mrows = [], []
     for x in projs:
         k = (x.game_id, x.player_id)
-        if not eligible(x) or k not in actual:
+        hist = base.get(x.player_id)
+        ok = (hist is not None and len(hist["minutes"]) and float(np.mean(hist["minutes"][-10:])) >= MIN_PROJECTED_MINUTES) if KEEP_ALL else eligible(x)
+        if not ok or k not in actual:
             continue
         a = actual[k]
-        hist = base.get(x.player_id)
         support = x.support()[0]
         for mkey, m in MARKETS.items():
             stat = m["stat"]
@@ -102,7 +104,7 @@ def score(projs, actual, base, season) -> tuple[pd.DataFrame, pd.DataFrame]:
                           "baseline": float(np.mean(hv)) if hv is not None and len(hv) else np.nan})
             for thr in m["ladder"]:
                 p = x.prob(stat, thr)
-                if p < 0.02 or p > 0.98:
+                if not KEEP_ALL and (p < 0.02 or p > 0.98):
                     continue
                 bp = (float(np.sum(hv >= thr)) + 0.5) / (len(hv) + 1.0) if hv is not None and len(hv) else np.nan
                 trows.append({"market": mkey, "season": season, "threshold": thr, "p": p, "baseline_p": bp, "y": float(y >= thr),

@@ -126,8 +126,18 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
     out["minutes_when_playing"] = mins
     out["starter_rate"] = (pd.Series(P["starter"].astype(float).to_numpy() * wm, index=P.index).groupby(P["player_id"]).sum()
                            / pd.Series(wm, index=P.index).groupby(P["player_id"]).sum())
+    out["minutes_high"] = (P.groupby("player_id").tail(10).groupby("player_id")["minutes"].quantile(0.9)).reindex(out.index)
+    if s.rate_prior_kind == "role":
+        # Prior = per-minute rate of players at the same position in the same minutes band (as of the cutoff).
+        band = pd.cut(out["minutes_when_playing"], [0, 15, 22, 28, 34, 60], labels=False).fillna(0).astype(int)
+        pb = pd.Series(band.reindex(P["player_id"]).to_numpy(), index=P.index)
+        role_min = P.groupby([P["group"], pb])["minutes"].sum()
     for r in RATES:
         lg = out["group"].map(lambda g: league.get(g, league["F"])[r])
+        if s.rate_prior_kind == "role":
+            role_rate = (P.groupby([P["group"], pb])[r].sum() / role_min).rename("rr")
+            key = pd.MultiIndex.from_arrays([out["group"], band])
+            lg = pd.Series(role_rate.reindex(key).to_numpy(), index=out.index).fillna(lg)
         out[f"{r}_pm"] = (agg[r] + lg * s.rate_prior_minutes) / (agg["wmin"] + s.rate_prior_minutes)
     out["usage_pm"] = (agg["fga"] + 0.44 * agg["fta"] + agg["tov"]) / agg["wmin"].replace(0, np.nan)
     out["n_games"] = P.groupby("player_id").size()
@@ -169,13 +179,29 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     if active.empty:
         return []
     exp_min = active["minutes_when_playing"] * active["appear_rate"]
-    scale = float(np.clip(TEAM_MINUTES / exp_min.sum(), 0.85, 1.25)) if exp_min.sum() > 0 else 1.0
-    base = (active["minutes_when_playing"] * scale).clip(upper=42.0)
+    if s.minutes_fill == "headroom" and exp_min.sum() > 0:
+        mwp = active["minutes_when_playing"]
+        gap = TEAM_MINUTES - float(exp_min.sum())
+        if gap > 0:
+            cap = np.minimum(42.0, np.maximum(active["minutes_high"].fillna(mwp), mwp + 4.0))
+            room = ((cap - mwp).clip(lower=0) * active["appear_rate"])
+            add = room / room.sum() * min(gap, float(room.sum())) if room.sum() > 0 else 0.0
+            base = mwp + (add / active["appear_rate"].clip(lower=0.2))
+            base = np.minimum(base, cap)
+        else:
+            base = mwp * (TEAM_MINUTES / float(exp_min.sum()))
+        scale = float(np.average(base / mwp.replace(0, np.nan), weights=exp_min)) if exp_min.sum() > 0 else 1.0
+        base = base.clip(upper=42.0)
+    else:
+        scale = float(np.clip(TEAM_MINUTES / exp_min.sum(), 0.85, 1.25)) if exp_min.sum() > 0 else 1.0
+        base = (active["minutes_when_playing"] * scale).clip(upper=42.0)
     blow = max(0.0, abs(margin) - 6.0) * s.blowout_strength
     base = base * np.where(active["starter_rate"] > 0.5, 1 - blow, 1.0)
     # Usage freed by ruled-out teammates (share of the team's usage they normally take).
     team_usage = float((active["usage_pm"].fillna(0) * active["minutes_when_playing"] * active["appear_rate"]).sum())
-    out_usage = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"]).sum())
+    fade = np.power(0.5, out["missed_in_row"].fillna(0).to_numpy(float) / s.rate_half_life) if s.usage_decay > 0 else 1.0
+    fade = fade ** s.usage_decay if s.usage_decay > 0 else fade
+    out_usage = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"] * fade).sum())
     freed = out_usage / (team_usage + out_usage) if team_usage + out_usage > 0 else 0.0
     usage_f = 1.0 + s.usage_boost * freed
     tp = ctx.team_pace.get(team, ctx.league["pace"])
