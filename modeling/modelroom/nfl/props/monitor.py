@@ -71,7 +71,7 @@ def build(pred: pd.DataFrame, box: pd.DataFrame, ranks=None) -> dict:
     if pred.empty:
         return out
     ranks = ranks or DEPTH.ranks
-    b = box.assign(game_id=box["game_id"].astype(str), player_id=box["player_id"].astype(str))
+    b = box.assign(game_id=box["game_id"].astype(str), player_id=box["player_id"].astype(str)).drop(columns=["team"], errors="ignore")
     d = pred.merge(b, on=["game_id", "player_id"], how="inner")
     if d.empty:
         return out
