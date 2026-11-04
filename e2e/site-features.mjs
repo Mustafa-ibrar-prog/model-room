@@ -48,13 +48,29 @@ const rows = (page) => page.locator("li[data-fav-id]:visible");
 // ------------------------------------------------------------------ every page, both sizes
 for (const device of ["desktop", "phone"]) {
   const { ctx, page, errors } = await session(device);
-  for (const path of ["/", "/nfl", "/nba", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
+  for (const path of ["/", "/nfl", "/nba", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
     errors.length = 0;
     const st = await go(page, path);
     check(st === 200, `${device} ${path}: loads (HTTP ${st})`);
     check(await noHScroll(page), `${device} ${path}: no sideways scrolling`);
     check(errors.length === 0, `${device} ${path}: no script errors${errors.length ? ` (${errors[0]})` : ""}`);
+    if (/yesterday|model-vs-market/.test(path)) {
+      await page.screenshot({ path: `e2e-shots/${device}-${path.replace(/[^a-z0-9]+/gi, "_")}.png`, fullPage: true }).catch(() => null);
+    }
   }
+  await ctx.close();
+}
+
+// ------------------------------------------------------------------ yesterday + model vs market (pro-test)
+{
+  const { ctx, page } = await session("phone");
+  await go(page, "/yesterday?date=2026-11-02");
+  const body = await page.locator("main").innerText();
+  check(/NFL/.test(body) && /Vs market spread/.test(body), "yesterday: NFL day with market record");
+  check(/Last successful data refresh/.test(body), "yesterday: shows the last refresh");
+  await go(page, "/model-vs-market?sport=nfl");
+  const t = await page.locator("main").innerText();
+  check(/Fair odds/.test(t) && /EV per \$1/.test(t), "model vs market: NFL rows with fair odds and EV");
   await ctx.close();
 }
 

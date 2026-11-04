@@ -18,7 +18,8 @@ concurrency:
 
 jobs:
   e2e:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    # Scheduled Preview runs check every 10 minutes and usually deploy nothing: test after pushes and manual runs.
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'schedule')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -48,4 +49,10 @@ jobs:
         if: always()
         env:
           BASE: ${{ env.PREVIEW_URL }}
-        run: node e2e/site-features.mjs
+        run: mkdir -p e2e-shots && node e2e/site-features.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: e2e-shots
+          if-no-files-found: ignore
