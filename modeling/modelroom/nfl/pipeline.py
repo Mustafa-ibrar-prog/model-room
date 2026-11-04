@@ -41,10 +41,13 @@ def _markets(games: pd.DataFrame) -> dict:
         m = {"spread": None, "total": None, "home_ml": None, "away_ml": None, "books": 0, "captured_at": None,
              "sources": ["nflverse"]}
         for _, r in g.iterrows():
+            px = lambda c: None if pd.isna(r[c]) else float(r[c])  # noqa: E731
             if r["market"] == "spread":
                 m["spread"] = float(r["line"])
+                m["home_spread_price"], m["away_spread_price"] = px("home_price"), px("away_price")
             elif r["market"] == "total":
                 m["total"] = float(r["line"])
+                m["over_price"], m["under_price"] = px("over_price"), px("under_price")
             elif r["market"] == "moneyline":
                 m["home_ml"] = None if pd.isna(r["home_price"]) else float(r["home_price"])
                 m["away_ml"] = None if pd.isna(r["away_price"]) else float(r["away_price"])

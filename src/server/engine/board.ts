@@ -109,3 +109,19 @@ export async function loadMarketResultsFile<T>(league: League): Promise<T | null
     return null;
   }
 }
+
+export interface RefreshStatus {
+  last_success: { slot: string; at: string; note: string | null } | null;
+  recent_failures: { slot: string; at: string; note: string | null }[];
+  schedule: string;
+}
+
+/** The refresh log's summary (written by every scheduled refresh). Null before the first logged run. */
+export async function loadRefreshStatus(): Promise<RefreshStatus | null> {
+  await connection();
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), "refresh_status.json"), "utf8")) as RefreshStatus;
+  } catch {
+    return null;
+  }
+}
