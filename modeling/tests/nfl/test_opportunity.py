@@ -68,7 +68,7 @@ def test_monitor_ranks_every_version_the_same_way():
                 "opportunity": {"targets": tg, "carries": 0.0} if tg is not None else None,
                 "probabilities": {"receptions": {"4": 0.6, "mean": 4.5, "sd": 2.0}}}
     pred = monitor._pregame([rec("0.1.0", "2030-01-01T00:00:00+00:00", None), rec("0.3.0", "2030-01-01T00:00:00+00:00", 7.0)])
-    box = pd.DataFrame([{"game_id": "g", "player_id": "p1", "group": "WR", "season": 2030, "week": 1, "targets": 8.0, "carries": 0.0,
+    box = pd.DataFrame([{"game_id": "g", "player_id": "p1", "team": "X", "group": "WR", "season": 2030, "week": 1, "targets": 8.0, "carries": 0.0,
                          "receptions": 5.0}])
     rep = monitor.build(pred, box, ranks=lambda s, w, c: {"p1": 1})
     assert rep["versions"]["0.3.0"]["by_depth"]["WR1"]["targets"]["bias"] == -1.0
