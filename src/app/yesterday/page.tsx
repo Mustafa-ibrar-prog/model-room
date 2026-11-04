@@ -51,7 +51,9 @@ async function Body({ searchParams }: { searchParams: SP }) {
           <Link href={`/yesterday?date=${addDays(date, 1)}`} className="rounded-md border border-navy-700 px-3 py-1.5 text-mute hover:text-ink">Next day</Link>
         ) : <span className="w-[5.5rem]" />}
       </nav>
-      {!days.length ? <Unavailable title={`No games on ${longDate(date)}`} body="Neither league played that day. Use Earlier day to go back." /> : null}
+      {[{ league: "nba", h: nba }, { league: "nfl", h: nfl }].filter((d) => !(d.h.available && d.h.games.length)).length === 2 ? (
+        <Unavailable title={`No results on file for ${longDate(date)}`} body="Either neither league played, or the results haven't been collected yet (the 7:00 AM PT refresh collects the night's finals). Use Earlier day to go back." />
+      ) : null}
       {days.map(({ league, h }) => <LeagueDay key={league} league={league} h={h} date={date} />)}
       <p className="text-xs text-faint">
         {refresh?.last_success ? `Last successful data refresh ${formatTimestamp(refresh.last_success.at)} (${refresh.last_success.slot.split(":")[0]}).` : "No logged refresh yet."}

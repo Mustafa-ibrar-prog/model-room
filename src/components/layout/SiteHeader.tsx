@@ -18,14 +18,14 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
           <Wordmark />
         </Link>
 
-        <nav aria-label="Main" className="hidden flex-1 md:block">
+        <nav aria-label="Main" className="hidden flex-1 lg:block">
           <ul className="flex items-center gap-1">
             {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   aria-current={isActive(item.href) ? "page" : undefined}
-                  className={`rounded-md px-3 py-2 font-display text-[1.05rem] font-600 tracking-wide transition-colors ${
+                  className={`rounded-md px-2.5 py-2 font-display text-[1rem] font-600 tracking-wide transition-colors ${
                     isActive(item.href) ? "bg-navy-800 text-model" : "text-mute hover:text-ink"
                   }`}
                 >
@@ -36,7 +36,7 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
           </ul>
         </nav>
 
-        <div className="ml-auto hidden items-center gap-2 md:flex">
+        <div className="ml-auto hidden items-center gap-2 lg:flex">
           <Link
             href="/pricing"
             className="rounded-full bg-model px-4 py-2 text-sm font-600 text-navy-950 hover:bg-model/90"
@@ -48,7 +48,7 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
 
         <button
           type="button"
-          className="ml-auto rounded-md p-2 text-ink md:hidden"
+          className="ml-auto rounded-md p-2 text-ink lg:hidden"
           aria-expanded={open}
           aria-controls="mobile-nav"
           onClick={() => setOpen((v) => !v)}
@@ -61,7 +61,7 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
       </div>
 
       {open && (
-        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 md:hidden" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
+        <nav id="mobile-nav" aria-label="Main" className="border-t border-navy-700/70 lg:hidden" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
           {mobileAccount ? <div className="mx-auto max-w-7xl px-4 pt-3">{mobileAccount}</div> : null}
           <ul className="mx-auto grid max-w-7xl grid-cols-2 gap-1 px-4 py-3">
             {NAV.map((item) => (
