@@ -30,10 +30,25 @@ from modelroom.sources import odds, state
 
 from .. import ingest
 from . import features as F
+from . import depth as DEPTH
 from . import inputs as I
 from . import model as M
 from .backtest import eligible
-from .config import MARKETS, MODEL_ID, MODEL_VERSION, PropParams
+import os
+
+from .config import CANDIDATE_FILE, CANDIDATE_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION, PARAMS_FILE, PropParams
+
+# Which NFL prop model the board and ledger use: 0.1.0 = params.json (the default everywhere); a candidate
+# version only when MODELROOM_NFL_PROPS_VERSION names it (the hosted test site's workflow). Rollback = unset
+# it. Every ledger record names the version that made it.
+VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE}
+
+
+def active_version() -> str:
+    v = os.environ.get("MODELROOM_NFL_PROPS_VERSION", "").strip() or MODEL_VERSION
+    if v not in VERSIONS:
+        raise ValueError(f"MODELROOM_NFL_PROPS_VERSION={v!r}: known versions are {sorted(VERSIONS)}")
+    return v
 
 TEAM_NAMES = {v: k for k, v in odds.NFL_TEAMS.items()}
 VARIANT_STAT = {("fantasy_points", "sleeper_ppr"): "fantasy_sleeper", ("fantasy_points", "espn_ppr"): "fantasy_ppr"}
@@ -54,13 +69,13 @@ def local_compare_path():
     return ensure(output_dir("nfl")) / "props_compare_local.json"
 
 
-def backtest_summary() -> dict | None:
+def backtest_summary(version: str = MODEL_VERSION) -> dict | None:
     local = output_dir("nfl") / "props_backtest.json"
     f = None
-    if local.exists() and json.loads(local.read_text()).get("model_version") == MODEL_VERSION:
+    if local.exists() and json.loads(local.read_text()).get("model_version") == version:
         f = local
     else:
-        c = MODELING_ROOT.parent / "docs" / "models" / "results" / f"nfl-props-backtest-{MODEL_VERSION}.json"
+        c = MODELING_ROOT.parent / "docs" / "models" / "results" / f"nfl-props-backtest-{version}.json"
         f = c if c.exists() else None
     if f is None:
         return None
@@ -136,7 +151,8 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list[PropQuote], 
 
 def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = True, sims: int | None = None) -> dict:
     now = now or B.now_utc()
-    p = PropParams.load()
+    version = active_version()
+    p = PropParams.load(VERSIONS[version])
     p = replace(p, settings=replace(p.settings, sims=sims or 10000))
     games_all = ingest.load_games()
     sched = games_all[games_all["status"] == "scheduled"]
@@ -152,7 +168,8 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     for wk, g in upcoming.groupby("week"):
         ro, inj = I.week_slices(inp, season, int(wk))
         seeds[int(wk)] = int(season * 100 + wk)
-        projs += M.project_games(ctx, g, ro, inj, p, seed=seeds[int(wk)])
+        dep = DEPTH.ranks(season, int(wk), now) if p.settings.opp_redistribution == "depth" else None
+        projs += M.project_games(ctx, g, ro, inj, p, seed=seeds[int(wk)], depth=dep)
     projs = [x for x in projs if eligible(x)]
 
     # ---------------------------------------------------------------- market quotes
@@ -183,7 +200,7 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     idx_pub, idx_all = _quote_index(pub_quotes), _quote_index(quotes)
 
     # ---------------------------------------------------------------- board
-    bt = backtest_summary()
+    bt = backtest_summary(version)
     reliability = (bt or {}).get("by_market", {})
     by_game: dict = {}
     local_games: dict = {}
@@ -200,7 +217,7 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         return p.calibrate(q.market, x.prob(s, float(q.threshold), q.op)), m["stat"]
 
     starts_iso = {gid: B.iso(t) for gid, t in upcoming.set_index("game_id")["start_time"].items()}
-    evaluated = evaluation.log_run("nfl", projs, idx_all, price, lambda x, mk: x.support(mk)[0], reliability, MODEL_VERSION,
+    evaluated = evaluation.log_run("nfl", projs, idx_all, price, lambda x, mk: x.support(mk)[0], reliability, version,
                                    now.isoformat(timespec="seconds"), starts_iso, now)
     games_json = []
     for _, g in upcoming.iterrows():
@@ -229,7 +246,13 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
                     probs[mkey]["support"] = x.support(mkey)[0]
             recs.append({"sport": "nfl", "kind": "player_props", "game_id": f"{x.game_id}|{x.player_id}", "nfl_game_id": x.game_id,
                          "player_id": x.player_id, "player": x.name, "team": x.team, "game_start": B.iso(starts[x.game_id]),
-                         "probabilities": probs, "model_id": MODEL_ID, "model_version": MODEL_VERSION, "params_hash": params_hash,
+                         "probabilities": probs, "model_id": MODEL_ID, "model_version": version,
+                         **({} if version == MODEL_VERSION else {  # extra fields only for non-default versions; 0.1.0 records stay as they were
+                             "role_rank": x.inputs.get("role_rank"), "play_chance": x.inputs.get("play_chance"), "depth_rank": x.inputs.get("depth_rank"),
+                             "injury_status": x.inputs.get("injury_status"),
+                             "opportunity": {"targets": round(x.mean("targets"), 2), "carries": round(x.mean("carries"), 2),
+                                             "team_pass_attempts": x.inputs.get("team_pass_attempts"), "team_carries": x.inputs.get("team_carries")}}),
+                         "params_hash": params_hash,
                          "inputs_hash": inputs_hash, "generated_at": generated_at, "sims": p.settings.sims,
                          "seed": seeds.get(int(upcoming.set_index("game_id").at[x.game_id, "week"]))})
         appended = ledger.append(ledger_path("nfl_props"), recs)
@@ -241,7 +264,7 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     recent.attach(games_json, pgr, {k: m["stat"] for k, m in MARKETS.items()}, today, played)
     board = {
         "league": "nfl", "kind": "player_props", "generated_at": generated_at, "season": season, "week": week,
-        "model": {"id": MODEL_ID, "version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
+        "model": {"id": MODEL_ID, "version": version, "default_version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
                   "status": p.provenance.get("status", "provisional"), "fitted_at": p.provenance.get("fitted_at"),
                   "sims": p.settings.sims, "seeds": seeds,
                   "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards."},
@@ -257,7 +280,7 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     if local_games:
         write_board(local_compare_path(), {**board, "games": [{"game_id": k, "players": v} for k, v in local_games.items()],
                                            "note": "Local only. Includes providers not cleared for publication."})
-    state.record("nfl_props_run", model_version=MODEL_VERSION, players=len(projs))
+    state.record("nfl_props_run", model_version=version, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs), "quotes": len(quotes),
             "quotes_matched": sum(1 for q in quotes if q.player_id), "evaluated_contracts": evaluated,
             "ledger": appended.__dict__ if appended else None}

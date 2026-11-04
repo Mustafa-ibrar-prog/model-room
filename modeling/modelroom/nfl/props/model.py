@@ -125,8 +125,76 @@ def candidates(ctx: Context, team: str, roster: pd.DataFrame | None, injuries: p
     return c
 
 
+def play_chance(c: pd.DataFrame, s, depth: dict | None = None) -> pd.Series:
+    """Chance each candidate plays: 0 if Out/Doubtful. Otherwise
+    table: his recent appearance rate (measured table) x the Questionable factor;
+    depth: the logistic PLAY_MODEL on depth rank, recent appearance rate and a Questionable designation."""
+    from .config import PLAY_MODEL
+    from .features import PLAY_RATE_NEW
+
+    p = c["p_play"].fillna(PLAY_RATE_NEW) if "p_play" in c else pd.Series(1.0, index=c.index)
+    q = (c["injury_status"] == "Questionable").to_numpy()
+    if s.play_model == "depth":
+        d = np.array([min(int((depth or {}).get(pid, 3)), 3) for pid in c.index])
+        a = np.vectorize(PLAY_MODEL["a"].get)(np.clip(d, 1, 3))
+        x = p.clip(0.01, 0.99).to_numpy()
+        z = a + PLAY_MODEL["b"] * np.log(x / (1 - x)) + PLAY_MODEL["q"] * q
+        p = pd.Series(1 / (1 + np.exp(-z)), index=c.index)
+    else:
+        p = p * np.where(q, s.questionable_factor, 1.0)
+    return p.where(~c["out"], 0.0).clip(0.0, 1.0)
+
+
+def role_rank(c: pd.DataFrame, raw: pd.Series, depth: dict | None) -> pd.Series:
+    """1..n within each position group: depth-chart rank first, ties and unlisted players by usage."""
+    d = pd.Series({pid: (depth or {}).get(pid, 9.0) for pid in c.index}, dtype=float)
+    key = pd.DataFrame({"g": c["group"], "d": d, "u": -raw.reindex(c.index).fillna(0.0)})
+    return key.sort_values(["g", "d", "u"]).groupby("g").cumcount().add(1).reindex(c.index).astype(float)
+
+
+def redistribute(raw: pd.Series, group: pd.Series, pplay: pd.Series, rank: pd.Series, total: float, s) -> pd.Series:
+    """Conditional-on-playing shares.
+
+    1. Scale the usage shares of everyone on the roster (Out / Doubtful included) so they add up to `total`,
+       what these players historically get (not every pass attempt has a tracked receiver).
+    2. Each player's expected missing share, (1 - chance he plays) x share, goes mostly to his position
+       group, weighted toward the next players down the depth chart (decay per step) and a little to those
+       above him; the rest goes to everyone available, in proportion to usage.
+    No share is created: the missing share moves to the players likely to be on the field."""
+    raw = raw.fillna(0.0).clip(lower=0.0)
+    tot = float(raw.sum())
+    if tot <= 0:
+        return raw
+    sh = raw * (total / tot)
+    gain = pd.Series(0.0, index=raw.index)
+    pool = 0.0
+    avail = pplay > 0
+    for j in raw.index:
+        mj = (1.0 - float(pplay[j])) * float(sh[j])
+        if mj <= 0:
+            continue
+        same = avail & (group == group[j]) & (raw.index != j)
+        if not same.any():
+            pool += mj
+            continue
+        steps = rank[same] - rank[j]
+        # Below him: the next man down first (decay per extra step). Above him: the starters, by usage
+        # (redist_up, with its own decay per step; 1 = no decay, i.e. in proportion to their share).
+        w = sh[same] ** s.redist_concentration * np.where(steps > 0, s.redist_decay ** (steps - 1).clip(lower=0), s.redist_up * s.redist_up_decay ** (-steps - 1).clip(lower=0))
+        if w.sum() <= 0:
+            pool += mj
+            continue
+        gain[same] += s.redist_in_group * mj * w / w.sum()
+        pool += (1.0 - s.redist_in_group) * mj
+    base = (sh ** s.redist_concentration * pplay)[avail]
+    if pool > 0 and base.sum() > 0:
+        gain[avail] += pool * base / base.sum()
+    return (sh + gain).where(avail, 0.0)
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, total: float, qb_id: str | None,
-                 roster: pd.DataFrame | None, injuries: pd.DataFrame | None, p: PropParams, rng) -> list[PlayerProjection]:
+                 roster: pd.DataFrame | None, injuries: pd.DataFrame | None, p: PropParams, rng,
+                 depth: dict | None = None) -> list[PlayerProjection]:
     s = p.settings
     n = s.sims
     c = candidates(ctx, team, roster, injuries)
@@ -159,6 +227,27 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     cw = (c_share * av(rushers)).sum()
     c_scale = float(np.clip(1.0 / cw, 0.75, 1.4)) if cw > 0 else 1.0
     c_share = c_share * c_scale
+    if s.opp_redistribution == "depth":
+        # Every skill candidate, including those ruled Out / Doubtful (their share is redistributed, not lost).
+        allsk = c[c["group"].isin(["WR", "TE", "RB"])]
+        pp = play_chance(allsk, s, depth)
+        ts = allsk["target_share_role"].fillna(allsk["target_share"]) if "target_share_role" in allsk else allsk["target_share"]
+        cs = allsk["carry_share_role"].fillna(allsk["carry_share"]) if "carry_share_role" in allsk else allsk["carry_share"]
+        t_raw = ts * snap_adj(allsk) * allsk["group"].map(lambda g: _ratio(D, f"tshare_{g}", s.matchup_strength))
+        c_raw = cs * snap_adj(allsk)
+        rk_t = role_rank(allsk, t_raw, depth)
+        rk_c = role_rank(allsk, c_raw, depth)
+        t_new = redistribute(t_raw, allsk["group"], pp, rk_t, float(L.get("target_rate", 0.95)) * s.target_total_factor, s)
+        qb_c = float(rushers.loc[starter, "carry_share"]) if starter is not None else 0.0
+        c_tot = float(L.get("skill_carry_rate", 0.84)) * s.carry_total_factor
+        c_new = redistribute(c_raw, allsk["group"], pp, rk_c, c_tot, s)
+        if s.redist_targets:
+            t_share = t_new.reindex(skill.index).fillna(0.0)
+        c_share = c_new.reindex(rushers.index)
+        if starter is not None:
+            c_share[starter] = qb_c
+        c_share = c_share.fillna(0.0)
+        role = rk_t.where(allsk["group"] != "RB", rk_c)
 
     PA = np.clip(np.rint(rng.normal(mu_pa, p.volume.pass_sd, n)), 8, 75).astype(int)
     RU = np.clip(np.rint(rng.normal(mu_ru, p.volume.rush_sd, n)), 5, 60).astype(int)
@@ -199,6 +288,8 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         r = rows[pid]
         r.update(targets=tg.astype(float), receptions=rec.astype(float), rec_yds=yds, long_rec=lng, rec_td=td.astype(float))
         r["_inputs"] = {"target_share": round(float(t_share[pid]), 4), "catch_rate": round(cr, 3), "yards_factor": round(f, 3),
+                        **({"role_rank": int(role[pid]), "play_chance": round(float(pp[pid]), 3), "depth_rank": (depth or {}).get(pid)}
+                           if s.opp_redistribution == "depth" else {}),
                         "coverage_factor": round(cov, 3), "blitz_factor": round(bz, 3)}
 
     # Rushers (including the starting QB)
@@ -246,7 +337,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
 
 
 def project_games(ctx: Context, games: pd.DataFrame, roster: pd.DataFrame | None, injuries: pd.DataFrame | None,
-                  p: PropParams, seed: int = 7) -> list[PlayerProjection]:
+                  p: PropParams, seed: int = 7, depth: dict | None = None) -> list[PlayerProjection]:
     """games: game_id, home_team, away_team, proj_home_score, proj_away_score, home_qb_id, away_qb_id.
 
     Each team-game gets its own random stream from (seed, game_id, team), so a projection reproduces
@@ -259,5 +350,5 @@ def project_games(ctx: Context, games: pd.DataFrame, roster: pd.DataFrame | None
                                       (g["away_team"], g["home_team"], -m, g.get("away_qb_id"))):
             rng = np.random.default_rng([seed, zlib.crc32(f"{g['game_id']}|{team}".encode())])
             out += project_team(ctx, g["game_id"], team, opp, margin, total, qb if isinstance(qb, str) else None,
-                                roster, injuries, p, rng)
+                                roster, injuries, p, rng, depth=depth)
     return out

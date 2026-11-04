@@ -24,12 +24,13 @@ from modelroom.common.propeval import apply_calibration, fit_calibration, object
 from modelroom.common.paths import ensure, output_dir
 
 from . import features as F
+from . import depth as DEPTH
 from . import inputs as I
 from . import model as M
 from .config import FIT_SEASONS, MARKETS, MODEL_VERSION, TEST_SEASONS, TUNE_SEASONS, PropParams, PropSettings, VolumeModel
 
 FEATURE_KEYS = ("half_life_games", "season_carry", "def_half_life_games", "share_prior_games", "rate_prior", "td_prior", "def_prior_games",
-                "share_half_life_games")
+                "share_half_life_games", "role_share_weight", "opp_redistribution", "fill_in_weight")
 BASELINE_GAMES = 16
 KEEP_ALL = False  # True: keep every ladder row (the candidate comparison filters rows on the baseline instead)
 
@@ -45,14 +46,21 @@ class Runner:
     def __init__(self, inp: I.Inputs):
         self.inp = inp
         self._ctx: dict = {}
+        self._dhist = None
 
-    def ctx(self, cutoff, season, s: PropSettings) -> F.Context:
-        fkey = tuple(getattr(s, k) for k in FEATURE_KEYS)
+    def ctx(self, cutoff, season, s: PropSettings, week: int | None = None) -> F.Context:
+        role = s.opp_redistribution == "depth" and s.role_share_weight < 1.0 and week is not None
+        fkey = tuple(getattr(s, k) for k in FEATURE_KEYS) + ((week,) if role else ())
         key = (cutoff, season, fkey)
-        if self._ctx and next(iter(self._ctx))[2] != fkey:
+        if self._ctx and next(iter(self._ctx))[2][:len(FEATURE_KEYS)] != fkey[:len(FEATURE_KEYS)]:
             self._ctx.clear()  # keep only one feature setting's contexts in memory
         if key not in self._ctx:
-            self._ctx[key] = F.build(self.inp.player_games, self.inp.passes, self.inp.rushes, cutoff, season, s)
+            kw = {}
+            if role:
+                if self._dhist is None:
+                    self._dhist = DEPTH.history(self.inp.player_games)
+                kw = {"depth_now": DEPTH.ranks(season, week, cutoff), "depth_hist": self._dhist}
+            self._ctx[key] = F.build(self.inp.player_games, self.inp.passes, self.inp.rushes, cutoff, season, s, **kw)
         return self._ctx[key]
 
     def volume_rows(self, seasons, s: PropSettings) -> pd.DataFrame:
@@ -104,9 +112,10 @@ class Runner:
             if only_week is not None and week != only_week:
                 continue
             cutoff = pd.Timestamp(g["game_date"].min())
-            ctx = self.ctx(cutoff, season, p.settings)
+            ctx = self.ctx(cutoff, season, p.settings, week)
             ro, inj = I.week_slices(self.inp, season, week)
-            projs = M.project_games(ctx, g, ro, inj, p, seed=season * 100 + week)
+            dep = DEPTH.ranks(season, week, cutoff) if p.settings.opp_redistribution == "depth" else None
+            projs = M.project_games(ctx, g, ro, inj, p, seed=season * 100 + week, depth=dep)
             base = _baseline_history(pg, cutoff, season)
             for x in projs:
                 k = (x.game_id, x.player_id)

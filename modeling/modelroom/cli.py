@@ -15,6 +15,7 @@
   nba props-monitor               stored NBA prop predictions vs results, by model version -> props_monitor_nba.json
   nba props-backtest              NBA prop walk-forward (tunes on 2021-22, tests 2022-23 to 2025-26; ~1 h)
   nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
+  nfl props-monitor               stored NFL prop predictions vs box scores, by version and depth rank -> props_monitor_nfl.json
   nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
   markets status                  which market-data providers are on, and why
   markets fetch nfl [--provider]  store a snapshot from each enabled provider (Polymarket US, Kalshi)
@@ -169,6 +170,11 @@ def _nfl(args) -> int:
 
         _print(props.run(days=args.days))
         return 0
+    if args.cmd == "props-monitor":
+        from modelroom.nfl.props import monitor as nfl_monitor
+
+        _print(nfl_monitor.run())
+        return 0
     if args.cmd == "props-backtest":
         from modelroom.nfl.props import backtest as pb
 
@@ -259,7 +265,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 
     f = sub.add_parser("nfl")
-    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest", "starters"])
+    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest", "props-monitor", "starters"])
     f.add_argument("--days", type=int, default=10, help="project: how many days ahead")
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 

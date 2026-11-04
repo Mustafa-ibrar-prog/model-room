@@ -94,6 +94,7 @@ jobs:
           python -m modelroom ledger verify
           python -m modelroom history
           python -m modelroom nba props-monitor
+          python -m modelroom nfl props-monitor
           # Market-settled grading. Exchange providers are never switched on here (public repo, provider
           # terms), so this publishes an empty record with the reason; it fills in where prices are enabled.
           python -m modelroom markets settle nfl
@@ -112,7 +113,7 @@ jobs:
                        modeling/data/published/nfl_props.json modeling/data/published/nba_props.json \
                        modeling/data/published/performance_nfl.json modeling/data/published/performance_nba.json \
                        modeling/data/published/market_results_nfl.json modeling/data/published/market_results_nba.json \
-                       modeling/data/published/props_monitor_nba.json \
+                       modeling/data/published/props_monitor_nba.json modeling/data/published/props_monitor_nfl.json \
                        modeling/data/published/history modeling/preview-ledger
             git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ)" || echo "No data changes"
           fi

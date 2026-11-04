@@ -10,7 +10,9 @@ MODEL_ID = "nfl-props"
 MODEL_VERSION = "0.1.0"
 PARAMS_FILE = Path(__file__).with_name("params.json")
 CANDIDATE_VERSION = "0.2.0"
-CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not used live until approved
+CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # yardage-shape candidate: held, never activated
+OPP_VERSION = "0.3.0"
+OPP_FILE = Path(__file__).with_name("params_0.3.0.json")  # opportunity redistribution (test site only when enabled)
 
 HISTORY_SEASONS = 3      # prior seasons used alongside the current one
 TUNE_SEASONS = (2021, 2022)
@@ -44,7 +46,37 @@ class PropSettings:
     availability_weight: float = 0.0    # 1 = when shares are scaled to the team total, each rostered player
                                         # counts by his chance of actually playing (gameday inactives took ~7%
                                         # of projected carries and ~6% of targets in 2024)
+    # 0.2 opportunity redistribution (defaults = 0.1 behaviour).
+    opp_redistribution: str = "proportional"  # "proportional": shares of unavailable players are spread over
+                                        # everyone by rescaling; "depth": each player's expected missing share
+                                        # ((1 - chance he plays) x his share, all of it if Out/Doubtful) goes to
+                                        # his position group in depth-chart order, and team totals are set to
+                                        # what tracked receivers / rushers historically get
+    redist_decay: float = 0.5           # weight multiplier per extra depth step below the missing player
+    redist_up: float = 0.3              # weight for players ranked above him (relative to the next man down)
+    redist_up_decay: float = 0.5        # weight multiplier per extra step for players ranked above him
+    redist_targets: bool = True         # False: carries only (targets keep the 0.1 allocation)
+    redist_concentration: float = 1.0   # >1: missing opportunity goes to the bigger roles more than in proportion
+    target_total_factor: float = 1.0    # team-total calibration (fit on 2021-22): projected targets / carries to the
+    carry_total_factor: float = 1.0     # players who play, summed per team-game, should match what they get
+    redist_in_group: float = 0.8        # share of the missing opportunity kept in his position group
+    questionable_factor: float = 0.78   # chance-of-playing multiplier for a Questionable designation (play_model="table")
+    fill_in_weight: float = 1.0         # weight of history games he played filling in for a missing teammate
+    role_share_weight: float = 1.0      # weight of history games played at another depth rank (1 = all equal, 0.1)
+    play_model: str = "table"           # "depth": chance of playing from depth rank + recent appearances +
+                                        # Questionable (logistic fit on 2021-22, PLAY_MODEL below)
     sims: int = 4000
+
+
+# P(plays) = sigmoid(a[depth] + b * logit(recent appearance rate) + q * Questionable); depth 1, 2, 3+ (or
+# unlisted). Fit on 2021-22 skill players not ruled Out/Doubtful; calibrated within 2 points on 2023-25.
+PLAY_MODEL = {"a": {1: 1.9017, 2: 0.6419, 3: 0.0867}, "b": 0.7252, "q": -1.6071}
+
+
+ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_rush", "shock_kind", "availability_weight",
+                  "opp_redistribution", "redist_decay", "redist_up", "redist_up_decay", "redist_in_group", "questionable_factor",
+                  "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
+                  "target_total_factor", "carry_total_factor")
 
 
 @dataclass(frozen=True)
@@ -73,7 +105,12 @@ class PropParams:
         return 1.0 / (1.0 + math.exp(-z))
 
     def to_json(self) -> dict:
-        return {"model_id": MODEL_ID, "model_version": MODEL_VERSION, **asdict(self)}
+        d = {"model_id": MODEL_ID, "model_version": MODEL_VERSION, **asdict(self)}
+        # Settings added after 0.1.0 are left out while they sit at their default, so 0.1.0's parameter hash
+        # (stored in every ledger record) stays exactly what it was.
+        default = PropSettings()
+        d["settings"] = {k: v for k, v in d["settings"].items() if k not in ADDED_SETTINGS or v != getattr(default, k)}
+        return d
 
     def save(self, path: Path = PARAMS_FILE) -> None:
         path.write_text(json.dumps(self.to_json(), indent=2, sort_keys=True) + "\n")
