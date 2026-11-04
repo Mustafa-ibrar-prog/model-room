@@ -45,7 +45,7 @@ def _mline(hist: np.ndarray | None) -> float | None:
 
 
 # ------------------------------------------------------------------ NBA
-def nba_rows(seasons, sims: int) -> pd.DataFrame:
+def nba_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
     from dataclasses import replace
 
     from modelroom.nba.props import backtest as B
@@ -53,7 +53,7 @@ def nba_rows(seasons, sims: int) -> pd.DataFrame:
     from modelroom.nba.props import model as M
     from modelroom.nba.props.config import MARKETS, PropParams
 
-    p = PropParams.load()
+    p = PropParams.load(Path(params_path)) if params_path else PropParams.load()
     p = replace(p, settings=replace(p.settings, sims=sims))
     inp = I.load()
     run = B.Runner(inp)
@@ -102,14 +102,14 @@ def nba_rows(seasons, sims: int) -> pd.DataFrame:
 
 
 # ------------------------------------------------------------------ NFL
-def nfl_rows(seasons, sims: int) -> pd.DataFrame:
+def nfl_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
     from dataclasses import replace
 
     from modelroom.nfl.props import backtest as B
     from modelroom.nfl.props import inputs as I
     from modelroom.nfl.props.config import FIT_SEASONS, MARKETS, TEST_SEASONS, TUNE_SEASONS, PropParams
 
-    p = PropParams.load()
+    p = PropParams.load(Path(params_path)) if params_path else PropParams.load()
     p = replace(p, settings=replace(p.settings, sims=sims))
     inp = I.load(set(FIT_SEASONS) | set(TUNE_SEASONS) | set(TEST_SEASONS))
     run = B.Runner(inp)
@@ -255,15 +255,17 @@ def main(argv=None) -> None:
     ap.add_argument("league", choices=["nba", "nfl"])
     ap.add_argument("--seasons", default=None)
     ap.add_argument("--sims", type=int, default=1500)
+    ap.add_argument("--params", default=None, help="params file (default: the live params.json)")
+    ap.add_argument("--tag", default="", help="suffix for the output files")
     a = ap.parse_args(argv)
     if a.league == "nba":
         seasons = [int(s) for s in (a.seasons or "2025,2026").split(",")]
-        df = nba_rows(seasons, a.sims)
+        df = nba_rows(seasons, a.sims, a.params)
     else:
         seasons = [int(s) for s in (a.seasons or "2023,2024,2025").split(",")]
-        df = nfl_rows(seasons, a.sims)
+        df = nfl_rows(seasons, a.sims, a.params)
     d = ensure(output_dir(a.league) / "audit")
-    tag = "_".join(map(str, seasons))
+    tag = "_".join(map(str, seasons)) + (f"_{a.tag}" if a.tag else "")
     df.drop(columns=["ladder"]).to_parquet(d / f"rows_{tag}.parquet")
     df.to_pickle(d / f"rows_{tag}.pkl")
     s = summarize(df, a.league)

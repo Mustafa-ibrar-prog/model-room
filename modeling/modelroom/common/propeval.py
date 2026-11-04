@@ -54,6 +54,14 @@ def apply_calibration(t: pd.DataFrame, cal: dict) -> pd.DataFrame:
     return t
 
 
+def fixed_rows(t: pd.DataFrame, lo: float = 0.05, hi: float = 0.95) -> pd.DataFrame:
+    """Rows chosen independently of the model being scored: thresholds where the player's own recent hit
+    rate is between lo and hi. Comparing models on rows filtered by their own probabilities is unfair (a
+    wider model keeps more easy rows and looks better)."""
+    b = t["baseline_p"]
+    return t[b.notna() & (b >= lo) & (b <= hi)]
+
+
 def objective(t: pd.DataFrame) -> float:
     """Mean of per-market log loss (each market counts equally)."""
     vals = []

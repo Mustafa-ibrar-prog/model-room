@@ -9,6 +9,8 @@ from pathlib import Path
 MODEL_ID = "nba-props"
 MODEL_VERSION = "0.1.0"
 PARAMS_FILE = Path(__file__).with_name("params.json")
+CANDIDATE_VERSION = "0.2.0"
+CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not used live until approved
 
 HISTORY_SEASONS = 2                  # earlier seasons used alongside the current one (hoopR season = end year)
 TUNE_SEASONS = (2021, 2022)          # 2020-21, 2021-22
@@ -34,6 +36,15 @@ class PropSettings:
     usage_boost: float = 0.5           # extra scoring/assists from teammates' missing usage (0 = none)
     blowout_strength: float = 0.02     # starters' minutes cut per point of projected margin beyond 6
     missed_games_out: int = 2          # a rotation player who missed the team's last N games is treated as out
+    # 0.2 foundation settings. Defaults reproduce 0.1 exactly.
+    rate_prior_kind: str = "position"  # per-minute rates pulled toward the position average, or toward players
+                                       # in the same role ("role": position x minutes band), so bench players
+                                       # aren't lifted to starter rates
+    minutes_fill: str = "scale"        # "scale": every active player's minutes scaled to fill 240 (stars too);
+                                       # "headroom": missing minutes go to players in proportion to their room
+                                       # below their own recent high, extra minutes are trimmed pro rata
+    usage_decay: float = 0.0           # 1 = freed usage from an absent teammate fades as his absence ages
+                                       # (teammates' recent rates already include it); 0 = full boost always
     sims: int = 4000
 
 

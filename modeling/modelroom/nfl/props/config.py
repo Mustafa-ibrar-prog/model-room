@@ -9,6 +9,8 @@ from pathlib import Path
 MODEL_ID = "nfl-props"
 MODEL_VERSION = "0.1.0"
 PARAMS_FILE = Path(__file__).with_name("params.json")
+CANDIDATE_VERSION = "0.2.0"
+CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not used live until approved
 
 HISTORY_SEASONS = 3      # prior seasons used alongside the current one
 TUNE_SEASONS = (2021, 2022)
@@ -33,6 +35,15 @@ class PropSettings:
     blitz_strength: float = 1.0       # QB blitz split × opponent blitz rate
     pressure_strength: float = 1.0    # opponent pressure/sack rate → QB completion %
     snap_trend_strength: float = 0.5  # recent snap share vs longer-run snap share
+    # 0.2 foundation settings. Defaults reproduce 0.1 exactly.
+    share_half_life_games: float = 0.0  # recency of target/carry shares (0 = same as half_life_games)
+    eff_sd_pass: float = -1.0           # yards shock per family (negative = use efficiency_sd)
+    eff_sd_rec: float = -1.0
+    eff_sd_rush: float = -1.0
+    shock_kind: str = "lognormal"       # "lognormal" (right-skewed) or "normal" (symmetric, floored)
+    availability_weight: float = 0.0    # 1 = when shares are scaled to the team total, each rostered player
+                                        # counts by his chance of actually playing (gameday inactives took ~7%
+                                        # of projected carries and ~6% of targets in 2024)
     sims: int = 4000
 
 

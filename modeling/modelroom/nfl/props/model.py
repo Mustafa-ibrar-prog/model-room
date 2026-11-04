@@ -74,11 +74,19 @@ def _beta_share(rng, mean: float, kappa: float, n: int) -> np.ndarray:
     return rng.beta(m * kappa, (1 - m) * kappa, size=n)
 
 
-def _shock(rng, sd: float, n: int) -> np.ndarray:
-    """Mean-one lognormal multiplier: a good or bad day for this player, shared across his plays."""
+def _shock(rng, sd: float, n: int, kind: str = "lognormal") -> np.ndarray:
+    """Mean-one multiplier: a good or bad day for this player, shared across his plays.
+    lognormal = right-skewed (0.1); normal = symmetric, floored at 0.1 (0.2 option)."""
     if sd <= 0:
         return np.ones(n)
+    if kind == "normal":
+        return np.clip(1.0 + rng.normal(0.0, sd, n), 0.1, None)
     return np.exp(rng.normal(-0.5 * sd * sd, sd, n))
+
+
+def _esd(s, fam: str) -> float:
+    v = getattr(s, f"eff_sd_{fam}")
+    return s.efficiency_sd if v < 0 else v
 
 
 def _ratio(d: pd.Series | None, key: str, power: float) -> float:
@@ -139,13 +147,17 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         return r ** s.snap_trend_strength
 
     t_share = skill["target_share"] * snap_adj(skill) * skill["group"].map(lambda g: _ratio(D, f"tshare_{g}", s.matchup_strength))
-    t_scale = float(np.clip(1.0 / t_share.sum(), 0.75, 1.4)) if t_share.sum() > 0 else 1.0
+    av = lambda df: df["p_play"].fillna(0.75) ** s.availability_weight if "p_play" in df else 1.0  # noqa: E731
+    tw = (t_share * av(skill)).sum()
+    t_total = float(ctx.league.get("target_rate", 1.0)) if s.availability_weight > 0 else 1.0
+    t_scale = float(np.clip(t_total / tw, 0.75, 1.4)) if tw > 0 else 1.0
     t_share = t_share * t_scale
     rushers = skill.copy()
     if starter is not None:
         rushers = pd.concat([rushers, active.loc[[starter]]])
     c_share = rushers["carry_share"] * snap_adj(rushers).where(rushers["group"] != "QB", 1.0)
-    c_scale = float(np.clip(1.0 / c_share.sum(), 0.75, 1.4)) if c_share.sum() > 0 else 1.0
+    cw = (c_share * av(rushers)).sum()
+    c_scale = float(np.clip(1.0 / cw, 0.75, 1.4)) if cw > 0 else 1.0
     c_share = c_share * c_scale
 
     PA = np.clip(np.rint(rng.normal(mu_pa, p.volume.pass_sd, n)), 8, 75).astype(int)
@@ -182,7 +194,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
             den = ml * x["ypt_man_rel"] + (1 - ml) * x["ypt_zone_rel"]
             cov = float(num / den) ** s.coverage_strength if den > 0 else 1.0
         f = float(x["ypr_factor"]) * _ratio(D, f"ypr_{grp}", s.matchup_strength) * cov * bz
-        yds, lng = _pool_sum(rng, ctx.pools[f"rec_{grp}"], rec, f * _shock(rng, s.efficiency_sd, n))
+        yds, lng = _pool_sum(rng, ctx.pools[f"rec_{grp}"], rec, f * _shock(rng, _esd(s, "rec"), n, s.shock_kind))
         td = rng.binomial(tg, float(np.clip(x["rec_td_rate"] * _ratio(D, f"rectd_{grp}", s.matchup_strength), 0, 0.5)))
         r = rows[pid]
         r.update(targets=tg.astype(float), receptions=rec.astype(float), rec_yds=yds, long_rec=lng, rec_td=td.astype(float))
@@ -195,7 +207,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         share = _beta_share(rng, c_share[pid], s.carry_dispersion, n)
         car = rng.binomial(RU, share)
         f = float(x["ypc_factor"]) * _ratio(D, "ypc", s.matchup_strength)
-        yds, _ = _pool_sum(rng, ctx.pools[f"rush_{grp}"], car, f * _shock(rng, s.efficiency_sd, n))
+        yds, _ = _pool_sum(rng, ctx.pools[f"rush_{grp}"], car, f * _shock(rng, _esd(s, "rush"), n, s.shock_kind))
         td = rng.binomial(car, float(np.clip(x["rush_td_rate"] * _ratio(D, "rushtd", s.matchup_strength), 0, 0.5)))
         r = rows.setdefault(pid, {k: np.zeros(n) for k in STATS})
         r.update(carries=car.astype(float), rush_yds=yds, rush_td=td.astype(float))
@@ -209,7 +221,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                               _ratio(D, "pressure", -0.15 * s.pressure_strength), 0.3, 0.85))
         cm = rng.binomial(att, cmp_p)
         f = float(x["ypcmp_factor"]) * _ratio(D, "ypcmp", s.matchup_strength) * bz
-        yds, _ = _pool_sum(rng, ctx.pools["pass"], cm, f * _shock(rng, s.efficiency_sd, n))
+        yds, _ = _pool_sum(rng, ctx.pools["pass"], cm, f * _shock(rng, _esd(s, "pass"), n, s.shock_kind))
         ints = rng.binomial(att, float(np.clip(x["int_rate"] * _ratio(D, "int", s.matchup_strength), 0.001, 0.2)))
         ptd = rng.binomial(att, float(np.clip(x["pass_td_rate"] * _ratio(D, "passtd", s.matchup_strength), 0.001, 0.2)))
         r = rows.setdefault(starter, {k: np.zeros(n) for k in STATS})
