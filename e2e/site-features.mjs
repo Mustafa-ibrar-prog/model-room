@@ -74,6 +74,25 @@ for (const device of ["desktop", "phone"]) {
   await ctx.close();
 }
 
+// ------------------------------------------------------------------ injury feed (test site)
+{
+  const { ctx, page } = await session("phone");
+  await go(page, "/nfl");
+  const nfl = await page.locator("main").innerText();
+  check(/Injury info as of/.test(nfl), "nfl: games show the injury feed time and sources");
+  check(/Projected QBs: JAX Trevor Lawrence, BAL Joe Fagnano/.test(nfl) || !/BAL/.test(nfl), "nfl: Ravens QB is Joe Fagnano (Jackson and Huntley out)");
+  check(!/Projected QBs: [^\n]*BAL Tyler Huntley/.test(nfl), "nfl: Huntley (out) is not the projected Ravens QB");
+  await go(page, "/nba");
+  const nba = await page.locator("main").innerText();
+  check(/NBA official report|ESPN report/.test(nba) || /Injury info as of/.test(nba), "nba: injury flags with source");
+  await go(page, "/injuries?sport=nba");
+  const inj = await page.locator("main").innerText();
+  check(/official NBA injury report/.test(inj) && /confirmed/.test(inj), "injuries: NBA official designations marked confirmed");
+  await go(page, "/injuries?sport=nfl");
+  check(/ESPN injury reports/.test(await page.locator("main").innerText()), "injuries: NFL shows ESPN as the source");
+  await ctx.close();
+}
+
 // ------------------------------------------------------------------ props marketplace (desktop)
 {
   const { ctx, page } = await session("desktop");
