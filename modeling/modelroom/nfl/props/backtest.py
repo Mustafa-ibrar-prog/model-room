@@ -30,7 +30,7 @@ from . import model as M
 from .config import FIT_SEASONS, MARKETS, MODEL_VERSION, TEST_SEASONS, TUNE_SEASONS, PropParams, PropSettings, VolumeModel
 
 FEATURE_KEYS = ("half_life_games", "season_carry", "def_half_life_games", "share_prior_games", "rate_prior", "td_prior", "def_prior_games",
-                "share_half_life_games", "role_share_weight", "opp_redistribution", "fill_in_weight")
+                "share_half_life_games", "role_share_weight", "opp_redistribution", "fill_in_weight", "share_model")
 BASELINE_GAMES = 16
 KEEP_ALL = False  # True: keep every ladder row (the candidate comparison filters rows on the baseline instead)
 
@@ -49,7 +49,7 @@ class Runner:
         self._dhist = None
 
     def ctx(self, cutoff, season, s: PropSettings, week: int | None = None) -> F.Context:
-        role = s.opp_redistribution == "depth" and s.role_share_weight < 1.0 and week is not None
+        role = ((s.opp_redistribution == "depth" and s.role_share_weight < 1.0) or s.share_model == "role") and week is not None
         fkey = tuple(getattr(s, k) for k in FEATURE_KEYS) + ((week,) if role else ())
         key = (cutoff, season, fkey)
         if self._ctx and next(iter(self._ctx))[2][:len(FEATURE_KEYS)] != fkey[:len(FEATURE_KEYS)]:
@@ -114,7 +114,8 @@ class Runner:
             cutoff = pd.Timestamp(g["game_date"].min())
             ctx = self.ctx(cutoff, season, p.settings, week)
             ro, inj = I.week_slices(self.inp, season, week)
-            dep = DEPTH.ranks(season, week, cutoff) if p.settings.opp_redistribution == "depth" else None
+            need = p.settings.opp_redistribution == "depth" or p.settings.questionable_model == "split" or p.settings.share_model == "role"
+            dep = DEPTH.ranks(season, week, cutoff) if need else None
             projs = M.project_games(ctx, g, ro, inj, p, seed=season * 100 + week, depth=dep)
             base = _baseline_history(pg, cutoff, season)
             for x in projs:

@@ -14,7 +14,7 @@ For each team in a game
 from __future__ import annotations
 
 import zlib
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 import pandas as pd
@@ -107,11 +107,13 @@ def team_volume(ctx: Context, team: str, opp: str, margin: float, total: float, 
     return max(pa, 12.0), max(ru, 8.0)
 
 
-def candidates(ctx: Context, team: str, roster: pd.DataFrame | None, injuries: pd.DataFrame | None) -> pd.DataFrame:
+def candidates(ctx: Context, team: str, roster: pd.DataFrame | None, injuries: pd.DataFrame | None,
+               gameday: bool = False) -> pd.DataFrame:
     """Players expected to be available for this team, with the reason any were left out."""
     P = ctx.players
     if roster is not None and len(roster):
-        r = roster[(roster["team"] == team) & roster["status"].isin(ACTIVE_ROSTER)]
+        # gameday=True: the official inactive list is out (~90 min before kickoff), so INA players are known not to play.
+        r = roster[(roster["team"] == team) & roster["status"].isin({"ACT"} if gameday else ACTIVE_ROSTER)]
         ids = set(r["gsis_id"])
         c = P[P.index.isin(ids)].copy()
     else:
@@ -192,12 +194,56 @@ def redistribute(raw: pd.Series, group: pd.Series, pplay: pd.Series, rank: pd.Se
     return (sh + gain).where(avail, 0.0)
 
 
+def _questionable_split(c, skill, rushers, t_share, c_share, s, depth):
+    """Questionable players, three separate pieces (each measured on 2021-22):
+    1. chance he plays: PLAY_MODEL (depth rank, recent appearances, the designation);
+    2. his role if he plays: his share x QUESTIONABLE_ROLE[position] (players listed Questionable who
+       played got 9% (WR) / 16% (TE) fewer targets than their usual share; RBs no fewer carries);
+    3. where the rest goes: the expected share he doesn't use (1 - chance x role) goes to his position
+       group in depth-chart order (next man down first, then the starters by usage).
+    The team's expected total is unchanged; only Questionable players' shares move."""
+    from .config import QUESTIONABLE_ROLE
+
+    q = c.index[(c["injury_status"] == "Questionable") & ~c["out"]]
+    q = [pid for pid in q if pid in skill.index]
+    if not q:
+        return t_share, c_share, {}
+    allsk = c.loc[skill.index]
+    pp = play_chance(allsk, replace(s, play_model="depth"), depth)
+    rank = role_rank(allsk, t_share, depth)
+    info = {}
+    t_new, c_new = t_share.copy(), c_share.copy()
+    for pid in q:
+        grp = allsk.at[pid, "group"]
+        role = float(QUESTIONABLE_ROLE.get(grp, 1.0))
+        # After the inactive lists, an active Questionable player is known to play: chance 1, role still reduced.
+        p = 1.0 if s.gameday_inactives else float(pp[pid])
+        info[pid] = {"play_chance": round(p, 3), "role_if_active": role}
+        for series, target in ((t_share, "t"), (c_share, "c")):
+            if pid not in series.index or series[pid] <= 0:
+                continue
+            base = float(series[pid])
+            missing = base * (1.0 - p * role)
+            mates = [j for j in series.index if j != pid and j in allsk.index and allsk.at[j, "group"] == grp and j not in q]
+            if not mates:
+                continue
+            steps = rank.reindex(mates).fillna(9) - rank.get(pid, 9)
+            w = series[mates].clip(lower=0) * np.where(steps > 0, s.redist_decay ** (steps - 1).clip(lower=0), 1.0)
+            if w.sum() <= 0:
+                continue
+            gain = missing * w / w.sum()
+            dest = t_new if target == "t" else c_new
+            dest[mates] = dest[mates] + gain.values
+            dest[pid] = base * role
+    return t_new, c_new, info
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, total: float, qb_id: str | None,
                  roster: pd.DataFrame | None, injuries: pd.DataFrame | None, p: PropParams, rng,
                  depth: dict | None = None) -> list[PlayerProjection]:
     s = p.settings
     n = s.sims
-    c = candidates(ctx, team, roster, injuries)
+    c = candidates(ctx, team, roster, injuries, gameday=s.gameday_inactives)
     active = c[~c["out"]]
     if active.empty:
         return []
@@ -217,8 +263,10 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     t_share = skill["target_share"] * snap_adj(skill) * skill["group"].map(lambda g: _ratio(D, f"tshare_{g}", s.matchup_strength))
     av = lambda df: df["p_play"].fillna(0.75) ** s.availability_weight if "p_play" in df else 1.0  # noqa: E731
     tw = (t_share * av(skill)).sum()
-    t_total = float(ctx.league.get("target_rate", 1.0)) if s.availability_weight > 0 else 1.0
+    t_total = float(ctx.league.get("target_rate", 1.0)) if (s.availability_weight > 0 or s.target_total_rate) else 1.0
     t_scale = float(np.clip(t_total / tw, 0.75, 1.4)) if tw > 0 else 1.0
+    if not s.share_normalize:
+        t_scale = 1.0
     t_share = t_share * t_scale
     rushers = skill.copy()
     if starter is not None:
@@ -226,7 +274,12 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     c_share = rushers["carry_share"] * snap_adj(rushers).where(rushers["group"] != "QB", 1.0)
     cw = (c_share * av(rushers)).sum()
     c_scale = float(np.clip(1.0 / cw, 0.75, 1.4)) if cw > 0 else 1.0
+    if not s.share_normalize:
+        c_scale = 1.0
     c_share = c_share * c_scale
+    q_info = {}
+    if s.questionable_model == "split":
+        t_share, c_share, q_info = _questionable_split(c, skill, rushers, t_share, c_share, s, depth)
     if s.opp_redistribution == "depth":
         # Every skill candidate, including those ruled Out / Doubtful (their share is redistributed, not lost).
         allsk = c[c["group"].isin(["WR", "TE", "RB"])]
@@ -290,6 +343,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         r["_inputs"] = {"target_share": round(float(t_share[pid]), 4), "catch_rate": round(cr, 3), "yards_factor": round(f, 3),
                         **({"role_rank": int(role[pid]), "play_chance": round(float(pp[pid]), 3), "depth_rank": (depth or {}).get(pid)}
                            if s.opp_redistribution == "depth" else {}),
+                        **({"questionable": q_info[pid]} if pid in q_info else {}),
                         "coverage_factor": round(cov, 3), "blitz_factor": round(bz, 3)}
 
     # Rushers (including the starting QB)
