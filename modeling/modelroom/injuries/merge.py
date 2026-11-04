@@ -108,6 +108,9 @@ def combine(league: str, espn: dict | None, official: dict | None, nflverse: pd.
     else:
         rows["player_id"] = rows["player_id"].where(rows["player_id"].notna(), rows["source_player_id"].map(id_map))
     rows["player_id"] = rows["player_id"].astype(object).where(rows["player_id"].notna(), "espn:" + rows["source_player_id"].astype(str))
+    # Position from whichever row has it (nflverse rows carry none).
+    pos = rows.dropna(subset=["position"]).drop_duplicates("player_id").set_index("player_id")["position"]
+    rows["position"] = rows["position"].where(rows["position"].notna(), rows["player_id"].map(pos))
     rows = rows.merge(sched, on="team", how="left")
     rt = pd.to_datetime(rows["report_time"], utc=True)
     last = pd.to_datetime(rows["player_id"].astype(str).map(last_played), utc=True)
@@ -129,9 +132,9 @@ def combine(league: str, espn: dict | None, official: dict | None, nflverse: pd.
     for pid, x in rows[~rows["stale"]].groupby("player_id"):
         if league == "nba":
             offc = x[(x["kind"] == "official") & (x["game_date"] == x["next_game_date"])]
-            best = offc.sort_values("report_time").iloc[-1] if len(offc) else x.sort_values("report_time").iloc[-1]
+            best = offc.sort_values("report_time", na_position="first").iloc[-1] if len(offc) else x.sort_values("report_time", na_position="first").iloc[-1]
         else:
-            best = x.sort_values("report_time").iloc[-1]
+            best = x.sort_values("report_time", na_position="first").iloc[-1]   # a row with no time never beats a dated one
         cur = set(x["status"]) - {"unknown"}
         if len(cur) > 1:
             conflicts[pid] = "; ".join(f"{r.source}: {r.raw_status} ({pd.Timestamp(r.report_time):%b %d %H:%M} UTC)" for r in x.itertuples() if pd.notna(r.report_time))
@@ -157,7 +160,7 @@ def combine(league: str, espn: dict | None, official: dict | None, nflverse: pd.
         cur["late_scratch"] = (soon & newly).fillna(False)
     stale_rows = rows[rows["stale"]]
     out = pd.concat([cur.assign(current=True), stale_rows[~stale_rows["player_id"].isin(cur["player_id"])].assign(current=False)], ignore_index=True)
-    meta = {"filings": filings, "conflicts": len(conflicts)}
+    meta = {"filings": filings, "conflicts": len(conflicts), "stale": stale[stale != ""].value_counts().to_dict()}
     return out, meta
 
 

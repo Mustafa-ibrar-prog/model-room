@@ -202,6 +202,7 @@ jobs:
                        modeling/data/published/performance_nfl.json modeling/data/published/performance_nba.json \
                        modeling/data/published/market_results_nfl.json modeling/data/published/market_results_nba.json \
                        modeling/data/published/props_monitor_nba.json modeling/data/published/props_monitor_nfl.json \
+                       modeling/data/published/injuries_live_nba.json modeling/data/published/injuries_live_nfl.json \
                        modeling/data/published/history modeling/preview-ledger
           fi
           git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ) [$ST]" || echo "No data changes"
