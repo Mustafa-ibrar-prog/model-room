@@ -84,6 +84,76 @@ def _player_stats(league: str) -> dict:
     return out, {k: m["stat"] for k, m in MARKETS.items()}, {k: m["label"] for k, m in MARKETS.items()}
 
 
+def _market(league: str) -> dict:
+    """{game_id: market dict} as the site had it before each game: Odds API / manual snapshots captured
+    before kickoff, else (NFL) nflverse's published line. Each keeps its source."""
+    from modelroom.common import board as B
+    from modelroom.common.paths import processed_dir
+    from modelroom.sources import odds
+
+    out: dict = {}
+    f = processed_dir(league) / "market_snapshots.parquet"
+    if f.exists():
+        snaps = pd.read_parquet(f)
+        if len(snaps):
+            ts = pd.to_datetime(snaps["captured_at"], utc=True, errors="coerce")
+            st = pd.to_datetime(snaps["commence_time"], utc=True, errors="coerce")
+            snaps = snaps[ts < st]
+            if len(snaps):
+                out = B.market_by_game(odds.consensus(snaps), snaps)
+    if league == "nfl" and (processed_dir("nfl") / "market_lines.parquet").exists():
+        from modelroom.nfl.pipeline import _markets
+
+        for gid, m in _markets(pd.DataFrame()).items():
+            out.setdefault(gid, m)
+    return out
+
+
+def _sigmas(league: str) -> tuple[float | None, float | None]:
+    try:
+        u = json.loads((data_root() / "published" / f"{league}.json").read_text())["model"]["uncertainty"]
+        return float(u["margin_sigma"]), float(u["total_sigma"])
+    except Exception:  # noqa: BLE001
+        return None, None
+
+
+def _grade_side(won: bool | None, push: bool) -> str:
+    return "push" if push else ("win" if won else "loss")
+
+
+def market_picks(pre: dict, market: dict | None, final: dict | None, sig: tuple) -> dict | None:
+    """The model's side at the market's spread and total (the side its own distribution gives the higher
+    chance), its probability, and how that side settled. Projection error is graded elsewhere."""
+    from modelroom.common import oddsmath as O
+
+    if not market or not pre:
+        return None
+    ms, ts = sig
+    out = {"source": ",".join(market.get("sources") or []) or None, "captured_at": market.get("captured_at"), "spread": None, "total": None,
+           "implied_scores": None}
+    sp, tot = market.get("spread"), market.get("total")
+    if sp is not None and tot is not None:
+        out["implied_scores"] = {"home": round((tot - sp) / 2, 1), "away": round((tot + sp) / 2, 1)}
+    if sp is not None and ms:
+        c = O.cover_probs(pre["pred_margin"], ms, sp)
+        side = "home" if c["home"] >= c["away"] else "away"
+        row = {"line": sp, "pick": side, "model_prob": round(c[side], 4), "push_prob": round(c["push"], 4), "result": None}
+        if final:
+            m = final["home"] - final["away"]
+            v = m + sp
+            row["result"] = _grade_side((v > 0) == (side == "home"), v == 0)
+        out["spread"] = row
+    if tot is not None and ts:
+        o = O.over_probs(pre["pred_total"], ts, tot)
+        side = "over" if o["over"] >= o["under"] else "under"
+        row = {"line": tot, "pick": side, "model_prob": round(o[side], 4), "push_prob": round(o["push"], 4), "result": None}
+        if final:
+            t = final["home"] + final["away"]
+            row["result"] = _grade_side((t > tot) == (side == "over"), t == tot)
+        out["total"] = row
+    return out
+
+
 def _f(x):
     return None if x is None or (isinstance(x, float) and math.isnan(x)) else float(x)
 
@@ -95,6 +165,7 @@ def build(league: str) -> dict:
     game_recs = _pregame(ledger.read(ledger_path(league)))
     prop_recs = _pregame(ledger.read(ledger_path(f"{league}_props")))
     stats, stat_of, label_of = _player_stats(league)
+    markets, sig = _market(league), _sigmas(league)
     gid_key = "nfl_game_id" if league == "nfl" else "nba_game_id"
     props_by_game: dict = {}
     for r in prop_recs.values():
@@ -121,10 +192,11 @@ def build(league: str) -> dict:
                        "winner_correct": None if margin == 0 else bool((pre["home_win_prob"] > 0.5) == (margin > 0))}
                 grades_games.append({"date": day, "p": pre["home_win_prob"], "y": float(margin > 0), "margin_err": abs(err["margin_error"]),
                                      "total_err": abs(err["total_error"]), "correct": err["winner_correct"]})
+            fin = {"home": int(x["home_score"]), "away": int(x["away_score"])} if final else None
+            picks = market_picks(pre, markets.get(x["game_id"]), fin, sig)
             day_games.append({"game_id": x["game_id"], "start_time": None if pd.isna(x["start_time"]) else pd.Timestamp(x["start_time"]).isoformat(),
                               "home": x["home"], "away": x["away"], "status": x["status"],
-                              "final": {"home": int(x["home_score"]), "away": int(x["away_score"])} if final else None,
-                              "pregame": pre, "result": err})
+                              "final": fin, "pregame": pre, "result": err, "market": picks})
             for r in props_by_game.get(x["game_id"], []):
                 actual = stats.get((x["game_id"], str(r["player_id"]))) if final else None
                 markets = {}

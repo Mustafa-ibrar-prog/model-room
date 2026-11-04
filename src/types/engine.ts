@@ -40,6 +40,21 @@ export interface EngineEdges {
   home_prob_market: number | null;
   away_prob_market: number | null;
   home_prob_diff: number | null;
+  /** Model probabilities at the market's own lines (engine common/board.market_detail). */
+  implied_scores?: { home: number; away: number } | null;
+  at_spread?: { line: number; home: EngineSide; away: EngineSide } | null;
+  at_total?: { line: number; over: EngineSide; under: EngineSide } | null;
+  moneyline?: { home: EngineSide; away: EngineSide } | null;
+  by_book?: Record<string, { at_spread: EngineEdges["at_spread"]; at_total: EngineEdges["at_total"]; moneyline: EngineEdges["moneyline"]; captured_at: string | null; source: string | null }>;
+}
+
+export interface EngineSide {
+  model_prob: number;
+  push_prob: number;
+  fair_odds: number | null;
+  market_price: number | null;
+  market_implied: number | null;
+  ev_per_dollar: number | null;
 }
 
 export interface EngineGame {

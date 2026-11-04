@@ -92,8 +92,35 @@ def market_by_game(consensus: pd.DataFrame, raw_snapshots: pd.DataFrame | None) 
                 g = out.setdefault(gid, {"spread": None, "total": None, "home_ml": None, "away_ml": None,
                                          "books": 0, "captured_at": None, "sources": set()})
                 g["home_ml"], g["away_ml"] = r["home_price"], r["away_price"]
+        out_books = by_book(raw_snapshots)
+        for gid, books in out_books.items():
+            if gid in out:
+                out[gid]["by_book"] = books
     for g in out.values():
         g["sources"] = sorted(s for s in g["sources"] if s and s != "nan")
+    return out
+
+
+def by_book(snaps: pd.DataFrame) -> dict:
+    """{game_id: {sportsbook: {spread, home_spread_price, ..., captured_at, source}}}: each book's latest
+    line and prices, kept separate so every price on the site names the book it came from."""
+    s = snaps.dropna(subset=["game_id"]).copy()
+    if s.empty:
+        return {}
+    s["ts"] = pd.to_datetime(s["captured_at"], utc=True, errors="coerce")
+    latest = s.sort_values("ts").groupby(["game_id", "sportsbook", "market"], dropna=False).tail(1)
+    f = lambda v: None if v is None or pd.isna(v) else float(v)  # noqa: E731
+    out: dict = {}
+    for r in latest.itertuples(index=False):
+        b = out.setdefault(r.game_id, {}).setdefault(str(r.sportsbook), {"source": r.source, "captured_at": None})
+        if pd.notna(r.ts):
+            b["captured_at"] = max(filter(None, [b["captured_at"], r.ts.isoformat()]))
+        if r.market == "spread":
+            b.update(spread=f(r.line), home_spread_price=f(r.home_price), away_spread_price=f(r.away_price))
+        elif r.market == "total":
+            b.update(total=f(r.line), over_price=f(r.over_price), under_price=f(r.under_price))
+        elif r.market == "moneyline":
+            b.update(home_ml=f(r.home_price), away_ml=f(r.away_price))
     return out
 
 
@@ -110,7 +137,38 @@ def model_vs_market(proj: dict, market: dict | None) -> dict | None:
     if hp is not None:
         e["home_prob_market"], e["away_prob_market"] = round(hp, 4), round(ap, 4)
         e["home_prob_diff"] = round(proj["home_win_prob"] - hp, 4)
+    e.update(market_detail(proj, market))
     return e
+
+
+def market_detail(proj: dict, market: dict) -> dict:
+    """Model probabilities at the market's own lines, fair odds, and EV where the market's price is known.
+
+    Market-implied scores come from the spread and total (home = (total − spread) / 2): they are what the
+    lines imply, not a sportsbook score prediction. Prices that weren't captured stay None (no EV)."""
+    from . import oddsmath as O
+
+    out: dict = {"implied_scores": None, "at_spread": None, "at_total": None, "moneyline": None}
+    sp, tot = market.get("spread"), market.get("total")
+    if sp is not None and tot is not None:
+        out["implied_scores"] = {"home": round((tot - sp) / 2, 1), "away": round((tot + sp) / 2, 1)}
+    ms, ts = O.sigma_from_range(proj.get("margin_range_80")), O.sigma_from_range(proj.get("total_range_80"))
+    if sp is not None and ms:
+        c = O.cover_probs(proj["margin"], ms, sp)
+        out["at_spread"] = {"line": sp, "home": O.side_view(c["home"], c["push"], market.get("home_spread_price")),
+                            "away": O.side_view(c["away"], c["push"], market.get("away_spread_price"))}
+    if tot is not None and ts:
+        o = O.over_probs(proj["total"], ts, tot)
+        out["at_total"] = {"line": tot, "over": O.side_view(o["over"], o["push"], market.get("over_price")),
+                           "under": O.side_view(o["under"], o["push"], market.get("under_price"))}
+    if market.get("home_ml") is not None and market.get("away_ml") is not None:
+        hw = float(proj["home_win_prob"])
+        out["moneyline"] = {"home": O.side_view(hw, 0.0, market.get("home_ml")), "away": O.side_view(1 - hw, 0.0, market.get("away_ml"))}
+    books = market.get("by_book") or {}
+    if books:
+        out["by_book"] = {name: {k: v for k, v in market_detail(proj, {**b, "by_book": None}).items() if k != "implied_scores"}
+                          | {"captured_at": b.get("captured_at"), "source": b.get("source")} for name, b in books.items()}
+    return out
 
 
 def grade_ledger(path, results: pd.DataFrame) -> dict:

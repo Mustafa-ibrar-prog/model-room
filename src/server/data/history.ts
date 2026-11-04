@@ -12,7 +12,11 @@ export interface HistoryView {
   date: string;
   dates: string[];
   firstRecorded: string | null;
-  games: (Omit<HistoryGame, "pregame" | "result"> & { pregame: Gate<HistoryGame["pregame"]>; result: Gate<HistoryGame["result"]> })[];
+  games: (Omit<HistoryGame, "pregame" | "result" | "market"> & {
+    pregame: Gate<HistoryGame["pregame"]>;
+    result: Gate<HistoryGame["result"]>;
+    market: Gate<NonNullable<HistoryGame["market"]>> | null;
+  })[];
   props: Gate<HistoryProp[]>;
   available: boolean;
 }
@@ -33,6 +37,7 @@ export async function getHistoryDay(league: League, date: string, tier: TierId):
       ...g,
       pregame: g.pregame ? gate(tier, "history", g.pregame) : null,
       result: g.result ? gate(tier, "history", g.result) : null,
+      market: g.market ? gate(tier, "history", g.market) : null,
     })),
     props: canAccess(tier, "history") ? (day?.props ?? []) : gate(tier, "history", []),
   };

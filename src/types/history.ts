@@ -23,6 +23,18 @@ export interface HistoryGame {
     home_win_prob: number;
   } | null;
   result: { margin_error: number; total_error: number; winner_correct: boolean | null } | null;
+  /** The market line the site had before the game, the model's side at it, and how that side settled. */
+  market?: HistoryMarket | null;
+}
+
+export type Settle = "win" | "loss" | "push" | null;
+export interface HistoryPick { line: number; pick: string; model_prob: number; push_prob: number; result: Settle }
+export interface HistoryMarket {
+  source: string | null;
+  captured_at: string | null;
+  implied_scores: { home: number; away: number } | null;
+  spread: HistoryPick | null;
+  total: HistoryPick | null;
 }
 
 export interface HistoryProp {
