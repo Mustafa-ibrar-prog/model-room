@@ -356,3 +356,23 @@ def test_no_lineups_posted_yet_is_not_an_error(tmp_path, monkeypatch):
     av = U.nba_availability(up, pg)
     assert av[("401", "DET")]["players"]["1"]["status"] == "out" and av[("401", "DET")]["starters"] is None
     assert U.availability_hash("nba")
+
+
+def test_live_qb_source_replaces_only_coming_games(monkeypatch):
+    """Ravens: the schedule field still says Huntley for Thursday; 'live' uses the projected starter there only."""
+    from modelroom.nfl import starters
+
+    st = pd.DataFrame([
+        {"game_id": "2026_08_BAL_BUF", "side": "away", "qb_id": "huntley", "qb_name": "Tyler Huntley", "source": "depth chart", "status": "final"},
+        {"game_id": "2026_08_BAL_BUF", "side": "home", "qb_id": "allen", "qb_name": "Josh Allen", "source": "depth chart", "status": "final"},
+        {"game_id": "2026_09_JAX_BAL", "side": "home", "qb_id": "fagnano", "qb_name": "Joe Fagnano", "source": "depth chart", "status": "scheduled"},
+        {"game_id": "2026_09_JAX_BAL", "side": "away", "qb_id": "lawrence", "qb_name": "Trevor Lawrence", "source": "depth chart", "status": "scheduled"},
+    ])
+    monkeypatch.setattr(starters, "load", lambda: st)
+    games = pd.DataFrame([
+        {"game_id": "2026_08_BAL_BUF", "home_qb_id": "allen", "home_qb_name": "Josh Allen", "away_qb_id": "lamar", "away_qb_name": "Lamar Jackson"},
+        {"game_id": "2026_09_JAX_BAL", "home_qb_id": "huntley", "home_qb_name": "Tyler Huntley", "away_qb_id": "lawrence", "away_qb_name": "Trevor Lawrence"},
+    ])
+    g = starters.apply(games, "live").set_index("game_id")
+    assert g.at["2026_09_JAX_BAL", "home_qb_name"] == "Joe Fagnano"
+    assert g.at["2026_08_BAL_BUF", "away_qb_name"] == "Lamar Jackson"      # finished game keeps the actual starter
