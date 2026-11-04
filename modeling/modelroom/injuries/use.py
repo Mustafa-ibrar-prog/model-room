@@ -47,7 +47,7 @@ def availability_hash(league: str) -> str:
         if league == "nfl":
             x = x[x["status"] == "scheduled"]
             parts += sorted(f"{r.game_id}|{r.team}|{r.qb_id}" for r in x.itertuples())
-        else:
+        elif {"espn_event", "source_player_id", "starter"} <= set(x.columns):
             parts += sorted(f"{r.espn_event}|{r.source_player_id}|{r.starter}" for r in x.itertuples())
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
 
@@ -62,7 +62,10 @@ def nba_availability(upcoming: pd.DataFrame, player_games: pd.DataFrame) -> dict
     meta = live_meta("nba") or {}
     submitted = {(f["game_date"], f["team"]) for f in meta.get("filings", []) if f.get("submitted")}
     st_f = processed_dir("nba") / "starters_live.parquet"
-    st = pd.read_parquet(st_f) if st_f.exists() else pd.DataFrame(columns=["espn_event", "team", "source_player_id", "starter"])
+    st = pd.read_parquet(st_f) if st_f.exists() else pd.DataFrame()
+    for c in ("espn_event", "team", "source_player_id", "starter"):
+        if c not in st:
+            st[c] = pd.Series(dtype=object)
     back = returns.current_back(player_games, d["player_id"].astype(str).tolist() + player_games.loc[player_games["season"] == player_games["season"].max(), "player_id"].astype(str).unique().tolist())
     out = {}
     for g in upcoming.itertuples():
