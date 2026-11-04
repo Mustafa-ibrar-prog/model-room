@@ -20,6 +20,9 @@ from .config import HISTORY_SEASONS, PropSettings
 GROUPS = {"WR": "WR", "TE": "TE", "RB": "RB", "FB": "RB", "QB": "QB"}
 
 
+_PROMOTED: dict = {}
+
+
 @dataclass
 class Context:
     """Everything the model needs at one cutoff."""
@@ -59,7 +62,7 @@ def _shrink(num, den, prior_mean, prior_n):
 
 
 def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: pd.Timestamp, season: int,
-          s: PropSettings) -> Context:
+          s: PropSettings, depth_now: dict | None = None, depth_hist: pd.DataFrame | None = None) -> Context:
     H = history(pg, cutoff, season).sort_values(["game_date", "game_id"])
     H = H.assign(group=H["position"].map(GROUPS))
     played = H[(H["offense_snaps"].fillna(0) > 0) | (H[["pass_att", "targets", "carries"]].sum(axis=1) > 0)]
@@ -92,12 +95,17 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     hr = hr.assign(group=pd.MultiIndex.from_arrays([hr["game_id"], hr["rusher_player_id"]]).map(pos))
 
     defense, league = _defense(hp, hr, tg, season, s)
-    # Targets per team pass attempt (throwaways, spikes and batted balls have no target): the share of
-    # attempts the receivers split between them.
-    tt = played.groupby(["game_id", "team"])["targets"].sum()
+    # Targets to RBs / WRs / TEs per team pass attempt (throwaways, spikes, batted balls and the odd QB or
+    # lineman target don't go to the tracked receivers).
+    tt = played[played["group"].isin(["RB", "WR", "TE"])].groupby(["game_id", "team"])["targets"].sum()
     pa = tg.set_index(["game_id", "team"])["team_pass_att"]
     pa = pa[~pa.index.duplicated()].reindex(tt.index)
     league["target_rate"] = float(tt.sum() / pa.sum()) if pa.sum() > 0 else 1.0
+    # Carries by RBs / WRs / TEs per team carry (the rest: QBs, kneels, others).
+    sk = played[played["group"].isin(["RB", "WR", "TE"])].groupby(["game_id", "team"])["carries"].sum()
+    ru = tg.set_index(["game_id", "team"])["team_carries"]
+    ru = ru[~ru.index.duplicated()].reindex(sk.index)
+    league["skill_carry_rate"] = float(sk.sum() / ru.sum()) if ru.sum() > 0 else 0.84
 
     # ---------------------------------------------------------------- players
     w = _recency(played, "player_id", s.half_life_games, s.season_carry, season)
@@ -163,6 +171,33 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     P["n_pass_att"] = raw["pass_att"].reindex(P.index).fillna(0).astype(int)
 
     P["p_play"] = _play_rate(played, tg, P)
+    if s.fill_in_weight < 1.0:
+        # Games a player spent filling in for a missing teammate count for less: his share then reflects his
+        # usual role, and the model's redistribution adds the fill-in share back when someone is missing now.
+        pr = _PROMOTED.get(id(pg))
+        if pr is None:
+            pr = promoted_flags(pg)
+            _PROMOTED.clear()
+            _PROMOTED[id(pg)] = pr
+        fl = pd.MultiIndex.from_arrays([played["game_id"], played["player_id"]]).map(pr).fillna(0.0).to_numpy()
+        wf = w * np.where(fl > 0, s.fill_in_weight, 1.0)
+        sf = _wsum(played, "player_id", wf, ["targets", "carries", "team_pass_att", "team_carries"])
+        f_pa = sf["team_pass_att"] / sf["w"]
+        f_ru = sf["team_carries"] / sf["w"]
+        P["target_share_role"] = _shrink(sf["targets"], sf["team_pass_att"], g.map(prior_t).fillna(0.02), s.share_prior_games * f_pa.fillna(lg_pa))
+        P["carry_share_role"] = _shrink(sf["carries"], sf["team_carries"], g.map(prior_c).fillna(0.01), s.share_prior_games * f_ru.fillna(lg_ru))
+    if depth_now is not None and depth_hist is not None and s.role_share_weight < 1.0:
+        # Role-matched usage: history games played at a different depth rank (e.g. a backup's games as the
+        # fill-in starter) count for less, so a player's share reflects the role he holds now.
+        h = played[["season", "week", "player_id"]].merge(depth_hist, on=["season", "week", "player_id"], how="left")
+        hd = h["depth"].fillna(9.0).clip(upper=3).to_numpy()
+        nd = played["player_id"].map(lambda x: min(depth_now.get(x, 9.0), 3.0)).to_numpy()
+        wr = w * np.where(hd == nd, 1.0, s.role_share_weight)
+        sr = _wsum(played, "player_id", wr, ["targets", "carries", "team_pass_att", "team_carries"])
+        a_pa = sr["team_pass_att"] / sr["w"]
+        a_ru = sr["team_carries"] / sr["w"]
+        P["target_share_role"] = _shrink(sr["targets"], sr["team_pass_att"], g.map(prior_t).fillna(0.02), s.share_prior_games * a_pa.fillna(lg_pa))
+        P["carry_share_role"] = _shrink(sr["carries"], sr["team_carries"], g.map(prior_c).fillna(0.01), s.share_prior_games * a_ru.fillna(lg_ru))
 
     P = P.join(_coverage_splits(hp, played, season, s, L))
     P = P.join(_blitz_splits(hp, season, s, L))
@@ -174,6 +209,35 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
 PLAY_RATE = {(1, 0): 0.40, (1, 1): 0.807, (2, 0): 0.37, (2, 1): 0.490, (2, 2): 0.881, (3, 0): 0.37, (3, 1): 0.296,
              (3, 2): 0.567, (3, 3): 0.937, (4, 0): 0.372, (4, 1): 0.556, (4, 2): 0.695, (4, 3): 0.844, (4, 4): 0.962}
 PLAY_RATE_NEW = 0.347
+
+
+def promoted_flags(pg: pd.DataFrame) -> pd.Series:
+    """1 for a player-game where a teammate at his position who had more usage so far that season, and
+    played in one of the team's previous three games, did not play: the player was filling in. Backward-
+    looking only (earlier games of the season), so it never uses anything after the game it describes.
+    Index: (game_id, player_id)."""
+    x = pg[(pg["offense_snaps"].fillna(0) > 0) | (pg[["pass_att", "targets", "carries"]].sum(axis=1) > 0)]
+    x = x.assign(group=x["position"].map(GROUPS))
+    x = x[x["group"].isin(["RB", "WR", "TE"])]
+    out = {}
+    for (season, team, grp), d in x.groupby(["season", "team", "group"], sort=False):
+        use_col = "carries" if grp == "RB" else "targets"
+        games = d[["game_id", "game_date"]].drop_duplicates().sort_values("game_date")["game_id"].tolist()
+        by_game = {g: dd for g, dd in d.groupby("game_id")}
+        cum: dict = {}
+        hist: list[set] = []
+        for g in games:
+            dd = by_game[g]
+            present = set(dd["player_id"])
+            recent = set().union(*hist[-3:]) if hist else set()
+            absent = recent - present
+            for pid in present:
+                mine = cum.get(pid, 0.0)
+                out[(g, pid)] = int(any(cum.get(j, 0.0) > mine for j in absent))
+            for pid, u in zip(dd["player_id"], dd[use_col].fillna(0)):
+                cum[pid] = cum.get(pid, 0.0) + float(u)
+            hist.append(present)
+    return pd.Series(out, name="promoted", dtype=float)
 
 
 def _play_rate(played: pd.DataFrame, tg: pd.DataFrame, P: pd.DataFrame, k: int = 4) -> pd.Series:
