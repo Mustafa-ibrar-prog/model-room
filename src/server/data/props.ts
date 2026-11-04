@@ -69,7 +69,7 @@ function playerView(p: EnginePropPlayer, tier: TierId): PropPlayerView {
       range80: m.range_80,
       lines: m.thresholds.map(lineView),
     })),
-    inputs: gate(tier, "props.advanced", p.inputs),
+    inputs: gate(tier, "props.advanced", scalarInputs(p.inputs)),
   };
 }
 
@@ -97,4 +97,11 @@ export async function getProps(league: League, tier: TierId, gameId?: string): P
     schedule: b.games.map((g) => ({ id: g.game_id, startTime: g.start_time, home: g.home.abbr, away: g.away.abbr, players: allowed ? g.players.length : 0 })),
     game: allowed ? selected(b, gameId, tier) : gate(tier, "props.projections", null),
   };
+}
+
+/** Model inputs shown as name / value pairs: scalars only (the injury objects are rendered separately). */
+export function scalarInputs(inputs: Record<string, unknown>): Record<string, number | string | null> {
+  return Object.fromEntries(
+    Object.entries(inputs ?? {}).filter(([, v]) => v == null || typeof v === "number" || typeof v === "string"),
+  ) as Record<string, number | string | null>;
 }

@@ -28,13 +28,24 @@ from . import model as M
 from .backtest import eligible
 import os
 
-from .config import CANDIDATE_FILE, CANDIDATE_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, PARAMS_FILE, PropParams
+from modelroom.injuries import use as U
+
+from .config import CANDIDATE_FILE, CANDIDATE_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, PARAMS_FILE, PropParams
 
 # Which prop model the board and ledger use. 0.1.0 = params.json (the default everywhere); 0.2.0 =
 # params_0.2.0.json, switched on for the hosted test site only by its workflow
 # (MODELROOM_NBA_PROPS_VERSION=0.2.0). Rollback = unset the variable (or set 0.1.0): both parameter files
 # stay in the repo, and every ledger record names the version that made it.
-VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE}
+VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, INJURY_VERSION: INJURY_FILE}
+
+
+def shadow_versions(active: str) -> list[str]:
+    """Versions also run and recorded in the ledger (never published), for side-by-side monitoring."""
+    vs = [v.strip() for v in os.environ.get("MODELROOM_NBA_PROPS_SHADOW", "").split(",") if v.strip()]
+    for v in vs:
+        if v not in VERSIONS:
+            raise ValueError(f"MODELROOM_NBA_PROPS_SHADOW: unknown version {v!r}")
+    return [v for v in dict.fromkeys(vs) if v != active]
 
 
 def active_version() -> str:
@@ -109,25 +120,33 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list, now: dateti
                          "support": support, "support_note": note, "thresholds": th,
                          "grid": G.build(sims, stat, lambda r, _m=mkey: p.calibrate(_m, r))}
     return {"player_id": x.player_id, "name": x.name, "team": x.team, "opp": x.opp, "position": x.group, "game_id": x.game_id,
-            "injury_status": None, "markets": markets, "inputs": {k: v for k, v in x.inputs.items() if k != "sample"}}
+            "injury_status": (x.inputs.get("availability") or {}).get("status"), "markets": markets,
+            "inputs": {k: v for k, v in x.inputs.items() if k != "sample"}}
 
 
 def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True, sims: int | None = None) -> dict:
     now = now or B.now_utc()
     version = active_version()
-    p = PropParams.load(VERSIONS[version])
-    p = replace(p, settings=replace(p.settings, sims=sims or 10000))
     inp = I.load()
     gp = inp.games
     upcoming = B.upcoming_window(gp[gp["status"] == "scheduled"], now, days)
     season = int(upcoming["season"].max()) if len(upcoming) else int(gp["season"].max())
     today = pd.Timestamp(pd.Timestamp(now).tz_convert("America/New_York").date())
-    ctx = M.build(inp.player_games, inp.pace, today, season, p.settings)
-    projs, seeds = [], {}
-    for day, g in upcoming.groupby("game_date"):
-        seeds[str(day)] = int(str(day).replace("-", ""))
-        projs += M.project_games(ctx, g, p, seed=seeds[str(day)])
-    projs = [x for x in projs if eligible(x)]
+    avail = U.nba_availability(upcoming, inp.player_games)
+    feed = U.live_meta("nba")
+
+    def project(v: str):
+        pv = PropParams.load(VERSIONS[v])
+        pv = replace(pv, settings=replace(pv.settings, sims=sims or 10000))
+        ctx = M.build(inp.player_games, inp.pace, today, season, pv.settings)
+        out, sd = [], {}
+        for day, g in upcoming.groupby("game_date"):
+            sd[str(day)] = int(str(day).replace("-", ""))
+            out += M.project_games(ctx, g, pv, seed=sd[str(day)], avail=avail if pv.settings.injury_feed else None)
+        return pv, [x for x in out if eligible(x)], sd
+
+    p, projs, seeds = project(version)
+    shadows = {v: project(v) for v in shadow_versions(version)}
 
     games_df = upcoming.rename(columns={"home_abbr": "home_team", "away_abbr": "away_team"})[["game_id", "game_date", "home_team", "away_team"]]
     plist = pd.DataFrame([{"game_id": x.game_id, "player_id": x.player_id, "name": x.name, "team": x.team, "sportradar_id": None} for x in projs])
@@ -159,33 +178,64 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                            "players": players})
 
     pg = inp.player_games
-    inputs_hash = hash_frame(pg[pg["season"] >= season - 2], ["game_id", "player_id", "minutes", "pts"])
-    params_hash = hash_obj(p.to_json())
+    base_hash = hash_frame(pg[pg["season"] >= season - 2], ["game_id", "player_id", "minutes", "pts"])
+    avail_hash = U.availability_hash("nba")
     generated_at = now.isoformat(timespec="seconds")
     appended = None
-    if write_ledger and projs:
+    shadow_appended = {}
+
+    def records(v: str, pv: PropParams, px: list, sd: dict) -> list[dict]:
+        # Versions that read the injury feed fold its state into the inputs hash: a changed injury picture is a
+        # new snapshot in the append-only ledger; the earlier ones stay as recorded.
+        ih = hash_obj({"base": base_hash, "injuries": avail_hash}) if pv.settings.injury_feed else base_hash
+        ph = hash_obj(pv.to_json())
         starts = upcoming.set_index("game_id")["start_time"]
         dates = upcoming.set_index("game_id")["game_date"].astype(str)
         recs = []
-        for x in projs:
-            probs = {mkey: {**{str(k): round(p.calibrate(mkey, x.prob(m["stat"], k)), 4) for k in m["ladder"]},
+        for x in px:
+            probs = {mkey: {**{str(k): round(pv.calibrate(mkey, x.prob(m["stat"], k)), 4) for k in m["ladder"]},
                             "mean": round(x.mean(m["stat"]), 2), "sd": round(x.sd(m["stat"]), 2)} for mkey, m in MARKETS.items()}
+            a = x.inputs.get("availability") or {}
             recs.append({"sport": "nba", "kind": "player_props", "game_id": f"{x.game_id}|{x.player_id}", "nba_game_id": x.game_id,
                          "player_id": x.player_id, "player": x.name, "team": x.team, "game_start": B.iso(starts[x.game_id]),
                          "probabilities": probs, "support": x.support()[0], "projected_minutes": x.inputs["projected_minutes"],
                          "starter_rate": x.inputs.get("starter_rate"), "usage_freed_by_absences": x.inputs.get("usage_freed_by_absences"),
-                         "model_id": MODEL_ID, "model_version": version, "params_hash": params_hash, "inputs_hash": inputs_hash,
-                         "generated_at": generated_at, "sims": p.settings.sims, "seed": seeds.get(dates[x.game_id])})
-        appended = ledger.append(ledger_path("nba_props"), recs)
+                         **({"injury_status": a.get("status"), "injury_source": a.get("source"), "injury_report_time": a.get("report_time"),
+                             "injury_notes": a.get("notes") or None, "teammates_out": x.inputs.get("teammates_out_detail"),
+                             "injury_feed_at": (feed or {}).get("generated_at")} if pv.settings.injury_feed else {}),
+                         "model_id": MODEL_ID, "model_version": v, "params_hash": ph, "inputs_hash": ih,
+                         "generated_at": generated_at, "sims": pv.settings.sims, "seed": sd.get(dates[x.game_id])})
+        return recs
+
+    inputs_hash = hash_obj({"base": base_hash, "injuries": avail_hash}) if p.settings.injury_feed else base_hash
+    params_hash = hash_obj(p.to_json())
+    if write_ledger and projs:
+        appended = ledger.append(ledger_path("nba_props"), records(version, p, projs, seeds))
+        for v, (pv, px, sd) in shadows.items():
+            if px:
+                shadow_appended[v] = ledger.append(ledger_path("nba_props"), records(v, pv, px, sd)).__dict__
 
     recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool))
+    try:
+        prev_board = json.loads(published_path().read_text())
+    except (OSError, ValueError):
+        prev_board = None
+    explained = U.explain(prev_board, games_json, ("points", "rebounds", "assists", "pra", "threes"))
+    flags = U.game_flags("nba", list(upcoming["home_abbr"]) + list(upcoming["away_abbr"])) if p.settings.injury_feed else {}
+    for gj in games_json:
+        gj["injuries"] = {side: flags.get(gj[side]["abbr"], []) for side in ("home", "away")} if flags else None
     board = {
         "league": "nba", "kind": "player_props", "generated_at": generated_at, "season": season, "week": None,
         "model": {"id": MODEL_ID, "version": version, "default_version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
                   "status": p.provenance.get("status", "provisional"), "fitted_at": p.provenance.get("fitted_at"),
                   "sims": p.settings.sims, "seeds": seeds,
                   "independence": "Uses only box scores, minutes, pace and the game engine. Exchange prices are never an input; they are compared afterwards.",
-                  "injuries": "No NBA injury feed is connected. A rotation player who missed his team's last two games is treated as out; anyone else is assumed available."},
+                  "injuries": (f"Injury feed: the NBA's official injury report and ESPN's injury reports (test site; refreshed {feed['generated_at']}). "
+                               "Out / Doubtful players are removed and their usage freed (Doubtful at 75%); returning players' minutes follow measured "
+                               "first-games-back patterns; a player with no current report falls back to the missed-games rule.")
+                              if p.settings.injury_feed and feed else
+                              "No NBA injury feed is used by this version. A rotation player who missed his team's last two games is treated as out; anyone else is assumed available.",
+                  "injury_feed": feed if p.settings.injury_feed else None, "shadow_versions": sorted(shadows)},
         "data": {"last_ingest": state.read().get("hoopr_schedule", {}).get("last_success"),
                  "results_through": str(pg.loc[pg["played"], "game_date"].max()),
                  "markets": [i for i in info if i["publishable"] or i["provider"] == "manual"],
@@ -201,4 +251,5 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                     {**board, "games": [{"game_id": k, "players": v} for k, v in local_games.items()], "note": "Local only."})
     state.record("nba_props_run", model_version=version, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs),
-            "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None}
+            "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None,
+            "shadow_ledger": shadow_appended, "explained_changes": explained}

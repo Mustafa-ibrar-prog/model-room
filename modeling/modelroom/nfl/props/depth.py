@@ -20,10 +20,11 @@ SKILL = {"RB": "RB", "FB": "RB", "WR": "WR", "TE": "TE"}
 
 @lru_cache(maxsize=16)
 def _season(season: int) -> pd.DataFrame | None:
-    f = raw_dir("nfl") / f"depth_charts_{season}.parquet"
-    if not f.exists():
+    from ..starters import read_depth
+
+    d = read_depth(season)
+    if d is None:
         return None
-    d = pd.read_parquet(f)
     if "dt" in d.columns:
         d = d[d["pos_abb"].isin(list(SKILL)) & d["gsis_id"].notna()]
         return pd.DataFrame({"dt": pd.to_datetime(d["dt"], utc=True), "gsis_id": d["gsis_id"],

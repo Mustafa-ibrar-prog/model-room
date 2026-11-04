@@ -15,6 +15,7 @@ from modelroom.common import ledger
 from modelroom.common.hashing import hash_frame, hash_obj
 from modelroom.common.paths import backtest_report, ledger_path, output_dir, processed_dir, published_board_path
 from modelroom.common.publish import write_board
+from modelroom.injuries import use as U
 from modelroom.sources import odds, state
 
 from . import project, walkforward
@@ -169,6 +170,8 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     cutoff = np.datetime64(pd.Timestamp(now).tz_convert("America/New_York").date(), "D") + np.timedelta64(1, "D")
 
     inputs_hash = hash_frame(prep.tg[prep.tg["season"] >= season - 3], ["game_id", "team", "wepa", "wplays"])
+    # Projected starters and the injury feed are inputs too: a QB change writes a new ledger snapshot.
+    inputs_hash = hash_obj({"base": inputs_hash, "availability": U.availability_hash("nfl")})
     params_hash = hash_obj(params.to_json())
     generated_at = now.isoformat(timespec="seconds")
     appended = None
@@ -237,6 +240,11 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
             "ledger": B.grade_ledger(ledger_path("nfl"), games[games["status"] == "final"][["game_id", "home_score", "away_score"]]),
         },
     }
+    U.attach_game_flags("nfl", board["upcoming"])
+    try:
+        U.explain_games(json.loads(published_board_path("nfl").read_text()), board["upcoming"])
+    except (OSError, ValueError):
+        pass
     path = write_board(published_board_path("nfl"), board)
     state.record("nfl_model_run", model_version=MODEL_VERSION, upcoming=len(board["upcoming"]))
     return {"board": str(path), "upcoming": len(board["upcoming"]), "recent": len(board["recent"]), "week": week,

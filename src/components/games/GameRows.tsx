@@ -7,6 +7,7 @@ import { liveGameLines, ownerLiveMarkets, type LiveGameLines } from "@/server/ma
 import { isLocked, type GameView, type League } from "@/types/domain";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { Gated, Unavailable } from "@/components/ui/primitives";
+import { InjuryLine } from "@/components/injuries/InjuryFlags";
 
 function dayKey(g: GameView): string {
   const [y, m, d] = g.gameDate.split("-").map(Number);
@@ -84,6 +85,7 @@ function Row({ g, league, now, avail, live }: { g: GameView; league: League; now
         {props}
         {avail?.priced ? <div className="mt-1 font-mono text-[0.65rem] text-market">{avail.priced} exchange prices</div> : null}
       </div>
+      {!started ? <InjuryLine a={g.availability} changes={g.changes} league={league} home={g.home.abbr} away={g.away.abbr} quarterbacks={g.quarterbacks} /> : null}
     </li>
   );
 }

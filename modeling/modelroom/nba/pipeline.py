@@ -20,7 +20,9 @@ from modelroom.sources import odds, state
 from . import ingest, walkforward
 from .backtest import apply
 from .config import MODEL_ID, MODEL_VERSION, ModelParams
-from .project import total_offsets
+from .project import finalize, total_offsets
+
+from modelroom.injuries import use as U
 
 RECENT_DAYS = 10
 
@@ -100,6 +102,28 @@ def _game_json(r, params, market: dict | None) -> dict:
     }
 
 
+def _injury_feed_adjustment(proj: pd.DataFrame, games: pd.DataFrame, season: int, params) -> dict:
+    """The fitted injury adjustment (Out = 1.0, Doubtful = 0.75 × the player's Game Score value × k) from the live
+    injury feed, for scheduled games. Off when MODELROOM_NBA_INJURY_FEED=off or no feed was fetched."""
+    import os
+
+    from . import injuries as INJ
+
+    off = {"applied": False, "adj": {}, "detail": {}}
+    feed = U.load("nba")
+    if os.environ.get("MODELROOM_NBA_INJURY_FEED", "on").lower() == "off" or feed is None or params.adjustments.injury_points_per_value is None:
+        return off
+    pg = INJ.load()
+    if pg is None:
+        return off
+    up = proj[proj["status"] == "scheduled"]
+    rep = feed[feed["status"].isin(["out", "doubtful"])]
+    rep = pd.DataFrame({"game_date": rep["next_game_date"], "team_abbr": rep["team"], "player": rep["player"], "status": rep["status"].str.title()})
+    adj = INJ.report_adjustments(rep, INJ.current_values(games, pg, season), up, params.adjustments.injury_points_per_value)
+    return {"applied": True, "adj": adj.set_index("game_id")["injury_adj"].to_dict(), "detail": adj.set_index("game_id")["injury_detail"].to_dict(),
+            "feed_at": (U.live_meta("nba") or {}).get("generated_at")}
+
+
 def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True) -> dict:
     now = now or B.now_utc()
     params = ModelParams.load()
@@ -113,7 +137,10 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
         proj["total_offset"] = total_offsets(proj, params.adjustments.total_rolling_games)
     proj = proj[proj["season"] == season]
     proj = proj.merge(games[["game_id", "home_name", "away_name"]], on="game_id", how="left")
-    proj = apply(proj, params.adjustments, use_injuries=False)  # no NBA injury feed connected
+    proj = apply(proj, params.adjustments, use_injuries=False)
+    injury_info = _injury_feed_adjustment(proj, games, season, params)
+    if injury_info["applied"]:
+        proj = finalize(proj.assign(injury_adj=proj["game_id"].map(injury_info["adj"]).astype(float)), params.adjustments)
     current = finals[season]
 
     # Market lines (optional): consensus of stored snapshots.
@@ -131,6 +158,8 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
 
     played = games[(games["season"] == season) & games["has_box"]]
     inputs_hash = hash_frame(team_games[team_games["game_id"].isin(played["game_id"])], ["game_id", "team_id", "pts", "fga", "fta", "oreb", "tov"])
+    if injury_info["applied"]:  # a changed injury picture = a new ledger snapshot (earlier ones stay as recorded)
+        inputs_hash = hash_obj({"base": inputs_hash, "injuries": U.availability_hash("nba")})
     params_hash = hash_obj(params.to_json())
     generated_at = now.isoformat(timespec="seconds")
 
@@ -146,6 +175,9 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
                 "model_id": MODEL_ID, "model_version": MODEL_VERSION, "params_hash": params_hash,
                 "inputs_hash": inputs_hash, "data_through": fresh["results_through"], "data_ingested_at": last_ingest,
                 "generated_at": generated_at,
+                "injury_points": None if pd.isna(r.get("injury_adj", np.nan)) else round(float(r["injury_adj"]), 2),
+                "injury_detail": injury_info["detail"].get(r["game_id"]) if injury_info["applied"] else None,
+                "injury_feed_at": injury_info.get("feed_at"),
             })
         appended = ledger.append(ledger_path("nba"), recs)
     else:
@@ -184,7 +216,11 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
         "data": {
             "sources": ["hoopR / sportsdataverse (ESPN)"],
             "freshness": fresh,
-            "injuries": {"connected": False, "note": "No NBA injury feed connected; injury adjustments are not applied."},
+            "injuries": ({"connected": True, "source": "nba_official+espn", "updated_at": injury_info.get("feed_at"),
+                          "note": "Official NBA injury report and ESPN injury reports (test site). Out = full value, Doubtful = 75%, "
+                                  "fitted points per unit of Game Score; Questionable / Probable players aren't adjusted."}
+                         if injury_info["applied"] else
+                         {"connected": False, "note": "No NBA injury feed connected; injury adjustments are not applied."}),
             "market": {"connected": bool(markets), "sources": sorted({s for m in markets.values() for s in m["sources"]}),
                        "note": None if markets else "No NBA sportsbook lines connected (optional Odds API key or manual CSV)."},
         },
@@ -213,6 +249,11 @@ def run(*, days: int = 7, now: datetime | None = None, write_ledger: bool = True
             "ledger": B.grade_ledger(ledger_path("nba"), results),
         },
     }
+    U.attach_game_flags("nba", board["upcoming"])
+    try:
+        U.explain_games(json.loads(published_board_path("nba").read_text()), board["upcoming"])
+    except (OSError, ValueError):
+        pass
     path = write_board(published_board_path("nba"), board)
     state.record("nba_model_run", model_version=MODEL_VERSION, upcoming=len(board["upcoming"]))
     return {"board": str(path), "upcoming": len(board["upcoming"]), "recent": len(board["recent"]),

@@ -74,6 +74,33 @@ export interface EngineGame {
   market: EngineMarket | null;
   edges: EngineEdges | null;
   result: { home_score: number; away_score: number; margin: number; total: number } | null;
+  /** Injury feed flags for this game (test site): designated players per side, with source and time. */
+  availability?: EngineAvailability | null;
+  /** Why the projection moved since the previous published board (only when the injury picture changed). */
+  changes?: { previous_at: string | null; reasons: string[]; moved: Record<string, { from: number; to: number }> } | null;
+}
+
+export interface EngineFlag {
+  player: string;
+  player_id: string;
+  position: string | null;
+  status: "out" | "doubtful" | "questionable" | "probable";
+  raw_status: string | null;
+  source: string;
+  confirmed: boolean;
+  report_time: string | null;
+  detail: string | null;
+  long_term: boolean;
+  late_scratch: boolean;
+  restriction: boolean;
+  conflict: string | null;
+}
+
+export interface EngineAvailability {
+  home: EngineFlag[];
+  away: EngineFlag[];
+  updated_at: string | null;
+  sources: string[];
 }
 
 export interface EngineRatingComponent {

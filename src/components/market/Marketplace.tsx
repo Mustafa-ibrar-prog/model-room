@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Confirmed, sourceLabel } from "@/components/injuries/InjuryFlags";
 import { formatKickoff, formatNumber, formatPct, formatTimestamp } from "@/lib/format";
 import { providerName } from "@/lib/providers";
 import { getExplorer, lineKey, marketMid, SORTS, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
@@ -149,6 +150,35 @@ function LinePill({ l, href, active }: { l: PropLineView; href: string; active: 
   );
 }
 
+function AvailabilityPanel({ r }: { r: ExplorerRow }) {
+  const i = r.injury;
+  if (!i && !r.teammatesOut.length && !r.changes) return null;
+  return (
+    <section aria-label="Availability" className="space-y-1 rounded-md border border-navy-700 p-2.5 text-xs">
+      <h3 className="text-[0.65rem] font-600 uppercase tracking-wider text-faint">Availability</h3>
+      {i?.status ? (
+        <p className="text-mute">
+          <span className={i.status === "available" ? "text-good" : "text-edge"}>{i.lateScratch ? "Late scratch: " : ""}{i.rawStatus ?? i.status}</span>
+          {" "}· <Confirmed confirmed={i.confirmed} /> · {sourceLabel(i.source)}{i.reportTime ? `, ${formatTimestamp(i.reportTime)}` : ""}
+          {i.starterConfirmed != null ? ` · ${i.starterConfirmed ? "confirmed starter" : "not in the confirmed starting five"}` : ""}
+        </p>
+      ) : i ? <p className="text-faint">Not on the injury report.</p> : null}
+      {i?.conflict ? <p className="text-edge">Sources disagree: {i.conflict}. The official designation is used.</p> : null}
+      {i?.startingQb ? <p className="text-mute">Projected starting QB: <span className="text-ink">{i.startingQb}</span></p> : null}
+      {i?.notes.map((n) => <p key={n} className="text-mute">{n}</p>)}
+      {r.teammatesOut.length ? (
+        <p className="text-mute">Teammates out: {r.teammatesOut.map((t) => `${t.name}${t.position ? ` (${t.position})` : ""}${t.status && t.status !== "out" ? `, ${t.status}` : ""}`).join("; ")}</p>
+      ) : null}
+      {r.changes ? (
+        <p className="text-edge">
+          Updated for injury news{r.changes.previous_at ? ` since ${formatTimestamp(r.changes.previous_at)}` : ""}: {r.changes.reasons.join("; ")}.{" "}
+          <span className="text-mute">{r.changes.markets.map((m) => `${m.label} ${m.from} → ${m.to}`).join(", ")}</span>
+        </p>
+      ) : null}
+    </section>
+  );
+}
+
 function PlayerRow({ r, league, q, activeKey, stat }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null; stat: string }) {
   const c = CONF[r.support];
   const href = (l: PropLineView) => propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: lineKey(r.id, l) });
@@ -164,7 +194,12 @@ function PlayerRow({ r, league, q, activeKey, stat }: { r: ExplorerRow; league: 
             <div className="truncate font-600 text-ink">{r.name}</div>
             <div className="flex flex-wrap gap-x-2 text-[0.72rem] text-faint">
               <span>{r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}</span>
-              {r.injuryStatus ? <span className="text-edge">{r.injuryStatus}</span> : null}
+              {r.injury?.status && r.injury.status !== "available" ? (
+                <span className="text-edge" title={`${sourceLabel(r.injury.source)}${r.injury.reportTime ? `, ${formatTimestamp(r.injury.reportTime)}` : ""}${r.injury.confirmed ? " (official)" : " (report)"}`}>
+                  {r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status}{r.injury.confirmed ? "" : "*"}
+                </span>
+              ) : r.injuryStatus && !r.injury ? <span className="text-edge">{r.injuryStatus}</span> : null}
+              {r.changes ? <span className="font-600 text-edge" title={r.changes.reasons.join("; ")}>Updated: injury news</span> : null}
             </div>
           </div>
           <section aria-label="Model Room projection" className="shrink-0 text-right">
@@ -219,6 +254,8 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
           <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
           {explicit ? <Link href={closeHref} scroll={false} className="rounded-md border border-navy-700 px-2 py-0.5 text-sm text-mute lg:hidden">Close</Link> : null}
         </div>
+
+        <AvailabilityPanel r={r} />
 
         <div className="flex flex-wrap gap-1">
           {r.lines.map((o) => {

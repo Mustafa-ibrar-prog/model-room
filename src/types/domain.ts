@@ -1,3 +1,4 @@
+import type { EngineAvailability, EngineGame } from "./engine";
 /**
  * View types the pages render. Built on the server from engine board files
  * (src/types/engine.ts) and gated per plan in src/server/data.
@@ -60,6 +61,9 @@ export interface GameView {
   quarterbacks: { home: string | null; away: string | null } | null;
   qbAdjustment: Gate<number | null>;
   result: { homeScore: number; awayScore: number; margin: number; total: number } | null;
+  /** Injury feed flags (null = no feed for this league this run; never read as "no injuries"). */
+  availability: EngineAvailability | null;
+  changes: EngineGame["changes"] | null;
 }
 
 export interface RatingView {
@@ -82,6 +86,13 @@ export interface InjuryView {
   practice: string | null;
   impactPoints: Gate<number | null>;
   impactNote: string | null;
+  /** From the injury feed (test site): where the status came from and when. */
+  source?: string | null;
+  confirmed?: boolean;
+  reportTime?: string | null;
+  conflict?: string | null;
+  lateScratch?: boolean;
+  longTerm?: boolean;
 }
 
 export interface Freshness {

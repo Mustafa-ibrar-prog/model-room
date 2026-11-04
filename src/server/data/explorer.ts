@@ -3,7 +3,7 @@ import { canAccess, gate } from "@/lib/entitlements";
 import { loadPropsBoard } from "@/server/engine/board";
 import type { Gate, League, TierId } from "@/types/domain";
 import type { EnginePropPlayer, EnginePropsBoard, PropBacktestSummary, PropLineView } from "@/types/props";
-import { lineView } from "./props";
+import { lineView, scalarInputs } from "./props";
 import { ownerLiveMarkets, withLivePolymarket, type LiveInfo } from "@/server/markets/polymarketLive";
 
 /**
@@ -71,6 +71,37 @@ export function lineKey(playerId: string, l: { op: string; threshold: number; va
   return `${playerId}~${l.op === ">" ? "gt" : "ge"}${l.threshold}${l.variant ? `~${l.variant}` : ""}`;
 }
 
+export interface PlayerInjury {
+  status: string | null;
+  rawStatus: string | null;
+  source: string | null;
+  confirmed: boolean;
+  reportTime: string | null;
+  notes: string[];
+  conflict: string | null;
+  lateScratch: boolean;
+  startingQb: string | null;
+  starterConfirmed: boolean | null;
+}
+
+function playerInjury(inputs: Record<string, unknown>): PlayerInjury | null {
+  const a = (inputs.availability ?? null) as Record<string, unknown> | null;
+  const qb = (inputs.starting_qb as string | undefined) ?? null;
+  if (!a && !qb) return null;
+  return {
+    status: (a?.status as string) ?? null,
+    rawStatus: (a?.raw_status as string) ?? null,
+    source: (a?.source as string) ?? null,
+    confirmed: Boolean(a?.confirmed),
+    reportTime: (a?.report_time as string) ?? null,
+    notes: ((a?.notes as string[]) ?? []).filter(Boolean),
+    conflict: (a?.conflict as string) ?? null,
+    lateScratch: Boolean(a?.late_scratch),
+    startingQb: qb,
+    starterConfirmed: (a?.starter_confirmed as boolean | null | undefined) ?? null,
+  };
+}
+
 export interface ExplorerRow {
   id: string;
   gameId: string;
@@ -80,6 +111,11 @@ export interface ExplorerRow {
   opp: string;
   position: string;
   injuryStatus: string | null;
+  /** Injury feed for this player (test site): status with source / time; null when no feed or no entry. */
+  injury: PlayerInjury | null;
+  /** Teammates ruled out for this game (the absences behind his projection). */
+  teammatesOut: { name: string; status: string; source: string; position?: string | null }[];
+  changes: EnginePropPlayer["changes"] | null;
   mean: number;
   median: number;
   sd: number;
@@ -170,6 +206,9 @@ function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: strin
     opp: p.opp,
     position: p.position,
     injuryStatus: p.injury_status,
+    injury: playerInjury(p.inputs ?? {}),
+    teammatesOut: ((p.inputs?.teammates_out_detail as ExplorerRow["teammatesOut"] | undefined) ?? []).slice(0, 8),
+    changes: p.changes ?? null,
     mean: m.mean,
     median: m.median,
     sd: m.sd,
@@ -180,7 +219,7 @@ function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: strin
     lines,
     bestEdge: edges.length ? Math.max(...edges) : null,
     strong: lines.some((l) => l.edge?.grade === "strong"),
-    inputs: gate(tier, "props.advanced", p.inputs as Record<string, unknown>),
+    inputs: gate(tier, "props.advanced", scalarInputs(p.inputs) as Record<string, unknown>),
     recent: (p.recent?.games ?? []).map((g, i) => ({ date: g.date, opp: g.opp, value: rv[i] ?? null })),
   };
 }

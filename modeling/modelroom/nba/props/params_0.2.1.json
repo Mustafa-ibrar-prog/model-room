@@ -1,0 +1,85 @@
+{
+  "calibration": {
+    "assists": [
+      0.2133,
+      1.2566
+    ],
+    "blocks": [
+      0.0867,
+      1.0774
+    ],
+    "points": [
+      0.1003,
+      1.2449
+    ],
+    "pra": [
+      0.0979,
+      1.3058
+    ],
+    "rebounds": [
+      0.1425,
+      1.2592
+    ],
+    "steals": [
+      0.1209,
+      1.109
+    ],
+    "threes": [
+      0.0606,
+      1.0753
+    ]
+  },
+  "model_id": "nba-props",
+  "model_version": "0.2.1",
+  "provenance": {
+    "based_on": "0.2.0 (same settings and calibration)",
+    "doubtful_weight": "0.75, the Doubtful weight already used by the NBA game engine's injury adjustment",
+    "fitted_at": "2026-11-04T18:30:00+00:00",
+    "return_minutes": "python -m modelroom.nba.props.returns: fit 2016-22 (n=646/554/501 games back); held out 2023+: 0.740/0.848/0.937 minutes ratio, sd factor 1.215/1.216/1.186",
+    "status": "test site only: 0.2.0 + the live injury feed (official NBA report, ESPN). 0.2.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NBA_PROPS_VERSION=0.2.0",
+    "test_seasons": [
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "tuning_seasons": [
+      2021,
+      2022
+    ]
+  },
+  "settings": {
+    "assist_sd": 0.35,
+    "blowout_strength": 0.02,
+    "def_half_life": 20.0,
+    "def_prior_minutes": 1500.0,
+    "doubtful_weight": 0.75,
+    "injury_feed": true,
+    "matchup_strength": 0.5,
+    "minutes_fill": "headroom",
+    "minutes_half_life": 3.0,
+    "minutes_sd": 11.0,
+    "missed_games_out": 2,
+    "pace_strength": 1.0,
+    "rate_half_life": 20.0,
+    "rate_prior_kind": "role",
+    "rate_prior_minutes": 150.0,
+    "rebound_sd": 0.25,
+    "return_minutes": [
+      0.743,
+      0.878,
+      0.949
+    ],
+    "return_sd_factor": [
+      1.307,
+      1.211,
+      1.179
+    ],
+    "scoring_sd": 0.25,
+    "season_carry": 0.5,
+    "sims": 10000,
+    "stock_sd": 0.4,
+    "usage_boost": 0.5,
+    "usage_decay": 1.0
+  }
+}

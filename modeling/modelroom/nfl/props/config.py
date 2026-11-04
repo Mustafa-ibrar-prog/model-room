@@ -13,6 +13,8 @@ CANDIDATE_VERSION = "0.2.0"
 CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # yardage-shape candidate: held, never activated
 OPP_VERSION = "0.3.0"
 OPP_FILE = Path(__file__).with_name("params_0.3.0.json")  # opportunity redistribution (test site only when enabled)
+INJURY_VERSION = "0.1.1"
+INJURY_FILE = Path(__file__).with_name("params_0.1.1.json")  # 0.1.0 + live injury feed + inexperienced-QB passing
 
 HISTORY_SEASONS = 3      # prior seasons used alongside the current one
 TUNE_SEASONS = (2021, 2022)
@@ -63,6 +65,11 @@ class PropSettings:
                                         # who are active are known to be active
     target_total_rate: bool = False     # True: receivers' shares add up to the share of pass attempts that
                                         # historically reach RBs/WRs/TEs (~95%), not 100%
+    inexp_qb_attempts: int = 0          # 0.1.1: a starting QB with fewer career attempts than this (0 = off) ...
+    injury_context: bool = False        # 0.1.1: record the starting QB and the injury feed on every projection
+    inexp_qb_yards: float = 1.0         # ... has his team's passing yards (his and his receivers') scaled by this:
+                                        # his rates are pulled toward the league-average QB, but such QBs reach
+                                        # 93% of it (measured 2021-22, held out 2023-25: same 0.931)
     share_normalize: bool = True        # False (share_model="role"): role shares are absolute (share of team
                                         # attempts if he plays), not rescaled so the roster sums to 100%
     questionable_model: str = "none"    # "none": a Questionable player is projected as fully active (0.1);
@@ -101,7 +108,8 @@ PLAY_MODEL = {"a": {1: 1.9017, 2: 0.6419, 3: 0.0867}, "b": 0.7252, "q": -1.6071}
 ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_rush", "shock_kind", "availability_weight",
                   "opp_redistribution", "redist_decay", "redist_up", "redist_up_decay", "redist_in_group", "questionable_factor",
                   "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
-                  "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate")
+                  "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate",
+                  "inexp_qb_attempts", "inexp_qb_yards", "injury_context")
 
 
 @dataclass(frozen=True)

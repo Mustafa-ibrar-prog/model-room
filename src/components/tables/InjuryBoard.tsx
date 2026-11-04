@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { formatSigned } from "@/lib/format";
+import { formatSigned, formatTimestamp } from "@/lib/format";
+import { Confirmed, sourceLabel } from "@/components/injuries/InjuryFlags";
+import type { InjuryView } from "@/types/domain";
 import { getInjuries } from "@/server/data";
 import { getViewer } from "@/server/viewer";
 import type { League } from "@/types/domain";
@@ -11,7 +13,20 @@ const STATUS_STYLE: Record<string, string> = {
   doubtful: "bg-edge/15 text-edge",
   questionable: "bg-edge/10 text-edge/90",
 };
-const ORDER = ["out", "doubtful", "questionable"];
+const ORDER = ["out", "doubtful", "questionable", "probable"];
+
+/** Where a status came from and when; confirmed = the league's own designation. */
+function Provenance({ r }: { r: InjuryView }) {
+  if (!r.source) return null;
+  return (
+    <div className="text-[0.7rem] text-faint">
+      {r.lateScratch ? <span className="font-600 text-danger">Late scratch · </span> : null}
+      <Confirmed confirmed={Boolean(r.confirmed)} /> · {sourceLabel(r.source)}{r.reportTime ? `, ${formatTimestamp(r.reportTime)}` : ""}
+      {r.longTerm ? " · long-term" : ""}
+      {r.conflict ? <span className="text-edge" title={r.conflict}> · sources disagree</span> : null}
+    </div>
+  );
+}
 
 /**
  * Injury report for one league, from the engine's board. With `filters`: status chips and a team picker
@@ -86,6 +101,7 @@ export async function InjuryBoard({ league, limit, team, status, filters = false
                     {r.injury ? ` · ${r.injury}` : ""}
                     {r.practice ? ` · ${r.practice}` : ""}
                   </div>
+                  <Provenance r={r} />
                 </div>
                 <div className="shrink-0 text-right">
                   {r.status ? <span className={`rounded-md px-2 py-0.5 text-xs font-600 ${STATUS_STYLE[r.status.toLowerCase()] ?? "bg-navy-800 text-mute"}`}>{r.status}</span> : null}
@@ -121,7 +137,7 @@ export async function InjuryBoard({ league, limit, team, status, filters = false
                     <td className="px-3 py-2">
                       {r.status ? <span className={`whitespace-nowrap rounded-md px-2 py-0.5 text-sm font-600 ${STATUS_STYLE[r.status.toLowerCase()] ?? "bg-navy-800 text-mute"}`}>{r.status}</span> : <span className="text-faint">–</span>}
                     </td>
-                    <td className="px-3 py-2 text-mute">{r.injury ?? <span className="text-faint">–</span>}</td>
+                    <td className="px-3 py-2 text-mute">{r.injury ?? <span className="text-faint">–</span>}<Provenance r={r} /></td>
                     <td className="px-3 py-2 text-mute">{r.practice ?? <span className="text-faint">–</span>}</td>
                     <td className="px-4 py-2 text-right font-display font-600">
                       <Gated value={r.impactPoints}>
