@@ -44,7 +44,7 @@ def test_monitor_uses_last_pregame_prediction_per_version():
             _rec("0.2.0", "2030-01-02T01:00:00+00:00", 30.0, 0.9, 1.0)]  # after tip-off: ignored
     pred = monitor._pregame(recs)
     box = pd.DataFrame([{"game_id": "g1", "player_id": "p1", "played": True, "minutes": 32.0, "pts": 21.0, "reb": 5, "ast": 4,
-                         "pra": 30.0, "fg3m": 2, "stl": 1, "blk": 0}])
+                         "pra": 30.0, "fg3m": 2, "stl": 1, "blk": 0, "starter": True}])
     rep = monitor.build(pred, box)
     v1, v2 = rep["versions"]["0.1.0"], rep["versions"]["0.2.0"]
     assert v1["markets"]["points"]["all"]["mean_proj"] == 22.0

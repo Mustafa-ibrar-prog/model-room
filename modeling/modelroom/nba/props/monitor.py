@@ -5,7 +5,7 @@
 Reads the append-only prediction ledger (never changes it). For each player-game it takes the LAST
 prediction recorded before tip-off for each model version, joins the final box score, and reports, per
 version:
-  * minutes: projected vs actual, starters and bench separately (starter = started most recent games)
+  * minutes: projected vs actual, starters and bench separately (starter = started that game)
   * points / PRA (and every other market): mean bias, MAE, RMSE, bench vs starters, with vs without a
     teammate ruled out (the injury adjustment)
   * Over / Under calibration at the stored ladder lines: Over leans (p > 0.5) and Under leans (p < 0.5)
@@ -71,8 +71,11 @@ def build(pred: pd.DataFrame, box: pd.DataFrame) -> dict:
     b = box[box["played"]].assign(game_id=lambda x: x["game_id"].astype(str), player_id=lambda x: x["player_id"].astype(str))
     d = pred.merge(b, on=["game_id", "player_id"], how="inner")
     for v, g in d.groupby("version"):
-        g = g.assign(role=np.where(g["starter_rate"].fillna(0) > 0.5, "starter", "bench"),
-                     injury=np.where(g["usage_freed"].fillna(0) > 0, "teammate_out", "none"))
+        # Role = whether he started that game (box score), so every version is split the same way, including
+        # records written before the ledger stored the model's own starter estimate.
+        role = np.where(g["starter"].astype(bool), "starter", "bench") if "starter" in g else np.where(g["starter_rate"].fillna(0) > 0.5, "starter", "bench")
+        injury = np.where(g["usage_freed"].isna(), "not recorded", np.where(g["usage_freed"].fillna(0) > 0, "teammate_out", "none"))
+        g = g.assign(role=role, injury=injury)
         rep = {"player_games": int(len(g)), "games": int(g["game_id"].nunique()),
                "first_game": str(g["game_start"].min()), "last_game": str(g["game_start"].max()),
                "minutes": {"all": _err(g, "proj_min", "minutes"), **{r: _err(x, "proj_min", "minutes") for r, x in g.groupby("role")}},
