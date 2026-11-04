@@ -338,3 +338,21 @@ def test_changed_injury_picture_is_a_new_snapshot(tmp_path):
     ledger.append(f, [{**rec, "inputs_hash": "b", "generated_at": "2026-11-04T23:00:00+00:00"}])   # same picture: deduped
     lines = f.read_text().splitlines()
     assert f.read_text().startswith(first) and len(lines) == 2
+
+
+def test_no_lineups_posted_yet_is_not_an_error(tmp_path, monkeypatch):
+    """Before ESPN posts lineups the starters table is empty; availability still builds (starters = unknown)."""
+    from modelroom.injuries import use as U
+
+    proc = tmp_path / "nba"
+    proc.mkdir()
+    feed = pd.DataFrame([{**_row(status="out", raw_status="Out", source="nba_official", kind="official", report_time=NOW), "current": True, "stale": False}])
+    feed.to_parquet(proc / "injury_feed.parquet")
+    pd.DataFrame(columns=E.STARTER_COLUMNS).to_parquet(proc / "starters_live.parquet")
+    monkeypatch.setattr(U, "processed_dir", lambda lg: proc)
+    monkeypatch.setattr(U, "live_meta", lambda lg: {"filings": [], "generated_at": NOW.isoformat()})
+    up = pd.DataFrame([{"game_id": "401", "start_time": pd.Timestamp("2026-11-05T00:00Z"), "home_abbr": "DET", "away_abbr": "PHI"}])
+    pg = pd.DataFrame([{"player_id": "1", "game_date": "2026-11-02", "played": True, "season": 2027}])
+    av = U.nba_availability(up, pg)
+    assert av[("401", "DET")]["players"]["1"]["status"] == "out" and av[("401", "DET")]["starters"] is None
+    assert U.availability_hash("nba")

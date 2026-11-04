@@ -21,6 +21,7 @@ from . import schema as S
 SITE = "https://site.api.espn.com/apis/site/v2/sports"
 PATH = {"nfl": "football/nfl", "nba": "basketball/nba"}
 NFL_ABBR = {"LAR": "LA", "WSH": "WAS"}   # ESPN → nflverse; NBA abbreviations already match the engine's
+STARTER_COLUMNS = ["team", "source_player_id", "starter", "fetched_at", "source", "espn_event", "game_start"]
 UA = {"User-Agent": "Mozilla/5.0 (compatible; ModelRoom/0.1; test site)"}
 
 
@@ -170,4 +171,4 @@ def fetch(league: str, *, get=get_json, now: pd.Timestamp | None = None, starter
     if not people:
         raise RuntimeError(f"ESPN {league}: no rosters fetched ({'; '.join(errors[:3])})")
     return {"rows": pd.DataFrame(rows, columns=S.COLUMNS), "roster": pd.DataFrame(people), "depth": pd.DataFrame(dep),
-            "starters": pd.DataFrame(starters), "errors": errors, "fetched_at": now}
+            "starters": pd.DataFrame(starters, columns=STARTER_COLUMNS), "errors": errors, "fetched_at": now}
