@@ -38,15 +38,27 @@ EXCLUDE_REPORT = {"Out", "Doubtful"}
 FIRST_SEASON = 2018
 
 
+def read_depth(season: int) -> pd.DataFrame | None:
+    """nflverse's depth charts for the season, plus the live ESPN snapshot fetched by the injury refresh
+    (same source and format, newer timestamp) when there is one."""
+    f = raw_dir("nfl") / f"depth_charts_{season}.parquet"
+    live = raw_dir("nfl") / f"depth_charts_live_{season}.parquet"
+    parts = [pd.read_parquet(x) for x in (f, live) if x.exists()]
+    if not parts:
+        return None
+    if len(parts) == 2 and "dt" not in parts[0].columns:
+        return parts[0]  # undated weekly charts (through 2024): the live snapshot format doesn't mix in
+    return pd.concat(parts, ignore_index=True)
+
+
 def _depth(seasons: list[int]):
     """Weekly ranks (season, week) → {gsis: rank}, and timestamped snapshots: sorted dts + {dt: {gsis: rank}}."""
     weekly: dict = {}
     snaps: dict = {}
     for s in seasons:
-        f = raw_dir("nfl") / f"depth_charts_{s}.parquet"
-        if not f.exists():
+        d = read_depth(s)
+        if d is None:
             continue
-        d = pd.read_parquet(f)
         if "dt" in d.columns:
             q = d[(d["pos_abb"] == "QB") & d["gsis_id"].notna()]
             q = q.assign(rank=pd.to_numeric(q["pos_rank"], errors="coerce")).dropna(subset=["rank"])
@@ -79,6 +91,7 @@ def build(games: pd.DataFrame | None = None) -> pd.DataFrame:
     actual = qbp.sort_values("pass_att").drop_duplicates(["game_id", "team"], keep="last").set_index(["game_id", "team"])["player_id"].to_dict()
     team_games = {t: x.sort_values("date") for t, x in qbp.groupby("team")}
     weekly, times, snaps = _depth(seasons)
+    live_qbs = _live_roster_qbs()
 
     rows = []
     for g in games.itertuples():
@@ -93,6 +106,10 @@ def build(games: pd.DataFrame | None = None) -> pd.DataFrame:
                 wk = weeks[weeks <= g.week].max() if (weeks <= g.week).any() else weeks.max()
                 cur = r[(r["week"] == wk) & r["status"].isin(ELIGIBLE)]
                 cands = [x for x in cur["gsis_id"].unique() if (int(g.season), int(g.week), x) not in out_ids]
+            if g.status == "scheduled" and team in live_qbs:
+                # Coming games: QBs on ESPN's current active roster (signings and promotions since nflverse's last
+                # weekly roster), still minus the injury report's Out / Doubtful.
+                cands += [x for x in live_qbs[team] if x not in cands and (int(g.season), int(g.week), x) not in out_ids]
             qb, source = None, None
             depth_qb = last_qb = None
             timestamped = False
@@ -105,9 +122,9 @@ def build(games: pd.DataFrame | None = None) -> pd.DataFrame:
                 if ranks is None:
                     ranks = weekly.get((int(g.season), int(g.week)))
                 if ranks:
-                    ranked = sorted((ranks[c], c) for c in cands if c in ranks)
-                    if ranked:
-                        qb, source = ranked[0][1], "depth chart"
+                    top = first_available(ranks, cands)
+                    if top:
+                        qb, source = top, "depth chart"
                         depth_qb = qb
                 tg = team_games.get(team)
                 if tg is not None:
@@ -135,6 +152,21 @@ def build(games: pd.DataFrame | None = None) -> pd.DataFrame:
     out = pd.DataFrame(rows)
     out.to_parquet(processed_dir("nfl") / "starters.parquet", index=False)
     return out
+
+
+def first_available(ranks: dict, cands: list[str]) -> str | None:
+    """Highest-ranked QB on the depth chart among the available candidates (injured QBs are already removed)."""
+    ranked = sorted((ranks[c], c) for c in cands if c in ranks)
+    return ranked[0][1] if ranked else None
+
+
+def _live_roster_qbs() -> dict[str, list[str]]:
+    f = processed_dir("nfl") / "espn_roster.parquet"
+    if not f.exists():
+        return {}
+    r = pd.read_parquet(f)
+    r = r[(r["position"] == "QB") & (r["roster_status"] == "Active") & r["player_id"].notna()]
+    return r.groupby("team")["player_id"].apply(list).to_dict()
 
 
 def load() -> pd.DataFrame | None:

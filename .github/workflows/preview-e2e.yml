@@ -18,8 +18,8 @@ concurrency:
 
 jobs:
   e2e:
-    # Scheduled Preview runs check every 10 minutes and usually deploy nothing: test after pushes and manual runs.
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'schedule')
+    # Scheduled / Supabase-dispatched Preview runs check every few minutes and usually deploy nothing: test after pushes.
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

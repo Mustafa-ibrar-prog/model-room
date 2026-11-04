@@ -125,3 +125,45 @@ export async function loadRefreshStatus(): Promise<RefreshStatus | null> {
     return null;
   }
 }
+
+
+export interface LiveInjuryRow {
+  team: string;
+  player: string;
+  player_id: string;
+  position: string | null;
+  status: string;
+  raw_status: string | null;
+  source: string;
+  kind: "official" | "report";
+  report_time: string | null;
+  detail: string | null;
+  comment: string | null;
+  current: boolean;
+  stale: boolean;
+  stale_reason: string | null;
+  conflict: string | null;
+  late_scratch: boolean;
+  long_term: boolean;
+  restriction: boolean;
+  team_report?: string;
+}
+
+export interface LiveInjuries {
+  league: string;
+  generated_at: string;
+  sources: Record<string, { ok: boolean; rows?: number; error?: string; report_time?: string; url?: string }>;
+  filings: { game_date: string; team: string; submitted: boolean }[];
+  conflicts: number;
+  players: LiveInjuryRow[];
+}
+
+/** The injury refresh's combined feed (test site). Null when no feed has been fetched for the league. */
+export async function loadLiveInjuries(league: League): Promise<LiveInjuries | null> {
+  await connection();
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), `injuries_live_${league}.json`), "utf8")) as LiveInjuries;
+  } catch {
+    return null;
+  }
+}

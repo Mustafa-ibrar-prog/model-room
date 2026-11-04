@@ -11,6 +11,8 @@ MODEL_VERSION = "0.1.0"
 PARAMS_FILE = Path(__file__).with_name("params.json")
 CANDIDATE_VERSION = "0.2.0"
 CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not used live until approved
+INJURY_VERSION = "0.2.1"
+INJURY_FILE = Path(__file__).with_name("params_0.2.1.json")      # 0.2.0 + the live injury feed (test site)
 
 HISTORY_SEASONS = 2                  # earlier seasons used alongside the current one (hoopR season = end year)
 TUNE_SEASONS = (2021, 2022)          # 2020-21, 2021-22
@@ -45,7 +47,17 @@ class PropSettings:
                                        # below their own recent high, extra minutes are trimmed pro rata
     usage_decay: float = 0.0           # 1 = freed usage from an absent teammate fades as his absence ages
                                        # (teammates' recent rates already include it); 0 = full boost always
+    # 0.2.1 injury-feed settings. Defaults reproduce 0.2.0 exactly (and leave its params hash unchanged).
+    injury_feed: bool = False          # availability from the injury feed (official NBA report, ESPN) for each game,
+                                       # ahead of the "missed the last N games" rule; that rule stays the fallback
+    doubtful_weight: float = 0.75      # share of a Doubtful player's usage treated as freed (as in the game model)
+    return_minutes: tuple = ()         # minutes multiplier in a player's 1st, 2nd, 3rd... game back after missing 3+
+                                       # (measured on box scores, fit 2016-22: see params_0.2.1.json provenance)
+    return_sd_factor: tuple = ()       # minutes_sd multiplier in those games (their minutes are less predictable)
     sims: int = 4000
+
+
+ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor")
 
 
 @dataclass(frozen=True)
@@ -55,7 +67,12 @@ class PropParams:
     provenance: dict = field(default_factory=dict)
 
     def to_json(self) -> dict:
-        return {"model_id": MODEL_ID, "model_version": MODEL_VERSION, **asdict(self)}
+        d = {"model_id": MODEL_ID, "model_version": MODEL_VERSION, **asdict(self)}
+        # Settings added after a version shipped are left out while at their default, so that version's
+        # params hash (stored in every ledger record) stays exactly what it was.
+        default = PropSettings()
+        d["settings"] = {k: v for k, v in d["settings"].items() if k not in ADDED_SETTINGS or v != getattr(default, k)}
+        return d
 
     def save(self, path: Path = PARAMS_FILE) -> None:
         path.write_text(json.dumps(self.to_json(), indent=2, sort_keys=True) + "\n")
@@ -66,7 +83,8 @@ class PropParams:
             return cls()
         d = json.loads(path.read_text())
         known = {f.name for f in fields(PropSettings)}
-        return cls(PropSettings(**{k: v for k, v in d["settings"].items() if k in known}), d.get("calibration", {}), d.get("provenance", {}))
+        st = {k: (tuple(v) if isinstance(v, list) else v) for k, v in d["settings"].items() if k in known}
+        return cls(PropSettings(**st), d.get("calibration", {}), d.get("provenance", {}))
 
     def calibrate(self, market: str, p: float) -> float:
         ab = self.calibration.get(market)

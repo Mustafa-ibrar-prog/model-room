@@ -61,7 +61,9 @@ export interface EnginePropPlayer {
   game_id: string;
   injury_status: string | null;
   markets: Record<string, EnginePropMarket>;
-  inputs: Record<string, number | string | null>;
+  inputs: Record<string, unknown>;
+  /** Why the projection moved since the previous board (only when the injury picture changed). */
+  changes?: { previous_at: string | null; reasons: string[]; markets: { market: string; label: string; from: number; to: number }[] } | null;
   /** Last few games before the run (newest first): context only, never an input to the board's numbers. */
   recent?: { games: { date: string; opp: string }[]; values: Record<string, (number | null)[]> };
 }

@@ -161,23 +161,92 @@ def _shock(rng, sd: float, n: int) -> np.ndarray:
     return np.exp(rng.normal(-0.5 * sd * sd, sd, n)) if sd > 0 else np.ones(n)
 
 
-def candidates(ctx: Context, team: str, s: PropSettings) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """(active, ruled out) players for a team. Out = a rotation player who missed the team's last N games."""
+def candidates(ctx: Context, team: str, s: PropSettings, avail: dict | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """(active, ruled out) players for a team. Out = a rotation player who missed the team's last N games.
+
+    With the injury feed (0.2.1, `avail` = this game's availability, see availability()): a current Out /
+    Doubtful designation rules a player out whatever his streak; Questionable / Probable / Available (or not
+    listed on the team's submitted official report) keeps him in even after missed games, as a returning
+    player. Players with no current information fall back to the streak rule: missing data is never read
+    as healthy or as out. Ruled-out rows carry `out_weight` (Doubtful counts partly)."""
     c = ctx.players[(ctx.players["team"] == team) & (ctx.cutoff - ctx.players["last_game"] <= pd.Timedelta(days=60))].copy()
     rotation = c["minutes_when_playing"] >= 12
-    out = c[rotation & (c["missed_in_row"].fillna(99) >= s.missed_games_out)]
-    active = c.drop(out.index)
-    active = active[active["appear_rate"] > 0]
+    streak = c["missed_in_row"].fillna(99) >= s.missed_games_out
+    if not (s.injury_feed and avail):
+        out = c[rotation & streak]
+        active = c.drop(out.index)
+        active = active[active["appear_rate"] > 0]
+        return active, out.assign(out_weight=1.0)
+    players = avail.get("players", {})
+    st = pd.Series({pid: (players.get(str(pid)) or {}).get("status") for pid in c.index}, dtype=object)
+    ruled = st.isin(["out", "doubtful"])
+    cleared = st.isin(["questionable", "probable", "available"]) | (st.isna() & bool(avail.get("submitted")))
+    out_mask = ruled | (rotation & streak & ~cleared)
+    out = c[out_mask].copy()
+    out = out[rotation[out.index] | ruled[out.index]]
+    out["out_weight"] = np.where(st[out.index] == "doubtful", s.doubtful_weight, 1.0)
+    active = c[~out_mask]
+    active = active[(active["appear_rate"] > 0) | cleared[active.index]]
     return active, out
 
 
+def availability(team_feed: pd.DataFrame | None, back: dict, submitted: bool, starters: set | None) -> dict:
+    """This team-game's availability from the injury feed rows (current, not stale): {players: {id: {...}},
+    submitted, starters}."""
+    players = {}
+    if team_feed is not None:
+        for r in team_feed.itertuples():
+            players[str(r.player_id)] = {"status": r.status, "raw_status": r.raw_status, "source": r.source, "kind": r.kind,
+                                         "report_time": None if pd.isna(r.report_time) else pd.Timestamp(r.report_time).isoformat(),
+                                         "restriction": bool(r.restriction), "restriction_minutes": None if pd.isna(r.restriction_minutes) else float(r.restriction_minutes),
+                                         "late_scratch": bool(getattr(r, "late_scratch", False)), "conflict": getattr(r, "conflict", None) or None,
+                                         "detail": r.detail if isinstance(r.detail, str) else None}
+    return {"players": players, "back": back, "submitted": submitted, "starters": starters}
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, pace: float | None, p: PropParams,
-                 rng) -> list[PlayerProjection]:
+                 rng, avail: dict | None = None) -> list[PlayerProjection]:
     s = p.settings
     n = s.sims
-    active, out = candidates(ctx, team, s)
+    active, out = candidates(ctx, team, s, avail)
     if active.empty:
         return []
+    feed_on = bool(s.injury_feed and avail)
+    sd_f = pd.Series(1.0, index=active.index)
+    notes: dict = {}
+    if feed_on:
+        # Returning players (1st-3rd game after missing 3+) play fewer, less predictable minutes (measured); a
+        # stated minutes restriction caps them. Done before the minutes fill, so the gap goes to teammates.
+        active = active.copy()
+        info = avail["players"]
+        for pid in active.index:
+            k = str(pid)
+            nb = 1 if active.at[pid, "missed_in_row"] >= 3 else (avail["back"].get(k, 99) + 1)
+            f = 1.0
+            if s.return_minutes and 1 <= nb <= len(s.return_minutes):
+                f = float(s.return_minutes[nb - 1])
+                sd_f[pid] = float(s.return_sd_factor[nb - 1]) if s.return_sd_factor else 1.0
+                notes.setdefault(pid, []).append(f"game {nb} back from a {int(active.at[pid, 'missed_in_row']) if nb == 1 else 3}+ game absence: minutes x{f:.2f}")
+            r = info.get(k) or {}
+            if r.get("status") in ("available", "probable") or (nb == 1 and (r.get("status") is None or r.get("status") != "questionable")):
+                # Expected to play: his recent appearance rate (low after an absence) no longer applies.
+                active.at[pid, "appear_rate"] = 1.0
+            cap = r.get("restriction_minutes")
+            mwp = float(active.at[pid, "minutes_when_playing"])
+            new_m = mwp * f
+            if cap:
+                new_m = min(new_m, float(cap))
+                notes.setdefault(pid, []).append(f"minutes restriction reported (~{cap:.0f})")
+            elif r.get("restriction"):
+                notes.setdefault(pid, []).append("minutes restriction reported, amount not given")
+                if nb > len(s.return_minutes or ()) and s.return_minutes:
+                    new_m = min(new_m, mwp * float(s.return_minutes[0]))
+                    sd_f[pid] = float(s.return_sd_factor[0]) if s.return_sd_factor else 1.0
+            if new_m != mwp:
+                active.at[pid, "minutes_when_playing"] = new_m
+                active.at[pid, "minutes_high"] = min(float(active.at[pid, "minutes_high"]) if pd.notna(active.at[pid, "minutes_high"]) else new_m, new_m + 4.0)
+        if avail.get("starters"):
+            active["starter_rate"] = [1.0 if str(pid) in avail["starters"] else 0.0 for pid in active.index]
     exp_min = active["minutes_when_playing"] * active["appear_rate"]
     if s.minutes_fill == "headroom" and exp_min.sum() > 0:
         mwp = active["minutes_when_playing"]
@@ -201,7 +270,8 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     team_usage = float((active["usage_pm"].fillna(0) * active["minutes_when_playing"] * active["appear_rate"]).sum())
     fade = np.power(0.5, out["missed_in_row"].fillna(0).to_numpy(float) / s.rate_half_life) if s.usage_decay > 0 else 1.0
     fade = fade ** s.usage_decay if s.usage_decay > 0 else fade
-    out_usage = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"] * fade).sum())
+    ow = out["out_weight"].to_numpy(float) if "out_weight" in out else 1.0
+    out_usage = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"] * fade * ow).sum())
     freed = out_usage / (team_usage + out_usage) if team_usage + out_usage > 0 else 0.0
     usage_f = 1.0 + s.usage_boost * freed
     tp = ctx.team_pace.get(team, ctx.league["pace"])
@@ -214,7 +284,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         def opp_f(r):
             return float(dfn[r]) ** s.matchup_strength if dfn is not None else 1.0
 
-        m = np.clip(rng.normal(base[pid], s.minutes_sd, n), 1.0, 48.0)
+        m = np.clip(rng.normal(base[pid], s.minutes_sd * float(sd_f.get(pid, 1.0)), n), 1.0, 48.0)
         sh_score = _shock(rng, s.scoring_sd, n) * usage_f
         sh_reb, sh_ast, sh_stk = _shock(rng, s.rebound_sd, n), _shock(rng, s.assist_sd, n) * usage_f ** 0.5, _shock(rng, s.stock_sd, n)
         lam = lambda r, sh: x[f"{r}_pm"] * m * pace_f * opp_f(r) * sh  # noqa: E731
@@ -232,16 +302,27 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                   "opp_points_factor": round(opp_f("fg2m"), 3), "opp_rebounds_factor": round(opp_f("reb"), 3),
                   "opp_assists_factor": round(opp_f("ast"), 3),
                   "sample": {"games": int(x["n_games"]), "minutes": round(float(x["n_minutes"]), 0)}}
+        if feed_on:
+            me = avail["players"].get(str(pid)) or {}
+            inputs["availability"] = {"status": me.get("status"), "raw_status": me.get("raw_status"), "source": me.get("source"),
+                                      "confirmed": me.get("kind") == "official", "report_time": me.get("report_time"),
+                                      "late_scratch": me.get("late_scratch"), "conflict": me.get("conflict"),
+                                      "starter_confirmed": (str(pid) in avail["starters"]) if avail.get("starters") else None,
+                                      "notes": notes.get(pid, [])}
+            inputs["teammates_out_detail"] = [{"name": str(o["name"]), "status": (avail["players"].get(str(oid)) or {}).get("status") or "missed recent games",
+                                               "source": (avail["players"].get(str(oid)) or {}).get("source") or "box scores",
+                                               "weight": round(float(o["out_weight"]), 2)} for oid, o in out.iterrows()]
         res.append(PlayerProjection(pid, str(x["name"]), team, opp, grp, game_id, sims, inputs))
     return res
 
 
-def project_games(ctx: Context, games: pd.DataFrame, p: PropParams, seed: int) -> list[PlayerProjection]:
-    """games: game_id, home_abbr, away_abbr, proj_margin (home), proj_pace. Seeded per (seed, game, team)."""
+def project_games(ctx: Context, games: pd.DataFrame, p: PropParams, seed: int, avail: dict | None = None) -> list[PlayerProjection]:
+    """games: game_id, home_abbr, away_abbr, proj_margin (home), proj_pace. Seeded per (seed, game, team).
+    avail: {(game_id, team): availability(...)} when the injury feed is used (0.2.1)."""
     out = []
     for _, g in games.iterrows():
         for team, opp, mg in ((g["home_abbr"], g["away_abbr"], g["proj_margin"]), (g["away_abbr"], g["home_abbr"], -g["proj_margin"])):
             rng = np.random.default_rng([seed, zlib.crc32(f"{g['game_id']}|{team}".encode())])
             out += project_team(ctx, str(g["game_id"]), team, opp, float(mg) if pd.notna(mg) else 0.0,
-                                g.get("proj_pace"), p, rng)
+                                g.get("proj_pace"), p, rng, (avail or {}).get((str(g["game_id"]), team)))
     return out

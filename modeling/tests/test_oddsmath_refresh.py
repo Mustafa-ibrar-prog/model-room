@@ -58,3 +58,19 @@ def test_refresh_slots_and_no_duplicates(tmp_path, monkeypatch):
     assert not R.due(t("2026-11-08T15:30:00"))                                      # done → never twice
     assert not R.due(t("2026-11-08T18:30:00"))                                      # game started: window closed
     assert [s["kind"] for s in R.due(t("2026-11-09T00:05:00"))] == ["afternoon"]   # 4:05 PM PT, its own slot
+
+
+def test_failed_runs_are_retried_reported_and_missed(tmp_path, monkeypatch):
+    pub = tmp_path / "published"
+    pub.mkdir()
+    monkeypatch.setattr(R, "PUBLISHED", pub)
+    monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
+    t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
+    R.record(["midday:2026-11-08"], "failed", "schedule run 1", t("2026-11-08T20:05:00"))
+    assert [s["id"] for s in R.due(t("2026-11-08T20:15:00"))] == ["midday:2026-11-08"]   # retried while the window is open
+    assert R.pending(["midday:2026-11-08", "morning:2026-11-08"]) == ["midday:2026-11-08", "morning:2026-11-08"]
+    R.record(["midday:2026-11-08"], "success", "schedule run 2", t("2026-11-08T20:20:00"))
+    assert R.pending(["midday:2026-11-08"]) == []                # a queued duplicate run sees it's done
+    st = R.status(t("2026-11-09T01:00:00"))                      # 5 PM PT: morning window long closed, never ran
+    assert "morning:2026-11-08" in st["missed"] and "midday:2026-11-08" not in st["missed"]
+    assert st["recent_failures"][-1]["note"] == "schedule run 1" and st["last_success_by_kind"]["midday"]["note"] == "schedule run 2"

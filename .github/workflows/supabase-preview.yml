@@ -93,6 +93,16 @@ jobs:
         # Only this workflow sets it, and it only ever targets the test site's project. A production
         # database never has the flag, so public.test_simulate_membership() refuses there.
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "insert into private.app_settings (key, value) values ('test_account_controls', 'on') on conflict (key) do update set value = excluded.value"
+      - name: Switch on the refresh scheduler for this (test site) database
+        if: steps.check.outputs.ready == 'yes'
+        # pg_cron dispatches the Preview workflow every 5 minutes (see the 20261104000100 migration). It needs
+        # the GitHub token in Supabase Vault, stored by the owner from the SQL editor; it is never in GitHub
+        # or this repository. Without the token it logs "no token" hourly and does nothing.
+        run: psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "insert into private.app_settings (key, value) values ('refresh_scheduler', 'on') on conflict (key) do update set value = excluded.value"
+      - name: Report the refresh scheduler's health (no secrets)
+        if: steps.check.outputs.ready == 'yes'
+        run: |
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'scheduler - enabled=' || enabled || ', token stored=' || (exists (select 1 from vault.secrets where name = 'model_room_github_dispatch'))::text || ', last accepted dispatch=' || coalesce(last_accepted::text, 'never') || ', failures 24h=' || failures_24h from scheduler.health"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/seed-test-accounts.mjs

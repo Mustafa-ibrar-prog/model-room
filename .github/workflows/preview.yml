@@ -18,8 +18,23 @@ on:
     # modeling/modelroom/refresh_plan.py): 7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min (inactive lists),
     # and 30 min before every game. GitHub can start scheduled runs late; each slot stays open for a window
     # so a late start still refreshes, and a slot that succeeded is never run twice.
+    # Backup trigger. The primary trigger is Supabase pg_cron, which dispatches this workflow every 5 minutes
+    # with mode=plan (supabase/migrations/20261104000100_refresh_scheduler.sql): it starts on time, unlike
+    # GitHub's schedule. Both go through the same planner, so a slot runs once whichever arrives first.
     - cron: "*/10 * * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "force = refresh now; plan = refresh only if a slot is due (what the scheduler sends)"
+        required: false
+        default: force
+        type: choice
+        options: [force, plan]
+      trigger:
+        description: "who started the run (logged)"
+        required: false
+        default: manual
+        type: string
 
 permissions:
   contents: write
@@ -48,8 +63,9 @@ jobs:
         working-directory: modeling
         env:
           EVENT: ${{ github.event_name }}
+          MODE: ${{ github.event.inputs.mode }}
         run: |
-          if [ "$EVENT" = "schedule" ]; then
+          if [ "$EVENT" = "schedule" ] || [ "$MODE" = "plan" ]; then
             python3 modelroom/refresh_plan.py due
           else
             echo "run=yes" >> "$GITHUB_OUTPUT"; echo "slots=" >> "$GITHUB_OUTPUT"; echo "kinds=$EVENT" >> "$GITHUB_OUTPUT"
@@ -68,7 +84,14 @@ jobs:
       # NBA player props: the 0.2.0 model on the TEST SITE only (approved 2026-11-03). Every prediction it
       # makes is recorded in the ledger as 0.2.0; earlier 0.1.0 records stay exactly as they were.
       # Rollback: delete this line (or set "0.1.0") and push; the next refresh publishes 0.1.0 again.
-      MODELROOM_NBA_PROPS_VERSION: "0.2.0"
+      MODELROOM_NBA_PROPS_VERSION: "0.2.1"
+      # Injury-feed versions on the TEST SITE only. The previous versions keep running in the ledger as shadows
+      # (recorded, not published) so both are graded on the same games. Rollback: set the versions back to
+      # 0.2.0 / 0.1.0 (and MODELROOM_NBA_INJURY_FEED: "off" for the NBA game engine's injury adjustment).
+      MODELROOM_NBA_PROPS_SHADOW: "0.2.0"
+      MODELROOM_NFL_PROPS_VERSION: "0.1.1"
+      MODELROOM_NFL_PROPS_SHADOW: "0.1.0"
+      MODELROOM_NBA_INJURY_FEED: "on"
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
     steps:
       - uses: actions/checkout@v4
@@ -94,7 +117,14 @@ jobs:
           BEFORE: ${{ github.event.before }}
           EVENT: ${{ github.event_name }}
           SHA: ${{ github.sha }}
+          SLOTS: ${{ needs.plan.outputs.slots }}
         run: |
+          # Duplicate-run protection: runs queue on the "preview" concurrency group, so by the time this one starts
+          # an earlier run may already have done the same slots. Re-check against the latest refresh log.
+          if [ -n "$SLOTS" ]; then
+            left=$(cd modeling && python3 modelroom/refresh_plan.py pending --slots "$SLOTS" | python3 -c "import sys,json;print(','.join(json.load(sys.stdin)['pending']))")
+            if [ -z "$left" ]; then echo "data=no" >> "$GITHUB_OUTPUT"; echo "Slots already done by an earlier run: $SLOTS"; exit 0; fi
+          fi
           if [ "$EVENT" != "push" ] || [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             echo "data=yes" >> "$GITHUB_OUTPUT"
           elif git diff --name-only "$BEFORE" "$SHA" | grep -q '^modeling/'; then
@@ -120,6 +150,12 @@ jobs:
           python -m modelroom nba ingest
           python -m modelroom nfl ingest
           python -m modelroom sources validate
+          # Injury feed (test site): the official NBA injury report + ESPN's injury reports (+ nflverse's copy of the
+          # NFL report). A failed source is logged on the site; the engines then fall back to their own
+          # availability rules. Then the NFL starters are rebuilt with the live depth chart and designations.
+          python -m modelroom injuries nba || echo "::warning::NBA injury feed failed; NBA engines use the missed-games rule"
+          python -m modelroom injuries nfl || echo "::warning::NFL injury feed failed; NFL engines use nflverse injury reports"
+          python -m modelroom nfl starters > /dev/null
           # Sportsbook lines (DraftKings, FanDuel and other US books) from The Odds API, only when the
           # ODDS_API_KEY secret is set. Free tier = 500 credits a month; each league costs 3 credits a call, so
           # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
@@ -157,7 +193,7 @@ jobs:
         run: |
           # Every attempt is logged (append-only), success or failure, with the slots it covered.
           if [ "$DATA" = "success" ]; then ST=success; elif [ "$DATA" = "skipped" ]; then ST=skipped; else ST=failed; fi
-          [ "$ST" = "skipped" ] || (cd modeling && python3 modelroom/refresh_plan.py record --slots "${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}" --status $ST --note "${{ github.event_name }} run ${{ github.run_id }}" \
+          [ "$ST" = "skipped" ] || (cd modeling && python3 modelroom/refresh_plan.py record --slots "${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}" --status $ST --note "${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}" \
             && python3 modelroom/refresh_plan.py status > data/published/refresh_status.json)
           [ "$ST" = "skipped" ] || git add -f modeling/preview-ledger/refresh_log.jsonl modeling/data/published/refresh_status.json
           if [ "$DATA" = "success" ]; then

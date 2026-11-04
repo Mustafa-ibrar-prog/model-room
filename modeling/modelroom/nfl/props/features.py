@@ -171,6 +171,9 @@ def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: 
     P["n_targets"] = raw["targets"].reindex(P.index).fillna(0).astype(int)
     P["n_carries"] = raw["carries"].reindex(P.index).fillna(0).astype(int)
     P["n_pass_att"] = raw["pass_att"].reindex(P.index).fillna(0).astype(int)
+    # Career pass attempts before the cutoff (every season in the data, from 2018): a QB's experience.
+    prior = pg[pd.to_datetime(pg["game_date"]) < pd.Timestamp(cutoff).tz_localize(None) if pd.Timestamp(cutoff).tzinfo else pd.to_datetime(pg["game_date"]) < pd.Timestamp(cutoff)]
+    P["career_pass_att"] = prior.groupby("player_id")["pass_att"].sum().reindex(P.index).fillna(0).astype(int)
 
     P["p_play"] = _play_rate(played, tg, P)
     if s.fill_in_weight < 1.0:

@@ -1,6 +1,6 @@
 import "server-only";
 import { FREE_EDGE_FINDER_LIMIT, canAccess, gate } from "@/lib/entitlements";
-import { loadBoard } from "@/server/engine/board";
+import { loadLiveInjuries, loadBoard } from "@/server/engine/board";
 import type {
   Freshness,
   GameView,
@@ -87,6 +87,8 @@ export function toGameView(g: EngineGame, league: League, tier: TierId, edgeAllo
     injuryAdjustment: gate(tier, "injuries.adjustments", g.adjustments.injury_points),
     quarterbacks: g.quarterbacks ?? null,
     qbAdjustment: gate(tier, "injuries.adjustments", g.adjustments.qb_points ?? null),
+    availability: g.availability ?? null,
+    changes: g.changes ?? null,
     result: g.result
       ? { homeScore: g.result.home_score, awayScore: g.result.away_score, margin: g.result.margin, total: g.result.total }
       : null,
@@ -210,6 +212,41 @@ export async function getInjuries(
   const res = await loadBoard(league);
   if (!res.ok) return { ok: false, reason: res.reason };
   const b = res.board;
+  const live = await loadLiveInjuries(league);
+  if (live) {
+    // The combined injury feed: one current status per player, with its source and time.
+    const impact = new Map((b.injuries ?? []).map((i) => [`${i.team}|${i.player}`, i]));
+    const order: Record<string, number> = { out: 0, doubtful: 1, questionable: 2, probable: 3 };
+    const ok = Object.entries(live.sources).filter(([, v]) => v.ok).map(([k]) => k);
+    const failed = Object.entries(live.sources).filter(([, v]) => !v.ok).map(([k]) => k);
+    return {
+      ok: true,
+      connected: true,
+      note: `${ok.map((k) => ({ nba_official: "official NBA injury report", espn: "ESPN injury reports", nflverse: "NFL injury report via nflverse" })[k] ?? k).join(" + ")}, as of ${new Date(live.generated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" })}${failed.length ? `. Unavailable this refresh: ${failed.join(", ")}` : ""}${live.conflicts ? `. ${live.conflicts} conflicting reports (official designation used)` : ""}.`,
+      rows: live.players
+        .filter((p) => p.current && p.status in order)
+        .sort((x, y) => order[x.status] - order[y.status] || x.team.localeCompare(y.team))
+        .map((p) => {
+          const i = impact.get(`${p.team}|${p.player}`);
+          return {
+            team: p.team,
+            player: p.player,
+            position: p.position,
+            status: p.raw_status && p.raw_status.toLowerCase() !== p.status ? `${p.status[0].toUpperCase()}${p.status.slice(1)}` : (p.raw_status ?? p.status),
+            injury: p.detail,
+            practice: i?.practice ?? null,
+            impactPoints: gate(tier, "injuries.adjustments", i?.impact_points ?? null),
+            impactNote: i?.impact_note ?? null,
+            source: p.source,
+            confirmed: p.kind === "official",
+            reportTime: p.report_time,
+            conflict: p.conflict,
+            lateScratch: p.late_scratch,
+            longTerm: p.long_term,
+          };
+        }),
+    };
+  }
   return {
     ok: true,
     connected: b.data.injuries.connected,

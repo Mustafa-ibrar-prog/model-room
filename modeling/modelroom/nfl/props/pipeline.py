@@ -36,12 +36,24 @@ from . import model as M
 from .backtest import eligible
 import os
 
-from .config import CANDIDATE_FILE, CANDIDATE_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION, PARAMS_FILE, PropParams
+from modelroom.injuries import use as U
+
+from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
+                     PARAMS_FILE, PropParams)
 
 # Which NFL prop model the board and ledger use: 0.1.0 = params.json (the default everywhere); a candidate
 # version only when MODELROOM_NFL_PROPS_VERSION names it (the hosted test site's workflow). Rollback = unset
 # it. Every ledger record names the version that made it.
-VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE}
+VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE, INJURY_VERSION: INJURY_FILE}
+
+
+def shadow_versions(active: str) -> list[str]:
+    """Versions also run and recorded in the ledger (never published), for side-by-side monitoring."""
+    vs = [v.strip() for v in os.environ.get("MODELROOM_NFL_PROPS_SHADOW", "").split(",") if v.strip()]
+    for v in vs:
+        if v not in VERSIONS:
+            raise ValueError(f"MODELROOM_NFL_PROPS_SHADOW: unknown version {v!r}")
+    return [v for v in dict.fromkeys(vs) if v != active]
 
 
 def active_version() -> str:
@@ -149,11 +161,28 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list[PropQuote], 
             "game_id": x.game_id, "injury_status": x.inputs.get("injury_status"), "markets": markets, "inputs": x.inputs}
 
 
+def _attach_availability(projs: list, feed: pd.DataFrame) -> None:
+    """Each projection's own injury row and his team's ruled-out skill players / QBs (source, time, confirmed)."""
+    me = {str(r.player_id): r for r in feed.itertuples()}
+    outs: dict = {}
+    for r in feed[feed["status"].isin(["out", "doubtful"]) & feed["position"].isin(["QB", "RB", "WR", "TE", "FB"])].itertuples():
+        outs.setdefault(r.team, []).append({"name": r.player, "position": r.position, "status": r.status, "source": r.source,
+                                            "long_term": bool(r.long_term)})
+    for x in projs:
+        r = me.get(str(x.player_id))
+        x.inputs["availability"] = None if r is None else {
+            "status": r.status, "raw_status": r.raw_status, "source": r.source, "confirmed": r.kind == "official",
+            "report_time": None if pd.isna(r.report_time) else pd.Timestamp(r.report_time).isoformat(),
+            "comment": r.comment if isinstance(r.comment, str) else None, "conflict": getattr(r, "conflict", None) or None,
+            "notes": [x.inputs["qb_note"]] if x.inputs.get("qb_note") else []}
+        if r is None and x.inputs.get("qb_note"):
+            x.inputs["availability"] = {"status": None, "notes": [x.inputs["qb_note"]]}
+        x.inputs["teammates_out_detail"] = [t for t in outs.get(x.team, []) if t["name"] != x.name]
+
+
 def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = True, sims: int | None = None) -> dict:
     now = now or B.now_utc()
     version = active_version()
-    p = PropParams.load(VERSIONS[version])
-    p = replace(p, settings=replace(p.settings, sims=sims or 10000))
     games_all = ingest.load_games()
     sched = games_all[games_all["status"] == "scheduled"]
     season = int(sched["season"].min()) if len(sched) else int(games_all["season"].max())
@@ -162,19 +191,30 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     upcoming = B.upcoming_window(gp[gp["status"] == "scheduled"], now, days)
     week = int(upcoming["week"].mode().iloc[0]) if len(upcoming) else None
     today = pd.Timestamp(pd.Timestamp(now).tz_convert("America/New_York").date())
-    kw = {}
-    if p.settings.share_model == "role" and len(upcoming):  # depth chart as of now: the role each player holds this week
-        kw = {"depth_now": DEPTH.ranks(season, int(upcoming["week"].min()), now)}
-    ctx = F.build(inp.player_games, inp.passes, inp.rushes, today, season, p.settings, **kw)
-    projs: list[M.PlayerProjection] = []
-    seeds = {}
-    for wk, g in upcoming.groupby("week"):
-        ro, inj = I.week_slices(inp, season, int(wk))
-        seeds[int(wk)] = int(season * 100 + wk)
-        need = p.settings.opp_redistribution == "depth" or p.settings.questionable_model == "split" or p.settings.share_model == "role"
-        dep = DEPTH.ranks(season, int(wk), now) if need else None
-        projs += M.project_games(ctx, g, ro, inj, p, seed=seeds[int(wk)], depth=dep)
-    projs = [x for x in projs if eligible(x)]
+
+    def project(v: str):
+        pv = PropParams.load(VERSIONS[v])
+        pv = replace(pv, settings=replace(pv.settings, sims=sims or 10000))
+        kw = {}
+        if pv.settings.share_model == "role" and len(upcoming):  # depth chart as of now: the role each player holds this week
+            kw = {"depth_now": DEPTH.ranks(season, int(upcoming["week"].min()), now)}
+        ctx = F.build(inp.player_games, inp.passes, inp.rushes, today, season, pv.settings, **kw)
+        out: list[M.PlayerProjection] = []
+        sd = {}
+        for wk, g in upcoming.groupby("week"):
+            ro, inj = I.week_slices(inp, season, int(wk))
+            sd[int(wk)] = int(season * 100 + wk)
+            need = pv.settings.opp_redistribution == "depth" or pv.settings.questionable_model == "split" or pv.settings.share_model == "role"
+            dep = DEPTH.ranks(season, int(wk), now) if need else None
+            out += M.project_games(ctx, g, ro, inj, pv, seed=sd[int(wk)], depth=dep)
+        return pv, [x for x in out if eligible(x)], sd
+
+    p, projs, seeds = project(version)
+    shadows = {v: project(v) for v in shadow_versions(version)}
+    feed = U.load("nfl")
+    feed_meta = U.live_meta("nfl")
+    if p.settings.injury_context and feed is not None:
+        _attach_availability(projs, feed)
 
     # ---------------------------------------------------------------- market quotes
     quotes: list[PropQuote] = []
@@ -233,11 +273,17 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     unmatched = [{"provider": q.provider, "player": q.player_name, "market": q.market, "threshold": q.threshold, "note": q.match_note}
                  for q in pub_quotes if q.player_id is None and not q.market.startswith("game_")][:200]
 
-    inputs_hash = hash_frame(inp.player_games[inp.player_games["season"] >= season - 3], ["game_id", "player_id", "targets", "carries", "pass_att"])
-    params_hash = hash_obj(p.to_json())
+    base_hash = hash_frame(inp.player_games[inp.player_games["season"] >= season - 3], ["game_id", "player_id", "targets", "carries", "pass_att"])
+    avail_hash = U.availability_hash("nfl")
     generated_at = now.isoformat(timespec="seconds")
     appended = None
-    if write_ledger and projs:
+    shadow_appended = {}
+
+    def records(version: str, p: PropParams, projs: list, seeds: dict) -> list[dict]:
+        # Versions that read the injury context fold the injury feed and projected starters into the inputs
+        # hash: a QB change or a new designation is a new snapshot; earlier snapshots stay as recorded.
+        inputs_hash = hash_obj({"base": base_hash, "availability": avail_hash}) if p.settings.injury_context else base_hash
+        params_hash = hash_obj(p.to_json())
         starts = upcoming.set_index("game_id")["start_time"]
         recs = []
         for x in projs:
@@ -256,22 +302,46 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
                              "injury_status": x.inputs.get("injury_status"),
                              "opportunity": {"targets": round(x.mean("targets"), 2), "carries": round(x.mean("carries"), 2),
                                              "team_pass_attempts": x.inputs.get("team_pass_attempts"), "team_carries": x.inputs.get("team_carries")}}),
+                         **({"starting_qb": x.inputs.get("starting_qb"), "starting_qb_career_attempts": x.inputs.get("starting_qb_career_attempts"),
+                             "injury_source": (x.inputs.get("availability") or {}).get("source"),
+                             "injury_report_time": (x.inputs.get("availability") or {}).get("report_time"),
+                             "teammates_out": x.inputs.get("teammates_out_detail"), "injury_feed_at": (feed_meta or {}).get("generated_at")}
+                            if p.settings.injury_context else {}),
                          "params_hash": params_hash,
                          "inputs_hash": inputs_hash, "generated_at": generated_at, "sims": p.settings.sims,
                          "seed": seeds.get(int(upcoming.set_index("game_id").at[x.game_id, "week"]))})
-        appended = ledger.append(ledger_path("nfl_props"), recs)
+        return recs
+
+    inputs_hash = hash_obj({"base": base_hash, "availability": avail_hash}) if p.settings.injury_context else base_hash
+    params_hash = hash_obj(p.to_json())
+    if write_ledger and projs:
+        appended = ledger.append(ledger_path("nfl_props"), records(version, p, projs, seeds))
+        for v, (pv, px, sd) in shadows.items():
+            if px:
+                if pv.settings.injury_context and feed is not None:
+                    _attach_availability(px, feed)
+                shadow_appended[v] = ledger.append(ledger_path("nfl_props"), records(v, pv, px, sd)).__dict__
 
     last_ingest = state.read().get("nflverse_games", {}).get("last_success")
     pgr = inp.player_games.assign(rush_rec_yds=inp.player_games["rush_yds"] + inp.player_games["rec_yds"],
                                   td_any=inp.player_games["rush_td"] + inp.player_games["rec_td"])
     played = (pgr["offense_snaps"].fillna(0) > 0) | (pgr[["pass_att", "targets", "carries"]].sum(axis=1) > 0)
     recent.attach(games_json, pgr, {k: m["stat"] for k, m in MARKETS.items()}, today, played)
+    try:
+        prev_board = json.loads(published_props_path().read_text())
+    except (OSError, ValueError):
+        prev_board = None
+    explained = U.explain(prev_board, games_json, ("passing_yards", "receiving_yards", "receptions", "rushing_yards", "rushing_attempts"))
+    flags = U.game_flags("nfl", list(upcoming["home_team"]) + list(upcoming["away_team"])) if feed is not None else {}
+    for gj in games_json:
+        gj["injuries"] = {side: flags.get(gj[side]["abbr"], []) for side in ("home", "away")} if flags else None
     board = {
         "league": "nfl", "kind": "player_props", "generated_at": generated_at, "season": season, "week": week,
         "model": {"id": MODEL_ID, "version": version, "default_version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
                   "status": p.provenance.get("status", "provisional"), "fitted_at": p.provenance.get("fitted_at"),
                   "sims": p.settings.sims, "seeds": seeds,
-                  "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards."},
+                  "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
+                  "injury_feed": feed_meta if feed is not None else None, "shadow_versions": sorted(shadows)},
         "data": {"last_ingest": last_ingest, "results_through": str(inp.player_games["game_date"].max()),
                  "markets": [i for i in provider_info if i["publishable"] or i["provider"] == "manual"],
                  "markets_not_published": [{"provider": i["provider"], "reason": i["reason"]} for i in provider_info if not i["publishable"] and i["provider"] != "manual"],
@@ -287,4 +357,4 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     state.record("nfl_props_run", model_version=version, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs), "quotes": len(quotes),
             "quotes_matched": sum(1 for q in quotes if q.player_id), "evaluated_contracts": evaluated,
-            "ledger": appended.__dict__ if appended else None}
+            "ledger": appended.__dict__ if appended else None, "shadow_ledger": shadow_appended, "explained_changes": explained}

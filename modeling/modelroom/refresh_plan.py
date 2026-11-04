@@ -22,7 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -67,7 +67,7 @@ def slots(now: datetime) -> list[dict]:
     out = []
     for day in (local.date() - timedelta(days=1), local.date()):
         for name, h, m in DAILY:
-            at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(timezone.utc)
+            at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
             out.append({"id": f"{name}:{day.isoformat()}", "kind": name, "at": at, "until": at + DAILY_WINDOW})
     starts = upcoming_starts(now)
     for lg, ts in starts.items():
@@ -96,7 +96,7 @@ def due(now: datetime) -> list[dict]:
 
 
 def record(slot_ids: list[str], status: str, note: str | None = None, now: datetime | None = None) -> None:
-    now = now or datetime.now(timezone.utc)
+    now = now or datetime.now(UTC)
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a") as f:
         for s in slot_ids:
@@ -104,25 +104,64 @@ def record(slot_ids: list[str], status: str, note: str | None = None, now: datet
                 f.write(json.dumps({"slot": s, "status": status, "at": now.isoformat(timespec="seconds"), "note": note}) + "\n")
 
 
+def pending(slot_ids: list[str]) -> list[str]:
+    """The given slots that have not succeeded yet (a queued run re-checks before refreshing: no duplicates)."""
+    done = {r["slot"] for r in log_entries() if r.get("status") == "success"}
+    return [s for s in slot_ids if s and s not in done]
+
+
 def status(now: datetime | None = None) -> dict:
-    """Latest successful refresh and recent failures, for the site."""
+    """For the site: the latest success, the latest success of each kind, recent failures, and missed slots
+    (a daily slot whose window closed without a successful run in the last two days, or a game slot that
+    only ever failed)."""
+    now = now or datetime.now(UTC)
     rows = log_entries()
     ok = [r for r in rows if r.get("status") == "success"]
     bad = [r for r in rows if r.get("status") == "failed"][-10:]
-    return {"last_success": ok[-1] if ok else None, "recent_failures": bad, "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min"}
+    done = {r["slot"] for r in ok}
+    by_kind = {}
+    for r in ok:
+        by_kind[r["slot"].split(":")[0]] = r
+    missed = []
+    local = now.astimezone(PT)
+    for day in (local.date() - timedelta(days=1), local.date()):
+        for name, h, m in DAILY:
+            at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
+            sid = f"{name}:{day.isoformat()}"
+            if at + DAILY_WINDOW <= now and sid not in done:
+                missed.append(sid)
+    for r in rows:
+        sl = r.get("slot", "")
+        if sl.startswith(("pregame:", "inactives:")) and sl not in done and sl not in missed:
+            try:
+                if _ts(sl.split(":", 2)[2]) <= now:
+                    missed.append(sl)
+            except ValueError:
+                pass
+    return {"last_success": ok[-1] if ok else None, "last_success_by_kind": by_kind, "recent_failures": bad, "missed": missed[-20:],
+            "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min",
+            "triggers": "Supabase pg_cron every 5 min (primary) and GitHub's own schedule every 10 min (backup)"}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["due", "record", "status"])
+    ap.add_argument("cmd", choices=["due", "record", "status", "pending"])
     ap.add_argument("--now")
     ap.add_argument("--slots", default="")
     ap.add_argument("--status", default="success", choices=["success", "failed"])
     ap.add_argument("--note")
     a = ap.parse_args(argv)
-    now = _ts(a.now) if a.now else datetime.now(timezone.utc)
+    now = _ts(a.now) if a.now else datetime.now(UTC)
     if a.cmd == "record":
         record(a.slots.split(","), a.status, a.note, now)
+        return 0
+    if a.cmd == "pending":
+        left = pending(a.slots.split(","))
+        print(json.dumps({"pending": left}))
+        gh = os.environ.get("GITHUB_OUTPUT")
+        if gh:
+            with open(gh, "a") as f:
+                f.write(f"pending={','.join(left)}\n")
         return 0
     if a.cmd == "status":
         print(json.dumps(status(now), indent=1, default=str))

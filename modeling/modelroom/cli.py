@@ -15,6 +15,7 @@
   nba props-monitor               stored NBA prop predictions vs results, by model version -> props_monitor_nba.json
   nba props-backtest              NBA prop walk-forward (tunes on 2021-22, tests 2022-23 to 2025-26; ~1 h)
   nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
+  injuries nba|nfl                fetch the injury sources, combine them -> injury_feed + injuries_live_<lg>.json
   nfl props-monitor               stored NFL prop predictions vs box scores, by version and depth rank -> props_monitor_nfl.json
   nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
   markets status                  which market-data providers are on, and why
@@ -248,6 +249,13 @@ def _ledger(args) -> int:
     return 0
 
 
+def _injuries(args) -> int:
+    from modelroom.injuries import merge
+
+    _print(merge.run(args.league))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="modelroom", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="group", required=True)
@@ -277,9 +285,11 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
     sub.add_parser("history", help="results history + performance files for the website")
+    ij = sub.add_parser("injuries", help="fetch + combine injury sources (official NBA report, ESPN, nflverse)")
+    ij.add_argument("league", choices=["nba", "nfl"])
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "injuries": _injuries}[args.group]
     return handler(args)
 
 

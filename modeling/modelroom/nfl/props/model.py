@@ -315,6 +315,14 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
             den = bl * q["ypa_blitz_rel"] + (1 - bl) * q["ypa_noblitz_rel"]
             bz = float(num / den) ** s.blitz_strength if den > 0 else 1.0
     man = float(D["man_rate"]) if D is not None and pd.notna(D.get("man_rate")) else L.get("man_rate", np.nan)
+    # Inexperienced starting QB (0.1.1): the whole passing game, his yards and his receivers', is scaled together.
+    qx = 1.0
+    qb_note = None
+    if starter is not None and s.inexp_qb_attempts > 0:
+        ca = int(ctx.players.loc[starter].get("career_pass_att", 0) or 0)
+        if ca < s.inexp_qb_attempts:
+            qx = s.inexp_qb_yards
+            qb_note = f"starting QB {ctx.players.loc[starter]['name']} has {ca} career pass attempts: team passing yards x{qx:.2f}"
 
     out: list[PlayerProjection] = []
     rows = {}
@@ -335,7 +343,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
             num = man * x["ypt_man_rel"] + (1 - man) * x["ypt_zone_rel"]
             den = ml * x["ypt_man_rel"] + (1 - ml) * x["ypt_zone_rel"]
             cov = float(num / den) ** s.coverage_strength if den > 0 else 1.0
-        f = float(x["ypr_factor"]) * _ratio(D, f"ypr_{grp}", s.matchup_strength) * cov * bz
+        f = float(x["ypr_factor"]) * _ratio(D, f"ypr_{grp}", s.matchup_strength) * cov * bz * qx
         yds, lng = _pool_sum(rng, ctx.pools[f"rec_{grp}"], rec, f * _shock(rng, _esd(s, "rec"), n, s.shock_kind))
         td = rng.binomial(tg, float(np.clip(x["rec_td_rate"] * _ratio(D, f"rectd_{grp}", s.matchup_strength), 0, 0.5)))
         r = rows[pid]
@@ -365,7 +373,7 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         cmp_p = float(np.clip(x["cmp_rate"] * _ratio(D, "cmp", s.matchup_strength) *
                               _ratio(D, "pressure", -0.15 * s.pressure_strength), 0.3, 0.85))
         cm = rng.binomial(att, cmp_p)
-        f = float(x["ypcmp_factor"]) * _ratio(D, "ypcmp", s.matchup_strength) * bz
+        f = float(x["ypcmp_factor"]) * _ratio(D, "ypcmp", s.matchup_strength) * bz * qx
         yds, _ = _pool_sum(rng, ctx.pools["pass"], cm, f * _shock(rng, _esd(s, "pass"), n, s.shock_kind))
         ints = rng.binomial(att, float(np.clip(x["int_rate"] * _ratio(D, "int", s.matchup_strength), 0.001, 0.2)))
         ptd = rng.binomial(att, float(np.clip(x["pass_td_rate"] * _ratio(D, "passtd", s.matchup_strength), 0.001, 0.2)))
@@ -383,6 +391,10 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         x = ctx.players.loc[pid]
         inputs["sample"] = {"games": int(x["n_games"]), "targets": int(x["n_targets"]), "carries": int(x["n_carries"]),
                             "pass_att": int(x["n_pass_att"])} if "n_games" in x else {}
+        if s.inexp_qb_attempts > 0 or s.injury_context:
+            inputs.update(starting_qb=str(ctx.players.loc[starter]["name"]) if starter is not None else None,
+                          starting_qb_career_attempts=int(ctx.players.loc[starter].get("career_pass_att", 0) or 0) if starter is not None else None,
+                          qb_note=qb_note)
         inputs.update(team_pass_attempts=round(mu_pa, 1), team_carries=round(mu_ru, 1),
                       injury_status=c.loc[pid, "injury_status"] if pid in c.index else None,
                       snap_share_recent=None if pd.isna(x["snap_short"]) else round(float(x["snap_short"]), 3))
