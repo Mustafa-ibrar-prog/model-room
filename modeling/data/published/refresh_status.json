@@ -5,6 +5,33 @@
   "at": "2026-11-04T16:42:47+00:00",
   "note": "push run 41869697081"
  },
- "recent_failures": [],
- "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff \u2212 90 min, every game \u2212 30 min"
+ "last_success_by_kind": {
+  "manual": {
+   "slot": "manual:2026-11-04T16:42Z",
+   "status": "success",
+   "at": "2026-11-04T16:42:47+00:00",
+   "note": "push run 41869697081"
+  },
+  "morning": {
+   "slot": "morning:2026-11-04",
+   "status": "success",
+   "at": "2026-11-04T15:31:34+00:00",
+   "note": "schedule run 41858242990"
+  }
+ },
+ "recent_failures": [
+  {
+   "slot": "manual:2026-11-04T17:32Z",
+   "status": "failed",
+   "at": "2026-11-04T17:32:32+00:00",
+   "note": "push run 41878079679"
+  }
+ ],
+ "missed": [
+  "morning:2026-11-03",
+  "midday:2026-11-03",
+  "afternoon:2026-11-03"
+ ],
+ "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff \u2212 90 min, every game \u2212 30 min",
+ "triggers": "Supabase pg_cron every 5 min (primary) and GitHub's own schedule every 10 min (backup)"
 }
