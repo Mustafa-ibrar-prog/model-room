@@ -26,7 +26,22 @@ from modelroom.sources import state
 from . import inputs as I
 from . import model as M
 from .backtest import eligible
-from .config import MARKETS, MODEL_ID, MODEL_VERSION, PropParams
+import os
+
+from .config import CANDIDATE_FILE, CANDIDATE_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, PARAMS_FILE, PropParams
+
+# Which prop model the board and ledger use. 0.1.0 = params.json (the default everywhere); 0.2.0 =
+# params_0.2.0.json, switched on for the hosted test site only by its workflow
+# (MODELROOM_NBA_PROPS_VERSION=0.2.0). Rollback = unset the variable (or set 0.1.0): both parameter files
+# stay in the repo, and every ledger record names the version that made it.
+VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE}
+
+
+def active_version() -> str:
+    v = os.environ.get("MODELROOM_NBA_PROPS_VERSION", "").strip() or MODEL_VERSION
+    if v not in VERSIONS:
+        raise ValueError(f"MODELROOM_NBA_PROPS_VERSION={v!r}: known versions are {sorted(VERSIONS)}")
+    return v
 
 TEAM_NAMES = {}
 for _name, _code in NBA_TEAMS.items():
@@ -38,11 +53,11 @@ def published_path():
     return data_root() / "published" / "nba_props.json"
 
 
-def backtest_summary() -> dict | None:
+def backtest_summary(version: str = MODEL_VERSION) -> dict | None:
     local = output_dir("nba") / "props_backtest.json"
-    f = local if local.exists() and json.loads(local.read_text()).get("model_version") == MODEL_VERSION else None
+    f = local if local.exists() and json.loads(local.read_text()).get("model_version") == version else None
     if f is None:
-        c = MODELING_ROOT.parent / "docs" / "models" / "results" / f"nba-props-backtest-{MODEL_VERSION}.json"
+        c = MODELING_ROOT.parent / "docs" / "models" / "results" / f"nba-props-backtest-{version}.json"
         f = c if c.exists() else None
     if f is None:
         return None
@@ -99,7 +114,8 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list, now: dateti
 
 def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True, sims: int | None = None) -> dict:
     now = now or B.now_utc()
-    p = PropParams.load()
+    version = active_version()
+    p = PropParams.load(VERSIONS[version])
     p = replace(p, settings=replace(p.settings, sims=sims or 10000))
     inp = I.load()
     gp = inp.games
@@ -117,7 +133,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     plist = pd.DataFrame([{"game_id": x.game_id, "player_id": x.player_id, "name": x.name, "team": x.team, "sportradar_id": None} for x in projs])
     idx_pub, idx_all, info, unmatched = prices.load("nba", games_df, plist)
 
-    bt = backtest_summary()
+    bt = backtest_summary(version)
     reliability = (bt or {}).get("by_market", {})
     by_game, local_games = {}, {}
     local_only = any(i["enabled"] and not i["publishable"] for i in info)
@@ -132,7 +148,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         return p.calibrate(q.market, x.prob(m["stat"], float(q.threshold), q.op)), m["stat"]
 
     starts_iso = {gid: B.iso(t) for gid, t in upcoming.set_index("game_id")["start_time"].items()}
-    evaluated = evaluation.log_run("nba", projs, idx_all, price, lambda x, mk: x.support()[0], reliability, MODEL_VERSION,
+    evaluated = evaluation.log_run("nba", projs, idx_all, price, lambda x, mk: x.support()[0], reliability, version,
                                    now.isoformat(timespec="seconds"), starts_iso, now)
     games_json = []
     for _, g in upcoming.iterrows():
@@ -157,14 +173,15 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
             recs.append({"sport": "nba", "kind": "player_props", "game_id": f"{x.game_id}|{x.player_id}", "nba_game_id": x.game_id,
                          "player_id": x.player_id, "player": x.name, "team": x.team, "game_start": B.iso(starts[x.game_id]),
                          "probabilities": probs, "support": x.support()[0], "projected_minutes": x.inputs["projected_minutes"],
-                         "model_id": MODEL_ID, "model_version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
+                         "starter_rate": x.inputs.get("starter_rate"), "usage_freed_by_absences": x.inputs.get("usage_freed_by_absences"),
+                         "model_id": MODEL_ID, "model_version": version, "params_hash": params_hash, "inputs_hash": inputs_hash,
                          "generated_at": generated_at, "sims": p.settings.sims, "seed": seeds.get(dates[x.game_id])})
         appended = ledger.append(ledger_path("nba_props"), recs)
 
     recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool))
     board = {
         "league": "nba", "kind": "player_props", "generated_at": generated_at, "season": season, "week": None,
-        "model": {"id": MODEL_ID, "version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
+        "model": {"id": MODEL_ID, "version": version, "default_version": MODEL_VERSION, "params_hash": params_hash, "inputs_hash": inputs_hash,
                   "status": p.provenance.get("status", "provisional"), "fitted_at": p.provenance.get("fitted_at"),
                   "sims": p.settings.sims, "seeds": seeds,
                   "independence": "Uses only box scores, minutes, pace and the game engine. Exchange prices are never an input; they are compared afterwards.",
@@ -182,6 +199,6 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     if local_games:
         write_board(ensure(output_dir("nba")) / "props_compare_local.json",
                     {**board, "games": [{"game_id": k, "players": v} for k, v in local_games.items()], "note": "Local only."})
-    state.record("nba_props_run", model_version=MODEL_VERSION, players=len(projs))
+    state.record("nba_props_run", model_version=version, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs),
             "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None}
