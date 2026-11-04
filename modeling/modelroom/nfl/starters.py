@@ -80,6 +80,10 @@ def build(games: pd.DataFrame | None = None) -> pd.DataFrame:
     ro = player_data.rosters(seasons)
     ro = ro[ro["position"] == "QB"]
     names = ro.drop_duplicates("gsis_id", keep="last").set_index("gsis_id")["full_name"].to_dict()
+    live_f = processed_dir("nfl") / "espn_roster.parquet"
+    if live_f.exists():  # names for QBs signed since nflverse's last weekly roster
+        lr = pd.read_parquet(live_f).dropna(subset=["player_id"])
+        names = {**lr.set_index("player_id")["player"].to_dict(), **names}
     roster_weeks = {k: x for k, x in ro.groupby(["season", "team"])}
     from .props import inputs as PI
 
@@ -179,10 +183,15 @@ def apply(games: pd.DataFrame, mode: str = "projected") -> pd.DataFrame:
 
     projected  the pre-game projected starter (this module's rule)
     previous   the QB who started the team's previous game (what the schedule field holds for coming games)
+    live       projected for scheduled games only (current injuries + depth chart); finished games keep the
+               schedule's field (the actual starter). The test site's setting: for coming games the schedule's
+               field is just last week's starter (right 85% of the time in 2023-25 vs 92% for projected).
     """
     st = load()
     if st is None:
         return games
+    if mode == "live":
+        st = st[st["status"] == "scheduled"]
     if mode == "previous":
         st = st.sort_values(["team", "season", "week"]).copy()
         st["qb_id"] = st.groupby("team")["actual_qb_id"].shift(1)
@@ -195,6 +204,8 @@ def apply(games: pd.DataFrame, mode: str = "projected") -> pd.DataFrame:
         g[f"{side}_qb_id_listed"] = g[f"{side}_qb_id"]
         g[f"{side}_qb_id"] = pid.where(pid.notna(), g[f"{side}_qb_id"])
         g[f"{side}_qb_name"] = pname.where(pid.notna(), g[f"{side}_qb_name"])
+        if mode == "live":
+            g[f"{side}_qb_source"] = g["game_id"].map(s["source"])
     return g
 
 

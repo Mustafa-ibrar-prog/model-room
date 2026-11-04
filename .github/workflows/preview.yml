@@ -92,6 +92,9 @@ jobs:
       MODELROOM_NFL_PROPS_VERSION: "0.1.1"
       MODELROOM_NFL_PROPS_SHADOW: "0.1.0"
       MODELROOM_NBA_INJURY_FEED: "on"
+      # NFL coming games: the projected starter (injury report + live depth chart) instead of the schedule field,
+      # which only repeats last week's starter. Finished games keep the actual starter. Rollback: "listed".
+      MODELROOM_NFL_QB_SOURCE: "live"
       ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
     steps:
       - uses: actions/checkout@v4

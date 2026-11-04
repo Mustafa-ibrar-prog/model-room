@@ -208,7 +208,7 @@ def qb_source() -> str:
     """Which starting QB the engines use. "listed" (the schedule's field, the active model) until the
     projected-starter version passes validation; "projected" / "previous" for backtests (see starters.py)."""
     v = os.environ.get("MODELROOM_NFL_QB_SOURCE", "listed").strip().lower()
-    return v if v in ("listed", "projected", "previous") else "listed"
+    return v if v in ("listed", "projected", "previous", "live") else "listed"
 
 
 def load_games() -> pd.DataFrame:
