@@ -1,0 +1,57 @@
+name: Scheduler diagnostics (test site)
+
+# Reads the Supabase refresh scheduler's own logs on the TEST database: dispatch attempts, GitHub's response
+# status and message, pg_cron job results, and whether the Vault secret is present and well-formed.
+# Never prints the token: only its length, whitespace and prefix checks.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the database connection
+        run: |
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1
+          try() { PGCONNECT_TIMEOUT=8 psql "$1" -qtAc "select 1" >/dev/null 2>&1; }
+          case "$SUPABASE_DB_URL" in
+            *pooler.supabase.com*)
+              try "$SUPABASE_DB_URL" || { echo "FAIL  can't connect with SUPABASE_DB_URL (check the password in the string)"; exit 1; }
+              echo "ok    database reachable through the connection pooler"
+              echo "DB_URL=$SUPABASE_DB_URL" >> "$GITHUB_ENV";;
+            *db.*.supabase.co*)
+              echo "::warning::SUPABASE_DB_URL is the direct connection (db.<ref>.supabase.co), which is IPv6-only and unreachable from GitHub. Trying the Session pooler for the same project instead. To skip this, replace the secret with the Session pooler string from Supabase → Connect."
+              found=""
+              for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1 aws-0-ap-southeast-1 aws-1-ap-southeast-1 aws-0-ap-southeast-2 aws-1-ap-southeast-2 aws-0-ap-northeast-1 aws-1-ap-northeast-1 aws-0-ap-south-1 aws-1-ap-south-1 aws-0-sa-east-1 aws-1-sa-east-1; do
+                urls=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py 2>/tmp/note) || { cat /tmp/note; exit 1; }
+                [ "$host" = aws-0-us-east-1 ] && cat /tmp/note
+                while IFS= read -r url; do
+                  echo "::add-mask::$url"
+                  err=$(PGCONNECT_TIMEOUT=8 psql "$url" -qtAc "select 1" 2>&1 >/dev/null) && { found="$url"; break; }
+                  case "$err" in *"password authentication failed"*) badpw=1;; esac
+                done <<< "$urls"
+                if [ -n "$found" ]; then echo "ok    reached the database through the Session pooler ($host)"; break; fi
+              done
+              [ -n "$found" ] || [ -z "${badpw:-}" ] || { echo "FAIL  found the project's pooler, but the database password in SUPABASE_DB_URL is wrong. Reset it in Supabase → Project Settings → Database and update the secret."; exit 1; }
+              [ -n "$found" ] || { echo "FAIL  couldn't reach the database through any Session pooler. Replace SUPABASE_DB_URL with the Session pooler string from Supabase → Connect."; exit 1; }
+              echo "DB_URL=$found" >> "$GITHUB_ENV";;
+            *)
+              try "$SUPABASE_DB_URL" || { echo "FAIL  can't connect with SUPABASE_DB_URL"; exit 1; }
+              echo "DB_URL=$SUPABASE_DB_URL" >> "$GITHUB_ENV";;
+          esac
+          psql "$(grep '^DB_URL=' "$GITHUB_ENV" | tail -1 | cut -d= -f2-)" -qtAc "select 'ok    Postgres ' || current_setting('server_version')"
+      - name: Scheduler logs (no secrets)
+        run: |
+          q() { echo; echo "== $1"; psql "$DB_URL" -v ON_ERROR_STOP=1 -P pager=off -c "$2"; }
+          q "health" "select * from scheduler.health"
+          q "vault secret (shape only)" "select name, length(decrypted_secret) as len, decrypted_secret ~ '(^\s|\s$)' as has_edge_whitespace, decrypted_secret ~ '[\r\n]' as has_newline, decrypted_secret ~ '^[\x27\x22]' as starts_with_quote, left(decrypted_secret, 11) = 'github_pat_' as fine_grained_prefix, created_at, updated_at from vault.decrypted_secrets where name like '%github%'"
+          q "dispatch log (latest 12)" "select id, requested_at, request_id, status_code, left(response, 220) as response, left(error, 220) as error from scheduler.dispatch_log order by id desc limit 12"
+          q "pg_net responses (latest 8)" "select id, status_code, timed_out, left(error_msg, 200) as error_msg, left(content::text, 220) as content, created from net._http_response order by id desc limit 8"
+          q "pg_cron runs (latest 8)" "select j.jobname, d.status, left(d.return_message, 200) as message, d.start_time from cron.job_run_details d join cron.job j on j.jobid = d.jobid where j.jobname like 'model-room%' order by d.start_time desc limit 8"
