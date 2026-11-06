@@ -74,3 +74,18 @@ def test_failed_runs_are_retried_reported_and_missed(tmp_path, monkeypatch):
     st = R.status(t("2026-11-09T01:00:00"))                      # 5 PM PT: morning window long closed, never ran
     assert "morning:2026-11-08" in st["missed"] and "midday:2026-11-08" not in st["missed"]
     assert st["recent_failures"][-1]["note"] == "schedule run 1" and st["last_success_by_kind"]["midday"]["note"] == "schedule run 2"
+
+
+def test_pregame_slots_that_never_started_are_missed(tmp_path, monkeypatch):
+    pub = tmp_path / "published"
+    pub.mkdir()
+    (pub / "nba.json").write_text(json.dumps({"upcoming": [], "recent": [{"start_time": "2026-11-05T00:00:00+00:00"}, {"start_time": "2026-11-05T02:00:00+00:00"}]}))
+    (pub / "nfl.json").write_text(json.dumps({"upcoming": [], "recent": [{"start_time": "2026-11-06T01:15:00+00:00"}]}))
+    monkeypatch.setattr(R, "PUBLISHED", pub)
+    monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
+    t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
+    R.record(["pregame:nba:2026-11-05T02:00:00+00:00"], "success", None, t("2026-11-05T01:44:00"))
+    m = R.status(t("2026-11-06T03:00:00"))["missed"]
+    assert "pregame:nba:2026-11-05T00:00:00+00:00" in m                 # never attempted: still missed
+    assert "pregame:nba:2026-11-05T02:00:00+00:00" not in m             # ran
+    assert {"inactives:nfl:2026-11-06T01:15:00+00:00", "pregame:nfl:2026-11-06T01:15:00+00:00"} <= set(m)
