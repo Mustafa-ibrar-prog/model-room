@@ -102,7 +102,7 @@ jobs:
       - name: Report the refresh scheduler's health (no secrets)
         if: steps.check.outputs.ready == 'yes'
         run: |
-          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'scheduler - enabled=' || enabled || ', token stored=' || (exists (select 1 from vault.secrets where name = 'model_room_github_dispatch'))::text || ', last accepted dispatch=' || coalesce(last_accepted::text, 'never') || ', failures 24h=' || failures_24h from scheduler.health"
+          psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'scheduler - enabled=' || enabled || ', token stored=' || (exists (select 1 from vault.secrets where name = 'model_room_github_dispatch'))::text || ', last accepted dispatch=' || coalesce(last_accepted::text, 'never') || ', failures 24h=' || failures_24h || ', no-token notes 24h=' || no_token_notes_24h from scheduler.health"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/seed-test-accounts.mjs
