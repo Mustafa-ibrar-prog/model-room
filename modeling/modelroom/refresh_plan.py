@@ -61,6 +61,24 @@ def upcoming_starts(now: datetime) -> dict[str, set[datetime]]:
     return out
 
 
+def recent_starts(now: datetime, hours: float = 36) -> dict[str, set[datetime]]:
+    """{league: start times} of games that started in the last `hours` (published boards, upcoming + recent)."""
+    out: dict[str, set[datetime]] = {"nfl": set(), "nba": set()}
+    for lg in out:
+        f = PUBLISHED / f"{lg}.json"
+        if not f.exists():
+            continue
+        try:
+            d = json.loads(f.read_text())
+        except (OSError, ValueError):
+            continue
+        for g in (d.get("upcoming") or []) + (d.get("recent") or []):
+            st = g.get("start_time")
+            if st and now - timedelta(hours=hours) <= _ts(st) <= now:
+                out[lg].add(_ts(st))
+    return out
+
+
 def slots(now: datetime) -> list[dict]:
     """Every slot whose window contains `now`."""
     local = now.astimezone(PT)
@@ -130,6 +148,14 @@ def status(now: datetime | None = None) -> dict:
             sid = f"{name}:{day.isoformat()}"
             if at + DAILY_WINDOW <= now and sid not in done:
                 missed.append(sid)
+    # Game slots come from the games' start times, so a pregame refresh that never started still counts as
+    # missed (not only ones that were attempted and failed).
+    for lg, ts in recent_starts(now).items():
+        for t in sorted(ts):
+            if lg == "nfl" and f"inactives:nfl:{t.isoformat()}" not in done and t - PREGAME_BEFORE <= now:
+                missed.append(f"inactives:nfl:{t.isoformat()}")
+            if f"pregame:{lg}:{t.isoformat()}" not in done:
+                missed.append(f"pregame:{lg}:{t.isoformat()}")
     for r in rows:
         sl = r.get("slot", "")
         if sl.startswith(("pregame:", "inactives:")) and sl not in done and sl not in missed:
