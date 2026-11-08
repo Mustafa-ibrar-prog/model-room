@@ -88,7 +88,11 @@ jobs:
       # Injury-feed versions on the TEST SITE only. The previous versions keep running in the ledger as shadows
       # (recorded, not published) so both are graded on the same games. Rollback: set the versions back to
       # 0.2.0 / 0.1.0 (and MODELROOM_NBA_INJURY_FEED: "off" for the NBA game engine's injury adjustment).
-      MODELROOM_NBA_PROPS_SHADOW: "0.2.1"
+      # NBA shadow evaluation (approved 2026-11-07, 2-3 weeks): 0.2.3a (primary) and 0.2.3 (secondary) are run on the
+      # same games and the same pregame information as the active 0.2.0 and recorded in the ledger; nothing they
+      # produce is published. 0.2.1's earlier shadow records stay in the ledger as they were. Graded daily by
+      # `nba props-shadow` → preview-ledger/reports/nba_props_shadow.json. Rollback: set back to "0.2.1" (or "").
+      MODELROOM_NBA_PROPS_SHADOW: "0.2.3a,0.2.3"
       MODELROOM_NFL_PROPS_VERSION: "0.1.1"
       MODELROOM_NFL_PROPS_SHADOW: "0.1.0"
       MODELROOM_NBA_INJURY_FEED: "on"
@@ -180,6 +184,7 @@ jobs:
           python -m modelroom history
           python -m modelroom nba props-monitor
           python -m modelroom nfl props-monitor
+          python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
           # Market-settled grading. Exchange providers are never switched on here (public repo, provider
           # terms), so this publishes an empty record with the reason; it fills in where prices are enabled.
           python -m modelroom markets settle nfl

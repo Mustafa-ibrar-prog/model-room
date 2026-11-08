@@ -30,20 +30,25 @@ import os
 
 from modelroom.injuries import use as U
 
-from .config import CANDIDATE_FILE, CANDIDATE_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, PARAMS_FILE, PropParams
+from .config import CANDIDATE_FILE, CANDIDATE_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, PARAMS_FILE, SHADOW_FILES, PropParams
 
 # Which prop model the board and ledger use. 0.1.0 = params.json (the default everywhere); 0.2.0 =
 # params_0.2.0.json, switched on for the hosted test site only by its workflow
 # (MODELROOM_NBA_PROPS_VERSION=0.2.0). Rollback = unset the variable (or set 0.1.0): both parameter files
 # stay in the repo, and every ledger record names the version that made it.
 VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, INJURY_VERSION: INJURY_FILE}
+SHADOW_ONLY = dict(SHADOW_FILES)   # 0.2.3a / 0.2.3: may run as shadows; refused as the published version
+
+
+def _params_file(v: str):
+    return VERSIONS.get(v) or SHADOW_ONLY[v]
 
 
 def shadow_versions(active: str) -> list[str]:
     """Versions also run and recorded in the ledger (never published), for side-by-side monitoring."""
     vs = [v.strip() for v in os.environ.get("MODELROOM_NBA_PROPS_SHADOW", "").split(",") if v.strip()]
     for v in vs:
-        if v not in VERSIONS:
+        if v not in VERSIONS and v not in SHADOW_ONLY:
             raise ValueError(f"MODELROOM_NBA_PROPS_SHADOW: unknown version {v!r}")
     return [v for v in dict.fromkeys(vs) if v != active]
 
@@ -136,7 +141,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     feed = U.live_meta("nba")
 
     def project(v: str):
-        pv = PropParams.load(VERSIONS[v])
+        pv = PropParams.load(_params_file(v))
         pv = replace(pv, settings=replace(pv.settings, sims=sims or 10000))
         ctx = M.build(inp.player_games, inp.pace, today, season, pv.settings)
         out, sd = [], {}
@@ -146,7 +151,14 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         return pv, [x for x in out if eligible(x)], sd
 
     p, projs, seeds = project(version)
-    shadows = {v: project(v) for v in shadow_versions(version)}
+    # Shadows never affect the published board: a failing shadow is skipped and logged, the active version publishes.
+    shadows, shadow_errors = {}, {}
+    for v in shadow_versions(version):
+        try:
+            shadows[v] = project(v)
+        except Exception as e:  # noqa: BLE001
+            shadow_errors[v] = f"{type(e).__name__}: {e}"[:300]
+            print(f"::warning::NBA props shadow {v} failed: {shadow_errors[v]}", flush=True)
 
     games_df = upcoming.rename(columns={"home_abbr": "home_team", "away_abbr": "away_team"})[["game_id", "game_date", "home_team", "away_team"]]
     plist = pd.DataFrame([{"game_id": x.game_id, "player_id": x.player_id, "name": x.name, "team": x.team, "sportradar_id": None} for x in projs])
@@ -201,6 +213,8 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                          "probabilities": probs, "support": x.support()[0], "projected_minutes": x.inputs["projected_minutes"],
                          "starter_rate": x.inputs.get("starter_rate"), "usage_freed_by_absences": x.inputs.get("usage_freed_by_absences"),
                          **({"injury_status": a.get("status"), "injury_source": a.get("source"), "injury_report_time": a.get("report_time"),
+                             "injury_raw_status": a.get("raw_status"), "injury_conflict": a.get("conflict"),
+                             "injury_confirmed": a.get("confirmed"), "injury_late_scratch": a.get("late_scratch"),
                              "injury_notes": a.get("notes") or None, "teammates_out": x.inputs.get("teammates_out_detail"),
                              "injury_feed_at": (feed or {}).get("generated_at")} if pv.settings.injury_feed else {}),
                          "model_id": MODEL_ID, "model_version": v, "params_hash": ph, "inputs_hash": ih,
@@ -213,7 +227,11 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         appended = ledger.append(ledger_path("nba_props"), records(version, p, projs, seeds))
         for v, (pv, px, sd) in shadows.items():
             if px:
-                shadow_appended[v] = ledger.append(ledger_path("nba_props"), records(v, pv, px, sd)).__dict__
+                try:
+                    shadow_appended[v] = ledger.append(ledger_path("nba_props"), records(v, pv, px, sd)).__dict__
+                except Exception as e:  # noqa: BLE001
+                    shadow_errors[v] = f"ledger: {type(e).__name__}: {e}"[:300]
+                    print(f"::warning::NBA props shadow {v} not recorded: {shadow_errors[v]}", flush=True)
 
     recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool))
     try:
@@ -252,4 +270,4 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     state.record("nba_props_run", model_version=version, players=len(projs))
     return {"board": str(path), "games": len(games_json), "players": len(projs),
             "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None,
-            "shadow_ledger": shadow_appended, "explained_changes": explained}
+            "shadow_ledger": shadow_appended, "shadow_errors": shadow_errors or None, "explained_changes": explained}

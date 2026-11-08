@@ -13,6 +13,7 @@
   nba project | nfl project       projections -> ledger -> published board for the site
   nba props                       NBA player-prop projections (next 3 days) -> ledger -> nba_props.json
   nba props-monitor               stored NBA prop predictions vs results, by model version -> props_monitor_nba.json
+  nba props-shadow                active vs shadow candidates on identical player-games -> preview-ledger/reports/nba_props_shadow.json
   nba props-backtest              NBA prop walk-forward (tunes on 2021-22, tests 2022-23 to 2025-26; ~1 h)
   nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
   injuries nba|nfl                fetch the injury sources, combine them -> injury_feed + injuries_live_<lg>.json
@@ -129,6 +130,11 @@ def _nba(args) -> int:
         from modelroom.nba.props import monitor
 
         _print(monitor.run())
+        return 0
+    if args.cmd == "props-shadow":
+        from modelroom.nba.props import shadow
+
+        _print(shadow.run())
         return 0
     if args.cmd == "props-backtest":
         from modelroom.nba.props import backtest as pb
@@ -267,7 +273,7 @@ def main(argv: list[str] | None = None) -> int:
     s.add_argument("--verbose", action="store_true")
 
     b = sub.add_parser("nba")
-    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest", "project", "props", "props-backtest", "props-monitor"])
+    b.add_argument("cmd", choices=["ingest", "crosscheck", "odds", "lines", "backtest", "project", "props", "props-backtest", "props-monitor", "props-shadow"])
     b.add_argument("--days", type=int, default=7, help="project: how many days ahead")
     b.add_argument("--season", type=int)
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
