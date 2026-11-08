@@ -1,0 +1,147 @@
+{
+ "n": 9103,
+ "bias_by_role": {
+  "RB1": {
+   "n": 1673,
+   "proj": 3.39,
+   "act": 3.47,
+   "bias_pct": -2.1
+  },
+  "RB2": {
+   "n": 837,
+   "proj": 1.8,
+   "act": 1.69,
+   "bias_pct": 6.7
+  },
+  "TE1": {
+   "n": 1481,
+   "proj": 4.85,
+   "act": 5.24,
+   "bias_pct": -7.6
+  },
+  "WR1": {
+   "n": 1695,
+   "proj": 7.27,
+   "act": 7.57,
+   "bias_pct": -4.0
+  },
+  "WR2": {
+   "n": 1628,
+   "proj": 5.13,
+   "act": 5.39,
+   "bias_pct": -4.9
+  },
+  "WR3+": {
+   "n": 1498,
+   "proj": 3.57,
+   "act": 3.43,
+   "bias_pct": 3.9
+  }
+ },
+ "walk_forward": {
+  "2024": {
+   "base": {
+    "coef": [],
+    "tgt_mae": 2.0333,
+    "tgt_rmse": 2.6552,
+    "top_wr_te_bias": -0.451,
+    "top_wr_te_mae": 2.4403
+   },
+   "air": {
+    "coef": [
+     -0.005,
+     0.034
+    ],
+    "tgt_mae": 2.0414,
+    "tgt_rmse": 2.6484,
+    "top_wr_te_bias": -0.249,
+    "top_wr_te_mae": 2.4391
+   },
+   "rz": {
+    "coef": [
+     0.108,
+     0.032
+    ],
+    "tgt_mae": 2.0404,
+    "tgt_rmse": 2.6474,
+    "top_wr_te_bias": -0.249,
+    "top_wr_te_mae": 2.4366
+   },
+   "air+rz": {
+    "coef": [
+     -0.0,
+     0.108,
+     0.032
+    ],
+    "tgt_mae": 2.0404,
+    "tgt_rmse": 2.6474,
+    "top_wr_te_bias": -0.249,
+    "top_wr_te_mae": 2.4366
+   },
+   "air+rz+role": {
+    "coef": [
+     -0.055,
+     0.064,
+     0.038,
+     0.012
+    ],
+    "tgt_mae": 2.0363,
+    "tgt_rmse": 2.6455,
+    "top_wr_te_bias": -0.155,
+    "top_wr_te_mae": 2.4401
+   }
+  },
+  "2025": {
+   "base": {
+    "coef": [],
+    "tgt_mae": 1.9596,
+    "tgt_rmse": 2.5518,
+    "top_wr_te_bias": -0.184,
+    "top_wr_te_mae": 2.2762
+   },
+   "air": {
+    "coef": [
+     0.059,
+     0.034
+    ],
+    "tgt_mae": 1.9741,
+    "tgt_rmse": 2.556,
+    "top_wr_te_bias": 0.038,
+    "top_wr_te_mae": 2.2926
+   },
+   "rz": {
+    "coef": [
+     0.168,
+     0.034
+    ],
+    "tgt_mae": 1.9754,
+    "tgt_rmse": 2.5579,
+    "top_wr_te_bias": 0.04,
+    "top_wr_te_mae": 2.2939
+   },
+   "air+rz": {
+    "coef": [
+     0.066,
+     0.171,
+     0.032
+    ],
+    "tgt_mae": 1.9744,
+    "tgt_rmse": 2.5579,
+    "top_wr_te_bias": 0.04,
+    "top_wr_te_mae": 2.2944
+   },
+   "air+rz+role": {
+    "coef": [
+     0.01,
+     0.14,
+     0.041,
+     0.01
+    ],
+    "tgt_mae": 1.9725,
+    "tgt_rmse": 2.5582,
+    "top_wr_te_bias": 0.146,
+    "top_wr_te_mae": 2.3054
+   }
+  }
+ }
+}
