@@ -3,8 +3,10 @@
     python -m modelroom nba props-shadow      → preview-ledger/reports/nba_props_shadow.json
 
 Reads the append-only prediction ledger (never changes it). For every player-game it takes each version's LAST
-record before tip-off and keeps the player-game only if every compared version has one from the SAME refresh
-(same generated_at), i.e. the same games and the same pregame information. Graded on players who played.
+record before tip-off and keeps the player-game only if every compared version has one. The shadow candidates must come from the same refresh
+(same generated_at): the same games and the same pregame information. The active version doesn't read the injury
+feed and is recorded again only when its own inputs change, so its last pre-game record is what it showed at
+tip-off. Graded on players who played.
 
 Breakdowns use one definition for every version (taken from the shadow candidate's record, which carries the
 injury feed, or from the box score): prop category, role (started / bench, and minutes band from prior games),
@@ -111,10 +113,13 @@ def build(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
     if pred.empty:
         return {**out, "player_games": 0}
     # identical games and pregame information: every version present, all from the same refresh
+    # The active version doesn't read the injury feed, so the ledger records it again only when its own inputs change:
+    # its last pre-game record is what it showed at tip-off. The shadow candidates must come from the same refresh.
     w = pred.pivot_table(index="key", columns="version", values="generated_at", aggfunc="first")
     have = w.dropna(subset=[v for v in versions if v in w.columns]) if all(v in w.columns for v in versions) else w.iloc[0:0]
-    same = have[have.nunique(axis=1) == 1].index
-    out["coverage"] = {"player_games_any_version": int(len(w)), "all_versions_present": int(len(have)), "same_refresh": int(len(same))}
+    sh = [v for v in versions[1:]]
+    same = have[have[sh].nunique(axis=1) == 1].index if sh else have.index
+    out["coverage"] = {"player_games_any_version": int(len(w)), "all_versions_present": int(len(have)), "shadows_same_refresh": int(len(same))}
     d = pred[pred["key"].isin(same)]
     b = box.assign(game_id=lambda x: x["game_id"].astype(str), player_id=lambda x: x["player_id"].astype(str), game_date=lambda x: pd.to_datetime(x["game_date"]))
     b = b.sort_values("game_date")
@@ -201,7 +206,11 @@ def run() -> dict:
     from . import data
 
     versions = tuple(v.strip() for v in os.environ.get("MODELROOM_NBA_SHADOW_REPORT", ",".join((ACTIVE,) + SHADOWS)).split(",") if v.strip())
-    pred = _load(ledger.read(ledger_path("nba_props")), versions)
+    main = ledger_path("nba_props")
+    recs = ledger.read(main)
+    for f in sorted(main.parent.glob("nba_props_shadow_*.jsonl")):   # shadow records: one file per version per week
+        recs += ledger.read(f)
+    pred = _load(recs, versions)
     rep = build(pred, data.load(), versions)
     rep["note"] = ("Shadow evaluation on the test site: identical player-games, last pre-game record per version from the same refresh, "
                    "players who played. Nothing here is published to users; the ledger is read, never changed.")
