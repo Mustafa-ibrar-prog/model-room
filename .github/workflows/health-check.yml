@@ -1,0 +1,103 @@
+name: Health check (test site)
+
+# Daily scheduler health check for the TEST site. Read-only toward the site: it never refreshes data, never touches
+# the preview branch or the ledgers, and never prints secrets (the database URL is masked; the GitHub token in Vault
+# is never read: only scheduler.health's yes/no "token_stored"). Alerts are GitHub issues labelled "health-alert":
+# one per incident type, updated silently while it lasts, closed when it clears (modeling/modelroom/health.py).
+#
+# Runs once a day at 2:13 PM PT (22:13 UTC in winter; 3:13 PM in summer), after the 12:00 PM refresh, so "latest
+# successful refresh older than 3 hours" is a real problem rather than the quiet overnight gap. "Run workflow"
+# with dry_run = true prints what it would do; simulate = <name> adds a clearly marked TEST incident.
+on:
+  schedule:
+    - cron: "13 22 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "true = report only, no issues opened/closed"
+        required: false
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+      simulate:
+        description: "optional: add a TEST incident with this name (tests the alert path)"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: health-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Refresh status (recomputed now from the preview branch's refresh log and game times)
+        run: |
+          git fetch -q --depth 1 origin preview
+          mkdir -p modeling/preview-ledger modeling/data/published
+          git show FETCH_HEAD:modeling/preview-ledger/refresh_log.jsonl > modeling/preview-ledger/refresh_log.jsonl
+          for f in nba nfl; do git show FETCH_HEAD:modeling/data/published/$f.json > modeling/data/published/$f.json; done
+          cd modeling && python3 modelroom/refresh_plan.py status > /tmp/status.json
+          python3 -c "import json; d=json.load(open('/tmp/status.json')); print('last success', (d.get('last_success') or {}).get('at'), '| missed', len(d.get('missed') or []))"
+
+      - name: Preview workflow runs, last 24 h
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          since=$(date -u -d '24 hours ago' +%Y-%m-%dT%H:%M:%SZ)
+          gh api "repos/${{ github.repository }}/actions/workflows/preview.yml/runs?per_page=100&created=%3E%3D$since" --paginate \
+            -q '[.workflow_runs[] | {id, event, status, conclusion, created_at}]' | python3 -c "import sys,json; r=[x for l in sys.stdin for x in json.loads(l)]; json.dump(r, open('/tmp/runs.json','w')); print(len(r), 'runs')"
+
+      - name: Supabase scheduler health (no secrets printed)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          echo '{"ok": false, "error": "database not reachable from the health check"}' > /tmp/supabase.json
+          [ -n "$SUPABASE_DB_URL" ] || { echo '{"ok": false, "error": "SUPABASE_DB_URL is not set"}' > /tmp/supabase.json; exit 0; }
+          echo "::add-mask::$SUPABASE_DB_URL"
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1 || true
+          url=""
+          case "$SUPABASE_DB_URL" in
+            *db.*.supabase.co*)
+              # Direct connection strings are IPv6-only: try the Session pooler for the same project (as the diagnostics do).
+              for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1; do
+                cands=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py 2>/dev/null) || continue
+                while IFS= read -r c; do
+                  echo "::add-mask::$c"
+                  PGCONNECT_TIMEOUT=8 psql "$c" -qtAc "select 1" >/dev/null 2>&1 && { url="$c"; break; }
+                done <<< "$cands"
+                [ -n "$url" ] && break
+              done;;
+            *) PGCONNECT_TIMEOUT=8 psql "$SUPABASE_DB_URL" -qtAc "select 1" >/dev/null 2>&1 && url="$SUPABASE_DB_URL";;
+          esac
+          [ -n "$url" ] || { echo "Supabase not reachable"; exit 0; }
+          row=$(psql "$url" -qtAc "select row_to_json(h) from scheduler.health h" 2>/dev/null) || true
+          if [ -n "$row" ]; then
+            echo "$row" | python3 -c "import sys,json; d=json.load(sys.stdin); d['ok']=True; json.dump(d, open('/tmp/supabase.json','w')); print({k: d.get(k) for k in ('enabled','token_stored','last_accepted','failures_24h')})"
+          else
+            echo '{"ok": false, "error": "scheduler.health could not be read"}' > /tmp/supabase.json
+          fi
+
+      - name: Evaluate and alert
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          DRY: ${{ github.event.inputs.dry_run || 'false' }}
+          SIM: ${{ github.event.inputs.simulate || '' }}
+        run: |
+          args="--status /tmp/status.json --runs /tmp/runs.json --supabase /tmp/supabase.json"
+          [ "$DRY" = "true" ] || args="$args --apply"
+          [ -z "$SIM" ] || args="$args --simulate $(echo "$SIM" | tr -cd 'a-z0-9-' | head -c 40)"
+          python3 modeling/modelroom/health.py $args

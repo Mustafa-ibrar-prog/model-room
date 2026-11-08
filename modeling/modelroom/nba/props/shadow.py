@@ -108,6 +108,68 @@ def _metrics(g: pd.DataFrame) -> dict:
     return o
 
 
+def _reason_index(pred: pd.DataFrame) -> dict:
+    """(game_id, team, lower-case name) -> why the shadow candidates left him out, from the teammates_out lists in their
+    own records for that game (status + source, or the missed-games rule)."""
+    idx = {}
+    for r in pred.itertuples():
+        for t in r.teammates_out or []:
+            st = t.get("status") or "?"
+            why = "missed recent games (no current report)" if st == "missed recent games" else f"{st} ({t.get('source') or 'unknown source'})"
+            idx.setdefault((r.game_id, r.team, str(t.get("name", "")).lower()), why)
+    return idx
+
+
+def disagreement(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
+    """Player-games the versions disagree on: projected by some versions and not others, in finished games where every
+    version ran. Did he actually play? For the versions that projected him and he played, the usual accuracy; for the
+    others only the availability outcome (excluded but played / excluded and sat), never counted as an accurate
+    prediction. Agreed players are analysed separately (the rest of the report)."""
+    if pred.empty or len(versions) < 2:
+        return {}
+    games_by_v = {v: set(pred.loc[pred["version"] == v, "game_id"]) for v in versions}
+    finished = set(box["game_id"].astype(str))
+    games = set.intersection(*games_by_v.values()) & finished
+    d = pred[pred["game_id"].isin(games)]
+    if d.empty:
+        return {"games": 0}
+    who = d.groupby("key")["version"].agg(lambda x: tuple(v for v in versions if v in set(x)))
+    info = d.sort_values("generated_at").groupby("key").last()[["game_id", "player_id", "player", "team"]]
+    b = box.assign(game_id=lambda x: x["game_id"].astype(str), player_id=lambda x: x["player_id"].astype(str))
+    in_box = {(g, p): bool(pl) for g, p, pl in zip(b["game_id"], b["player_id"], b["played"])}
+    reasons = _reason_index(d[d["version"] != versions[0]])
+    rows = []
+    for key, vs in who.items():
+        g, pid, name, team = info.loc[key, ["game_id", "player_id", "player", "team"]]
+        played = in_box.get((g, pid))
+        group = "all versions" if len(vs) == len(versions) else ("only " + " + ".join(vs))
+        rows.append({"key": key, "group": group, "projected_by": vs, "played": bool(played), "in_box": played is not None,
+                     "reason": None if len(vs) == len(versions) else (
+                         reasons.get((g, team, str(name).lower()), "not in the shadow's teammates-out list (eligibility / no recent minutes)")
+                         if versions[0] in vs else "0.2.0's missed-games rule or eligibility (0.2.0 records carry no injury detail)")})
+    R = pd.DataFrame(rows)
+    out = {"games": len(games), "player_games": int(len(R)),
+           "note": "Excluded = the version made no projection. An excluded player who sat is a correct exclusion (availability), "
+                   "not an accurate prediction; an excluded player who played is a miss. Accuracy is graded only for versions "
+                   "that projected a player who played."}
+    out["groups"] = {}
+    for grp, x in R.groupby("group"):
+        e = {"player_games": int(len(x)), "played": int(x["played"].sum()), "did_not_play": int((~x["played"]).sum()),
+             "not_in_box_score": int((~x["in_box"]).sum())}
+        if grp != "all versions":
+            e["reasons"] = {k: {"n": int(len(y)), "played": int(y["played"].sum())} for k, y in x.groupby("reason")}
+        out["groups"][grp] = e
+    # availability outcome per version over every player-game any version projected
+    av = {}
+    for v in versions:
+        proj = R["projected_by"].map(lambda t, _v=v: _v in t)
+        av[v] = {"projected_and_played": int((proj & R["played"]).sum()), "projected_but_did_not_play": int((proj & ~R["played"]).sum()),
+                 "excluded_but_played": int((~proj & R["played"]).sum()), "excluded_and_sat": int((~proj & ~R["played"]).sum())}
+    out["availability_by_version"] = av
+    out["_keys"] = {grp: list(x["key"]) for grp, x in R.groupby("group") if grp != "all versions"}
+    return out
+
+
 def build(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
     out = {"generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "versions": list(versions)}
     if pred.empty:
@@ -120,13 +182,15 @@ def build(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
     sh = [v for v in versions[1:]]
     same = have[have[sh].nunique(axis=1) == 1].index if sh else have.index
     out["coverage"] = {"player_games_any_version": int(len(w)), "all_versions_present": int(len(have)), "shadows_same_refresh": int(len(same))}
+    dis = disagreement(pred, box, versions)
+    dis_keys = dis.pop("_keys", {}) if dis else {}
     d = pred[pred["key"].isin(same)]
     b = box.assign(game_id=lambda x: x["game_id"].astype(str), player_id=lambda x: x["player_id"].astype(str), game_date=lambda x: pd.to_datetime(x["game_date"]))
     b = b.sort_values("game_date")
     played = b[b["played"]]
     d = d.merge(played[["game_id", "player_id", "game_date", "minutes", "starter"] + sorted({m["stat"] for m in MARKETS.values()})], on=["game_id", "player_id"], how="inner")
     if d.empty:
-        return {**out, "player_games": 0}
+        return {**out, "player_games": 0, "disagreement_players": dis}
     # prior-only history per player: minutes band and the last-10 median line
     hist = {pid: g for pid, g in played.groupby("player_id")}
     # injury context from the first shadow candidate's record, applied to every version
@@ -169,7 +233,7 @@ def build(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
             return {v: _metrics(S[S["version"] == v]) for v in versions}
         return {str(k): {v: _metrics(x[x["version"] == v]) for v in versions} for k, x in S.groupby(col) if len(x) >= len(versions) * 20}
 
-    out["overall"] = by()
+    out["overall"] = by()   # agreed players only (projected by every version)
     out["by_week"] = by("week")
     out["by_market"] = by("market")
     out["by_role"] = by("role")
@@ -197,6 +261,30 @@ def build(pred: pd.DataFrame, box: pd.DataFrame, versions: tuple) -> dict:
                                                       "played_anyway": int((x["played"] == True).sum())}  # noqa: E712
                                                   for s, x in L.groupby("source")}
     st = d[d["version"] == versions[1]] if len(versions) > 1 else d
+    out["agreed_players"] = {"definition": "player-games projected by every version (the shadows from the same refresh); all "
+                                           "metrics above are on these only", "player_games": out["player_games"]}
+    out["disagreement_players"] = dis
+    if dis_keys:
+        # accuracy of the versions that DID project a disagreement player who then played (sample sizes shown; small)
+        acc = {}
+        for grp, ks in dis_keys.items():
+            sub = pred[pred["key"].isin(ks)].merge(played[["game_id", "player_id", "minutes"] + sorted({m["stat"] for m in MARKETS.values()})], on=["game_id", "player_id"], how="inner")
+            if sub.empty:
+                continue
+            rr = []
+            for r in sub.itertuples():
+                for mk, m in MARKETS.items():
+                    pr = r.probabilities.get(mk) or {}
+                    if "mean" not in pr:
+                        continue
+                    y = float(getattr(r, m["stat"]))
+                    lad = [(float(k), float(v)) for k, v in pr.items() if k not in ("mean", "sd")]
+                    rr.append({"version": r.version, "market": mk, "mean": float(pr["mean"]), "actual": y, "lad_p": [v for _, v in lad],
+                               "lad_y": [float(y >= k) for k, _ in lad], "p_over": None, "y_over": None, "proj_min": r.proj_min, "minutes": r.minutes})
+            S = pd.DataFrame(rr)
+            acc[grp] = {v: {"player_games": int(sub.loc[sub["version"] == v, "key"].nunique()), **_metrics(S[S["version"] == v])}
+                        for v in versions if (S["version"] == v).any()}   # metric "n" counts player-game-markets
+        out["disagreement_players"]["accuracy_when_projected_and_played"] = acc
     out["own_status_sources"] = {"official": int((st["source"] == "nba_official").sum()), "espn": int((st["source"] == "espn").sum()),
                                  "none": int(st["source"].isna().sum()), "conflicts": int(st["conflict"].notna().sum())}
     return out
