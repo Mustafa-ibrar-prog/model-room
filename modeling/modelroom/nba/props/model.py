@@ -20,6 +20,7 @@ Players who don't play are not projected (exchanges settle those props at a fair
 from __future__ import annotations
 
 import itertools
+import os
 import zlib
 from dataclasses import dataclass
 
@@ -158,6 +159,9 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
     return Context(cutoff, season, out, D, team_pace, {"rates": league, "pace": float(np.nanmean(team_pace)) if len(team_pace) else 99.0})
 
 
+_AUDIT_PARTS = os.environ.get("MODELROOM_AUDIT_USAGE_PARTS") == "1"
+
+
 def _shock(rng, sd: float, n: int) -> np.ndarray:
     return np.exp(rng.normal(-0.5 * sd * sd, sd, n)) if sd > 0 else np.ones(n)
 
@@ -292,6 +296,15 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
 
     base, scale, freed = fill(active["appear_rate"], [])
     usage_f = 1.0 + s.usage_boost * freed
+    parts = None
+    if _AUDIT_PARTS and feed_on:
+        # Audit only (never set on the site): the ingredients of the freed-usage share, for refitting it offline.
+        st_ = {str(k): (v or {}).get("status") for k, v in avail["players"].items()}
+        parts = {"T_w": float((active["usage_pm"].fillna(0) * active["minutes_when_playing"] * active["appear_rate"]).sum()),
+                 "T_u": float((active["usage_pm"].fillna(0) * active["minutes_when_playing"]).sum()),
+                 "out": [(float(o["usage_pm"] if pd.notna(o["usage_pm"]) else 0) * float(o["minutes_when_playing"]), float(o["appear_rate"]),
+                          float(o["out_weight"]) if "out_weight" in out else 1.0, float(o["missed_in_row"]) if pd.notna(o["missed_in_row"]) else -1.0,
+                          st_.get(str(oid))) for oid, o in out.iterrows()]}
     # 0.2.2 lineup scenarios: the most consequential uncertain rotation players either play or sit; every lineup is
     # filled on its own, so a healthy starter only loses minutes in the lineups where the uncertain player plays.
     U: list = []
@@ -361,6 +374,9 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
             inputs["teammates_out_detail"] = [{"name": str(o["name"]), "status": (avail["players"].get(str(oid)) or {}).get("status") or "missed recent games",
                                                "source": (avail["players"].get(str(oid)) or {}).get("source") or "box scores",
                                                "weight": round(float(o["out_weight"]), 2)} for oid, o in out.iterrows()]
+        if parts is not None:
+            inputs["usage_parts"] = parts
+            inputs["usage_f_mean"] = float(np.mean(uf))
         res.append(PlayerProjection(pid, str(x["name"]), team, opp, grp, game_id, sims, inputs))
     return res
 

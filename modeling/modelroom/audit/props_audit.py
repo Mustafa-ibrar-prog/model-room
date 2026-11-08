@@ -125,6 +125,7 @@ def nba_rows(seasons, sims: int, params_path=None, avail_mode: str | None = None
                           "n_out": len(str(x.inputs.get("teammates_out")).split(", ")) if x.inputs.get("teammates_out") else 0,
                           "has_report": bool(av and (str(x.game_id), x.team) in av),
                           "my_status": ((x.inputs.get("availability") or {}).get("status")),
+                          "usage_parts": x.inputs.get("usage_parts"), "usage_f_mean": x.inputs.get("usage_f_mean"),
                           "usage_freed": float(x.inputs.get("usage_freed_by_absences") or 0.0),
                           "team": x.team, "opp": opp_of.get((str(x.game_id), x.team)),
                           "returning": any("back from" in n for n in ((x.inputs.get("availability") or {}).get("notes") or []))}
@@ -319,8 +320,8 @@ def main(argv=None) -> None:
         df = nfl_rows(seasons, a.sims, a.params)
     d = ensure(output_dir(a.league) / "audit")
     tag = "_".join(map(str, seasons)) + (f"_{a.tag}" if a.tag else "")
-    df.drop(columns=["ladder"]).to_parquet(d / f"rows_{tag}.parquet")
     df.to_pickle(d / f"rows_{tag}.pkl")
+    df.drop(columns=[c for c in ("ladder", "usage_parts") if c in df.columns]).to_parquet(d / f"rows_{tag}.parquet")
     s = summarize(df, a.league)
     (d / f"summary_{tag}.json").write_text(json.dumps(s, indent=2, default=str))
     print(json.dumps({k: s[k] for k in ("rows", "market_line", "ladder")}, indent=1, default=str)[:3000])

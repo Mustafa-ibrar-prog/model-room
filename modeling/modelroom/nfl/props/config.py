@@ -85,6 +85,8 @@ class PropSettings:
     role_share_weight: float = 1.0      # weight of history games played at another depth rank (1 = all equal, 0.1)
     play_model: str = "table"           # "depth": chance of playing from depth rank + recent appearances +
                                         # Questionable (logistic fit on 2021-22, PLAY_MODEL below)
+    rb_role_factors: tuple = ()         # experimental: carry-share multipliers for the team's lead back and the other
+                                        # backs (RB1, RB2+), fitted on 2021-22; empty = off (0.1.1 unchanged)
     sims: int = 4000
 
 
@@ -109,7 +111,7 @@ ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_
                   "opp_redistribution", "redist_decay", "redist_up", "redist_up_decay", "redist_in_group", "questionable_factor",
                   "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
                   "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate",
-                  "inexp_qb_attempts", "inexp_qb_yards", "injury_context")
+                  "inexp_qb_attempts", "inexp_qb_yards", "injury_context", "rb_role_factors")
 
 
 @dataclass(frozen=True)
