@@ -58,7 +58,7 @@ def _context(league: str) -> dict:
     out = {"props": {}, "games": {}, "finals": {}, "stats": {}, "stat_of": {}, "labels": {}}
     try:
         gid = "nfl_game_id" if league == "nfl" else "nba_game_id"
-        for r in ledger.read(ledger_path(f"{league}_props")):
+        for r in ledger.read_series(ledger_path(f"{league}_props")):
             if r["generated_at"] >= r["game_start"]:
                 continue
             k = (str(r[gid]), str(r["player_id"]))
