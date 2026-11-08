@@ -30,6 +30,7 @@ from datetime import UTC, datetime
 import numpy as np
 import pandas as pd
 
+from modelroom.common import ledger as ledger_mod
 from modelroom.common.paths import data_root, ledger_path, processed_dir
 
 from . import schema as S
@@ -265,12 +266,26 @@ def run(league: str, now: datetime | None = None) -> dict:
     return {k: v for k, v in log.items() if k != "sources"} | {"sources": {k: v.get("ok") for k, v in log["sources"].items()}}
 
 
-def _snap_path(league: str):
-    return ledger_path(f"injury_snapshots_{league}")
+def _snap_path(league: str, now=None):
+    """NFL: one file per ISO week (injury_snapshots_nfl_week_<YYYY>-W<ww>.jsonl); the original file keeps every earlier
+    line. NBA: unchanged (one file)."""
+    base = ledger_path(f"injury_snapshots_{league}")
+    if league != "nfl":
+        return base
+    return ledger_mod.weekly_path(base, now or datetime.now(UTC))
 
 
 def _last_hash(league: str) -> str | None:
-    f = _snap_path(league)
+    base = ledger_path(f"injury_snapshots_{league}")
+    files = [base] if league != "nfl" else ledger_mod.series_files(base)
+    for f in reversed(files):
+        h = _last_hash_in(f)
+        if h:
+            return h
+    return None
+
+
+def _last_hash_in(f) -> str | None:
     if not f.exists():
         return None
     for line in reversed(f.read_text().splitlines()):

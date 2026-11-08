@@ -163,7 +163,7 @@ def build(league: str) -> dict:
     season_now = int(games.loc[games["status"].isin(["final", "scheduled"]), "season"].max())
     games = games[games["season"] >= season_now - SEASONS_BACK]
     game_recs = _pregame(ledger.read(ledger_path(league)))
-    prop_recs = _pregame(ledger.read(ledger_path(f"{league}_props")))
+    prop_recs = _pregame(ledger.read_series(ledger_path(f"{league}_props")))
     stats, stat_of, label_of = _player_stats(league)
     markets, sig = _market(league), _sigmas(league)
     gid_key = "nfl_game_id" if league == "nfl" else "nba_game_id"

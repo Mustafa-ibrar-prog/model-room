@@ -52,6 +52,23 @@ def availability_hash(league: str) -> str:
     return hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
 
 
+def game_availability_hashes(league: str, games: pd.DataFrame) -> dict:
+    """{game_id: hash} of ONE game's injury picture: the same ingredients as availability_hash() (feed statuses and
+    restrictions, projected NFL starting QBs), limited to that game's two teams. games: game_id, home_team, away_team."""
+    d = load(league)
+    s = processed_dir(league) / ("starters_live.parquet" if league == "nba" else "starters.parquet")
+    st = pd.read_parquet(s) if s.exists() else None
+    out = {}
+    for g in games.itertuples():
+        teams = {g.home_team, g.away_team}
+        parts = [] if d is None else sorted(f"{r.player_id}|{r.status}|{r.restriction_minutes}" for r in d.itertuples() if r.team in teams)
+        if st is not None and league == "nfl" and {"game_id", "team", "qb_id"} <= set(st.columns):
+            x = st[(st["game_id"].astype(str) == str(g.game_id))]
+            parts += sorted(f"{r.game_id}|{r.team}|{r.qb_id}" for r in x.itertuples())
+        out[str(g.game_id)] = hashlib.sha256("\n".join(parts).encode()).hexdigest()[:16]
+    return out
+
+
 def nba_availability(upcoming: pd.DataFrame, player_games: pd.DataFrame) -> dict:
     from modelroom.nba.props import model as M
     from modelroom.nba.props import returns

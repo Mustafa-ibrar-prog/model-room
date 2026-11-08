@@ -129,7 +129,7 @@ def run() -> dict:
     from modelroom.nfl import player_data
     from .features import GROUPS
 
-    pred = _pregame(ledger.read(ledger_path("nfl_props")))
+    pred = _pregame(ledger.read_series(ledger_path("nfl_props")))
     pg, _, _ = player_data.load()
     pg = pg[(pg["offense_snaps"].fillna(0) > 0) | (pg[["pass_att", "targets", "carries"]].sum(axis=1) > 0)]
     pg = pg.assign(group=pg["position"].map(GROUPS), rush_rec_yds=pg["rush_yds"] + pg["rec_yds"], td_any=pg["rush_td"] + pg["rec_td"])

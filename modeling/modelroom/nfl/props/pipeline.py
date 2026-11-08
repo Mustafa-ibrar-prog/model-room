@@ -275,6 +275,9 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
 
     base_hash = hash_frame(inp.player_games[inp.player_games["season"] >= season - 3], ["game_id", "player_id", "targets", "carries", "pass_att"])
     avail_hash = U.availability_hash("nfl")
+    # Ledger records hash only their own game's injury picture (feed rows of both teams + projected starting QBs), so a
+    # change elsewhere in the league doesn't re-record every player. Projections don't use this; only the ledger does.
+    game_avail = U.game_availability_hashes("nfl", upcoming[["game_id", "home_team", "away_team"]])
     generated_at = now.isoformat(timespec="seconds")
     appended = None
     shadow_appended = {}
@@ -287,6 +290,8 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         starts = upcoming.set_index("game_id")["start_time"]
         recs = []
         for x in projs:
+            if p.settings.injury_context:
+                inputs_hash = hash_obj({"base": base_hash, "game_availability": game_avail.get(str(x.game_id), "")})
             probs = {}
             for mkey, m in MARKETS.items():
                 if x.group in m["positions"]:
@@ -315,12 +320,14 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     inputs_hash = hash_obj({"base": base_hash, "availability": avail_hash}) if p.settings.injury_context else base_hash
     params_hash = hash_obj(p.to_json())
     if write_ledger and projs:
-        appended = ledger.append(ledger_path("nfl_props"), records(version, p, projs, seeds))
+        # Weekly ledger files (nfl_props_week_<YYYY>-W<ww>.jsonl, each its own hash chain); nfl_props.jsonl keeps every
+        # earlier record exactly as written. Duplicates are checked against the whole series.
+        appended = ledger.append_weekly(ledger_path("nfl_props"), now, records(version, p, projs, seeds))
         for v, (pv, px, sd) in shadows.items():
             if px:
                 if pv.settings.injury_context and feed is not None:
                     _attach_availability(px, feed)
-                shadow_appended[v] = ledger.append(ledger_path("nfl_props"), records(v, pv, px, sd)).__dict__
+                shadow_appended[v] = ledger.append_weekly(ledger_path("nfl_props"), now, records(v, pv, px, sd)).__dict__
 
     last_ingest = state.read().get("nflverse_games", {}).get("last_success")
     pgr = inp.player_games.assign(rush_rec_yds=inp.player_games["rush_yds"] + inp.player_games["rec_yds"],

@@ -7,6 +7,9 @@ Rules
 - Re-running the same model on the same inputs for the same game is a no-op
   (deduplicated on game_id + model_version + inputs_hash + params_hash).
 - Grading never touches this file; results are computed into separate reports.
+- A ledger can be a series: the original file plus one file per ISO week (<name>_week_<YYYY>-W<ww>.jsonl), each its
+  own hash chain. New records go to the current week's file, deduplicated against every file in the series, so
+  no single file outgrows GitHub's 100 MB limit while the earlier files stay exactly as written.
 """
 from __future__ import annotations
 
@@ -49,15 +52,19 @@ def read(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def append(path: Path, predictions: Iterable[dict]) -> AppendResult:
+def _key(r: dict) -> tuple:
+    return (r["game_id"], r["model_version"], r["inputs_hash"], r.get("params_hash"))
+
+
+def append(path: Path, predictions: Iterable[dict], also_seen: set | None = None) -> AppendResult:
     """Append prediction dicts. Each needs game_id, model_version, inputs_hash,
-    generated_at and game_start (ISO 8601 with timezone)."""
+    generated_at and game_start (ISO 8601 with timezone). `also_seen`: dedupe keys already recorded in other files of
+    the same series."""
     existing = read(path)
     verify_records(existing)
-    def key(r):
-        return (r["game_id"], r["model_version"], r["inputs_hash"], r.get("params_hash"))
+    key = _key
 
-    seen = {key(r) for r in existing}
+    seen = {key(r) for r in existing} | set(also_seen or ())
     prev = existing[-1]["hash"] if existing else GENESIS
     seq = existing[-1]["seq"] if existing else 0
 
@@ -106,3 +113,41 @@ def verify(path: Path) -> int:
     records = read(path)
     verify_records(records)
     return len(records)
+
+
+# ------------------------------------------------------------------ weekly series
+def week_tag(now) -> str:
+    y, w, _ = datetime.fromisoformat(str(now)).isocalendar() if isinstance(now, str) else now.isocalendar()
+    return f"{y}-W{w:02d}"
+
+
+def weekly_path(base: Path, now) -> Path:
+    return base.with_name(f"{base.stem}_week_{week_tag(now)}.jsonl")
+
+
+def series_files(base: Path) -> list[Path]:
+    """The original file (if any) then the weekly files, oldest first."""
+    weekly = sorted(base.parent.glob(f"{base.stem}_week_*.jsonl"))
+    return ([base] if base.exists() else []) + weekly
+
+
+def read_series(base: Path) -> list[dict]:
+    files = series_files(base)
+    if not files:
+        return read(base)   # nothing on disk yet: same as reading a missing ledger
+    out: list[dict] = []
+    for f in files:
+        out += read(f)
+    return out
+
+
+def verify_series(base: Path) -> dict:
+    """Verify every file's hash chain; returns {file name: records}."""
+    return {f.name: verify(f) for f in series_files(base)}
+
+
+def append_weekly(base: Path, now, predictions: Iterable[dict]) -> AppendResult:
+    """Append to the current week's file, skipping anything already recorded anywhere in the series."""
+    target = weekly_path(base, now)
+    others = {_key(r) for f in series_files(base) if f != target for r in read(f)}
+    return append(target, predictions, also_seen=others)

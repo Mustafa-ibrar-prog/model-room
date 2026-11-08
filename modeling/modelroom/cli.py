@@ -250,8 +250,10 @@ def _ledger(args) -> int:
     from modelroom.common.paths import ledger_path
 
     for league in ("nba", "nfl", "nfl_props", "nba_props"):
-        n = ledger.verify(ledger_path(league))
-        print(f"{league}: {n} predictions, chain intact")
+        for name, n in ledger.verify_series(ledger_path(league)).items():
+            print(f"{name}: {n} predictions, chain intact")
+    for f in sorted(ledger_path("nba_props").parent.glob("nba_props_shadow_*.jsonl")):   # NBA shadow candidates
+        print(f"{f.name}: {ledger.verify(f)} predictions, chain intact")
     return 0
 
 
