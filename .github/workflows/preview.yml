@@ -84,11 +84,11 @@ jobs:
       # NBA player props: the 0.2.0 model on the TEST SITE only (approved 2026-11-03). Every prediction it
       # makes is recorded in the ledger as 0.2.0; earlier 0.1.0 records stay exactly as they were.
       # Rollback: delete this line (or set "0.1.0") and push; the next refresh publishes 0.1.0 again.
-      MODELROOM_NBA_PROPS_VERSION: "0.2.1"
+      MODELROOM_NBA_PROPS_VERSION: "0.2.0"
       # Injury-feed versions on the TEST SITE only. The previous versions keep running in the ledger as shadows
       # (recorded, not published) so both are graded on the same games. Rollback: set the versions back to
       # 0.2.0 / 0.1.0 (and MODELROOM_NBA_INJURY_FEED: "off" for the NBA game engine's injury adjustment).
-      MODELROOM_NBA_PROPS_SHADOW: "0.2.0"
+      MODELROOM_NBA_PROPS_SHADOW: "0.2.1"
       MODELROOM_NFL_PROPS_VERSION: "0.1.1"
       MODELROOM_NFL_PROPS_SHADOW: "0.1.0"
       MODELROOM_NBA_INJURY_FEED: "on"
