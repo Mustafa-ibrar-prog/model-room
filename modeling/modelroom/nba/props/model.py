@@ -272,6 +272,8 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         if s.minutes_fill == "headroom" and exp_min.sum() > 0:
             mwp = active["minutes_when_playing"]
             gap = TEAM_MINUTES - float(exp_min.sum())
+            if gap > 0 and s.minutes_gap_fill != 1.0:
+                gap = gap * s.minutes_gap_fill
             if gap > 0:
                 cap = np.minimum(42.0, np.maximum(active["minutes_high"].fillna(mwp), mwp + 4.0))
                 room = ((cap - mwp).clip(lower=0) * ap)

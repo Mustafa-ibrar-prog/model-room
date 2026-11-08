@@ -62,13 +62,15 @@ class PropSettings:
     unlisted_clears: bool = True       # 0.2.1: a player absent from a submitted report counts as cleared even after a
                                        # long absence. False = the missed-games rule still applies to him (measured:
                                        # such players play ~12% of the time; most have left the team)
+    minutes_gap_fill: float = 1.0      # share of the team's unclaimed minutes (240 minus expected minutes) handed out to
+                                       # the active players; 1 = all (0.2.0-0.2.2). Fitted on 2023-24 for 0.2.3
     lineup_scenarios: int = 0          # up to this many uncertain rotation players are simulated as playing / sitting
                                        # (2^k lineups); teammates' minutes and usage are filled per lineup. 0 = off
     sims: int = 4000
 
 
 ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor",
-                  "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios")
+                  "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios", "minutes_gap_fill")
 
 
 @dataclass(frozen=True)
