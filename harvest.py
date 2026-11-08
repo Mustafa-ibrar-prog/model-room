@@ -37,7 +37,7 @@ def parse(args):
         return None, None, f"{u}: {e}"
 
 if __name__ == "__main__":
-    with ThreadPoolExecutor(24) as ex:
+    with ThreadPoolExecutor(int(os.environ.get("THREADS", "24"))) as ex:
         got = list(ex.map(get, list(T["rt"])))
     miss = [str(g[0]) for g in got if g[3] is None]
     ok = [g for g in got if g[3] is not None]

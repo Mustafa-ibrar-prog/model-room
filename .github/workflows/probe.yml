@@ -10,7 +10,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install pdfplumber pandas pyarrow
-      - run: TARGETS=targets2.csv OUT=hist2 python3 harvest.py
+      - run: THREADS=3 TARGETS=targets3.csv OUT=hist3 python3 harvest.py
       - run: |
           git config user.name probe; git config user.email probe@users.noreply.github.com
-          git add hist2 && git commit -qm "Historical NBA injury reports (parsed)" && git push
+          git add hist3 && git commit -qm "Historical NBA injury reports (parsed)" && git push
