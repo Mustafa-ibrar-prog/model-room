@@ -13,6 +13,8 @@ CANDIDATE_VERSION = "0.2.0"
 CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not used live until approved
 INJURY_VERSION = "0.2.1"
 INJURY_FILE = Path(__file__).with_name("params_0.2.1.json")      # 0.2.0 + the live injury feed (test site)
+# Experimental versions that may be recorded as shadows on the test site (never published unless approved).
+SHADOW_FILES = {"0.2.3a": Path(__file__).with_name("params_0.2.3a.json"), "0.2.3": Path(__file__).with_name("params_0.2.3.json")}
 
 HISTORY_SEASONS = 2                  # earlier seasons used alongside the current one (hoopR season = end year)
 TUNE_SEASONS = (2021, 2022)          # 2020-21, 2021-22
