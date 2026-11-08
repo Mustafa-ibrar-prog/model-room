@@ -53,6 +53,13 @@ def shadow_versions(active: str) -> list[str]:
     return [v for v in dict.fromkeys(vs) if v != active]
 
 
+def shadow_ledger_path(v: str, now) -> "Path":
+    """Shadow records live in their own append-only, hash-chained files, one per version per ISO week (the active
+    version's ledger stays nba_props.jsonl), so no single ledger file outgrows GitHub's 100 MB limit."""
+    y, w, _ = pd.Timestamp(now).isocalendar()
+    return ledger_path(f"nba_props_shadow_{v}_{y}-W{w:02d}")
+
+
 def active_version() -> str:
     v = os.environ.get("MODELROOM_NBA_PROPS_VERSION", "").strip() or MODEL_VERSION
     if v not in VERSIONS:
@@ -196,15 +203,28 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     appended = None
     shadow_appended = {}
 
-    def records(v: str, pv: PropParams, px: list, sd: dict) -> list[dict]:
+    def game_avail_hash(gid: str) -> str:
+        """The injury picture of ONE game (both teams: statuses, restrictions, filed or not, confirmed starters)."""
+        parts = []
+        for (g, team), a in (avail or {}).items():
+            if g != gid:
+                continue
+            parts.append(f"{team}|submitted={bool(a.get('submitted'))}|starters={sorted(a.get('starters') or [])}")
+            parts += sorted(f"{team}|{pid}|{r.get('status')}|{r.get('restriction_minutes')}" for pid, r in (a.get("players") or {}).items())
+        return hash_obj(sorted(parts))
+
+    def records(v: str, pv: PropParams, px: list, sd: dict, per_game: bool = False) -> list[dict]:
         # Versions that read the injury feed fold its state into the inputs hash: a changed injury picture is a
-        # new snapshot in the append-only ledger; the earlier ones stay as recorded.
+        # new snapshot in the append-only ledger; the earlier ones stay as recorded. Shadows (per_game) hash only
+        # their own game's injury picture, so a change elsewhere in the league doesn't re-record every player.
         ih = hash_obj({"base": base_hash, "injuries": avail_hash}) if pv.settings.injury_feed else base_hash
         ph = hash_obj(pv.to_json())
         starts = upcoming.set_index("game_id")["start_time"]
         dates = upcoming.set_index("game_id")["game_date"].astype(str)
         recs = []
         for x in px:
+            if per_game and pv.settings.injury_feed:
+                ih = hash_obj({"base": base_hash, "game_injuries": game_avail_hash(str(x.game_id))})
             probs = {mkey: {**{str(k): round(pv.calibrate(mkey, x.prob(m["stat"], k)), 4) for k in m["ladder"]},
                             "mean": round(x.mean(m["stat"]), 2), "sd": round(x.sd(m["stat"]), 2)} for mkey, m in MARKETS.items()}
             a = x.inputs.get("availability") or {}
@@ -228,7 +248,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         for v, (pv, px, sd) in shadows.items():
             if px:
                 try:
-                    shadow_appended[v] = ledger.append(ledger_path("nba_props"), records(v, pv, px, sd)).__dict__
+                    shadow_appended[v] = ledger.append(shadow_ledger_path(v, now), records(v, pv, px, sd, per_game=True)).__dict__
                 except Exception as e:  # noqa: BLE001
                     shadow_errors[v] = f"ledger: {type(e).__name__}: {e}"[:300]
                     print(f"::warning::NBA props shadow {v} not recorded: {shadow_errors[v]}", flush=True)
