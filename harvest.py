@@ -7,19 +7,23 @@ import pandas as pd
 sys.path.insert(0, "inj")
 import nba_official as N
 
-T = pd.read_csv("targets.csv", parse_dates=["rt"])
+T = pd.read_csv(os.environ.get("TARGETS", "targets.csv"), parse_dates=["rt"])
 T["rt"] = pd.to_datetime(T["rt"], utc=True).dt.tz_convert("America/New_York")
 UA = {"User-Agent": "Mozilla/5.0 (compatible; ModelRoom/0.1; research replay)"}
 
 def get(rt):
-    for k in range(3):
-        t = rt - timedelta(hours=k)
-        u = N.URL.format(t.strftime("%Y-%m-%d_%I%p"))
-        try:
-            b = urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30).read()
-            return rt, t, u, b
-        except Exception:
-            continue
+    # rt is the hour floor of tip-30; the 15-minute format (2025-26 on) can be up to 45 minutes later and still be
+    # before tip-30, but we only know tip-30 to the hour here, so the latest slot used is rt itself (conservative).
+    for k in range(9):
+        t = rt - timedelta(minutes=15 * k)
+        fmts = ["%Y-%m-%d_%I_%M%p"] + (["%Y-%m-%d_%I%p"] if t.minute == 0 else [])
+        for f in fmts:
+            u = N.URL.format(t.strftime(f))
+            try:
+                b = urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=30).read()
+                return rt, t, u, b
+            except Exception:
+                continue
     return rt, None, None, None
 
 def parse(args):
@@ -43,8 +47,8 @@ if __name__ == "__main__":
     errs = [r[2] for r in res if r[2]]
     R = pd.concat([r[0] for r in res if r[0] is not None], ignore_index=True)
     F = pd.concat([r[1] for r in res if r[1] is not None], ignore_index=True)
-    os.makedirs("hist", exist_ok=True)
-    R.astype({"report_time": str, "fetched_at": str}).to_parquet("hist/nba_reports.parquet", index=False)
-    F.to_parquet("hist/nba_filings.parquet", index=False)
-    json.dump({"missing": miss, "parse_errors": errs[:200], "n_parse_errors": len(errs), "rows": len(R)}, open("hist/summary.json", "w"), indent=1)
+    os.makedirs(os.environ.get("OUT", "hist"), exist_ok=True)
+    R.astype({"report_time": str, "fetched_at": str}).to_parquet(os.environ.get("OUT", "hist") + "/nba_reports.parquet", index=False)
+    F.to_parquet(os.environ.get("OUT", "hist") + "/nba_filings.parquet", index=False)
+    json.dump({"missing": miss, "parse_errors": errs[:200], "n_parse_errors": len(errs), "rows": len(R)}, open(os.environ.get("OUT", "hist") + "/summary.json", "w"), indent=1)
     print("rows", len(R), "parse errors", len(errs))
