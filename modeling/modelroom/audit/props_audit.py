@@ -83,12 +83,25 @@ def nba_rows(seasons, sims: int, params_path=None, avail_mode: str | None = None
     rng = np.random.default_rng(7)
     rows = []
     g = inp.games
+    hist = None
+    if avail_mode == "hist" and p.settings.injury_feed:
+        import os
+
+        from modelroom.audit import hist_reports
+        hist, st = hist_reports.build(inp, [Path(x) for x in os.environ["MODELROOM_HIST_REPORTS"].split(",")])
+        print("historical reports:", st, flush=True)
     for season in seasons:
         for day in run.days.get(season, []):
             day_games = g[(g["game_date"].astype(str) == day) & (g["status"] == "final")]
             ctx = run.ctx(day, season, p.settings)
             av = None
-            if avail_mode in ("actual", "report") and p.settings.injury_feed:
+            if avail_mode == "hist" and hist is not None:
+                from modelroom.nba.props import returns
+
+                prior = pg[pd.to_datetime(pg["game_date"]) < pd.Timestamp(day)]
+                back = returns.current_back(prior[prior["season"] == season], ctx.players.index.astype(str).tolist())
+                av = {k: {**v, "back": back} for k in ((str(r.game_id), t) for r in day_games.itertuples() for t in (r.home_abbr, r.away_abbr)) if (v := hist.get(k))}
+            elif avail_mode in ("actual", "report") and p.settings.injury_feed:
                 from modelroom.nba.props import returns
 
                 av = _actual_availability(M, ctx, day_games, pg[pg["game_id"].isin(day_games["game_id"])], avail_mode)
@@ -109,6 +122,9 @@ def nba_rows(seasons, sims: int, params_path=None, avail_mode: str | None = None
                           "group": x.group, "starter": x.inputs.get("starter_rate", 0) > 0.5,
                           "proj_min": x.inputs.get("projected_minutes"), "act_min": mins.get(k),
                           "support": x.support()[0], "teammates_out": bool(x.inputs.get("teammates_out")),
+                          "n_out": len(str(x.inputs.get("teammates_out")).split(", ")) if x.inputs.get("teammates_out") else 0,
+                          "has_report": bool(av and (str(x.game_id), x.team) in av),
+                          "my_status": ((x.inputs.get("availability") or {}).get("status")),
                           "usage_freed": float(x.inputs.get("usage_freed_by_absences") or 0.0),
                           "team": x.team, "opp": opp_of.get((str(x.game_id), x.team)),
                           "returning": any("back from" in n for n in ((x.inputs.get("availability") or {}).get("notes") or []))}
@@ -293,7 +309,7 @@ def main(argv=None) -> None:
     ap.add_argument("--sims", type=int, default=1500)
     ap.add_argument("--params", default=None, help="params file (default: the live params.json)")
     ap.add_argument("--tag", default="", help="suffix for the output files")
-    ap.add_argument("--avail", default=None, choices=[None, "actual", "report"], help="NBA 0.2.1: availability from who actually played (upper bound)")
+    ap.add_argument("--avail", default=None, choices=[None, "actual", "report", "hist"], help="NBA 0.2.1: availability from who actually played (upper bound)")
     a = ap.parse_args(argv)
     if a.league == "nba":
         seasons = [int(s) for s in (a.seasons or "2025,2026").split(",")]
