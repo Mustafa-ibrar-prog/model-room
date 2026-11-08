@@ -302,6 +302,14 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         c_share = c_share.fillna(0.0)
         role = rk_t.where(allsk["group"] != "RB", rk_c)
 
+    if s.rb_role_factors:
+        # Experimental lead-back correction: the model spreads carries too evenly across backs (lead backs short by
+        # 8-10% every season 2023-25, backups over). RB1 = the active back with the largest projected carry share.
+        rbs = [i for i in c_share.index if i in rushers.index and rushers.at[i, "group"] == "RB"] if len(c_share) else []
+        if rbs:
+            lead = max(rbs, key=lambda i: float(c_share[i]))
+            for i in rbs:
+                c_share[i] = float(c_share[i]) * float(s.rb_role_factors[0] if i == lead else s.rb_role_factors[1])
     PA = np.clip(np.rint(rng.normal(mu_pa, p.volume.pass_sd, n)), 8, 75).astype(int)
     RU = np.clip(np.rint(rng.normal(mu_ru, p.volume.rush_sd, n)), 5, 60).astype(int)
 
