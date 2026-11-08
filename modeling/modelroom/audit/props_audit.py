@@ -83,24 +83,24 @@ def nba_rows(seasons, sims: int, params_path=None, avail_mode: str | None = None
     rng = np.random.default_rng(7)
     rows = []
     g = inp.games
-    hist = None
+    hist_av = None
     if avail_mode == "hist" and p.settings.injury_feed:
         import os
 
         from modelroom.audit import hist_reports
-        hist, st = hist_reports.build(inp, [Path(x) for x in os.environ["MODELROOM_HIST_REPORTS"].split(",")])
+        hist_av, st = hist_reports.build(inp, [Path(x) for x in os.environ["MODELROOM_HIST_REPORTS"].split(",")])
         print("historical reports:", st, flush=True)
     for season in seasons:
         for day in run.days.get(season, []):
             day_games = g[(g["game_date"].astype(str) == day) & (g["status"] == "final")]
             ctx = run.ctx(day, season, p.settings)
             av = None
-            if avail_mode == "hist" and hist is not None:
+            if avail_mode == "hist" and hist_av is not None:
                 from modelroom.nba.props import returns
 
                 prior = pg[pd.to_datetime(pg["game_date"]) < pd.Timestamp(day)]
                 back = returns.current_back(prior[prior["season"] == season], ctx.players.index.astype(str).tolist())
-                av = {k: {**v, "back": back} for k in ((str(r.game_id), t) for r in day_games.itertuples() for t in (r.home_abbr, r.away_abbr)) if (v := hist.get(k))}
+                av = {k: {**v, "back": back} for k in ((str(r.game_id), t) for r in day_games.itertuples() for t in (r.home_abbr, r.away_abbr)) if (v := hist_av.get(k))}
             elif avail_mode in ("actual", "report") and p.settings.injury_feed:
                 from modelroom.nba.props import returns
 
