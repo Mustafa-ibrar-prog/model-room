@@ -1,0 +1,112 @@
+{
+  "calibration": {
+    "assists": [
+      0.2133,
+      1.2566
+    ],
+    "blocks": [
+      0.0867,
+      1.0774
+    ],
+    "points": [
+      0.1003,
+      1.2449
+    ],
+    "pra": [
+      0.0979,
+      1.3058
+    ],
+    "rebounds": [
+      0.1425,
+      1.2592
+    ],
+    "steals": [
+      0.1209,
+      1.109
+    ],
+    "threes": [
+      0.0606,
+      1.0753
+    ]
+  },
+  "model_id": "nba-props",
+  "model_version": "0.2.3a",
+  "provenance": {
+    "based_on": "0.2.0 (same settings and calibration)",
+    "calibration": "unchanged from 0.2.1 (so the replay isolates the availability change)",
+    "change_from_0.2.1": "Report status sets a probability of playing instead of certainty; a player missing from a submitted report no longer counts as cleared after a long absence; Doubtful = out",
+    "change_from_0.2.2a": "Freed-usage boost removed (usage_boost 0) and half of the team's unclaimed minutes handed out (minutes_gap_fill 0.5)",
+    "doubtful_weight": "0.75, the Doubtful weight already used by the NBA game engine's injury adjustment",
+    "fitted_at": "2026-11-04T18:30:00+00:00",
+    "minutes_fit": "2023-24 replay, usage_boost 0: minutes_gap_fill 1.0 -> minutes bias +0.96, stat bias +4.75%; 0.5 -> minutes bias +0.16, stat bias +0.4%, ladder ECE 0.47%, O/U ECE 1.75%. Test seasons 2024-25 and 2025-26 not used.",
+    "play_prob_fit": "official NBA injury reports 2023-24 (hoopR season 2024), last hourly report at or before tip-30 ET; P(played | Available/Probable) by minutes-when-playing band <8 / 8-16 / 16-24 / 24+ = 0.364 / 0.640 / 0.918 / 0.993 (n 321 / 378 / 450 / 1436). Questionable (n 33, overall 0.42) = Available rates x 0.49. Test seasons 2024-25, 2025-26 not used.",
+    "return_minutes": "python -m modelroom.nba.props.returns: fit 2016-22 (n=646/554/501 games back); held out 2023+: 0.740/0.848/0.937 minutes ratio, sd factor 1.215/1.216/1.186",
+    "status": "experimental 0.2.3a: NOT active (test replay only)",
+    "test_seasons": [
+      2023,
+      2024,
+      2025,
+      2026
+    ],
+    "tuning_seasons": [
+      2021,
+      2022
+    ],
+    "unlisted_fit": "2023-24: rotation players (12+ min) who missed 3+ games and were absent from a submitted report played 12.2% of the time (n 1847)",
+    "usage_fit": "2023-24 historical-report replay of 0.2.2a with the freed-usage ingredients recorded; grid over absence fade half-life (1-20 games), weighted/unweighted denominator and boost 0-0.8: every positive boost raised points and assists error; best = 0 (points bias +9.7% -> +3.7%)"
+  },
+  "settings": {
+    "assist_sd": 0.35,
+    "blowout_strength": 0.02,
+    "def_half_life": 20.0,
+    "def_prior_minutes": 1500.0,
+    "doubtful_weight": 1.0,
+    "injury_feed": true,
+    "lineup_scenarios": 0,
+    "matchup_strength": 0.5,
+    "minutes_fill": "headroom",
+    "minutes_gap_fill": 0.5,
+    "minutes_half_life": 3.0,
+    "minutes_sd": 11.0,
+    "missed_games_out": 2,
+    "pace_strength": 1.0,
+    "play_bands": [
+      8,
+      16,
+      24
+    ],
+    "play_prob_available": [
+      0.364,
+      0.64,
+      0.918,
+      0.993
+    ],
+    "play_prob_questionable": [
+      0.18,
+      0.31,
+      0.45,
+      0.49
+    ],
+    "rate_half_life": 20.0,
+    "rate_prior_kind": "role",
+    "rate_prior_minutes": 150.0,
+    "rebound_sd": 0.25,
+    "return_minutes": [
+      0.743,
+      0.878,
+      0.949
+    ],
+    "return_sd_factor": [
+      1.307,
+      1.211,
+      1.179
+    ],
+    "scoring_sd": 0.25,
+    "season_carry": 0.5,
+    "sims": 10000,
+    "stock_sd": 0.4,
+    "unlisted_clears": false,
+    "usage_boost": 0.0,
+    "usage_decay": 1.0
+  }
+}
