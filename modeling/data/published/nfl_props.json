@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-08T03:51:32+00:00",
+  "generated_at": "2026-11-08T03:56:45+00:00",
   "season": 2026,
   "week": 9,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "be1800a1f4dbcbcf",
+    "inputs_hash": "3b9155bb3b417e28",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,7 +20,7 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-08T03:50:58.687583+00:00",
+      "generated_at": "2026-11-08T03:56:11.606907+00:00",
       "sources": {
         "espn": {
           "ok": true,
@@ -40,7 +40,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-08T03:50:35+00:00",
+    "last_ingest": "2026-11-08T03:55:49+00:00",
     "results_through": "2026-11-05",
     "markets": [
       {
@@ -15172,7 +15172,7 @@
           "opp": "CLE",
           "position": "QB",
           "game_id": "2026_09_CLE_NO",
-          "injury_status": "Available",
+          "injury_status": null,
           "markets": {
             "passing_yards": {
               "label": "Passing yards",
@@ -15909,18 +15909,9 @@
             "qb_note": null,
             "team_pass_attempts": 34.5,
             "team_carries": 26.2,
-            "injury_status": "Available",
+            "injury_status": null,
             "snap_share_recent": 0.993,
-            "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-10-25T18:17:00+00:00",
-              "comment": "Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries. With the Saints' ground game getting absolutely nowhere -- Shough actually led the team in rushing yards -- the second-year QB had to air it out frequently once again, but the volume didn't result in much production. Shough will head into a Week 8 bye averaging 39 pass attempts a game -- the fourth-highest mark in the league behind Matthew Stafford, Dak Prescott and Bryce Young -- to go along with a 13:6 TD:INT and 1,721 passing yards.",
-              "conflict": null,
-              "notes": []
-            },
+            "availability": null,
             "teammates_out_detail": [
               {
                 "name": "Travis Etienne Jr.",
@@ -16893,7 +16884,7 @@
           "opp": "CLE",
           "position": "RB",
           "game_id": "2026_09_CLE_NO",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -17529,9 +17520,18 @@
             "qb_note": null,
             "team_pass_attempts": 34.5,
             "team_carries": 26.2,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.393,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-03T23:40:00+00:00",
+              "comment": "The Saints claimed Estime off waivers from the Browns on Tuesday. New Orleans released kicker Daniel Carlson to clear room on the 53-man roster for Estime, who began the season with the Saints before being cut on an injury settlement Sept. 22. After moving past a thigh injury, Estime caught on with the Browns and made his lone appearance for the team back in Week 6, when he carried nine times for 19 yards and a touchdown in a win over the Ravens. Upon rejoining the Saints, Estime will provide depth to a backfield that also includes Alvin Kamara, Kendre Miller and CJ Donaldson (shoulder).",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Travis Etienne Jr.",
@@ -44081,7 +44081,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-08T03:38:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Shoulder Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -128937,7 +128937,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-08T03:43:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Hamstring Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -170442,7 +170442,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-08T03:43:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Hamstring Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -186717,16 +186717,7 @@
             "team_carries": 26.7,
             "injury_status": null,
             "snap_share_recent": 0.993,
-            "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-10-25T18:17:00+00:00",
-              "comment": "Shough completed 30 of 38 passes for 278 yards and one touchdown with one interception in Sunday's 16-10 loss to the Steelers. He added seven rushing yards on three carries. With the Saints' ground game getting absolutely nowhere -- Shough actually led the team in rushing yards -- the second-year QB had to air it out frequently once again, but the volume didn't result in much production. Shough will head into a Week 8 bye averaging 39 pass attempts a game -- the fourth-highest mark in the league behind Matthew Stafford, Dak Prescott and Bryce Young -- to go along with a 13:6 TD:INT and 1,721 passing yards.",
-              "conflict": null,
-              "notes": []
-            },
+            "availability": null,
             "teammates_out_detail": [
               {
                 "name": "Travis Etienne Jr.",
@@ -188318,7 +188309,16 @@
             "team_carries": 26.7,
             "injury_status": null,
             "snap_share_recent": 0.393,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-03T23:40:00+00:00",
+              "comment": "The Saints claimed Estime off waivers from the Browns on Tuesday. New Orleans released kicker Daniel Carlson to clear room on the 53-man roster for Estime, who began the season with the Saints before being cut on an injury settlement Sept. 22. After moving past a thigh injury, Estime caught on with the Browns and made his lone appearance for the team back in Week 6, when he carried nine times for 19 yards and a touchdown in a win over the Ravens. Upon rejoining the Saints, Estime will provide depth to a backfield that also includes Alvin Kamara, Kendre Miller and CJ Donaldson (shoulder).",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Travis Etienne Jr.",
