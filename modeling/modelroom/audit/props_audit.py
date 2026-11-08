@@ -45,7 +45,28 @@ def _mline(hist: np.ndarray | None) -> float | None:
 
 
 # ------------------------------------------------------------------ NBA
-def nba_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
+def _actual_availability(M, ctx, day_games, pg_day, mode: str = "actual") -> dict:
+    """Perfect-information availability for testing 0.2.1's injury logic: every candidate is "out" unless he
+    played in that game, "available" if he did. An UPPER BOUND on what an injury report can tell the model
+    (a real report is less certain); never used for the live model."""
+    played = set(pg_day.loc[pg_day["played"], "player_id"].astype(str))
+    if mode == "report":
+        # What an injury report would say: Out = absent for injury / illness / rest / suspension / personal, or not in
+        # the box at all. A coach's-decision DNP was healthy and available, so he is not "out" for his teammates.
+        coach = pg_day["reason"].fillna("").str.upper().str.contains("COACH")
+        played = played | set(pg_day.loc[coach, "player_id"].astype(str))
+    out = {}
+    for g in day_games.itertuples():
+        for team in (g.home_abbr, g.away_abbr):
+            pool = ctx.players[ctx.players["team"] == team].index.astype(str)
+            feed = pd.DataFrame([{"player_id": pid, "status": "available" if pid in played else "out", "raw_status": None, "source": "box",
+                                  "kind": "official", "report_time": None, "restriction": False, "restriction_minutes": None, "detail": None}
+                                 for pid in pool])
+            out[(str(g.game_id), team)] = M.availability(feed, {}, False, None)
+    return out
+
+
+def nba_rows(seasons, sims: int, params_path=None, avail_mode: str | None = None) -> pd.DataFrame:
     from dataclasses import replace
 
     from modelroom.nba.props import backtest as B
@@ -66,7 +87,17 @@ def nba_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
         for day in run.days.get(season, []):
             day_games = g[(g["game_date"].astype(str) == day) & (g["status"] == "final")]
             ctx = run.ctx(day, season, p.settings)
-            projs = M.project_games(ctx, day_games, p, seed=int(day.replace("-", "")))
+            av = None
+            if avail_mode in ("actual", "report") and p.settings.injury_feed:
+                from modelroom.nba.props import returns
+
+                av = _actual_availability(M, ctx, day_games, pg[pg["game_id"].isin(day_games["game_id"])], avail_mode)
+                prior = pg[pd.to_datetime(pg["game_date"]) < pd.Timestamp(day)]
+                back = returns.current_back(prior[prior["season"] == season], ctx.players.index.astype(str).tolist())
+                for v in av.values():
+                    v["back"] = back
+            projs = M.project_games(ctx, day_games, p, seed=int(day.replace("-", "")), avail=av)
+            opp_of = {**{(str(r.game_id), r.home_abbr): r.away_abbr for r in day_games.itertuples()}, **{(str(r.game_id), r.away_abbr): r.home_abbr for r in day_games.itertuples()}}
             base = B._baseline(pg, run.pg_dates, pd.Timestamp(day), season)
             for x in projs:
                 k = (x.game_id, x.player_id)
@@ -77,7 +108,10 @@ def nba_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
                 common = {"season": season, "date": day, "game_id": x.game_id, "player_id": x.player_id, "name": x.name,
                           "group": x.group, "starter": x.inputs.get("starter_rate", 0) > 0.5,
                           "proj_min": x.inputs.get("projected_minutes"), "act_min": mins.get(k),
-                          "support": x.support()[0], "teammates_out": bool(x.inputs.get("teammates_out"))}
+                          "support": x.support()[0], "teammates_out": bool(x.inputs.get("teammates_out")),
+                          "usage_freed": float(x.inputs.get("usage_freed_by_absences") or 0.0),
+                          "team": x.team, "opp": opp_of.get((str(x.game_id), x.team)),
+                          "returning": any("back from" in n for n in ((x.inputs.get("availability") or {}).get("notes") or []))}
                 for mkey, m in MARKETS.items():
                     st = m["stat"]
                     s = x.sims[st]
@@ -125,8 +159,10 @@ def nfl_rows(seasons, sims: int, params_path=None) -> pd.DataFrame:
                 a = rec["actual"]
                 hist = rec["base"]
                 act = {"rush_rec_yds": a["rush_yds"] + a["rec_yds"], "td_any": a["rush_td"] + a["rec_td"]}
-                common = {"season": season, "week": int(wk), "game_id": rec["game_id"], "player_id": rec["player_id"], "name": rec["name"],
-                          "group": x.group, "proj_tgt": x.mean("targets"), "act_tgt": float(a.get("targets", np.nan)),
+                gid = rec["game_id"]
+                common = {"season": season, "week": int(wk), "game_id": gid, "player_id": rec["player_id"], "name": rec["name"],
+                          "group": x.group, "team": x.team, "opp": x.opp,
+                          "qb_career_att": x.inputs.get("starting_qb_career_attempts"), "qb_note": bool(x.inputs.get("qb_note")), "proj_tgt": x.mean("targets"), "act_tgt": float(a.get("targets", np.nan)),
                           "proj_car": x.mean("carries"), "act_car": float(a.get("carries", np.nan)),
                           "proj_att": x.mean("pass_att"), "act_att": float(a.get("pass_att", np.nan))}
                 for mkey, m in MARKETS.items():
@@ -257,10 +293,11 @@ def main(argv=None) -> None:
     ap.add_argument("--sims", type=int, default=1500)
     ap.add_argument("--params", default=None, help="params file (default: the live params.json)")
     ap.add_argument("--tag", default="", help="suffix for the output files")
+    ap.add_argument("--avail", default=None, choices=[None, "actual", "report"], help="NBA 0.2.1: availability from who actually played (upper bound)")
     a = ap.parse_args(argv)
     if a.league == "nba":
         seasons = [int(s) for s in (a.seasons or "2025,2026").split(",")]
-        df = nba_rows(seasons, a.sims, a.params)
+        df = nba_rows(seasons, a.sims, a.params, a.avail)
     else:
         seasons = [int(s) for s in (a.seasons or "2023,2024,2025").split(",")]
         df = nfl_rows(seasons, a.sims, a.params)
