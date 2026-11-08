@@ -19,6 +19,7 @@ Players who don't play are not projected (exchanges settle those props at a fair
 """
 from __future__ import annotations
 
+import itertools
 import zlib
 from dataclasses import dataclass
 
@@ -180,7 +181,7 @@ def candidates(ctx: Context, team: str, s: PropSettings, avail: dict | None = No
     players = avail.get("players", {})
     st = pd.Series({pid: (players.get(str(pid)) or {}).get("status") for pid in c.index}, dtype=object)
     ruled = st.isin(["out", "doubtful"])
-    cleared = st.isin(["questionable", "probable", "available"]) | (st.isna() & bool(avail.get("submitted")))
+    cleared = st.isin(["questionable", "probable", "available"]) | (st.isna() & bool(avail.get("submitted")) & s.unlisted_clears)
     out_mask = ruled | (rotation & streak & ~cleared)
     out = c[out_mask].copy()
     out = out[rotation[out.index] | ruled[out.index]]
@@ -228,7 +229,15 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                 sd_f[pid] = float(s.return_sd_factor[nb - 1]) if s.return_sd_factor else 1.0
                 notes.setdefault(pid, []).append(f"game {nb} back from a {int(active.at[pid, 'missed_in_row']) if nb == 1 else 3}+ game absence: minutes x{f:.2f}")
             r = info.get(k) or {}
-            if r.get("status") in ("available", "probable") or (nb == 1 and (r.get("status") is None or r.get("status") != "questionable")):
+            if s.play_prob_available:
+                # 0.2.2: the report status sets a probability of playing (measured by role on 2023-24 reports), never a
+                # certainty: Available bench players often still don't play.
+                band = int(np.searchsorted(np.asarray(s.play_bands, float), float(active.at[pid, "minutes_when_playing"]), side="right"))
+                if r.get("status") in ("available", "probable"):
+                    active.at[pid, "appear_rate"] = float(s.play_prob_available[band])
+                elif r.get("status") == "questionable" and s.play_prob_questionable:
+                    active.at[pid, "appear_rate"] = float(s.play_prob_questionable[band])
+            elif r.get("status") in ("available", "probable") or (nb == 1 and (r.get("status") is None or r.get("status") != "questionable")):
                 # Expected to play: his recent appearance rate (low after an absence) no longer applies.
                 active.at[pid, "appear_rate"] = 1.0
             cap = r.get("restriction_minutes")
@@ -247,33 +256,61 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                 active.at[pid, "minutes_high"] = min(float(active.at[pid, "minutes_high"]) if pd.notna(active.at[pid, "minutes_high"]) else new_m, new_m + 4.0)
         if avail.get("starters"):
             active["starter_rate"] = [1.0 if str(pid) in avail["starters"] else 0.0 for pid in active.index]
-    exp_min = active["minutes_when_playing"] * active["appear_rate"]
-    if s.minutes_fill == "headroom" and exp_min.sum() > 0:
-        mwp = active["minutes_when_playing"]
-        gap = TEAM_MINUTES - float(exp_min.sum())
-        if gap > 0:
-            cap = np.minimum(42.0, np.maximum(active["minutes_high"].fillna(mwp), mwp + 4.0))
-            room = ((cap - mwp).clip(lower=0) * active["appear_rate"])
-            add = room / room.sum() * min(gap, float(room.sum())) if room.sum() > 0 else 0.0
-            base = mwp + (add / active["appear_rate"].clip(lower=0.2))
-            base = np.minimum(base, cap)
-        else:
-            base = mwp * (TEAM_MINUTES / float(exp_min.sum()))
-        scale = float(np.average(base / mwp.replace(0, np.nan), weights=exp_min)) if exp_min.sum() > 0 else 1.0
-        base = base.clip(upper=42.0)
-    else:
-        scale = float(np.clip(TEAM_MINUTES / exp_min.sum(), 0.85, 1.25)) if exp_min.sum() > 0 else 1.0
-        base = (active["minutes_when_playing"] * scale).clip(upper=42.0)
-    blow = max(0.0, abs(margin) - 6.0) * s.blowout_strength
-    base = base * np.where(active["starter_rate"] > 0.5, 1 - blow, 1.0)
-    # Usage freed by ruled-out teammates (share of the team's usage they normally take).
-    team_usage = float((active["usage_pm"].fillna(0) * active["minutes_when_playing"] * active["appear_rate"]).sum())
     fade = np.power(0.5, out["missed_in_row"].fillna(0).to_numpy(float) / s.rate_half_life) if s.usage_decay > 0 else 1.0
     fade = fade ** s.usage_decay if s.usage_decay > 0 else fade
     ow = out["out_weight"].to_numpy(float) if "out_weight" in out else 1.0
-    out_usage = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"] * fade * ow).sum())
-    freed = out_usage / (team_usage + out_usage) if team_usage + out_usage > 0 else 0.0
+    out_usage0 = float((out["usage_pm"].fillna(0) * out["minutes_when_playing"] * out["appear_rate"] * fade * ow).sum())
+
+    def fill(ap: pd.Series, gone: list) -> tuple[pd.Series, float, float]:
+        """Minutes when playing (filled to the team's 240) and usage freed, given each player's chance of playing `ap`
+        and the uncertain players sitting in this lineup (`gone`)."""
+        exp_min = active["minutes_when_playing"] * ap
+        if s.minutes_fill == "headroom" and exp_min.sum() > 0:
+            mwp = active["minutes_when_playing"]
+            gap = TEAM_MINUTES - float(exp_min.sum())
+            if gap > 0:
+                cap = np.minimum(42.0, np.maximum(active["minutes_high"].fillna(mwp), mwp + 4.0))
+                room = ((cap - mwp).clip(lower=0) * ap)
+                add = room / room.sum() * min(gap, float(room.sum())) if room.sum() > 0 else 0.0
+                base = mwp + (add / ap.clip(lower=0.2))
+                base = np.minimum(base, cap)
+            else:
+                base = mwp * (TEAM_MINUTES / float(exp_min.sum()))
+            scale = float(np.average(base / mwp.replace(0, np.nan), weights=exp_min)) if exp_min.sum() > 0 else 1.0
+            base = base.clip(upper=42.0)
+        else:
+            scale = float(np.clip(TEAM_MINUTES / exp_min.sum(), 0.85, 1.25)) if exp_min.sum() > 0 else 1.0
+            base = (active["minutes_when_playing"] * scale).clip(upper=42.0)
+        blow = max(0.0, abs(margin) - 6.0) * s.blowout_strength
+        base = base * np.where(active["starter_rate"] > 0.5, 1 - blow, 1.0)
+        # Usage freed by ruled-out teammates (share of the team's usage they normally take), plus uncertain players
+        # who sit in this lineup.
+        team_usage = float((active["usage_pm"].fillna(0) * active["minutes_when_playing"] * ap).sum())
+        out_usage = out_usage0 + float(sum(float(active.at[g, "usage_pm"] or 0) * float(active.at[g, "minutes_when_playing"]) for g in gone if pd.notna(active.at[g, "usage_pm"])))
+        freed = out_usage / (team_usage + out_usage) if team_usage + out_usage > 0 else 0.0
+        return base, scale, freed
+
+    base, scale, freed = fill(active["appear_rate"], [])
     usage_f = 1.0 + s.usage_boost * freed
+    # 0.2.2 lineup scenarios: the most consequential uncertain rotation players either play or sit; every lineup is
+    # filled on its own, so a healthy starter only loses minutes in the lineups where the uncertain player plays.
+    U: list = []
+    if s.lineup_scenarios and feed_on:
+        ar = active["appear_rate"]
+        unc = active[(ar > 0.05) & (ar < 0.95) & (active["minutes_when_playing"] >= 12)]
+        U = list((unc["minutes_when_playing"] * np.minimum(unc["appear_rate"], 1 - unc["appear_rate"])).nlargest(s.lineup_scenarios).index)
+    if U:
+        sc_p, sc_play, sc_base, sc_freed = [], [], [], []
+        for bits in itertools.product((1, 0), repeat=len(U)):
+            ap = active["appear_rate"].copy()
+            pr = 1.0
+            for u, b in zip(U, bits):
+                pr *= float(ap[u]) if b else 1.0 - float(ap[u])
+                ap[u] = float(b)
+            b_, _, f_ = fill(ap, [u for u, b in zip(U, bits) if not b])
+            sc_p.append(pr), sc_play.append(bits), sc_base.append(b_.to_numpy(float)), sc_freed.append(f_)
+        sc_p, sc_play, sc_base, sc_freed = np.array(sc_p), np.array(sc_play, float), np.vstack(sc_base), np.array(sc_freed)
+        col = {pid: i for i, pid in enumerate(active.index)}
     tp = ctx.team_pace.get(team, ctx.league["pace"])
     pace_f = (float(pace) / tp) ** s.pace_strength if pace and tp else 1.0
     res = []
@@ -284,9 +321,19 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         def opp_f(r):
             return float(dfn[r]) ** s.matchup_strength if dfn is not None else 1.0
 
-        m = np.clip(rng.normal(base[pid], s.minutes_sd * float(sd_f.get(pid, 1.0)), n), 1.0, 48.0)
-        sh_score = _shock(rng, s.scoring_sd, n) * usage_f
-        sh_reb, sh_ast, sh_stk = _shock(rng, s.rebound_sd, n), _shock(rng, s.assist_sd, n) * usage_f ** 0.5, _shock(rng, s.stock_sd, n)
+        if U:
+            w = sc_p * (sc_play[:, U.index(pid)] if pid in U else 1.0)   # props are graded only if he plays
+            w = w / w.sum()
+            idx = rng.choice(len(w), n, p=w)
+            m = np.clip(rng.normal(sc_base[idx, col[pid]], s.minutes_sd * float(sd_f.get(pid, 1.0)), n), 1.0, 48.0)
+            uf = 1.0 + s.usage_boost * sc_freed[idx]
+            base_pid = float(w @ sc_base[:, col[pid]])
+        else:
+            m = np.clip(rng.normal(base[pid], s.minutes_sd * float(sd_f.get(pid, 1.0)), n), 1.0, 48.0)
+            uf = usage_f
+            base_pid = float(base[pid])
+        sh_score = _shock(rng, s.scoring_sd, n) * uf
+        sh_reb, sh_ast, sh_stk = _shock(rng, s.rebound_sd, n), _shock(rng, s.assist_sd, n) * uf ** 0.5, _shock(rng, s.stock_sd, n)
         lam = lambda r, sh: x[f"{r}_pm"] * m * pace_f * opp_f(r) * sh  # noqa: E731
         fg2 = rng.poisson(lam("fg2m", sh_score))
         fg3 = rng.poisson(lam("fg3m", sh_score))
@@ -295,10 +342,12 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                 "reb": rng.poisson(lam("reb", sh_reb)).astype(float), "ast": rng.poisson(lam("ast", sh_ast)).astype(float),
                 "stl": rng.poisson(lam("stl", sh_stk)).astype(float), "blk": rng.poisson(lam("blk", sh_stk)).astype(float)}
         sims["pra"] = sims["pts"] + sims["reb"] + sims["ast"]
-        inputs = {"projected_minutes": round(float(base[pid]), 1), "minutes_scale": round(scale, 3), "pace_factor": round(pace_f, 3),
-                  "usage_freed_by_absences": round(freed, 3), "starter_rate": round(float(x["starter_rate"]), 2),
+        inputs = {"projected_minutes": round(base_pid, 1), "minutes_scale": round(scale, 3), "pace_factor": round(pace_f, 3),
+                  "usage_freed_by_absences": round(float(np.mean(uf) - 1.0) / s.usage_boost if U and s.usage_boost else freed, 3), "starter_rate": round(float(x["starter_rate"]), 2),
                   "appear_rate_last10": round(float(x["appear_rate"]), 2),
                   "teammates_out": ", ".join(out["name"].astype(str).tolist()) or None,
+                  **({"uncertain_teammates": [{"name": str(active.at[u, "name"]), "play_prob": round(float(active.at[u, "appear_rate"]), 2)}
+                                              for u in U if u != pid]} if U else {}),
                   "opp_points_factor": round(opp_f("fg2m"), 3), "opp_rebounds_factor": round(opp_f("reb"), 3),
                   "opp_assists_factor": round(opp_f("ast"), 3),
                   "sample": {"games": int(x["n_games"]), "minutes": round(float(x["n_minutes"]), 0)}}

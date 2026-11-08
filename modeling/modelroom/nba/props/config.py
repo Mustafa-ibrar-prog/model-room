@@ -54,10 +54,21 @@ class PropSettings:
     return_minutes: tuple = ()         # minutes multiplier in a player's 1st, 2nd, 3rd... game back after missing 3+
                                        # (measured on box scores, fit 2016-22: see params_0.2.1.json provenance)
     return_sd_factor: tuple = ()       # minutes_sd multiplier in those games (their minutes are less predictable)
+    # 0.2.2 (experimental) play-probability settings. Defaults reproduce 0.2.1 exactly.
+    play_bands: tuple = ()             # minutes-when-playing band edges for the play-probability tables, e.g. (8, 16, 24)
+    play_prob_available: tuple = ()    # P(plays | listed Available or Probable at the final pregame report), per band;
+                                       # empty = 0.2.1's rule (an Available player is certain to play)
+    play_prob_questionable: tuple = () # P(plays | listed Questionable), per band; empty = his recent appearance rate
+    unlisted_clears: bool = True       # 0.2.1: a player absent from a submitted report counts as cleared even after a
+                                       # long absence. False = the missed-games rule still applies to him (measured:
+                                       # such players play ~12% of the time; most have left the team)
+    lineup_scenarios: int = 0          # up to this many uncertain rotation players are simulated as playing / sitting
+                                       # (2^k lineups); teammates' minutes and usage are filled per lineup. 0 = off
     sims: int = 4000
 
 
-ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor")
+ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor",
+                  "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios")
 
 
 @dataclass(frozen=True)
