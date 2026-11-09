@@ -63,13 +63,13 @@ function Row({ g, league, now, avail, live }: { g: GameView; league: League; now
           <div className="text-[0.62rem] text-faint">Spread</div>
           <div className="font-mono text-sm text-model">{model.text}</div>
           {market ? <div className="font-mono text-[0.7rem] text-market">{pm}{market.text}</div> : null}
-          {se != null && Math.abs(se) >= 1 ? <div className={`font-mono text-[0.66rem] ${Math.abs(se) >= 3 ? "text-edge" : "text-edge/70"}`}>gap {Math.abs(se).toFixed(1)}</div> : null}
+          {se != null && Math.abs(se) >= 1 ? <div className="font-mono text-[0.66rem] text-mute" title="Model vs line difference, not a verified edge">diff {Math.abs(se).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Total</div>
           <div className="font-mono text-sm text-model">{formatNumber(g.modelTotal)}</div>
           {mTotal != null ? <div className="font-mono text-[0.7rem] text-market">{pm}{formatNumber(mTotal)}</div> : null}
-          {te != null && Math.abs(te) >= 1.5 ? <div className={`font-mono text-[0.66rem] ${Math.abs(te) >= 4 ? "text-edge" : "text-edge/70"}`}>{te > 0 ? "over" : "under"} {Math.abs(te).toFixed(1)}</div> : null}
+          {te != null && Math.abs(te) >= 1.5 ? <div className="font-mono text-[0.66rem] text-mute" title="Model total minus the line, not a verified edge">model {te > 0 ? "+" : "−"}{Math.abs(te).toFixed(1)}</div> : null}
         </div>
         <div className={cell}>
           <div className="text-[0.62rem] text-faint">Win</div>
@@ -136,7 +136,7 @@ export async function GameRows({ league, day, withinHours, limit, note = true, u
         </section>
       ))}
       {note ? <p className="text-xs text-faint">
-        Blue is the model, white the market line (favored team shown). Gaps of 3+ points on the spread or 4+ on the total are highlighted. Model {board.model.version}.
+        Blue is the model projection, white the sportsbook line (favored team shown); “diff” is the gap between them. Win is the model&apos;s probability. Differences are shown, not recommended: no market edge has been verified, and in 2023–25 NFL tests the sportsbook line was more accurate than the model. Model {board.model.version}.
         {live ? " PM = Polymarket US main line, live (owner view on the test site only; not stored)." : ""}
       </p> : null}
     </div>

@@ -39,7 +39,7 @@ export const flagText = (flags: string[]) => [...new Set(flags.map((f) => FLAG[f
 
 /**
  * The signature mark: one 0–100% track with the model (blue) and the market (white) on it; the stretch
- * between them is orange when it's an edge after fees, gray otherwise. No market: the model tick alone.
+ * between them is orange when the model-implied value after fees is positive (unverified), gray otherwise. No market: the model tick alone.
  */
 export function GapBar({ model, market, edge, className = "" }: { model: number; market: number | null; edge: boolean; className?: string }) {
   const lo = market == null ? model : Math.min(model, market);
@@ -60,10 +60,10 @@ export function EdgeTag({ l, compact = false }: { l: PropLineView; compact?: boo
   const strong = l.edge.grade === "strong";
   return (
     <span
-      title={`${strong ? "Strong edge" : `Lean, not strong: ${l.edge.reasons.join("; ")}`}. Buy ${l.edge.side === "yes" ? "Yes" : "No"} at ${cents(l.edge.price)}¢ on ${providerName(l.edge.provider)}; expected value after the fee.`}
+      title={`Model-implied expected value after the fee, unverified${strong ? "" : `; data warnings: ${l.edge.reasons.join("; ")}`}. ${l.edge.side === "yes" ? "Yes" : "No"} at ${cents(l.edge.price)}¢ on ${providerName(l.edge.provider)}. Not a verified edge.`}
       className={`whitespace-nowrap rounded px-1 font-mono ${compact ? "text-[0.62rem]" : "text-xs py-0.5"} ${strong ? "bg-edge font-600 text-navy-950" : "border border-edge/70 text-edge"}`}
     >
-      {strong ? "Edge" : "Lean"} {l.edge.side === "yes" ? "Yes" : "No"} +{(l.edge.ev * 100).toFixed(1)}¢
+      Est. {l.edge.side === "yes" ? "Yes" : "No"} +{(l.edge.ev * 100).toFixed(1)}¢
     </span>
   );
 }

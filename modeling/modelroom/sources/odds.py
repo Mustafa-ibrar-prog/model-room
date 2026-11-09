@@ -5,8 +5,13 @@ stay missing. Nothing here invents or fills a line.
 
 Normalized columns (processed/<league>/market_snapshots.parquet):
   league, game_id, home_team, away_team, commence_time, sportsbook, market,
-  line, home_price, away_price, over_price, under_price, captured_at, source
+  line, home_price, away_price, over_price, under_price, captured_at, source, collected_at
 Spreads use the home team's line (negative = home favored).
+
+captured_at   when the sportsbook last changed that line (The Odds API's last_update), as published.
+collected_at  when Model Room fetched it (UTC). The same unchanged line seen at two collections is kept twice,
+              so a later market check can tell which lines were live at a given moment. Rows stored before this
+              column existed, and manual CSV rows, have no collected_at (left empty, never back-filled).
 """
 from __future__ import annotations
 
@@ -27,7 +32,7 @@ ODDS_API = "https://api.the-odds-api.com/v4/sports/{sport}/odds"
 SPORT_KEYS = {"nba": "basketball_nba", "nfl": "americanfootball_nfl"}
 MARKETS = ("spread", "total", "moneyline")
 COLUMNS = ["league", "game_id", "home_team", "away_team", "commence_time", "sportsbook", "market", "line",
-           "home_price", "away_price", "over_price", "under_price", "captured_at", "source"]
+           "home_price", "away_price", "over_price", "under_price", "captured_at", "source", "collected_at"]
 MANUAL_COLUMNS = ["game_date", "home_team", "away_team", "sportsbook", "market", "line", "home_price",
                   "away_price", "over_price", "under_price", "captured_at", "entered_by", "note"]
 
@@ -53,7 +58,7 @@ def _american(p) -> bool:
 
 
 # ---------------------------------------------------------------- The Odds API
-def parse_odds_api(events: list[dict], league: str) -> pd.DataFrame:
+def parse_odds_api(events: list[dict], league: str, collected_at: str | None = None) -> pd.DataFrame:
     """Normalize a /v4/sports/{sport}/odds response (markets spreads, totals, h2h; American odds)."""
     rows = []
     for ev in events:
@@ -64,7 +69,7 @@ def parse_odds_api(events: list[dict], league: str) -> pd.DataFrame:
                 captured = mk.get("last_update") or bm.get("last_update")
                 base = {"league": league, "game_id": None, "home_team": home, "away_team": away,
                         "commence_time": ev["commence_time"], "sportsbook": bm["key"], "captured_at": captured,
-                        "source": "the_odds_api", "home_price": np.nan, "away_price": np.nan,
+                        "source": "the_odds_api", "collected_at": collected_at, "home_price": np.nan, "away_price": np.nan,
                         "over_price": np.nan, "under_price": np.nan, "line": np.nan}
                 if mk["key"] == "spreads" and home in outcomes and away in outcomes:
                     rows.append({**base, "market": "spread", "line": outcomes[home].get("point"),
@@ -78,20 +83,72 @@ def parse_odds_api(events: list[dict], league: str) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=COLUMNS)
 
 
+# Free tier: 500 credits a month, 3 per league call (us region x 3 markets). Every call is logged (no key, no URL) to
+# an append-only file kept with the ledgers, so the remaining-credit count survives between workflow runs.
+MIN_CREDITS = int(os.environ.get("MODELROOM_ODDS_MIN_CREDITS", "15"))
+
+
+def usage_log_path() -> Path:
+    d = os.environ.get("MODELROOM_LEDGER_DIR")
+    return Path(d) / "odds_api_usage.jsonl" if d else data_root() / "raw" / "odds_api_usage.jsonl"
+
+
+def last_usage() -> dict | None:
+    p = usage_log_path()
+    if not p.exists():
+        return None
+    lines = [l for l in p.read_text().splitlines() if l.strip()]
+    return json.loads(lines[-1]) if lines else None
+
+
+def credit_guard(now: datetime | None = None) -> str | None:
+    """A reason to skip the call, or None. Skips when the last call this calendar month (UTC) left fewer than
+    MIN_CREDITS. (The provider's exact reset day isn't documented to us; a new month re-allows one call, whose
+    response header then reports the real count.) MODELROOM_ODDS_FORCE=1 overrides."""
+    if os.environ.get("MODELROOM_ODDS_FORCE") == "1":
+        return None
+    u = last_usage()
+    if not u or u.get("remaining") is None:
+        return None
+    now = now or datetime.now(timezone.utc)
+    at = pd.Timestamp(u["at"])
+    if (at.year, at.month) != (now.year, now.month):
+        return None
+    if int(float(u["remaining"])) < MIN_CREDITS:
+        return f"only {u['remaining']} Odds API credits left this month (minimum {MIN_CREDITS}); call skipped"
+    return None
+
+
+def _log_usage(row: dict) -> None:
+    p = usage_log_path()
+    p.parent.mkdir(parents=True, exist_ok=True)
+    with p.open("a") as f:
+        f.write(json.dumps(row, sort_keys=True) + "\n")
+
+
 def collect_odds_api(league: str, api_key: str | None = None) -> pd.DataFrame:
     key = api_key or os.environ.get("ODDS_API_KEY")
     if not key:
         raise LinesError("ODDS_API_KEY is not set. It's optional: without it, lines come from nflverse (NFL) "
                          "or data/manual/<league>_lines.csv.")
+    why = credit_guard()
+    if why:
+        state.record_failure("the_odds_api", why)
+        raise LinesError(why)
     url = (ODDS_API.format(sport=SPORT_KEYS[league]) +
            f"?apiKey={key}&regions=us&markets=spreads,totals,h2h&oddsFormat=american&dateFormat=iso")
     with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ModelRoom/0.1"}), timeout=60) as r:
         body = r.read()
         remaining = r.headers.get("x-requests-remaining")
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+        used = r.headers.get("x-requests-used")
+        last_cost = r.headers.get("x-requests-last")
+    now = datetime.now(timezone.utc)
+    collected = now.isoformat(timespec="seconds")
+    stamp = now.strftime("%Y%m%dT%H%M%SZ")
     raw = ensure(raw_dir(league) / "odds_api") / f"odds_{stamp}.json"
     raw.write_bytes(body)  # the key is not in the response; never store the request URL
-    df = parse_odds_api(json.loads(body), league)
+    df = parse_odds_api(json.loads(body), league, collected_at=collected)
+    _log_usage({"at": collected, "league": league, "rows": len(df), "remaining": remaining, "used": used, "cost": last_cost})
     state.record("the_odds_api", league=league, rows=len(df), credits_remaining=remaining)
     return df
 
@@ -200,10 +257,17 @@ def consensus(snapshots: pd.DataFrame) -> pd.DataFrame:
 
 
 def store(league: str, new: pd.DataFrame) -> pd.DataFrame:
-    """Append snapshots, de-duplicated on (source, book, game, market, captured_at)."""
+    """Append snapshots (never rewrites a stored row), de-duplicated on (source, book, game, market, captured_at,
+    collected_at). Re-running the same collection is a no-op; a later collection of an unchanged line is a new row."""
     f = ensure(processed_dir(league)) / "market_snapshots.parquet"
     old = pd.read_parquet(f) if f.exists() else pd.DataFrame(columns=COLUMNS)
+    if "collected_at" not in old.columns:
+        old["collected_at"] = None  # rows from before collection time was kept: left empty, never guessed
+    new = new.copy()
+    if "collected_at" not in new.columns:
+        new["collected_at"] = None
     both = pd.concat([old, new], ignore_index=True)
-    both = both.drop_duplicates(["source", "sportsbook", "home_team", "away_team", "commence_time", "market", "captured_at"], keep="last")
+    key = ["source", "sportsbook", "home_team", "away_team", "commence_time", "market", "captured_at", "collected_at"]
+    both = both.drop_duplicates(key, keep="first")
     both.to_parquet(f, index=False)
     return both

@@ -19,7 +19,7 @@ const STEPS = [
   },
   {
     title: "Compare with the market",
-    body: "The projection is set against the current line. The difference is the edge, and only edges of a point or more are flagged.",
+    body: "The projection is shown next to the sportsbook line, and the difference between them is shown as a number. A difference is not a betting edge: in the NFL seasons tested (2023–25) the sportsbook line was closer to the final score than the model, and the largest spread differences picked the side that covered less than half the time.",
   },
 ];
 

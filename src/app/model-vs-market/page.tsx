@@ -18,7 +18,7 @@ export default function ModelVsMarketPage({ searchParams }: { searchParams: SP }
     <>
       <PageHeader
         title="Model vs market"
-        intro="Every upcoming game line where a market price is on file, next to the model's own probability at that exact line. Fair odds and expected value come from the model's full distribution, with pushes on whole-number lines counted as stake back."
+        intro="Every upcoming game line where a sportsbook price is on file, next to the model's probability at that exact line. Model fair odds and model-implied return are what the price would be worth if the model's probability were right. They are not verified edges: no betting record backs them yet."
       />
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 sm:px-6"><TableSkeleton rows={10} /></div>}>
         <Body searchParams={searchParams} />
@@ -86,7 +86,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
   }
   const lg = one(sp.sport);
   const mk = one(sp.market);
-  const sort = one(sp.sort) ?? "ev";
+  const sort = one(sp.sort) ?? "diff";
   const leagues: League[] = lg === "nfl" || lg === "nba" ? [lg] : ["nba", "nfl"];
   const boards = await Promise.all(leagues.map(async (l) => ({ l, r: await loadBoard(l) })));
   let rows = boards.flatMap(({ l, r }) => (r.ok ? rowsFor(l, r.board.upcoming, r.board.model.version, r.board.generated_at) : []));
@@ -106,7 +106,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
         <span className="w-px bg-navy-700" />
         {[["", "All markets"], ["spread", "Spread"], ["total", "Total"], ["moneyline", "Moneyline"]].map(([v, t]) => <Link key={t} href={q({ market: v || undefined })} className={chip((mk ?? "") === v)}>{t}</Link>)}
         <span className="w-px bg-navy-700" />
-        {[["ev", "Sort by EV"], ["diff", "Sort by disagreement"]].map(([v, t]) => <Link key={v} href={q({ sort: v })} className={chip(sort === v)}>{t}</Link>)}
+        {[["diff", "Sort by disagreement"], ["ev", "Sort by model-implied return"]].map(([v, t]) => <Link key={v} href={q({ sort: v })} className={chip(sort === v)}>{t}</Link>)}
       </div>
       {!rows.length ? (
         <Unavailable title="No market prices on file for upcoming games" body="Sportsbook lines appear here once a market source is connected (The Odds API key on the test site). Nothing is filled in when a line is missing." />
@@ -115,7 +115,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
           <table className="w-full min-w-[56rem] text-sm">
             <thead className="text-faint">
               <tr className="text-left">
-                {["Game", "Market", "Side", "Model line", "Model prob", "Market prob", "Fair odds", "Market odds", "EV per $1", "Source"].map((h) => <th key={h} className="px-3 py-2 font-500">{h}</th>)}
+                {["Game", "Market", "Side", "Model line", "Model prob", "Sportsbook implied prob", "Model fair odds", "Sportsbook odds", "Model-implied return per $1 (unverified)", "Source"].map((h) => <th key={h} className="px-3 py-2 font-500">{h}</th>)}
               </tr>
             </thead>
             <tbody>
@@ -131,7 +131,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
                     <td className="px-3 py-2 font-mono text-market">{r.s.market_implied == null ? "–" : formatPct(r.s.market_implied, 1)}</td>
                     <td className="px-3 py-2 font-mono text-model">{r.s.fair_odds == null ? "–" : formatMoneyline(r.s.fair_odds)}</td>
                     <td className="px-3 py-2 font-mono text-market">{r.s.market_price == null ? <span className="text-faint">no price</span> : formatMoneyline(r.s.market_price)}</td>
-                    <td className={`px-3 py-2 font-mono ${ev == null ? "text-faint" : ev > 0 ? "text-good" : "text-danger"}`}>{ev == null ? "–" : `${ev > 0 ? "+" : ""}${(ev * 100).toFixed(1)}¢`}</td>
+                    <td className={`px-3 py-2 font-mono ${ev == null ? "text-faint" : "text-mute"}`}>{ev == null ? "–" : `${ev > 0 ? "+" : ""}${(ev * 100).toFixed(1)}¢`}</td>
                     <td className="px-3 py-2 text-xs text-faint">{r.book}{r.capturedAt ? `, ${formatTimestamp(r.capturedAt)}` : ", time not published"}<div>model {r.version}, run {formatTimestamp(r.generatedAt)}</div></td>
                   </tr>
                 );
@@ -141,7 +141,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
         </div>
       )}
       <p className="text-xs text-faint">
-        Market prob is the price&apos;s break-even probability, vig included. Positive EV is an estimate from the model&apos;s distribution, not a validated edge: no confidence label is shown until the model&apos;s calibration against market lines is established on the Performance page. Player-prop prices aren&apos;t on file: the free sportsbook feed doesn&apos;t cover props.
+        Sportsbook implied prob is the price&apos;s break-even probability, vig included. Model-implied return is the model&apos;s own estimate, not a validated edge, and a positive number does not mean a bet is profitable. In 2023–25 NFL tests the sportsbook line was closer to the final score than the model (spread error 9.8 vs 10.2 points; total 10.1 vs 10.4), and spread differences of 3+ points picked the side that covered only 44.5% of the time. NBA has no historical lines to test against yet. No confidence label is shown until the model&apos;s record against sportsbook lines is established. Player-prop prices aren&apos;t on file: the free sportsbook feed doesn&apos;t cover props.
       </p>
     </div>
   );

@@ -15,7 +15,7 @@ const MATRIX: { group: string; rows: Row[] }[] = [
     rows: [
       { label: "NFL and NBA schedules", free: true, plus: true, pro: true },
       { label: "Spread and total projections", free: "Basic", plus: "Full", pro: "Full" },
-      { label: "Edge Finder", free: "First 2 games", plus: "Every game", pro: "Every game" },
+      { label: "Model vs sportsbook comparison", free: "First 2 games", plus: "Every game", pro: "Every game" },
       { label: "Projected scores", free: false, plus: true, pro: true },
       { label: "Line movement", free: false, plus: true, pro: true },
       { label: "Matchup breakdowns", free: false, plus: true, pro: true },

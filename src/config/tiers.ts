@@ -24,7 +24,7 @@ export const PLANS: Plan[] = [
       "Basic game spread and total projections",
       "Daily insights",
       "Basic injury reports",
-      "Limited game Edge Finder",
+      "Model vs sportsbook comparison for a few games",
     ],
     excluded: ["Player props"],
   },
