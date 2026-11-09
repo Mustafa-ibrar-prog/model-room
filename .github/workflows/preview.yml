@@ -168,6 +168,9 @@ jobs:
           # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
           # The 4:00 PM injury refresh reuses the midday prices (a third fetch would exceed the free 500).
           # Snapshots are kept on the preview branch (append-only) so past games keep the line they had.
+          # Each row keeps the book, market, line, prices, the book's own update time (captured_at) and our fetch time
+          # (collected_at). Every call's remaining credits go to preview-ledger/odds_api_usage.jsonl (no key, no URL);
+          # a call is skipped when fewer than 15 credits are left this month (forward-only: nothing is back-filled).
           for lg in nba nfl; do
             mkdir -p data/processed/$lg
             [ -f preview-ledger/market_snapshots_$lg.parquet ] && cp preview-ledger/market_snapshots_$lg.parquet data/processed/$lg/market_snapshots.parquet

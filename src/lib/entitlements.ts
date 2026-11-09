@@ -47,7 +47,7 @@ const MIN_TIER: Record<Feature, TierId> = {
   "reports.download": "pro",
 };
 
-/** How many games a Free viewer gets edges for in the Edge Finder. */
+/** How many games a Free viewer gets the model-vs-sportsbook comparison for. */
 export const FREE_EDGE_FINDER_LIMIT = 2;
 
 export function requiredTier(feature: Feature): TierId {

@@ -12,7 +12,8 @@ import { AutoSubmit } from "@/components/props/AutoSubmit";
 import { age, cents, EdgeTag, flagText, fmt, GapBar, lineLabel, PROVIDERS, quoteBy } from "./bits";
 import { FavoritesScope, FavoriteStar, RecentlyViewed, TrackView } from "./local";
 
-const CONF = { ok: { label: "High", cls: "text-model" }, limited: { label: "Medium", cls: "text-mute" }, insufficient: { label: "Low", cls: "text-faint" } } as const;
+// Player data history behind the projection (the engine's "support"), not a confidence that the projection beats the market.
+const CONF = { ok: { label: "Full history", cls: "text-mute" }, limited: { label: "Limited data", cls: "text-edge" }, insufficient: { label: "Very limited data", cls: "text-edge" } } as const;
 
 export function propsHref(league: League, q: ExplorerQuery, patch: Partial<ExplorerQuery>): string {
   const all = { ...q, ...patch };
@@ -205,7 +206,7 @@ function PlayerRow({ r, league, q, activeKey, stat }: { r: ExplorerRow; league: 
           <section aria-label="Model Room projection" className="shrink-0 text-right">
             <div className="text-[0.6rem] text-faint">Projection</div>
             <div className="font-display text-xl font-700 leading-none text-model">{fmt(r.median)}</div>
-            <div className={`text-[0.62rem] ${c.cls}`}>{c.label} confidence</div>
+            <div className={`text-[0.62rem] ${c.cls}`}>{c.label}</div>
           </section>
         </div>
         {main ? <MainLine l={main} href={href(main)} active={lineKey(r.id, main) === activeKey} stat={stat} /> : null}
@@ -313,17 +314,17 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
           </table>
         </section>
 
-        <section aria-label="Edge" className="rounded-md border border-navy-700 p-2.5 text-xs">
+        <section aria-label="Model-implied value" className="rounded-md border border-navy-700 p-2.5 text-xs">
           {l.edge ? (
             <>
-              <div className="flex items-center justify-between"><span className="font-600 text-edge">Estimated edge</span><EdgeTag l={l} /></div>
+              <div className="flex items-center justify-between"><span className="font-600 text-edge">Model-implied expected value (unverified)</span><EdgeTag l={l} /></div>
               <p className="mt-1 text-mute">
-                Buy {l.edge.side === "yes" ? "Yes" : "No"} at {cents(l.edge.price)}¢ on {providerName(l.edge.provider)}. Expected value = model chance − price − fee ={" "}
-                <span className="text-edge">+{(l.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{l.edge.grade !== "strong" ? ` Lean only: ${l.edge.reasons.join("; ")}.` : ""}
+                {l.edge.side === "yes" ? "Yes" : "No"} at {cents(l.edge.price)}¢ on {providerName(l.edge.provider)}. Model chance − price − fee ={" "}
+                <span className="text-edge">+{(l.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{l.edge.grade !== "strong" ? ` Data warnings: ${l.edge.reasons.join("; ")}.` : ""} This assumes the model&apos;s probability is right; prop probabilities have not been validated against market prices, so it is not a verified edge.
               </p>
             </>
           ) : (
-            <p className="text-faint">{l.market ? "No edge at the current executable price after fees." : "No usable exchange price, so no edge is calculated."}</p>
+            <p className="text-faint">{l.market ? "Model-implied value is not positive at the current executable price after fees." : "No usable exchange price, so nothing is compared."}</p>
           )}
         </section>
 
@@ -335,7 +336,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
             ))}
             <div><dt className="text-[0.65rem] text-faint">80% range</dt><dd className="font-mono text-sm text-ink">{fmt(r.range80[0])}–{fmt(r.range80[1])}</dd></div>
           </dl>
-          <p className="text-xs text-mute"><span className={CONF[r.support].cls}>{CONF[r.support].label} confidence</span>: {r.supportNote}</p>
+          <p className="text-xs text-mute"><span className={CONF[r.support].cls}>{CONF[r.support].label}</span>: {r.supportNote}</p>
         </section>
 
         {recent.length ? (
@@ -415,7 +416,7 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
           </summary>
           <p className="mt-1.5 text-mute">
             Fetched {formatTimestamp(x.live.fetchedAt)} for {x.live.games === 1 ? "this game" : `${x.live.games} games`}: {x.live.found} found on Polymarket, {x.live.matched} lines matched.
-            Only your test-site login sees these; nothing is stored, and production never shows them. Contract sizes aren&apos;t in the listing, so edges are leans at most.
+            Only your test-site login sees these; nothing is stored, and production never shows them. Contract sizes aren&apos;t in the listing, and the model&apos;s prop probabilities haven&apos;t been validated against these prices, so expected values are unverified estimates.
           </p>
         </details>
       ) : null}
@@ -445,7 +446,7 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             <span className="hidden items-center gap-3 text-[0.7rem] text-mute md:flex">
               <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-model" />Model</span>
               <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-market" />Market</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-edge" />Edge after fees</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-edge" />Model-implied +EV after fees (unverified)</span>
             </span>
           </div>
 
@@ -460,6 +461,13 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
               );
             })}
           </nav>
+
+          {league === "nfl" && x.category.key.startsWith("passing") ? (
+            <p className="rounded-md border border-navy-700 px-3 py-2 text-xs text-mute">
+              Less reliable market: in 2023–25 tests the model&apos;s range for QB passing yards was about 40% wider than real outcomes, and at the
+              median line it expected the over 45% of the time when it happened 54% of the time. Treat these probabilities with extra caution.
+            </p>
+          ) : null}
 
           <form action="/props" className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="sport" value={league} />
@@ -478,9 +486,9 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             <select name="only" aria-label="Show" defaultValue={x.query.only ?? ""} className={`${sel} min-w-0 flex-1 text-[0.8rem] sm:flex-none sm:text-sm`}>
               <option value="">All players</option>
               <option value="priced">With market prices</option>
-              <option value="edges">With an edge</option>
-              <option value="strong">Strong edges only</option>
-              <option value="ok">High confidence</option>
+              <option value="edges">Model-implied +EV (unverified)</option>
+              <option value="strong">+EV with no data warnings</option>
+              <option value="ok">Full player history</option>
             </select>
             <select name="sort" aria-label="Sort" defaultValue={x.sort} className={`${sel} min-w-0 flex-1 text-[0.8rem] sm:flex-none sm:text-sm`}>
               {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
@@ -515,9 +523,10 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
       </div>
 
       <p className="text-xs leading-relaxed text-faint">
-        Market-implied probability is the midpoint of an exchange&apos;s bid and ask. Edges use the price you would actually pay (the ask) after the exchange fee,
+        Market-implied probability is the midpoint of an exchange&apos;s bid and ask. Model-implied expected value (unverified) uses the price you would actually pay (the ask) after the exchange fee,
         from quotes under {x.rules.max_age_min} minutes old with a spread under {(x.rules.max_spread * 100).toFixed(0)}¢. Struck-through prices are stale,
-        thin or one-sided and are never used.
+        thin or one-sided and are never used. The model&apos;s probability is its projection; it has not yet been validated against market prices, so
+        a positive expected value is an estimate, not a verified edge. Data history labels describe how much of a player&apos;s history the projection rests on, not how likely it is to be right.
       </p>
     </div>
   );

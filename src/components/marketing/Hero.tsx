@@ -13,7 +13,7 @@ export function Hero() {
           Where the market and the model disagree.
         </h1>
         <p className="mt-4 max-w-lg text-base leading-relaxed text-mute">
-          Model Room projects every NFL and NBA spread and total from play-by-play and box-score data, then shows the gap against the posted line.
+          Model Room projects every NFL and NBA spread and total from play-by-play and box-score data, then shows how far its projection is from the sportsbook line. A difference is a disagreement, not a verified edge.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/nfl" className="rounded-full bg-model px-5 py-2.5 font-600 text-navy-950 hover:bg-model/90">
@@ -31,7 +31,7 @@ export function Hero() {
   );
 }
 
-/** The upcoming game with the largest visible spread edge; else the next game with a projection. */
+/** The upcoming game with the largest visible model-vs-sportsbook spread difference; else the next game with a projection. */
 async function FeaturedGame() {
   const viewer = await getViewer();
   const boards = await Promise.all([getLeagueBoard("nfl", viewer.tier), getLeagueBoard("nba", viewer.tier)]);
@@ -82,15 +82,15 @@ function EdgeFigure({ g }: { g: GameView }) {
 
   return (
     <figure className="rounded-2xl border border-navy-700 bg-navy-900 p-5 sm:p-7">
-      <Caption g={g} note={`Market line from ${g.market!.sources.join(", ")}`} />
-      <div className="relative mt-14 h-28" role="img" aria-label={`Market ${mk.text}, model ${md.text}, a ${edge.toFixed(1)} point gap.`}>
+      <Caption g={g} note={`Sportsbook line from ${g.market!.sources.join(", ")}`} />
+      <div className="relative mt-14 h-28" role="img" aria-label={`Market ${mk.text}, model ${md.text}, a ${edge.toFixed(1)} point difference.`}>
         <div className="gap-marker absolute -top-10 whitespace-nowrap" style={anchor(pos(market))}>
-          <div className="text-[0.8rem] text-mute">Market</div>
+          <div className="text-[0.8rem] text-mute">Sportsbook</div>
           <div className="font-display text-2xl font-700 leading-none text-market sm:text-3xl">{mk.text}</div>
         </div>
         <div className="gap-marker absolute top-[3.6rem] whitespace-nowrap" style={anchor(pos(model))}>
           <div className="font-display text-2xl font-700 leading-none text-model sm:text-3xl">{md.text}</div>
-          <div className="text-[0.8rem] text-mute">Model</div>
+          <div className="text-[0.8rem] text-mute">Model projection</div>
         </div>
         <div className="absolute left-0 right-0 top-9 h-1 rounded-full bg-navy-700" />
         <div className="gap-bar absolute top-[2.05rem] h-2.5 rounded-full bg-edge" style={{ left: `${left}%`, width: `${width}%` }} />
@@ -100,10 +100,10 @@ function EdgeFigure({ g }: { g: GameView }) {
       <div className="gap-marker-late mt-2 flex items-end justify-between gap-4 border-t border-navy-700 pt-4">
         <div>
           <div className="font-display text-5xl font-700 leading-none text-edge">{edge.toFixed(1)}</div>
-          <div className="mt-1 text-sm text-mute">point gap toward {side}</div>
+          <div className="mt-1 text-sm text-mute">point difference toward {side}</div>
         </div>
         <p className="max-w-[17rem] text-right text-sm leading-relaxed text-mute">
-          The model projects {formatNumber(Math.abs(g.projectedMargin))} points for {g.projectedMargin >= 0 ? g.home.abbr : g.away.abbr}. The market says {formatNumber(Math.abs(market))}.
+          The model projects {formatNumber(Math.abs(g.projectedMargin))} points for {g.projectedMargin >= 0 ? g.home.abbr : g.away.abbr}. The sportsbook line is {mk.text}. Not a verified edge.
         </p>
       </div>
     </figure>
@@ -118,16 +118,16 @@ function ModelFigure({ g }: { g: GameView }) {
       <Caption g={g} note="No market line connected" />
       <div className="mt-8 grid grid-cols-2 gap-6">
         <div>
-          <div className="text-sm text-mute">Model line</div>
+          <div className="text-sm text-mute">Model projected line</div>
           <div className="font-display text-5xl font-700 leading-none text-model">{md.text}</div>
         </div>
         <div>
-          <div className="text-sm text-mute">Model total</div>
+          <div className="text-sm text-mute">Model projected total</div>
           <div className="font-display text-5xl font-700 leading-none text-model">{formatNumber(g.modelTotal)}</div>
         </div>
       </div>
       <p className="mt-6 border-t border-navy-700 pt-4 text-sm text-mute">
-        Edges appear once a market line is connected for this game.
+        The comparison with the sportsbook line appears once a line is on file for this game.
       </p>
     </figure>
   );

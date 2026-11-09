@@ -47,10 +47,10 @@ export const CATEGORIES: Record<League, Category[]> = {
 };
 
 export const SORTS = [
-  { key: "edge", label: "Biggest edge" },
+  { key: "edge", label: "Model-implied value" },
   { key: "projection", label: "Projection" },
   { key: "probability", label: "Probability" },
-  { key: "confidence", label: "Confidence" },
+  { key: "confidence", label: "Data history" },
   { key: "player", label: "Player" },
 ] as const;
 export type SortKey = (typeof SORTS)[number]["key"];

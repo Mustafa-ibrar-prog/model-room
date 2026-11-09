@@ -29,9 +29,9 @@ export async function TopGaps({ limit = 6 }: { limit?: number }) {
   gaps.sort((a, b) => b.size - a.size);
   if (!gaps.length) {
     return locked ? (
-      <div className="flex items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 p-4 text-sm text-mute">Model-vs-market gaps <LockedCell requires={locked} /></div>
+      <div className="flex items-center gap-2 rounded-lg border border-navy-700 bg-navy-900 p-4 text-sm text-mute">Model vs sportsbook differences <LockedCell requires={locked} /></div>
     ) : (
-      <p className="rounded-lg border border-navy-700 bg-navy-900 p-4 text-sm text-mute">No market lines posted for upcoming games yet.</p>
+      <p className="rounded-lg border border-navy-700 bg-navy-900 p-4 text-sm text-mute">No sportsbook lines on file for upcoming games yet.</p>
     );
   }
   return (
@@ -44,7 +44,7 @@ export async function TopGaps({ limit = 6 }: { limit?: number }) {
             <span className="text-sm text-mute">{x.kind}</span>
             <span className="ml-auto font-mono text-sm text-model">{x.model}</span>
             <span className="font-mono text-sm text-market">{x.market}</span>
-            <span className={`w-14 text-right font-mono text-sm ${x.size >= (x.kind === "Spread" ? 3 : 4) ? "text-edge" : "text-mute"}`}>{x.size.toFixed(1)}</span>
+            <span className={`w-14 text-right font-mono text-sm text-mute`}>{x.size.toFixed(1)}</span>
           </Link>
         </li>
       ))}

@@ -44,9 +44,9 @@ export default function HomePage() {
         </div>
         <div className="contents lg:block lg:space-y-8">
           <div className="order-1">
-            <Block title="Biggest model vs market gaps">
+            <Block title="Largest model vs sportsbook differences">
               <Suspense fallback={<TableSkeleton rows={5} />}><TopGaps /></Suspense>
-              <p className="mt-2 text-xs text-faint">Points between the model (blue) and the posted line (white). Orange: 3+ on a spread, 4+ on a total.</p>
+              <p className="mt-2 text-xs text-faint">Points between the model projection (blue) and the sportsbook line (white). These are disagreements, not verified edges: in 2023–25 NFL tests the sportsbook line was more accurate, and spread differences of 3+ points picked the side that covered only 44.5% of the time.</p>
             </Block>
           </div>
           <div className="order-4">

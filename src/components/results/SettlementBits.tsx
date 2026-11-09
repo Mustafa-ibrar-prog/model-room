@@ -73,7 +73,7 @@ export function ResultRow({ r }: { r: MarketResult }) {
           {r.actual?.stat != null ? <div><dt className="inline text-faint">Actual stat: </dt><dd className="inline text-mute">{formatNumber(r.actual.stat)} (context only; the grade is the settlement)</dd></div> : null}
           {r.actual?.home_score != null ? <div><dt className="inline text-faint">Final: </dt><dd className="inline text-mute">{r.actual.away} {r.actual.away_score}, {r.actual.home} {r.actual.home_score}</dd></div> : null}
           {r.edge ? (
-            <div><dt className="inline text-edge">Flagged edge: </dt><dd className="inline text-mute">{r.edge.grade} on {r.edge.side === "yes" ? "Yes" : "No"}{r.edge.result ? `, ${r.edge.result === "won" ? "correct" : "incorrect"}` : ""}</dd></div>
+            <div><dt className="inline text-edge">Model-implied +EV flag (unverified): </dt><dd className="inline text-mute">{r.edge.grade === "strong" ? "no data warnings" : "with data warnings"} on {r.edge.side === "yes" ? "Yes" : "No"}{r.edge.result ? `, ${r.edge.result === "won" ? "correct" : "incorrect"}` : ""}</dd></div>
           ) : null}
           {r.corrections.length ? (
             <div className="sm:col-span-2 text-pending">
