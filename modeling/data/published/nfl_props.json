@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-09T23:32:07+00:00",
+  "generated_at": "2026-11-09T23:47:10+00:00",
   "season": 2026,
   "week": 10,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "eac442c428d0a7ee",
+    "inputs_hash": "23f66c21e5ce8ed3",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,11 +20,11 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-09T23:31:17.085988+00:00",
+      "generated_at": "2026-11-09T23:46:21.456671+00:00",
       "sources": {
         "espn": {
           "ok": true,
-          "rows": 1084,
+          "rows": 1083,
           "errors": []
         },
         "nflverse": {
@@ -40,7 +40,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-09T23:30:54+00:00",
+    "last_ingest": "2026-11-09T23:45:55+00:00",
     "results_through": "2026-11-08",
     "markets": [
       {
@@ -37346,20 +37346,6 @@
                 18.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 16.87,
-                "to": 15.44
-              }
-            ]
           }
         },
         {
@@ -38174,20 +38160,6 @@
                 20.9
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 18.35,
-                "to": 17.28
-              }
-            ]
           }
         },
         {
@@ -38915,20 +38887,6 @@
                 9.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 46.44,
-                "to": 43.47
-              }
-            ]
           }
         },
         {
@@ -39670,20 +39628,6 @@
                 4.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 49.94,
-                "to": 46.33
-              }
-            ]
           }
         },
         {
@@ -40299,20 +40243,6 @@
                 0.3
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 24.5,
-                "to": 22.49
-              }
-            ]
           }
         },
         {
@@ -40925,20 +40855,6 @@
                 5.4
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Tim Patrick"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 23.6,
-                "to": 22.35
-              }
-            ]
           }
         }
       ],
@@ -43858,7 +43774,7 @@
           "opp": "NO",
           "position": "WR",
           "game_id": "2026_10_CAR_NO",
-          "injury_status": "Available",
+          "injury_status": null,
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -44397,18 +44313,9 @@
             "qb_note": null,
             "team_pass_attempts": 34.8,
             "team_carries": 26.6,
-            "injury_status": "Available",
+            "injury_status": null,
             "snap_share_recent": 0.381,
-            "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-11-02T15:15:00+00:00",
-              "comment": "Metchie recorded three receptions for 14 yards on three targets in Thursday's 27-19 loss to the Packers. Metchie took the field for 33 of the Panthers' 73 snaps on offense, placing him behind Tetairoa McMillan (65 snaps) and Jalen Coker (63) but ahead of Brycen Tremayne (19) and David Moore (zero) among Carolina receivers. Though he's now drawn at least three targets in five straight games, Metchie has found the end zone just once and is averaging 22.8 receiving yards per contest during that stretch.",
-              "conflict": null,
-              "notes": []
-            },
+            "availability": null,
             "teammates_out_detail": [
               {
                 "name": "Xavier Legette",
@@ -53565,7 +53472,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-09T23:18:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Quadriceps Strain",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -62131,20 +62038,6 @@
                 7.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Cade Stover"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 23.13,
-                "to": 21.57
-              }
-            ]
           }
         },
         {
@@ -86903,22 +86796,6 @@
                 11.2
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Pharaoh Brown",
-              "teammate back: Riley Leonard",
-              "teammate back: Will Mallory"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 19.22,
-                "to": 18.07
-              }
-            ]
           }
         },
         {
@@ -87632,22 +87509,6 @@
                 7.7
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Pharaoh Brown",
-              "teammate back: Riley Leonard",
-              "teammate back: Will Mallory"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 45.22,
-                "to": 40.72
-              }
-            ]
           }
         },
         {
@@ -88356,22 +88217,6 @@
                 9.5
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Pharaoh Brown",
-              "teammate back: Riley Leonard",
-              "teammate back: Will Mallory"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 46.04,
-                "to": 42.8
-              }
-            ]
           }
         },
         {
@@ -89036,22 +88881,6 @@
                 5.4
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Pharaoh Brown",
-              "teammate back: Riley Leonard",
-              "teammate back: Will Mallory"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 24.16,
-                "to": 22.05
-              }
-            ]
           }
         },
         {
@@ -89705,22 +89534,6 @@
                 14.7
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Pharaoh Brown",
-              "teammate back: Riley Leonard",
-              "teammate back: Will Mallory"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 44.2,
-                "to": 40.3
-              }
-            ]
           }
         },
         {
@@ -106879,21 +106692,6 @@
                 3.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Gardner Minshew II",
-              "teammate out: Michael Wilson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 19.9,
-                "to": 23.25
-              }
-            ]
           }
         },
         {
@@ -107623,21 +107421,6 @@
                 0.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Gardner Minshew II",
-              "teammate out: Michael Wilson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 20.79,
-                "to": 23.74
-              }
-            ]
           }
         },
         {
@@ -108372,21 +108155,6 @@
                 4.9
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Gardner Minshew II",
-              "teammate out: Michael Wilson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 20.9,
-                "to": 24.51
-              }
-            ]
           }
         },
         {
@@ -109068,21 +108836,6 @@
                 8.7
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Gardner Minshew II",
-              "teammate out: Michael Wilson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 21.09,
-                "to": 24.61
-              }
-            ]
           }
         },
         {
@@ -109866,27 +109619,6 @@
                 21.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Gardner Minshew II",
-              "teammate out: Michael Wilson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 73.51,
-                "to": 85.73
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 8.11,
-                "to": 9.37
-              }
-            ]
           }
         },
         {
@@ -110752,21 +110484,6 @@
                 27.3
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Puka Nacua",
-              "teammate back: Ty Simpson"
-            ],
-            "markets": [
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 5.19,
-                "to": 5.69
-              }
-            ]
           }
         },
         {
@@ -111596,21 +111313,6 @@
                 16.2
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Puka Nacua",
-              "teammate back: Ty Simpson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 9.52,
-                "to": 12.71
-              }
-            ]
           }
         },
         {
@@ -112534,27 +112236,6 @@
                 19.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Puka Nacua",
-              "teammate back: Ty Simpson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 22.77,
-                "to": 29.73
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.07,
-                "to": 4.02
-              }
-            ]
           }
         },
         {
@@ -114578,27 +114259,6 @@
                 0.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Puka Nacua",
-              "teammate back: Ty Simpson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 26.14,
-                "to": 34.9
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 2.71,
-                "to": 3.59
-              }
-            ]
           }
         },
         {
@@ -115295,27 +114955,6 @@
                 13.3
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Puka Nacua",
-              "teammate back: Ty Simpson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 37.25,
-                "to": 49.26
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.49,
-                "to": 4.59
-              }
-            ]
           }
         }
       ],
@@ -117592,22 +117231,6 @@
                 10.7
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 28.61,
-                "to": 25.41
-              }
-            ]
           }
         },
         {
@@ -118292,22 +117915,6 @@
                 2.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 4.71,
-                "to": 3.97
-              }
-            ]
           }
         },
         {
@@ -118953,22 +118560,6 @@
                 0.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 22.75,
-                "to": 21.33
-              }
-            ]
           }
         },
         {
@@ -119675,22 +119266,6 @@
                 7.5
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 37.57,
-                "to": 34.65
-              }
-            ]
           }
         },
         {
@@ -120390,22 +119965,6 @@
                 23.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 67.59,
-                "to": 62.29
-              }
-            ]
           }
         },
         {
@@ -121030,22 +120589,6 @@
                 1.2
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Aidan O'Connell",
-              "teammate back: Dont'e Thornton Jr.",
-              "teammate back: Malik Benson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 34.66,
-                "to": 31.93
-              }
-            ]
           }
         },
         {
@@ -129471,20 +129014,6 @@
                 14.2
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Jake Ferguson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 19.66,
-                "to": 21.8
-              }
-            ]
           }
         },
         {
@@ -130371,26 +129900,6 @@
                 2.9
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Jake Ferguson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 110.95,
-                "to": 121.91
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 8.79,
-                "to": 9.73
-              }
-            ]
           }
         },
         {
@@ -131196,20 +130705,6 @@
                 12.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate out: Jake Ferguson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 55.97,
-                "to": 62.98
-              }
-            ]
           }
         },
         {
@@ -131855,21 +131350,6 @@
                 0.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate out: Jake Ferguson"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 23.89,
-                "to": 26.02
-              }
-            ]
           }
         },
         {
@@ -154896,21 +154376,6 @@
                 11.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 9.57,
-                "to": 8.74
-              }
-            ]
           }
         },
         {
@@ -155701,20 +155166,6 @@
                 13.3
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 10.12,
-                "to": 9.02
-              }
-            ]
           }
         },
         {
@@ -156385,20 +155836,6 @@
                 0.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 23.2,
-                "to": 21.77
-              }
-            ]
           }
         },
         {
@@ -157122,20 +156559,6 @@
                 6.5
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 36.33,
-                "to": 32.56
-              }
-            ]
           }
         },
         {
@@ -157874,20 +157297,6 @@
                 7.0
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 38.53,
-                "to": 34.64
-              }
-            ]
           }
         },
         {
@@ -159275,20 +158684,6 @@
                 13.6
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 33.22,
-                "to": 30.13
-              }
-            ]
           }
         },
         {
@@ -159884,20 +159279,6 @@
                 5.1
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 19.36,
-                "to": 18.09
-              }
-            ]
           }
         },
         {
@@ -160497,21 +159878,6 @@
                 8.8
               ]
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-09T21:16:49+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate back: Theo Wease Jr."
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 22.54,
-                "to": 20.93
-              }
-            ]
           }
         }
       ],
