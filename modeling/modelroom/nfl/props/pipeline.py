@@ -38,13 +38,16 @@ import os
 
 from modelroom.injuries import use as U
 
-from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
+from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, CONC_FILE, CONC_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
                      PARAMS_FILE, PropParams)
 
 # Which NFL prop model the board and ledger use: 0.1.0 = params.json (the default everywhere); a candidate
 # version only when MODELROOM_NFL_PROPS_VERSION names it (the hosted test site's workflow). Rollback = unset
 # it. Every ledger record names the version that made it.
-VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE, INJURY_VERSION: INJURY_FILE}
+VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE, INJURY_VERSION: INJURY_FILE,
+            CONC_VERSION: CONC_FILE}
+# Versions that may only ever run as shadows (recorded in the ledger, never published).
+SHADOW_ONLY = {CONC_VERSION}
 
 
 def shadow_versions(active: str) -> list[str]:
@@ -60,6 +63,9 @@ def active_version() -> str:
     v = os.environ.get("MODELROOM_NFL_PROPS_VERSION", "").strip() or MODEL_VERSION
     if v not in VERSIONS:
         raise ValueError(f"MODELROOM_NFL_PROPS_VERSION={v!r}: known versions are {sorted(VERSIONS)}")
+    if v in SHADOW_ONLY:
+        raise ValueError(f"MODELROOM_NFL_PROPS_VERSION={v!r} is a shadow-only experiment and can't be published; "
+                         "list it in MODELROOM_NFL_PROPS_SHADOW instead")
     return v
 
 TEAM_NAMES = {v: k for k, v in odds.NFL_TEAMS.items()}
@@ -207,10 +213,18 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
             need = pv.settings.opp_redistribution == "depth" or pv.settings.questionable_model == "split" or pv.settings.share_model == "role"
             dep = DEPTH.ranks(season, int(wk), now) if need else None
             out += M.project_games(ctx, g, ro, inj, pv, seed=sd[int(wk)], depth=dep)
-        return pv, [x for x in out if eligible(x)], sd
+        return pv, [x for x in out if eligible(x)], sd, out
 
-    p, projs, seeds = project(version)
-    shadows = {v: project(v) for v in shadow_versions(version)}
+    p, projs, seeds, _ = project(version)
+    shadows = {}
+    on_board = {(x.game_id, x.player_id) for x in projs}
+    for v in shadow_versions(version):
+        pv, px, sd, px_all = project(v)
+        if v in SHADOW_ONLY:
+            # Shadow-only experiments are recorded for exactly the active version's players, so both are graded on the
+            # same player-games (an experiment that moves a backup below the eligibility bar would otherwise drop him).
+            px = [x for x in px_all if (x.game_id, x.player_id) in on_board]
+        shadows[v] = (pv, px, sd)
     feed = U.load("nfl")
     feed_meta = U.live_meta("nfl")
     if p.settings.injury_context and feed is not None:

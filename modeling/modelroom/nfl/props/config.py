@@ -15,6 +15,8 @@ OPP_VERSION = "0.3.0"
 OPP_FILE = Path(__file__).with_name("params_0.3.0.json")  # opportunity redistribution (test site only when enabled)
 INJURY_VERSION = "0.1.1"
 INJURY_FILE = Path(__file__).with_name("params_0.1.1.json")  # 0.1.0 + live injury feed + inexperienced-QB passing
+CONC_VERSION = "0.1.3"
+CONC_FILE = Path(__file__).with_name("params_0.1.3.json")  # 0.1.1 + RB-carry / TE-target concentration: SHADOW ONLY
 
 HISTORY_SEASONS = 3      # prior seasons used alongside the current one
 TUNE_SEASONS = (2021, 2022)
@@ -87,6 +89,9 @@ class PropSettings:
                                         # Questionable (logistic fit on 2021-22, PLAY_MODEL below)
     rb_role_factors: tuple = ()         # experimental: carry-share multipliers for the team's lead back and the other
                                         # backs (RB1, RB2+), fitted on 2021-22; empty = off (0.1.1 unchanged)
+    share_concentration: tuple = ()     # experimental (0.1.3, shadow only): ((stat, group, gamma), ...), stat "t" targets /
+                                        # "c" carries. Within each team's active players of that group, share -> share^gamma,
+                                        # rescaled so the group's team total is unchanged. Empty = off (0.1.1 unchanged).
     sims: int = 4000
 
 
@@ -111,7 +116,7 @@ ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_
                   "opp_redistribution", "redist_decay", "redist_up", "redist_up_decay", "redist_in_group", "questionable_factor",
                   "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
                   "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate",
-                  "inexp_qb_attempts", "inexp_qb_yards", "injury_context", "rb_role_factors")
+                  "inexp_qb_attempts", "inexp_qb_yards", "injury_context", "rb_role_factors", "share_concentration")
 
 
 @dataclass(frozen=True)
@@ -156,7 +161,10 @@ class PropParams:
             return cls()
         d = json.loads(path.read_text())
         known = {f.name for f in fields(PropSettings)}
-        s = PropSettings(**{k: v for k, v in d["settings"].items() if k in known})
+        st = {k: v for k, v in d["settings"].items() if k in known}
+        if isinstance(st.get("share_concentration"), list):  # JSON lists -> hashable tuples
+            st["share_concentration"] = tuple(tuple(x) for x in st["share_concentration"])
+        s = PropSettings(**st)
         v = d["volume"]
         vm = VolumeModel(tuple(v["pass_coef"]), tuple(v["rush_coef"]), v["pass_sd"], v["rush_sd"])
         return cls(s, vm, d.get("calibration", {}), d.get("provenance", {}))
