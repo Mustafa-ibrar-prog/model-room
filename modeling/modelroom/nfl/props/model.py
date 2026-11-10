@@ -238,6 +238,19 @@ def _questionable_split(c, skill, rushers, t_share, c_share, s, depth):
     return t_new, c_new, info
 
 
+def concentrate(share: pd.Series, group: pd.Series, grp: str, gamma: float) -> pd.Series:
+    """Within one position group: share -> share**gamma, rescaled so the group's total is unchanged. Players of
+    other groups, and players with no share, are untouched (0.1.3 experiment; gamma 1 = no change)."""
+    out = share.astype(float).copy()
+    g = group.reindex(out.index)
+    m = (g == grp) & (out > 0)
+    if int(m.sum()) > 1 and float(gamma) != 1.0:
+        v = out[m]
+        w = v ** float(gamma)
+        out[m] = w * float(v.sum()) / float(w.sum())
+    return out
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, total: float, qb_id: str | None,
                  roster: pd.DataFrame | None, injuries: pd.DataFrame | None, p: PropParams, rng,
                  depth: dict | None = None) -> list[PlayerProjection]:
@@ -310,6 +323,14 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
             lead = max(rbs, key=lambda i: float(c_share[i]))
             for i in rbs:
                 c_share[i] = float(c_share[i]) * float(s.rb_role_factors[0] if i == lead else s.rb_role_factors[1])
+    if s.share_concentration:
+        # Experimental (0.1.3, shadow only): shares within a position were too even in 2023-25 (lead backs and TE1s
+        # short, third backs / TEs over). Concentrate within the group; the group's team total is kept exactly.
+        for stat, grp, gam in s.share_concentration:
+            if stat == "t":
+                t_share = concentrate(t_share, skill["group"], grp, gam)
+            else:
+                c_share = concentrate(c_share, rushers["group"], grp, gam)
     PA = np.clip(np.rint(rng.normal(mu_pa, p.volume.pass_sd, n)), 8, 75).astype(int)
     RU = np.clip(np.rint(rng.normal(mu_ru, p.volume.rush_sd, n)), 5, 60).astype(int)
 

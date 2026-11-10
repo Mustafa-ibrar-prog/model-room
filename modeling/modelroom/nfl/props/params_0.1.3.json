@@ -1,0 +1,118 @@
+{
+  "calibration": {
+    "anytime_td": [
+      0.1295,
+      1.0764
+    ],
+    "fantasy_points": [
+      0.1479,
+      1.1746
+    ],
+    "interceptions": [
+      -0.0903,
+      0.8514
+    ],
+    "longest_reception": [
+      0.3382,
+      1.2105
+    ],
+    "passing_attempts": [
+      -0.1479,
+      0.9761
+    ],
+    "passing_completions": [
+      -0.164,
+      1.0466
+    ],
+    "passing_tds": [
+      -0.102,
+      1.153
+    ],
+    "passing_yards": [
+      0.1268,
+      1.5314
+    ],
+    "receiving_yards": [
+      0.3533,
+      1.3153
+    ],
+    "receptions": [
+      0.2667,
+      1.3076
+    ],
+    "rush_rec_yards": [
+      0.4145,
+      1.3725
+    ],
+    "rushing_attempts": [
+      0.6168,
+      1.6241
+    ],
+    "rushing_yards": [
+      0.6455,
+      1.3739
+    ]
+  },
+  "model_id": "nfl-props",
+  "model_version": "0.1.3",
+  "provenance": {
+    "based_on": "0.1.1 (same settings, volume model and calibration)",
+    "calibration": "0.1.1's per-market calibration kept unchanged, so no other player's probabilities move; a refit variant is evaluated in the replay only.",
+    "change_from_0.1.1": "Within-position concentration: each team's RB carry shares ^1.25 and TE target shares ^1.15, rescaled so the team's RB carry total and TE target total are unchanged. WR, QB and RB receiving untouched.",
+    "fit": "Exponents fitted on 2021-22 only (walk-forward refits gave RB 1.25 / 1.25 / 1.20 and TE 1.15 in all three windows). Research: modeling/research/2026-11-nfl-volume-allocation.",
+    "game_uncertainty": "Game margin / total errors were not wider with an inexperienced starter (2016-21 and 2022-25, ratio ~1.0), so the game engine's ranges are not widened.",
+    "inexp_qb": "QB passing yards, 2021-25 walk-forward (2,762 QB-games): starters with <150 career attempts reached 0.914 of the projection in 2021-22 vs 0.982 for 500+ (relative 0.931); held out 2023-25: 0.946 vs 1.016 (relative 0.931). 150-500 attempts was not consistent (0.932 then 0.994) and is not adjusted.",
+    "status": "experimental 0.1.3: SHADOW ONLY on the test site (recorded in the ledger, never published). Approved for shadow testing 2026-11-09; not activated. Rollback = remove it from MODELROOM_NFL_PROPS_SHADOW."
+  },
+  "settings": {
+    "blitz_strength": 1.0,
+    "carry_dispersion": 3.0,
+    "coverage_strength": 1.0,
+    "def_half_life_games": 10.0,
+    "def_prior_games": 6.0,
+    "efficiency_sd": 0.3,
+    "half_life_games": 12.0,
+    "inexp_qb_attempts": 150,
+    "inexp_qb_yards": 0.931,
+    "injury_context": true,
+    "matchup_strength": 0.5,
+    "pressure_strength": 0.0,
+    "rate_prior": 40.0,
+    "season_carry": 0.5,
+    "share_concentration": [
+      [
+        "c",
+        "RB",
+        1.25
+      ],
+      [
+        "t",
+        "TE",
+        1.15
+      ]
+    ],
+    "share_prior_games": 1.0,
+    "sims": 4000,
+    "snap_trend_strength": 1.0,
+    "target_dispersion": 15.0,
+    "td_prior": 120.0
+  },
+  "volume": {
+    "pass_coef": [
+      -15.1317,
+      1.2506,
+      0.6066,
+      0.1008,
+      0.1392
+    ],
+    "pass_sd": 8.03,
+    "rush_coef": [
+      1.1246,
+      1.0664,
+      0.7896,
+      -0.0156,
+      -0.0593
+    ],
+    "rush_sd": 7.287
+  }
+}
