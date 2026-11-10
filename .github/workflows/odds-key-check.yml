@@ -1,0 +1,52 @@
+name: Odds key check (test site)
+
+# Manual, read-only diagnostic for the ODDS_API_KEY secret. It prints only yes/no facts and, if the key is present,
+# the HTTP status and remaining-credit headers of The Odds API's /v4/sports endpoint (which costs 0 credits).
+# It never prints the key: the value is only read inside Python, never echoed, and GitHub masks it in logs anyway.
+# Writes nothing to the repository and touches no data, predictions or production.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Where is ODDS_API_KEY visible? (yes/no only)
+        env:
+          K_SECRET: ${{ secrets.ODDS_API_KEY }}
+          K_VAR_PRESENT: ${{ vars.ODDS_API_KEY != '' }}
+          REPO: ${{ github.repository }}
+        run: |
+          python3 - <<'EOF'
+          import os
+          k = os.environ.get("K_SECRET", "")
+          print("repository:", os.environ["REPO"])
+          print("Actions repository secret ODDS_API_KEY present:", "yes" if k else "no")
+          print("Actions repository VARIABLE named ODDS_API_KEY present (wrong tab):", "yes" if os.environ.get("K_VAR_PRESENT") == "true" else "no")
+          if k:
+              print("value has leading/trailing whitespace or a line break:", "yes" if k != k.strip() else "no")
+              print("value contains inner spaces or quotes:", "yes" if any(c in k.strip() for c in " '\"") else "no")
+          EOF
+
+      - name: Does The Odds API accept the key? (0-credit endpoint, status only)
+        env:
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import os, urllib.request, urllib.error
+          k = os.environ.get("ODDS_API_KEY", "").strip()
+          if not k:
+              print("skipped: the workflow received no key"); raise SystemExit(0)
+          url = "https://api.the-odds-api.com/v4/sports/?apiKey=" + k
+          try:
+              with urllib.request.urlopen(url, timeout=20) as r:
+                  print("status:", r.status, "| credits remaining:", r.headers.get("x-requests-remaining"), "| used:", r.headers.get("x-requests-used"))
+          except urllib.error.HTTPError as e:
+              print("status:", e.code, "(401 = key rejected by the provider)")
+          except Exception as e:
+              print("request failed:", type(e).__name__)
+          EOF
