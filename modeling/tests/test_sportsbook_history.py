@@ -158,3 +158,11 @@ def test_derived_tables_append_only_and_chained():
     finally:
         admin.execute(f"drop database {name} with (force)")
         admin.close()
+
+
+def test_schedule_coverage_window_is_capped():
+    f = "2026-11-11T15:00:00+00:00"
+    P = SB.prepare(pd.DataFrame([snap(f, gid="g1"), snap(f, gid="g9", commence="2026-12-30T01:00:00Z", h="LAL", a="DEN")]))
+    sched = pd.DataFrame({"game_id": ["g1", "g2", "g3"], "start_ts": pd.to_datetime(["2026-11-12T01:00:00Z", "2026-11-12T03:00:00Z", "2026-12-01T01:00:00Z"], utc=True)})
+    pub, _ = SB.coverage(P, sched)
+    assert pub["fetches"][0]["scheduled_games_next_72h_without_lines"] == 1  # g2 only; g3 is beyond 72 h

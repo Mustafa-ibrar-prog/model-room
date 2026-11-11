@@ -210,6 +210,17 @@ jobs:
           python -m modelroom nba props-monitor
           python -m modelroom nfl props-monitor
           python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
+          # Historical sportsbook analysis (read-only toward models, probabilities, grading and every existing record):
+          # matches each stored line to the latest game prediction recorded BEFORE it, appends the comparisons and a
+          # detailed report to the private append-only tables odds.comparisons / odds.reports, and writes aggregate
+          # counts only to preview-ledger/reports/sportsbook_<lg>.json. No Odds API calls. A failure never fails the refresh.
+          if [ "${ODDS_STORE:-off}" = on ]; then
+            for lg in nba nfl; do
+              python -m modelroom markets sportsbook $lg > /tmp/sb_$lg.json \
+                && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'])" \
+                || echo "::warning::$lg sportsbook analysis failed; nothing else is affected"
+            done
+          fi
           # Market-settled grading. Exchange providers are never switched on here (public repo, provider
           # terms), so this publishes an empty record with the reason; it fills in where prices are enabled.
           python -m modelroom markets settle nfl

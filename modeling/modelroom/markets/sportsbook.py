@@ -38,6 +38,7 @@ from modelroom.common import oddsmath as O
 
 GATE = 250                 # settled games per league and market before any summary statistic is published
 STALE_HOURS = 6.0          # a line whose own book timestamp is older than this when collected is "stale"
+COVERAGE_HOURS = 72.0      # "scheduled games without lines" looks only this far ahead of each fetch
 CLOSE_WINDOW_MIN = 10.0    # an observation this close to the start would count as a genuine closing line
 MARKETS = ("spread", "total", "moneyline")
 SIDES = {"spread": ("home_price", "away_price", "home", "away"), "moneyline": ("home_price", "away_price", "home", "away"),
@@ -183,12 +184,12 @@ def coverage(S: pd.DataFrame, schedule: pd.DataFrame | None = None) -> tuple[dic
         no_lines = None
         if schedule is not None and len(schedule) and d["commence_ts"].notna().any():
             t0 = pd.to_datetime(f, utc=True)
-            horizon = d["commence_ts"].max()
-            sch = schedule[(schedule["start_ts"] > t0) & (schedule["start_ts"] <= horizon)]
+            horizon = min(d["commence_ts"].max(), t0 + pd.Timedelta(hours=COVERAGE_HOURS))
+            sch = schedule[schedule["start_ts"].notna() & (schedule["start_ts"] > t0) & (schedule["start_ts"] <= horizon)]
             no_lines = int((~sch["game_id"].astype(str).isin(set(d.loc[d["matched_game"], "game_id"].astype(str)))).sum())
         fetches.append({"collected_at": f, "rows": int(len(d)), "games": int(games.ngroups), "books": len(books),
                         "game_book_pairs_missing_a_book": miss_books, "missing_market_slots": miss_mkts,
-                        "scheduled_games_in_window_without_lines": no_lines,
+                        "scheduled_games_next_72h_without_lines": no_lines,
                         "stale_rows": int(d["stale"].sum()), "unmatched_to_schedule_rows": int((~d["matched_game"]).sum()),
                         "unchanged_since_previous_fetch_rows": int(d["unchanged_since_prev"].sum())})
     pub = {"fetches": fetches,
