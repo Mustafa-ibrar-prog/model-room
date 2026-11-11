@@ -1,0 +1,42 @@
+name: Sportsbook analysis check (test site)
+
+# Manual, read-only: runs the historical sportsbook analysis against the TEST odds store and the prediction ledgers
+# with --dry-run (writes nothing to the store, the branch or the site) and prints the PUBLIC aggregate report only
+# (counts and rates; no sportsbook lines or prices). No Odds API calls.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      MODELROOM_LEDGER_DIR: ${{ github.workspace }}/modeling/preview-ledger
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Prediction ledgers and credit log from the preview branch (read-only copy)
+        run: |
+          git fetch -q --depth 1 origin preview
+          git checkout FETCH_HEAD -- modeling/preview-ledger
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Connect to the odds store (nothing printed)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+      - name: Analyse (dry run) and print the public aggregates
+        working-directory: modeling
+        run: |
+          pip install -q -e . "psycopg[binary]"
+          python -m modelroom nba ingest > /dev/null
+          python -m modelroom nfl ingest > /dev/null
+          for lg in nba nfl; do
+            python -m modelroom markets sportsbook $lg --dry-run > /tmp/sb_$lg.json
+            python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print(json.dumps(d['public_report'], indent=1)[:12000])"
+          done

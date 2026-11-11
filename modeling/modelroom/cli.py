@@ -27,6 +27,7 @@
   markets report nfl              settle past contracts: model vs market accuracy, ROI, closing-line value
   markets backfill nfl --days 30  Kalshi: hourly price history of settled contracts (local only)
   markets replay nfl              price that history with the walk-forward model (then: markets report)
+  markets sportsbook nba|nfl      sportsbook line history, movement, coverage and model-vs-book comparisons (TEST)
   ledger verify                   check the prediction ledgers' hash chains
   odds-store load|sync|verify|import --league nba|nfl
                                   sportsbook snapshots <-> append-only Supabase table odds.snapshots (TEST)
@@ -230,6 +231,12 @@ def _markets(args) -> int:
 
         _print(history.backfill_kalshi(args.league, days=args.days))
         return 0
+    if args.cmd == "sportsbook":
+        from modelroom.markets import sportsbook
+
+        res = sportsbook.run(args.league, write_store=not args.dry_run)
+        _print(res)
+        return 0 if all(res.get(k, True) for k in ("comparisons_chain_ok", "reports_chain_ok", "snapshots_chain_ok")) else 1
     if args.cmd == "replay":
         from modelroom.markets import history
 
@@ -297,10 +304,11 @@ def main(argv: list[str] | None = None) -> int:
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 
     mk = sub.add_parser("markets")
-    mk.add_argument("cmd", choices=["status", "fetch", "depth", "refresh", "settle", "report", "backfill", "replay"])
+    mk.add_argument("cmd", choices=["status", "fetch", "depth", "refresh", "settle", "report", "backfill", "replay", "sportsbook"])
     mk.add_argument("league", nargs="?", default="nfl", choices=["nfl", "nba"])
     mk.add_argument("--provider", default="all", choices=["all", "polymarket_us", "kalshi"])
     mk.add_argument("--days", type=int, default=10)
+    mk.add_argument("--dry-run", action="store_true", help="sportsbook: analyse but write nothing to the store")
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
     os_ = sub.add_parser("odds-store", help="sportsbook snapshots <-> append-only Supabase table (TEST)")
