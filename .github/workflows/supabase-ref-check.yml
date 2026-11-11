@@ -44,11 +44,24 @@ jobs:
               info = f"HTTP {st}" + (f", x-vercel-error={h.get('x-vercel-error') or h.get('X-Vercel-Error')}" if (h.get('x-vercel-error') or h.get('X-Vercel-Error')) else "")
               if st != 200:
                   return info, None
-              refs = set(re.findall(r"([a-z0-9]{20})\.supabase\.co", html))
-              for src in re.findall(r'src="(/_next/static/[^"]+\.js)"', html)[:60]:
+              t = re.search(r"<title[^>]*>([^<]{0,80})", html)
+              info += f", title={t.group(1).strip() if t else '?'!r}, model-room page: {'Model Room' in html}"
+              refs, seen, queue = set(), set(), []
+              for path in ("/", "/login", "/account", "/signup"):
+                  s1, h1, _ = get(base + path) if path != "/" else (st, html, h)
+                  if s1 == 200:
+                      refs |= set(re.findall(r"([a-z0-9]{20})\.supabase\.co", h1))
+                      queue += re.findall(r"(/_next/static/[^\"'\s]+?\.js)", h1)
+              while queue and len(seen) < 250:
+                  src = queue.pop()
+                  if src in seen:
+                      continue
+                  seen.add(src)
                   s2, js, _ = get(base + src)
                   if s2 == 200:
                       refs |= set(re.findall(r"([a-z0-9]{20})\.supabase\.co", js))
+                      queue += ["/_next/" + x for x in re.findall(r'(static/chunks/[A-Za-z0-9_./~-]+?\.js)', js)]
+              info += f", scripts scanned: {len(seen)}"
               return info, refs
           sites = {"TEST site (preview branch)": "https://model-room-git-preview-computer-citi.vercel.app",
                    "Vercel production alias (project-team)": "https://model-room-computer-citi.vercel.app",
