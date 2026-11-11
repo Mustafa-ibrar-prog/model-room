@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "league": "nba",
-  "generated_at": "2026-11-11T00:01:40+00:00",
+  "generated_at": "2026-11-11T00:31:38+00:00",
   "season": 2027,
   "season_label": "2026-27",
   "model": {
@@ -10,7 +10,7 @@
     "params_hash": "b6f976a4fe33ed0f",
     "status": "provisional",
     "fitted_at": "2026-11-02T07:16:22+00:00",
-    "inputs_hash": "346b53be3e040298",
+    "inputs_hash": "bc2ca1b81c165847",
     "ratings_through_games": 154,
     "uncertainty": {
       "margin_sigma": 13.3165,
@@ -26,13 +26,13 @@
       "status": "current",
       "reasons": [],
       "results_through": "2026-11-09",
-      "last_ingest": "2026-11-11T00:00:57+00:00",
+      "last_ingest": "2026-11-11T00:30:56+00:00",
       "missing_results": []
     },
     "injuries": {
       "connected": true,
       "source": "nba_official+espn",
-      "updated_at": "2026-11-11T00:01:20.038372+00:00",
+      "updated_at": "2026-11-11T00:31:19.085311+00:00",
       "note": "Official NBA injury report and ESPN injury reports (test site). Out = full value, Doubtful = 75%, fitted points per unit of Game Score; Questionable / Probable players aren't adjusted."
     },
     "market": {
@@ -44,843 +44,6 @@
     }
   },
   "upcoming": [
-    {
-      "game_id": "401909960",
-      "start_time": "2026-11-11T00:30:00+00:00",
-      "game_date": "2026-11-10",
-      "status": "scheduled",
-      "season_type": "regular",
-      "neutral": false,
-      "home": {
-        "id": 18,
-        "abbr": "NY",
-        "name": "New York Knicks",
-        "net_rating": 5.45
-      },
-      "away": {
-        "id": 15,
-        "abbr": "MIL",
-        "name": "Milwaukee Bucks",
-        "net_rating": -7.4
-      },
-      "rest": {
-        "home_days": 3,
-        "away_days": 2,
-        "home_b2b": false,
-        "away_b2b": false
-      },
-      "adjustments": {
-        "rest_points": 0.19,
-        "injury_points": 0.87
-      },
-      "projection": {
-        "home_score": 118.1,
-        "away_score": 102.9,
-        "margin": 15.2,
-        "total": 220.9,
-        "spread": -15.2,
-        "home_win_prob": 0.8735,
-        "away_win_prob": 0.1265,
-        "margin_range_80": [
-          -1.8,
-          32.3
-        ],
-        "total_range_80": [
-          197.0,
-          244.8
-        ],
-        "pace": 99.0
-      },
-      "market": {
-        "spread": -15.5,
-        "total": 222.0,
-        "home_ml": -1050.0,
-        "away_ml": 686.0,
-        "books": 9,
-        "captured_at": "2026-11-10T22:53:35+00:00",
-        "sources": [
-          "the_odds_api"
-        ],
-        "by_book": {
-          "bovada": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:52:06+00:00",
-            "total": 222.5,
-            "over_price": -110.0,
-            "under_price": -110.0,
-            "spread": -15.5,
-            "home_spread_price": -105.0,
-            "away_spread_price": -115.0,
-            "home_ml": -1000.0,
-            "away_ml": 625.0
-          },
-          "draftkings": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:52:58+00:00",
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -110.0,
-            "home_ml": -1040.0,
-            "away_ml": 670.0,
-            "total": 221.5,
-            "over_price": -115.0,
-            "under_price": -105.0
-          },
-          "betmgm": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:52:58+00:00",
-            "total": 222.5,
-            "over_price": -110.0,
-            "under_price": -110.0,
-            "home_ml": -1100.0,
-            "away_ml": 700.0,
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -110.0
-          },
-          "lowvig": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:52:59+00:00",
-            "total": 222.0,
-            "over_price": -107.0,
-            "under_price": -107.0,
-            "home_ml": -1028.0,
-            "away_ml": 708.0,
-            "spread": -15.5,
-            "home_spread_price": -106.0,
-            "away_spread_price": -106.0
-          },
-          "betrivers": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:52:59+00:00",
-            "home_ml": -1250.0,
-            "away_ml": 700.0,
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -112.0,
-            "total": 222.5,
-            "over_price": -109.0,
-            "under_price": -113.0
-          },
-          "betonlineag": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:53:00+00:00",
-            "home_ml": -1050.0,
-            "away_ml": 686.0,
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -110.0,
-            "total": 222.0,
-            "over_price": -110.0,
-            "under_price": -110.0
-          },
-          "fanduel": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:53:18+00:00",
-            "home_ml": -1200.0,
-            "away_ml": 750.0,
-            "total": 221.5,
-            "over_price": -115.0,
-            "under_price": -105.0,
-            "spread": -15.5,
-            "home_spread_price": -108.0,
-            "away_spread_price": -112.0
-          },
-          "mybookieag": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:53:19+00:00",
-            "home_ml": -1058.0,
-            "away_ml": 676.0,
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -110.0,
-            "total": 222.0,
-            "over_price": -110.0,
-            "under_price": -110.0
-          },
-          "betus": {
-            "source": "the_odds_api",
-            "captured_at": "2026-11-10T22:53:35+00:00",
-            "total": 222.0,
-            "over_price": -110.0,
-            "under_price": -110.0,
-            "spread": -15.5,
-            "home_spread_price": -110.0,
-            "away_spread_price": -110.0,
-            "home_ml": -1050.0,
-            "away_ml": 680.0
-          }
-        }
-      },
-      "edges": {
-        "spread": -0.3,
-        "total": -1.1,
-        "home_prob_market": 0.8777,
-        "away_prob_market": 0.1223,
-        "home_prob_diff": -0.0042,
-        "implied_scores": {
-          "home": 118.8,
-          "away": 103.2
-        },
-        "at_spread": {
-          "line": -15.5,
-          "home": {
-            "model_prob": 0.491,
-            "push_prob": 0.0,
-            "fair_odds": 104,
-            "market_price": null,
-            "market_implied": null,
-            "ev_per_dollar": null
-          },
-          "away": {
-            "model_prob": 0.509,
-            "push_prob": 0.0,
-            "fair_odds": -104,
-            "market_price": null,
-            "market_implied": null,
-            "ev_per_dollar": null
-          }
-        },
-        "at_total": {
-          "line": 222.0,
-          "over": {
-            "model_prob": 0.4658,
-            "push_prob": 0.0214,
-            "fair_odds": 110,
-            "market_price": null,
-            "market_implied": null,
-            "ev_per_dollar": null
-          },
-          "under": {
-            "model_prob": 0.5128,
-            "push_prob": 0.0214,
-            "fair_odds": -110,
-            "market_price": null,
-            "market_implied": null,
-            "ev_per_dollar": null
-          }
-        },
-        "moneyline": {
-          "home": {
-            "model_prob": 0.8735,
-            "push_prob": 0.0,
-            "fair_odds": -691,
-            "market_price": -1050.0,
-            "market_implied": 0.913,
-            "ev_per_dollar": -0.0433
-          },
-          "away": {
-            "model_prob": 0.1265,
-            "push_prob": 0.0,
-            "fair_odds": 691,
-            "market_price": 686.0,
-            "market_implied": 0.1272,
-            "ev_per_dollar": -0.0057
-          }
-        },
-        "by_book": {
-          "bovada": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -105.0,
-                "market_implied": 0.5122,
-                "ev_per_dollar": -0.0414
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -115.0,
-                "market_implied": 0.5349,
-                "ev_per_dollar": -0.0484
-              }
-            },
-            "at_total": {
-              "line": 222.5,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0,
-                "fair_odds": 115,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.1107
-              },
-              "under": {
-                "model_prob": 0.5342,
-                "push_prob": 0.0,
-                "fair_odds": -115,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": 0.0198
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1000.0,
-                "market_implied": 0.9091,
-                "ev_per_dollar": -0.0391
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 625.0,
-                "market_implied": 0.1379,
-                "ev_per_dollar": -0.0829
-              }
-            },
-            "captured_at": "2026-11-10T22:52:06+00:00",
-            "source": "the_odds_api"
-          },
-          "draftkings": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0283
-              }
-            },
-            "at_total": {
-              "line": 221.5,
-              "over": {
-                "model_prob": 0.4872,
-                "push_prob": 0.0,
-                "fair_odds": 105,
-                "market_price": -115.0,
-                "market_implied": 0.5349,
-                "ev_per_dollar": -0.0892
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0,
-                "fair_odds": -105,
-                "market_price": -105.0,
-                "market_implied": 0.5122,
-                "ev_per_dollar": 0.0012
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1040.0,
-                "market_implied": 0.9123,
-                "ev_per_dollar": -0.0425
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 670.0,
-                "market_implied": 0.1299,
-                "ev_per_dollar": -0.026
-              }
-            },
-            "captured_at": "2026-11-10T22:52:58+00:00",
-            "source": "the_odds_api"
-          },
-          "betmgm": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0283
-              }
-            },
-            "at_total": {
-              "line": 222.5,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0,
-                "fair_odds": 115,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.1107
-              },
-              "under": {
-                "model_prob": 0.5342,
-                "push_prob": 0.0,
-                "fair_odds": -115,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": 0.0198
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1100.0,
-                "market_implied": 0.9167,
-                "ev_per_dollar": -0.0471
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 700.0,
-                "market_implied": 0.125,
-                "ev_per_dollar": 0.012
-              }
-            },
-            "captured_at": "2026-11-10T22:52:58+00:00",
-            "source": "the_odds_api"
-          },
-          "lowvig": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -106.0,
-                "market_implied": 0.5146,
-                "ev_per_dollar": -0.0458
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -106.0,
-                "market_implied": 0.5146,
-                "ev_per_dollar": -0.0108
-              }
-            },
-            "at_total": {
-              "line": 222.0,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0214,
-                "fair_odds": 110,
-                "market_price": -107.0,
-                "market_implied": 0.5169,
-                "ev_per_dollar": -0.0775
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0214,
-                "fair_odds": -110,
-                "market_price": -107.0,
-                "market_implied": 0.5169,
-                "ev_per_dollar": 0.0135
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1028.0,
-                "market_implied": 0.9113,
-                "ev_per_dollar": -0.0415
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 708.0,
-                "market_implied": 0.1238,
-                "ev_per_dollar": 0.0221
-              }
-            },
-            "captured_at": "2026-11-10T22:52:59+00:00",
-            "source": "the_odds_api"
-          },
-          "betrivers": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -112.0,
-                "market_implied": 0.5283,
-                "ev_per_dollar": -0.0365
-              }
-            },
-            "at_total": {
-              "line": 222.5,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0,
-                "fair_odds": 115,
-                "market_price": -109.0,
-                "market_implied": 0.5215,
-                "ev_per_dollar": -0.1068
-              },
-              "under": {
-                "model_prob": 0.5342,
-                "push_prob": 0.0,
-                "fair_odds": -115,
-                "market_price": -113.0,
-                "market_implied": 0.5305,
-                "ev_per_dollar": 0.0069
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1250.0,
-                "market_implied": 0.9259,
-                "ev_per_dollar": -0.0566
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 700.0,
-                "market_implied": 0.125,
-                "ev_per_dollar": 0.012
-              }
-            },
-            "captured_at": "2026-11-10T22:52:59+00:00",
-            "source": "the_odds_api"
-          },
-          "betonlineag": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0283
-              }
-            },
-            "at_total": {
-              "line": 222.0,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0214,
-                "fair_odds": 110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0894
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0214,
-                "fair_odds": -110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": 0.0004
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1050.0,
-                "market_implied": 0.913,
-                "ev_per_dollar": -0.0433
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 686.0,
-                "market_implied": 0.1272,
-                "ev_per_dollar": -0.0057
-              }
-            },
-            "captured_at": "2026-11-10T22:53:00+00:00",
-            "source": "the_odds_api"
-          },
-          "fanduel": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -108.0,
-                "market_implied": 0.5192,
-                "ev_per_dollar": -0.0544
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -112.0,
-                "market_implied": 0.5283,
-                "ev_per_dollar": -0.0365
-              }
-            },
-            "at_total": {
-              "line": 221.5,
-              "over": {
-                "model_prob": 0.4872,
-                "push_prob": 0.0,
-                "fair_odds": 105,
-                "market_price": -115.0,
-                "market_implied": 0.5349,
-                "ev_per_dollar": -0.0892
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0,
-                "fair_odds": -105,
-                "market_price": -105.0,
-                "market_implied": 0.5122,
-                "ev_per_dollar": 0.0012
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1200.0,
-                "market_implied": 0.9231,
-                "ev_per_dollar": -0.0537
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 750.0,
-                "market_implied": 0.1176,
-                "ev_per_dollar": 0.0752
-              }
-            },
-            "captured_at": "2026-11-10T22:53:18+00:00",
-            "source": "the_odds_api"
-          },
-          "mybookieag": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0283
-              }
-            },
-            "at_total": {
-              "line": 222.0,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0214,
-                "fair_odds": 110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0894
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0214,
-                "fair_odds": -110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": 0.0004
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1058.0,
-                "market_implied": 0.9136,
-                "ev_per_dollar": -0.0439
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 676.0,
-                "market_implied": 0.1289,
-                "ev_per_dollar": -0.0184
-              }
-            },
-            "captured_at": "2026-11-10T22:53:19+00:00",
-            "source": "the_odds_api"
-          },
-          "betus": {
-            "at_spread": {
-              "line": -15.5,
-              "home": {
-                "model_prob": 0.491,
-                "push_prob": 0.0,
-                "fair_odds": 104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0626
-              },
-              "away": {
-                "model_prob": 0.509,
-                "push_prob": 0.0,
-                "fair_odds": -104,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0283
-              }
-            },
-            "at_total": {
-              "line": 222.0,
-              "over": {
-                "model_prob": 0.4658,
-                "push_prob": 0.0214,
-                "fair_odds": 110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": -0.0894
-              },
-              "under": {
-                "model_prob": 0.5128,
-                "push_prob": 0.0214,
-                "fair_odds": -110,
-                "market_price": -110.0,
-                "market_implied": 0.5238,
-                "ev_per_dollar": 0.0004
-              }
-            },
-            "moneyline": {
-              "home": {
-                "model_prob": 0.8735,
-                "push_prob": 0.0,
-                "fair_odds": -691,
-                "market_price": -1050.0,
-                "market_implied": 0.913,
-                "ev_per_dollar": -0.0433
-              },
-              "away": {
-                "model_prob": 0.1265,
-                "push_prob": 0.0,
-                "fair_odds": 691,
-                "market_price": 680.0,
-                "market_implied": 0.1282,
-                "ev_per_dollar": -0.0133
-              }
-            },
-            "captured_at": "2026-11-10T22:53:35+00:00",
-            "source": "the_odds_api"
-          }
-        }
-      },
-      "result": null,
-      "availability": {
-        "home": [
-          {
-            "player": "Josh Hart",
-            "player_id": "3062679",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "nba_official",
-            "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
-            "detail": "Injury/Illness - Illness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          }
-        ],
-        "away": [
-          {
-            "player": "Tyler Herro",
-            "player_id": "4395725",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "nba_official",
-            "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
-            "detail": "Injury/Illness - Right Knee Contusion",
-            "long_term": false,
-            "late_scratch": true,
-            "restriction": false,
-            "conflict": null
-          }
-        ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
-        "sources": [
-          "espn",
-          "nba_official"
-        ]
-      },
-      "changes": {
-        "previous_at": "2026-11-10T22:53:38+00:00",
-        "reasons": [
-          "NY: Josh Hart now out",
-          "MIL: Tyler Herro now out"
-        ],
-        "moved": {
-          "margin": {
-            "from": 13.6,
-            "to": 15.2
-          },
-          "home_win_prob": {
-            "from": 0.8463,
-            "to": 0.8735
-          }
-        }
-      }
-    },
     {
       "game_id": "401909961",
       "start_time": "2026-11-11T01:00:00+00:00",
@@ -1669,7 +832,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -1684,7 +847,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -1699,7 +862,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Cervical Spine Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -1716,7 +879,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -1731,7 +894,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -1739,7 +902,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -2534,7 +1697,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -2551,7 +1714,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Heel Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -2566,7 +1729,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -2581,7 +1744,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -2596,7 +1759,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Lisfranc Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -2611,7 +1774,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -2626,7 +1789,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -2634,7 +1797,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -3429,7 +2592,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -3444,7 +2607,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -3459,7 +2622,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right MCL Tear",
             "long_term": false,
             "late_scratch": false,
@@ -3474,7 +2637,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -3489,7 +2652,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -3504,7 +2667,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -3519,7 +2682,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -3532,19 +2695,19 @@
             "player": "Giannis Antetokounmpo",
             "player_id": "3032977",
             "position": "F",
-            "status": "probable",
-            "raw_status": "Probable",
+            "status": "questionable",
+            "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 09 23:05 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -4339,7 +3502,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4354,7 +3517,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4369,7 +3532,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -4384,7 +3547,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -4401,7 +3564,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4416,7 +3579,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4431,7 +3594,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4446,7 +3609,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4461,7 +3624,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -4476,7 +3639,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -4484,7 +3647,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -5279,7 +4442,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -5294,7 +4457,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -5309,7 +4472,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Fracture",
             "long_term": false,
             "late_scratch": false,
@@ -5324,7 +4487,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -5339,7 +4502,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -5356,7 +4519,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -5371,7 +4534,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -5386,7 +4549,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -5401,7 +4564,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -5416,7 +4579,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -5431,7 +4594,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee surgery",
             "long_term": false,
             "late_scratch": false,
@@ -5439,7 +4602,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -5764,7 +4927,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -5779,7 +4942,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Meniscus Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -5794,7 +4957,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -5809,7 +4972,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -5826,7 +4989,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Foot Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -5841,7 +5004,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right AC Joint Injury",
             "long_term": false,
             "late_scratch": false,
@@ -5856,7 +5019,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -5871,7 +5034,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hip Impingement",
             "long_term": false,
             "late_scratch": false,
@@ -5879,7 +5042,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -5946,7 +5109,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -5963,7 +5126,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -5978,15 +5141,15 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -6053,7 +5216,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -6068,7 +5231,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Groin Strain",
             "long_term": false,
             "late_scratch": false,
@@ -6083,7 +5246,22 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Immanuel Quickley",
+            "player_id": "4395724",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -6098,23 +5276,8 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Immanuel Quickley",
-            "player_id": "4395724",
-            "position": "G",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nba_official",
-            "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
-            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -6128,7 +5291,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -6145,7 +5308,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -6160,7 +5323,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -6168,7 +5331,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -6493,7 +5656,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -6508,7 +5671,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Respiratory Illness",
             "long_term": false,
             "late_scratch": false,
@@ -6523,7 +5686,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -6538,7 +5701,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Tightness",
             "long_term": false,
             "late_scratch": false,
@@ -6555,7 +5718,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -6570,7 +5733,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -6585,7 +5748,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -6600,7 +5763,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -6615,7 +5778,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -6623,7 +5786,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -6690,7 +5853,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -6705,7 +5868,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Concussion Protocol",
             "long_term": false,
             "late_scratch": false,
@@ -6720,7 +5883,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -6735,7 +5898,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -6750,7 +5913,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -6765,7 +5928,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -6782,7 +5945,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Knee Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -6790,7 +5953,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -6857,10 +6020,10 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Contusion",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           }
@@ -6874,7 +6037,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Finger Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -6882,7 +6045,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -7207,7 +6370,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -7222,7 +6385,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7237,7 +6400,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7252,7 +6415,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7267,12 +6430,12 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -7284,7 +6447,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -7299,7 +6462,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7314,7 +6477,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -7329,7 +6492,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7344,7 +6507,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7359,15 +6522,15 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Bone Bruise",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -7434,7 +6597,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7449,7 +6612,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -7464,7 +6627,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right MCL Tear",
             "long_term": false,
             "late_scratch": false,
@@ -7479,7 +6642,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7494,7 +6657,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -7509,7 +6672,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7524,7 +6687,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7541,7 +6704,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7556,7 +6719,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7571,7 +6734,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7586,7 +6749,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7601,7 +6764,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -7616,7 +6779,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -7624,7 +6787,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -7949,7 +7112,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Soleus Strain",
             "long_term": false,
             "late_scratch": false,
@@ -7964,7 +7127,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -7979,7 +7142,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -7994,7 +7157,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -8011,7 +7174,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8026,7 +7189,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Not With Team",
             "long_term": false,
             "late_scratch": false,
@@ -8041,7 +7204,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -8056,7 +7219,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8071,7 +7234,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8086,15 +7249,15 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Thumb UCL Tear",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -8419,7 +7582,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -8434,7 +7597,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -8449,7 +7612,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Fracture",
             "long_term": false,
             "late_scratch": false,
@@ -8464,7 +7627,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8479,7 +7642,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -8496,7 +7659,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8511,7 +7674,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -8526,7 +7689,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -8541,7 +7704,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -8556,7 +7719,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -8571,7 +7734,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee surgery",
             "long_term": false,
             "late_scratch": false,
@@ -8579,7 +7742,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -8646,7 +7809,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8661,7 +7824,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8676,7 +7839,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Cervical Spine Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -8693,7 +7856,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8708,7 +7871,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Groin Strain",
             "long_term": false,
             "late_scratch": false,
@@ -8723,7 +7886,22 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Immanuel Quickley",
+            "player_id": "4395724",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8738,23 +7916,8 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Immanuel Quickley",
-            "player_id": "4395724",
-            "position": "G",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nba_official",
-            "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
-            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -8768,7 +7931,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -8776,7 +7939,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -8843,7 +8006,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Foot Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -8858,7 +8021,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right AC Joint Injury",
             "long_term": false,
             "late_scratch": false,
@@ -8873,7 +8036,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -8888,7 +8051,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hip Impingement",
             "long_term": false,
             "late_scratch": false,
@@ -8928,7 +8091,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9080,7 +8243,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9147,7 +8310,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -9202,21 +8365,6 @@
             "conflict": null
           },
           {
-            "player": "Brandon Miller",
-            "player_id": "4433287",
-            "position": "F",
-            "status": "questionable",
-            "raw_status": "Day-To-Day",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-10T02:51:00+00:00",
-            "detail": "Right Groin Soreness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Moussa Diabate",
             "player_id": "4433249",
             "position": "F",
@@ -9230,9 +8378,24 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": null
+          },
+          {
+            "player": "Brandon Miller",
+            "player_id": "4433287",
+            "position": "F",
+            "status": "questionable",
+            "raw_status": "Day-To-Day",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-10T02:51:00+00:00",
+            "detail": "Right Groin Soreness",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9299,7 +8462,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -9314,7 +8477,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Meniscus Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -9329,7 +8492,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9344,7 +8507,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -9361,7 +8524,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -9369,7 +8532,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9436,7 +8599,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9451,7 +8614,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9466,7 +8629,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9481,7 +8644,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9496,7 +8659,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9511,7 +8674,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -9528,15 +8691,15 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Contusion",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9599,16 +8762,16 @@
             "player": "Giannis Antetokounmpo",
             "player_id": "3032977",
             "position": "F",
-            "status": "probable",
-            "raw_status": "Probable",
+            "status": "questionable",
+            "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 09 23:05 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": null
           }
         ],
         "away": [
@@ -9620,7 +8783,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9635,15 +8798,15 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9710,7 +8873,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -9725,7 +8888,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Respiratory Illness",
             "long_term": false,
             "late_scratch": false,
@@ -9740,7 +8903,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -9755,7 +8918,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Tightness",
             "long_term": false,
             "late_scratch": false,
@@ -9825,7 +8988,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -9892,7 +9055,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -9907,7 +9070,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9922,7 +9085,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -9937,7 +9100,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -9952,12 +9115,12 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -9969,7 +9132,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -9984,7 +9147,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Concussion Protocol",
             "long_term": false,
             "late_scratch": false,
@@ -9999,7 +9162,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -10014,7 +9177,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10029,7 +9192,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10044,7 +9207,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10052,7 +9215,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -10119,7 +9282,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Soleus Strain",
             "long_term": false,
             "late_scratch": false,
@@ -10134,7 +9297,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -10149,7 +9312,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10164,7 +9327,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10181,7 +9344,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10196,7 +9359,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -10211,7 +9374,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right MCL Tear",
             "long_term": false,
             "late_scratch": false,
@@ -10226,7 +9389,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10241,7 +9404,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -10256,7 +9419,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10271,7 +9434,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10279,7 +9442,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -10346,7 +9509,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -10361,7 +9524,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10376,7 +9539,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10391,7 +9554,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10406,7 +9569,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10423,7 +9586,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10438,7 +9601,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Not With Team",
             "long_term": false,
             "late_scratch": false,
@@ -10453,7 +9616,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -10468,7 +9631,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10483,7 +9646,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10498,15 +9661,15 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Thumb UCL Tear",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -10573,7 +9736,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10588,7 +9751,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10603,7 +9766,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10618,7 +9781,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10635,7 +9798,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -10650,7 +9813,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10665,7 +9828,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Fracture",
             "long_term": false,
             "late_scratch": false,
@@ -10680,7 +9843,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10695,7 +9858,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10703,7 +9866,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -10770,7 +9933,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Heel Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10785,7 +9948,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10800,7 +9963,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10815,7 +9978,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Lisfranc Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10830,7 +9993,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -10845,7 +10008,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -10862,7 +10025,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -10877,7 +10040,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -10892,7 +10055,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10907,7 +10070,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10922,7 +10085,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -10937,7 +10100,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee surgery",
             "long_term": false,
             "late_scratch": false,
@@ -10945,7 +10108,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11012,7 +10175,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -11027,7 +10190,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11042,7 +10205,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -11057,7 +10220,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -11072,12 +10235,12 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -11089,7 +10252,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Knee Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -11097,7 +10260,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11164,7 +10327,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11179,12 +10342,12 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -11249,7 +10412,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11312,16 +10475,16 @@
             "player": "Giannis Antetokounmpo",
             "player_id": "3032977",
             "position": "F",
-            "status": "probable",
-            "raw_status": "Probable",
+            "status": "questionable",
+            "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 09 23:05 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": null
           }
         ],
         "away": [
@@ -11356,7 +10519,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11423,7 +10586,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11438,7 +10601,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Concussion Protocol",
             "long_term": false,
             "late_scratch": false,
@@ -11453,7 +10616,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -11468,7 +10631,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -11483,7 +10646,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -11498,7 +10661,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11515,7 +10678,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -11530,7 +10693,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -11545,7 +10708,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -11560,7 +10723,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -11575,7 +10738,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11590,15 +10753,15 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Bone Bruise",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11697,7 +10860,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -11712,7 +10875,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Respiratory Illness",
             "long_term": false,
             "late_scratch": false,
@@ -11727,7 +10890,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -11742,7 +10905,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Tightness",
             "long_term": false,
             "late_scratch": false,
@@ -11750,7 +10913,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11817,7 +10980,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11832,7 +10995,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11847,7 +11010,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Cervical Spine Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -11864,7 +11027,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -11879,7 +11042,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Meniscus Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -11894,7 +11057,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -11909,7 +11072,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -11917,7 +11080,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -11984,7 +11147,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -12001,7 +11164,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Finger Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -12009,7 +11172,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -12076,7 +11239,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Heel Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -12091,7 +11254,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12106,7 +11269,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12121,7 +11284,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Lisfranc Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -12136,7 +11299,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12151,7 +11314,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -12206,21 +11369,6 @@
             "conflict": null
           },
           {
-            "player": "Brandon Miller",
-            "player_id": "4433287",
-            "position": "F",
-            "status": "questionable",
-            "raw_status": "Day-To-Day",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-10T02:51:00+00:00",
-            "detail": "Right Groin Soreness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Moussa Diabate",
             "player_id": "4433249",
             "position": "F",
@@ -12234,9 +11382,24 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": null
+          },
+          {
+            "player": "Brandon Miller",
+            "player_id": "4433287",
+            "position": "F",
+            "status": "questionable",
+            "raw_status": "Day-To-Day",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-10T02:51:00+00:00",
+            "detail": "Right Groin Soreness",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -12303,7 +11466,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12318,7 +11481,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -12333,7 +11496,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right MCL Tear",
             "long_term": false,
             "late_scratch": false,
@@ -12348,7 +11511,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12363,7 +11526,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -12378,7 +11541,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12393,7 +11556,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12410,7 +11573,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -12425,7 +11588,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12440,7 +11603,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12455,7 +11618,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -12470,7 +11633,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12478,7 +11641,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -12545,7 +11708,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12560,7 +11723,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12630,7 +11793,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -12697,7 +11860,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12712,7 +11875,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Groin Strain",
             "long_term": false,
             "late_scratch": false,
@@ -12727,7 +11890,22 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Immanuel Quickley",
+            "player_id": "4395724",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12742,23 +11920,8 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Immanuel Quickley",
-            "player_id": "4395724",
-            "position": "G",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nba_official",
-            "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
-            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -12772,7 +11935,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -12789,7 +11952,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Illness",
             "long_term": false,
             "late_scratch": false,
@@ -12797,7 +11960,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -12864,7 +12027,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Foot Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -12879,7 +12042,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right AC Joint Injury",
             "long_term": false,
             "late_scratch": false,
@@ -12894,7 +12057,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -12909,7 +12072,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hip Impingement",
             "long_term": false,
             "late_scratch": false,
@@ -12926,7 +12089,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Soleus Strain",
             "long_term": false,
             "late_scratch": false,
@@ -12941,7 +12104,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -12956,7 +12119,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12971,7 +12134,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -12979,7 +12142,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13046,10 +12209,10 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Contusion",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           }
@@ -13116,7 +12279,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13183,7 +12346,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13198,7 +12361,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13213,7 +12376,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13228,7 +12391,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13245,7 +12408,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13260,7 +12423,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -13275,7 +12438,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -13290,7 +12453,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -13305,7 +12468,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -13320,7 +12483,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee surgery",
             "long_term": false,
             "late_scratch": false,
@@ -13328,7 +12491,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13395,7 +12558,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13410,7 +12573,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13427,7 +12590,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13442,7 +12605,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13457,7 +12620,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13472,7 +12635,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13487,7 +12650,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13502,7 +12665,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Calf Strain",
             "long_term": false,
             "late_scratch": false,
@@ -13510,7 +12673,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13577,7 +12740,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13592,12 +12755,12 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:07 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -13609,7 +12772,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -13624,7 +12787,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Respiratory Illness",
             "long_term": false,
             "late_scratch": false,
@@ -13639,7 +12802,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Spasms",
             "long_term": false,
             "late_scratch": false,
@@ -13654,7 +12817,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Low Back Tightness",
             "long_term": false,
             "late_scratch": false,
@@ -13662,7 +12825,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13729,7 +12892,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Foot Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -13744,7 +12907,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right AC Joint Injury",
             "long_term": false,
             "late_scratch": false,
@@ -13759,7 +12922,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13774,7 +12937,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hip Impingement",
             "long_term": false,
             "late_scratch": false,
@@ -13791,7 +12954,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13806,7 +12969,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Concussion Protocol",
             "long_term": false,
             "late_scratch": false,
@@ -13821,7 +12984,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -13836,7 +12999,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Knee Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -13851,7 +13014,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13866,7 +13029,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -13874,7 +13037,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -13941,7 +13104,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -13956,7 +13119,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -13971,7 +13134,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - On Assignment",
             "long_term": false,
             "late_scratch": false,
@@ -13986,7 +13149,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14001,7 +13164,7 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14016,12 +13179,12 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Bone Bruise",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 22:51 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -14033,7 +13196,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14048,7 +13211,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14063,7 +13226,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Cervical Spine Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -14071,7 +13234,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -14134,16 +13297,16 @@
             "player": "Giannis Antetokounmpo",
             "player_id": "3032977",
             "position": "F",
-            "status": "probable",
-            "raw_status": "Probable",
+            "status": "questionable",
+            "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Wrist Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 09 23:05 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": null
           }
         ],
         "away": [
@@ -14155,7 +13318,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Soleus Strain",
             "long_term": false,
             "late_scratch": false,
@@ -14170,7 +13333,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -14185,7 +13348,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14200,7 +13363,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14208,7 +13371,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -14307,7 +13470,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -14322,7 +13485,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14337,7 +13500,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Ankle Fracture",
             "long_term": false,
             "late_scratch": false,
@@ -14352,7 +13515,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14367,7 +13530,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14375,7 +13538,7 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -14442,7 +13605,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Right Ankle Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -14457,7 +13620,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14472,7 +13635,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14487,7 +13650,7 @@
             "raw_status": "Doubtful",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "G League - Two-Way",
             "long_term": false,
             "late_scratch": false,
@@ -14502,12 +13665,12 @@
             "raw_status": "Probable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Day-To-Day (Nov 10 19:22 UTC); nba_official: Probable (Nov 11 00:30 UTC)"
           }
         ],
         "away": [
@@ -14519,7 +13682,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14534,7 +13697,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Not With Team",
             "long_term": false,
             "late_scratch": false,
@@ -14549,7 +13712,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Hamstring Strain",
             "long_term": false,
             "late_scratch": false,
@@ -14564,7 +13727,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14579,7 +13742,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": null,
             "long_term": false,
             "late_scratch": false,
@@ -14594,15 +13757,15 @@
             "raw_status": "Questionable",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Thumb UCL Tear",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:00 UTC)"
+            "conflict": "espn: Out (Nov 10 21:34 UTC); nba_official: Questionable (Nov 11 00:30 UTC)"
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -14669,7 +13832,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Knee Sprain",
             "long_term": false,
             "late_scratch": false,
@@ -14686,7 +13849,7 @@
             "raw_status": "Out",
             "source": "nba_official",
             "confirmed": true,
-            "report_time": "2026-11-11T00:00:00+00:00",
+            "report_time": "2026-11-11T00:30:00+00:00",
             "detail": "Injury/Illness - Left Shoulder Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -14694,7 +13857,174 @@
             "conflict": null
           }
         ],
-        "updated_at": "2026-11-11T00:01:20.038372+00:00",
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
+        "sources": [
+          "espn",
+          "nba_official"
+        ]
+      }
+    },
+    {
+      "game_id": "401910002",
+      "start_time": "2026-11-18T00:30:00+00:00",
+      "game_date": "2026-11-17",
+      "status": "scheduled",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 28,
+        "abbr": "TOR",
+        "name": "Toronto Raptors",
+        "net_rating": 1.07
+      },
+      "away": {
+        "id": 18,
+        "abbr": "NY",
+        "name": "New York Knicks",
+        "net_rating": 5.47
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": 0.0
+      },
+      "projection": {
+        "home_score": 108.4,
+        "away_score": 111.4,
+        "margin": -2.9,
+        "total": 219.8,
+        "spread": 2.9,
+        "home_win_prob": 0.4134,
+        "away_win_prob": 0.5866,
+        "margin_range_80": [
+          -20.0,
+          14.2
+        ],
+        "total_range_80": [
+          195.9,
+          243.7
+        ],
+        "pace": 99.6
+      },
+      "market": null,
+      "edges": null,
+      "result": null,
+      "availability": {
+        "home": [
+          {
+            "player": "Nate Bittle",
+            "player_id": "4432586",
+            "position": "C",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Scottie Barnes",
+            "player_id": "4433134",
+            "position": "F",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": "Injury/Illness - Left Groin Strain",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kawhi Leonard",
+            "player_id": "6450",
+            "position": "F",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Immanuel Quickley",
+            "player_id": "4395724",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Trayce Jackson-Davis",
+            "player_id": "4431684",
+            "position": "F",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": "Injury/Illness - Illness",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Collin Murray-Boyles",
+            "player_id": "5093267",
+            "position": "F",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": "Injury/Illness - Illness",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          }
+        ],
+        "away": [
+          {
+            "player": "Josh Hart",
+            "player_id": "3062679",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "nba_official",
+            "confirmed": true,
+            "report_time": "2026-11-11T00:30:00+00:00",
+            "detail": "Injury/Illness - Illness",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          }
+        ],
+        "updated_at": "2026-11-11T00:31:19.085311+00:00",
         "sources": [
           "espn",
           "nba_official"
@@ -15936,62 +15266,6 @@
       }
     },
     {
-      "game_id": "401909294",
-      "start_time": "2026-11-07T03:00:00+00:00",
-      "game_date": "2026-11-06",
-      "status": "final",
-      "season_type": "regular",
-      "neutral": false,
-      "home": {
-        "id": 13,
-        "abbr": "LAL",
-        "name": "Los Angeles Lakers",
-        "net_rating": 3.4
-      },
-      "away": {
-        "id": 22,
-        "abbr": "POR",
-        "name": "Portland Trail Blazers",
-        "net_rating": 3.42
-      },
-      "rest": {
-        "home_days": 2,
-        "away_days": 2,
-        "home_b2b": false,
-        "away_b2b": false
-      },
-      "adjustments": {
-        "rest_points": 0.0,
-        "injury_points": null
-      },
-      "projection": {
-        "home_score": 116.5,
-        "away_score": 114.9,
-        "margin": 1.6,
-        "total": 231.5,
-        "spread": -1.6,
-        "home_win_prob": 0.5474,
-        "away_win_prob": 0.4526,
-        "margin_range_80": [
-          -15.5,
-          18.7
-        ],
-        "total_range_80": [
-          207.6,
-          255.4
-        ],
-        "pace": 102.6
-      },
-      "market": null,
-      "edges": null,
-      "result": {
-        "home_score": 124,
-        "away_score": 118,
-        "margin": 6,
-        "total": 242
-      }
-    },
-    {
       "game_id": "401909295",
       "start_time": "2026-11-07T03:00:00+00:00",
       "game_date": "2026-11-06",
@@ -16045,6 +15319,62 @@
         "away_score": 124,
         "margin": -15,
         "total": 233
+      }
+    },
+    {
+      "game_id": "401909294",
+      "start_time": "2026-11-07T03:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 13,
+        "abbr": "LAL",
+        "name": "Los Angeles Lakers",
+        "net_rating": 3.4
+      },
+      "away": {
+        "id": 22,
+        "abbr": "POR",
+        "name": "Portland Trail Blazers",
+        "net_rating": 3.42
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 116.5,
+        "away_score": 114.9,
+        "margin": 1.6,
+        "total": 231.5,
+        "spread": -1.6,
+        "home_win_prob": 0.5474,
+        "away_win_prob": 0.4526,
+        "margin_range_80": [
+          -15.5,
+          18.7
+        ],
+        "total_range_80": [
+          207.6,
+          255.4
+        ],
+        "pace": 102.6
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 124,
+        "away_score": 118,
+        "margin": 6,
+        "total": 242
       }
     },
     {
@@ -16328,62 +15658,6 @@
       }
     },
     {
-      "game_id": "401909287",
-      "start_time": "2026-11-07T00:00:00+00:00",
-      "game_date": "2026-11-06",
-      "status": "final",
-      "season_type": "regular",
-      "neutral": false,
-      "home": {
-        "id": 1,
-        "abbr": "ATL",
-        "name": "Atlanta Hawks",
-        "net_rating": 1.59
-      },
-      "away": {
-        "id": 27,
-        "abbr": "WSH",
-        "name": "Washington Wizards",
-        "net_rating": -5.44
-      },
-      "rest": {
-        "home_days": 2,
-        "away_days": 2,
-        "home_b2b": false,
-        "away_b2b": false
-      },
-      "adjustments": {
-        "rest_points": 0.0,
-        "injury_points": null
-      },
-      "projection": {
-        "home_score": 119.1,
-        "away_score": 110.1,
-        "margin": 9.0,
-        "total": 229.3,
-        "spread": -9.0,
-        "home_win_prob": 0.7497,
-        "away_win_prob": 0.2503,
-        "margin_range_80": [
-          -8.1,
-          26.0
-        ],
-        "total_range_80": [
-          205.4,
-          253.2
-        ],
-        "pace": 104.4
-      },
-      "market": null,
-      "edges": null,
-      "result": {
-        "home_score": 139,
-        "away_score": 132,
-        "margin": 7,
-        "total": 271
-      }
-    },
-    {
       "game_id": "401909288",
       "start_time": "2026-11-07T00:00:00+00:00",
       "game_date": "2026-11-06",
@@ -16437,6 +15711,62 @@
         "away_score": 119,
         "margin": -39,
         "total": 199
+      }
+    },
+    {
+      "game_id": "401909287",
+      "start_time": "2026-11-07T00:00:00+00:00",
+      "game_date": "2026-11-06",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 1,
+        "abbr": "ATL",
+        "name": "Atlanta Hawks",
+        "net_rating": 1.59
+      },
+      "away": {
+        "id": 27,
+        "abbr": "WSH",
+        "name": "Washington Wizards",
+        "net_rating": -5.44
+      },
+      "rest": {
+        "home_days": 2,
+        "away_days": 2,
+        "home_b2b": false,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": 0.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 119.1,
+        "away_score": 110.1,
+        "margin": 9.0,
+        "total": 229.3,
+        "spread": -9.0,
+        "home_win_prob": 0.7497,
+        "away_win_prob": 0.2503,
+        "margin_range_80": [
+          -8.1,
+          26.0
+        ],
+        "total_range_80": [
+          205.4,
+          253.2
+        ],
+        "pace": 104.4
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 139,
+        "away_score": 132,
+        "margin": 7,
+        "total": 271
       }
     },
     {
@@ -17336,62 +16666,6 @@
       }
     },
     {
-      "game_id": "401909919",
-      "start_time": "2026-11-03T03:00:00+00:00",
-      "game_date": "2026-11-02",
-      "status": "final",
-      "season_type": "regular",
-      "neutral": false,
-      "home": {
-        "id": 9,
-        "abbr": "GS",
-        "name": "Golden State Warriors",
-        "net_rating": 1.55
-      },
-      "away": {
-        "id": 21,
-        "abbr": "PHX",
-        "name": "Phoenix Suns",
-        "net_rating": -2.08
-      },
-      "rest": {
-        "home_days": 1,
-        "away_days": 3,
-        "home_b2b": true,
-        "away_b2b": false
-      },
-      "adjustments": {
-        "rest_points": -2.0,
-        "injury_points": null
-      },
-      "projection": {
-        "home_score": 117.5,
-        "away_score": 114.0,
-        "margin": 3.5,
-        "total": 231.5,
-        "spread": -3.5,
-        "home_win_prob": 0.6026,
-        "away_win_prob": 0.3974,
-        "margin_range_80": [
-          -13.6,
-          20.5
-        ],
-        "total_range_80": [
-          207.6,
-          255.4
-        ],
-        "pace": 101.1
-      },
-      "market": null,
-      "edges": null,
-      "result": {
-        "home_score": 116,
-        "away_score": 113,
-        "margin": 3,
-        "total": 229
-      }
-    },
-    {
       "game_id": "401909920",
       "start_time": "2026-11-03T03:00:00+00:00",
       "game_date": "2026-11-02",
@@ -17445,6 +16719,62 @@
         "away_score": 125,
         "margin": -7,
         "total": 243
+      }
+    },
+    {
+      "game_id": "401909919",
+      "start_time": "2026-11-03T03:00:00+00:00",
+      "game_date": "2026-11-02",
+      "status": "final",
+      "season_type": "regular",
+      "neutral": false,
+      "home": {
+        "id": 9,
+        "abbr": "GS",
+        "name": "Golden State Warriors",
+        "net_rating": 1.55
+      },
+      "away": {
+        "id": 21,
+        "abbr": "PHX",
+        "name": "Phoenix Suns",
+        "net_rating": -2.08
+      },
+      "rest": {
+        "home_days": 1,
+        "away_days": 3,
+        "home_b2b": true,
+        "away_b2b": false
+      },
+      "adjustments": {
+        "rest_points": -2.0,
+        "injury_points": null
+      },
+      "projection": {
+        "home_score": 117.5,
+        "away_score": 114.0,
+        "margin": 3.5,
+        "total": 231.5,
+        "spread": -3.5,
+        "home_win_prob": 0.6026,
+        "away_win_prob": 0.3974,
+        "margin_range_80": [
+          -13.6,
+          20.5
+        ],
+        "total_range_80": [
+          207.6,
+          255.4
+        ],
+        "pace": 101.1
+      },
+      "market": null,
+      "edges": null,
+      "result": {
+        "home_score": 116,
+        "away_score": 113,
+        "margin": 3,
+        "total": 229
       }
     },
     {
@@ -18397,62 +17727,6 @@
         "away_score": 108,
         "margin": -11,
         "total": 205
-      }
-    },
-    {
-      "game_id": "401909902",
-      "start_time": "2026-11-01T00:30:00+00:00",
-      "game_date": "2026-10-31",
-      "status": "final",
-      "season_type": "regular",
-      "neutral": false,
-      "home": {
-        "id": 10,
-        "abbr": "HOU",
-        "name": "Houston Rockets",
-        "net_rating": 5.61
-      },
-      "away": {
-        "id": 25,
-        "abbr": "OKC",
-        "name": "Oklahoma City Thunder",
-        "net_rating": 6.03
-      },
-      "rest": {
-        "home_days": 1,
-        "away_days": 3,
-        "home_b2b": true,
-        "away_b2b": false
-      },
-      "adjustments": {
-        "rest_points": -2.0,
-        "injury_points": null
-      },
-      "projection": {
-        "home_score": 110.3,
-        "away_score": 111.1,
-        "margin": -0.8,
-        "total": 221.5,
-        "spread": 0.8,
-        "home_win_prob": 0.4765,
-        "away_win_prob": 0.5235,
-        "margin_range_80": [
-          -17.9,
-          16.3
-        ],
-        "total_range_80": [
-          197.6,
-          245.4
-        ],
-        "pace": 101.0
-      },
-      "market": null,
-      "edges": null,
-      "result": {
-        "home_score": 119,
-        "away_score": 98,
-        "margin": 21,
-        "total": 217
       }
     }
   ],
@@ -19930,7 +19204,7 @@
       "note": "Walk-forward: each game projected with ratings from earlier games only, computed after the fact."
     },
     "ledger": {
-      "tracked": 113,
+      "tracked": 114,
       "graded": 62,
       "by_version": {
         "1.1.0": {
