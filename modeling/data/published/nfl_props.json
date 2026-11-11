@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-11T02:32:19+00:00",
+  "generated_at": "2026-11-11T03:32:10+00:00",
   "season": 2026,
   "week": 10,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "9f9c808b0fbaecf7",
+    "inputs_hash": "2842d1902f8165b1",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,11 +20,11 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-11T02:31:25.728941+00:00",
+      "generated_at": "2026-11-11T03:31:19.871659+00:00",
       "sources": {
         "espn": {
           "ok": true,
-          "rows": 1083,
+          "rows": 1084,
           "errors": []
         },
         "nflverse": {
@@ -41,7 +41,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-11T02:31:03+00:00",
+    "last_ingest": "2026-11-11T03:30:59+00:00",
     "results_through": "2026-11-09",
     "markets": [
       {
@@ -33196,7 +33196,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-05T03:59:00+00:00",
-            "detail": "Not Specified Hamstring Not Specified",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -35800,7 +35800,7 @@
           "opp": "NO",
           "position": "WR",
           "game_id": "2026_10_CAR_NO",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -36336,9 +36336,18 @@
             "qb_note": null,
             "team_pass_attempts": 34.8,
             "team_carries": 26.6,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.381,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-11T02:51:00+00:00",
+              "comment": "Metchie caught both of his targets for 40 yards Sunday in a loss to the Broncos. Both of Metchie's receptions came in the second half -- he brought in a 15-yarder midway through the third quarter and added a 25-yarder near the end of the fourth. The latter catch took the ball down to Denver's nine-yard line and set up a Panthers touchdown, but Carolina ultimately was unable to complete the comeback. Metchie has been consistent but relatively unremarkable this season, logging either two or three receptions in six straight games but not surpassing Sunday's 40 yards in any of those contests.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Xavier Legette",
@@ -81287,7 +81296,7 @@
               "source": "espn",
               "confirmed": false,
               "report_time": "2026-11-11T00:16:00+00:00",
-              "comment": "Treadwell logged 52 of the Colts' 64 snaps and was held without a reception on one target in Sunday's 27-23 loss to the Cowboys. Since drawing a season-high eight targets in a Week 5 loss to the Steelers, Treadwell has barely surpassed that total over the past four games combined. Despite handling snap shares north of 70 percent in each of those contests, Treadwell has mustered a 5-58-0 receiving line on 10 targets during that stretch. The Colts will have more target volume up for grabs after trading Josh Downs to the Chiefs on Tuesday, and though Treadwell could be one of the beneficiaries, he still looks to be a low-upside fantasy option.",
+              "comment": "Treadwell logged 52 of the Colts' 64 snaps and was held without a reception on one target in Sunday's 27-23 loss to the Cowboys. Since drawing a season-high eight targets in a Week 5 loss to the Steelers, Treadwell has barely surpassed that total over the past four games combined. Despite handling snap shares north of 70 percent in each of those contests, Treadwell has mustered a 5-58-0 receiving line on 10 targets during that stretch. The Colts will have more target volume up for grabs after trading Keenan Allen to the 49ers and Josh Downs to the Chiefs on Tuesday, and though Treadwell could be one of the beneficiaries, he still looks to be a low-upside fantasy option.",
               "conflict": null,
               "notes": []
             },
@@ -114990,8 +114999,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-03T15:18:00+00:00",
-              "comment": "Wilson played just seven snaps -- all on special teams -- in Monday's 34-17 loss to the Bears. After logging double-digit carries in six of the Seahawks' previous seven games while scoring four touchdowns and averaging 66.4 scrimmage yards during that span, Wilson fell out of the game plan entirely in Week 8. With Zach Charbonnet (knee) getting cleared to make his 2026 debut, Jadarian Price (chest) returning from injured reserve and George Holani still on hand as an option on passing downs, the Seahawks had no reps available out of the backfield for Wilson. Unless Charbonnet or Price succumbs to another injury, Wilson's playing time on offense will likely remain scarce moving forward.",
+              "report_time": "2026-11-11T02:28:00+00:00",
+              "comment": "Wilson didn't log any snaps during Sunday's win over the Cardinals. Wilson averaged 18.2 carries for 66.7 yards over six games between Week 2 and Week 7, culminating with a 24-100-1 rushing line against Kansas City. However, that opportunity came while Jadarian Price and Zach Charbonnet were on IR. Both running backs returned ahead of the Week 8 matchup against Chicago, and Wilson hasn't played a single offensive snap in two games since. As long as Charbonnet and Price are both healthy, it appears Wilson is going to be relegated primarily to a special-teams role, if he plays at all.",
               "conflict": null,
               "notes": []
             },
@@ -162900,7 +162909,7 @@
               "source": "espn",
               "confirmed": false,
               "report_time": "2026-11-11T00:16:00+00:00",
-              "comment": "Treadwell logged 52 of the Colts' 64 snaps and was held without a reception on one target in Sunday's 27-23 loss to the Cowboys. Since drawing a season-high eight targets in a Week 5 loss to the Steelers, Treadwell has barely surpassed that total over the past four games combined. Despite handling snap shares north of 70 percent in each of those contests, Treadwell has mustered a 5-58-0 receiving line on 10 targets during that stretch. The Colts will have more target volume up for grabs after trading Josh Downs to the Chiefs on Tuesday, and though Treadwell could be one of the beneficiaries, he still looks to be a low-upside fantasy option.",
+              "comment": "Treadwell logged 52 of the Colts' 64 snaps and was held without a reception on one target in Sunday's 27-23 loss to the Cowboys. Since drawing a season-high eight targets in a Week 5 loss to the Steelers, Treadwell has barely surpassed that total over the past four games combined. Despite handling snap shares north of 70 percent in each of those contests, Treadwell has mustered a 5-58-0 receiving line on 10 targets during that stretch. The Colts will have more target volume up for grabs after trading Keenan Allen to the 49ers and Josh Downs to the Chiefs on Tuesday, and though Treadwell could be one of the beneficiaries, he still looks to be a low-upside fantasy option.",
               "conflict": null,
               "notes": []
             },
