@@ -51,7 +51,7 @@ jobs:
                   s1, h1, _ = get(base + path) if path != "/" else (st, html, h)
                   if s1 == 200:
                       refs |= set(re.findall(r"([a-z0-9]{20})\.supabase\.co", h1))
-                      queue += re.findall(r'(/_next/static/[^"'\s]+?\.js)', h1)
+                      queue += re.findall(r"(/_next/static/[^\"'\s]+?\.js)", h1)
               while queue and len(seen) < 250:
                   src = queue.pop()
                   if src in seen:
