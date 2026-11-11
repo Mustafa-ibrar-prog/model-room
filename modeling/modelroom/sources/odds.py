@@ -12,9 +12,13 @@ captured_at   when the sportsbook last changed that line (The Odds API's last_up
 collected_at  when Model Room fetched it (UTC). The same unchanged line seen at two collections is kept twice,
               so a later market check can tell which lines were live at a given moment. Rows stored before this
               column existed, and manual CSV rows, have no collected_at (left empty, never back-filled).
+raw_sha256    SHA-256 of the provider response the row was parsed from (collector rows only).
+On the test site the permanent record is the append-only Supabase table odds.snapshots (see odds_store.py);
+the parquet file is a working copy rebuilt from it at the start of each refresh.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import urllib.request
@@ -148,6 +152,8 @@ def collect_odds_api(league: str, api_key: str | None = None) -> pd.DataFrame:
     raw = ensure(raw_dir(league) / "odds_api") / f"odds_{stamp}.json"
     raw.write_bytes(body)  # the key is not in the response; never store the request URL
     df = parse_odds_api(json.loads(body), league, collected_at=collected)
+    # Provenance: fingerprint of the exact provider response these rows came from (kept with each stored row).
+    df["raw_sha256"] = hashlib.sha256(body).hexdigest()
     _log_usage({"at": collected, "league": league, "rows": len(df), "remaining": remaining, "used": used, "cost": last_cost})
     state.record("the_odds_api", league=league, rows=len(df), credits_remaining=remaining)
     return df

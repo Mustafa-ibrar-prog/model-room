@@ -1,0 +1,64 @@
+name: Odds store migration (test site, one-time)
+
+# Manual, one-time and idempotent: moves the sportsbook snapshots that were kept on the public preview branch
+# (commit 8230bf8, the 2026-11-10 collection) into the append-only Supabase table odds.snapshots, then verifies the
+# hash chains and that every value reads back identical. Re-running inserts nothing. Prints counts and booleans only.
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: "preview-branch commit holding the snapshot files"
+        required: false
+        default: "8230bf82c8a6a6c984d9fc14d7341ab1711bcd31"
+
+permissions:
+  contents: read
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Connect to the TEST project (nothing printed)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+      - name: Get the snapshot files from the preview branch
+        env:
+          SRC: ${{ github.event.inputs.source_commit }}
+        run: |
+          git fetch -q --depth 1 origin "$SRC"
+          mkdir -p /tmp/legacy
+          for lg in nba nfl; do git show FETCH_HEAD:modeling/preview-ledger/market_snapshots_$lg.parquet > /tmp/legacy/$lg.parquet; done
+          ls -la /tmp/legacy
+      - name: Import, verify, compare
+        working-directory: modeling
+        run: |
+          pip install -q -e . "psycopg[binary]"
+          for lg in nba nfl; do
+            python -m modelroom odds-store import --league $lg --path /tmp/legacy/$lg.parquet \
+              --batch "initial import: 2026-11-10 collection, moved from the public preview branch (raw response not retained)" \
+              | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['league'], '| rows in file:', d['offered'], '| inserted:', d['inserted'], '| already stored:', d['already_stored'], '| chain rows:', d['verify']['rows'], '| chain ok:', d['verify']['ok'], d['verify']['problems'][:3])"
+          done
+          python3 - <<'EOF'
+          import pandas as pd
+          from modelroom.sources import odds_store as S
+          c = S.connect()
+          for lg in ("nba", "nfl"):
+              a = pd.read_parquet(f"/tmp/legacy/{lg}.parquet").reindex(columns=S.PAYLOAD_FIELDS)
+              b = S.load(c, lg)
+              txt = all(((a[k].isna() & b[k].isna()) | (a[k].astype(str) == b[k].astype(str))).all() for k in S.PAYLOAD_FIELDS if k not in S.NUM)
+              num = all(((a[k].isna() & b[k].isna()) | ((a[k] - b[k]).abs() < 1e-12)).all() for k in S.NUM)
+              print(f"{lg}: table rows {len(b)} vs file rows {len(a)} | every value identical: {len(a) == len(b) and txt and num}")
+          cur = c.cursor()
+          cur.execute("select has_schema_privilege('anon', 'odds', 'usage'), has_schema_privilege('authenticated', 'odds', 'usage')")
+          print("API roles can reach the odds schema (anon, authenticated):", cur.fetchone())
+          cur.execute("select tgname from pg_trigger where tgrelid = 'odds.snapshots'::regclass and not tgisinternal order by 1")
+          print("append-only triggers present:", [r[0] for r in cur.fetchall()])
+          EOF
