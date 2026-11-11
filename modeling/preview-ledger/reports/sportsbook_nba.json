@@ -1,0 +1,364 @@
+{
+ "league": "nba",
+ "generated_at": "2026-11-11T23:33:39+00:00",
+ "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
+ "accumulation": {
+  "snapshot_rows": 772,
+  "fetches": 3,
+  "first_collected_at": "2026-11-10T22:53:37+00:00",
+  "last_collected_at": "2026-11-11T20:01:46+00:00",
+  "days_of_history": 0.88,
+  "calendar_days_with_fetches": 2,
+  "books": 9,
+  "games": 20,
+  "games_matched_to_schedule": 20,
+  "series_game_book_market": 444,
+  "rows_by_market": {
+   "moneyline": 250,
+   "spread": 261,
+   "total": 261
+  },
+  "comparisons": {
+   "matched": 736,
+   "not_matched": {
+    "post_start": 0,
+    "not_matched_to_schedule": 0,
+    "no_prediction_before_line": 36,
+    "no_model_probability": 0
+   },
+   "rule": "each line is paired only with the latest game prediction recorded before that line was collected"
+  },
+  "games_with_comparisons": {
+   "settled": 6,
+   "upcoming_or_unsettled": 10
+  },
+  "settled_events_by_market": {
+   "spread": 6,
+   "total": 6,
+   "moneyline": 6
+  },
+  "gate": {
+   "spread": {
+    "settled": 6,
+    "required": 250
+   },
+   "total": {
+    "settled": 6,
+    "required": 250
+   },
+   "moneyline": {
+    "settled": 6,
+    "required": 250
+   }
+  },
+  "odds_api": {
+   "calls_logged": 3,
+   "calls_this_month": 3,
+   "credits_used_this_month_logged": 9,
+   "credits_remaining_last_reported": "485",
+   "as_of": "2026-11-11T20:01:46+00:00"
+  },
+  "stored_comparisons": 736
+ },
+ "coverage": {
+  "fetches": [
+   {
+    "collected_at": "2026-11-10T22:53:37+00:00",
+    "rows": 209,
+    "games": 15,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 62,
+    "missing_market_slots": 10,
+    "scheduled_games_next_72h_without_lines": 9,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 0
+   },
+   {
+    "collected_at": "2026-11-11T15:02:00+00:00",
+    "rows": 282,
+    "games": 14,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 32,
+    "missing_market_slots": 0,
+    "scheduled_games_next_72h_without_lines": 13,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 14
+   },
+   {
+    "collected_at": "2026-11-11T20:01:46+00:00",
+    "rows": 281,
+    "games": 14,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 32,
+    "missing_market_slots": 1,
+    "scheduled_games_next_72h_without_lines": 13,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 46
+   }
+  ],
+  "rows_total": 772,
+  "stale_rows_total": 0,
+  "stale_rule": "book's own update time older than 6 h when collected",
+  "unchanged_rows_total": 60,
+  "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
+  "post_start_rows_excluded": 0,
+  "books_seen": [
+   "betmgm",
+   "betonlineag",
+   "betrivers",
+   "betus",
+   "bovada",
+   "draftkings",
+   "fanduel",
+   "lowvig",
+   "mybookieag"
+  ],
+  "markets_seen": [
+   "moneyline",
+   "spread",
+   "total"
+  ],
+  "rows_by_book": {
+   "betmgm": 78,
+   "betonlineag": 88,
+   "betrivers": 114,
+   "betus": 77,
+   "bovada": 78,
+   "draftkings": 93,
+   "fanduel": 78,
+   "lowvig": 88,
+   "mybookieag": 78
+  },
+  "rows_by_market": {
+   "moneyline": 250,
+   "spread": 261,
+   "total": 261
+  }
+ },
+ "movement": {
+  "overall": {
+   "series": 444,
+   "series_with_2plus_observations": 281,
+   "moved": 224,
+   "mean_abs_line_change": 0.654,
+   "mean_abs_novig_change_pp": 0.91
+  },
+  "by_market": {
+   "moneyline": {
+    "series": 148,
+    "series_with_2plus_observations": 93,
+    "moved": 72,
+    "mean_abs_line_change": null,
+    "mean_abs_novig_change_pp": 1.41
+   },
+   "spread": {
+    "series": 148,
+    "series_with_2plus_observations": 94,
+    "moved": 82,
+    "mean_abs_line_change": 0.66,
+    "mean_abs_novig_change_pp": 0.83
+   },
+   "total": {
+    "series": 148,
+    "series_with_2plus_observations": 94,
+    "moved": 70,
+    "mean_abs_line_change": 0.649,
+    "mean_abs_novig_change_pp": 0.5
+   }
+  },
+  "by_book": {
+   "betmgm": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 25,
+    "mean_abs_line_change": 0.4,
+    "mean_abs_novig_change_pp": 1.04
+   },
+   "betonlineag": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 27,
+    "mean_abs_line_change": 0.9,
+    "mean_abs_novig_change_pp": 1.17
+   },
+   "betrivers": {
+    "series": 60,
+    "series_with_2plus_observations": 42,
+    "moved": 23,
+    "mean_abs_line_change": 0.536,
+    "mean_abs_novig_change_pp": 0.68
+   },
+   "betus": {
+    "series": 48,
+    "series_with_2plus_observations": 29,
+    "moved": 25,
+    "mean_abs_line_change": 0.575,
+    "mean_abs_novig_change_pp": 0.48
+   },
+   "bovada": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 27,
+    "mean_abs_line_change": 0.575,
+    "mean_abs_novig_change_pp": 0.8
+   },
+   "draftkings": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 24,
+    "mean_abs_line_change": 0.95,
+    "mean_abs_novig_change_pp": 1.31
+   },
+   "fanduel": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 25,
+    "mean_abs_line_change": 0.6,
+    "mean_abs_novig_change_pp": 1.18
+   },
+   "lowvig": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 27,
+    "mean_abs_line_change": 0.9,
+    "mean_abs_novig_change_pp": 1.24
+   },
+   "mybookieag": {
+    "series": 48,
+    "series_with_2plus_observations": 30,
+    "moved": 21,
+    "mean_abs_line_change": 0.5,
+    "mean_abs_novig_change_pp": 0.34
+   }
+  },
+  "by_team": {
+   "Boston Celtics": {
+    "moved_toward": 0,
+    "moved_against": 18
+   },
+   "Brooklyn Nets": {
+    "moved_toward": 18,
+    "moved_against": 0
+   },
+   "Chicago Bulls": {
+    "moved_toward": 1,
+    "moved_against": 12
+   },
+   "Cleveland Cavaliers": {
+    "moved_toward": 15,
+    "moved_against": 1
+   },
+   "Denver Nuggets": {
+    "moved_toward": 0,
+    "moved_against": 11
+   },
+   "Golden State Warriors": {
+    "moved_toward": 2,
+    "moved_against": 14
+   },
+   "Houston Rockets": {
+    "moved_toward": 14,
+    "moved_against": 2
+   },
+   "Indiana Pacers": {
+    "moved_toward": 8,
+    "moved_against": 4
+   },
+   "Los Angeles Lakers": {
+    "moved_toward": 15,
+    "moved_against": 1
+   },
+   "Memphis Grizzlies": {
+    "moved_toward": 11,
+    "moved_against": 0
+   },
+   "Milwaukee Bucks": {
+    "moved_toward": 1,
+    "moved_against": 15
+   },
+   "New Orleans Pelicans": {
+    "moved_toward": 0,
+    "moved_against": 18
+   },
+   "New York Knicks": {
+    "moved_toward": 1,
+    "moved_against": 15
+   },
+   "Oklahoma City Thunder": {
+    "moved_toward": 0,
+    "moved_against": 18
+   },
+   "Orlando Magic": {
+    "moved_toward": 13,
+    "moved_against": 3
+   },
+   "Portland Trail Blazers": {
+    "moved_toward": 18,
+    "moved_against": 0
+   },
+   "San Antonio Spurs": {
+    "moved_toward": 12,
+    "moved_against": 1
+   },
+   "Toronto Raptors": {
+    "moved_toward": 18,
+    "moved_against": 0
+   },
+   "Utah Jazz": {
+    "moved_toward": 3,
+    "moved_against": 13
+   },
+   "Washington Wizards": {
+    "moved_toward": 4,
+    "moved_against": 8
+   }
+  },
+  "games_with_any_movement": 10,
+  "games_with_repeat_observations": 14
+ },
+ "upcoming": {
+  "status": "unvalidated comparisons (games not settled)",
+  "games": 10,
+  "comparisons": 574,
+  "abs_model_minus_book_novig_pp": {
+   "median": 3.8,
+   "p90": 9.26
+  },
+  "note": "A difference is a disagreement between the model and the book, not a verified edge."
+ },
+ "settled": {
+  "spread": {
+   "settled_games": 6,
+   "required_for_summary": 250,
+   "progress_pct": 2.4,
+   "status": "insufficient sample: counts only until 250 settled games"
+  },
+  "total": {
+   "settled_games": 6,
+   "required_for_summary": 250,
+   "progress_pct": 2.4,
+   "status": "insufficient sample: counts only until 250 settled games"
+  },
+  "moneyline": {
+   "settled_games": 6,
+   "required_for_summary": 250,
+   "progress_pct": 2.4,
+   "status": "insufficient sample: counts only until 250 settled games"
+  }
+ },
+ "closing_line_value": {
+  "status": "disabled",
+  "reason": "no genuine closing line: lines are fetched at 7 AM and noon PT only",
+  "observations_within_close_window": 0,
+  "close_window_minutes": 10.0
+ },
+ "privacy": "Aggregates only. Line-level detail is kept in the private Supabase tables odds.comparisons and odds.reports.",
+ "storage_verification": {
+  "comparisons_chain_ok": true,
+  "reports_chain_ok": true,
+  "snapshots_chain_ok": true
+ }
+}
