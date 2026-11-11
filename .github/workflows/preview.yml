@@ -148,6 +148,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Connect to the sportsbook snapshot store (TEST Supabase; nothing printed)
+        if: steps.plan.outputs.data == 'yes'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+
       - name: Download, validate and project
         id: data
         if: steps.plan.outputs.data == 'yes'
@@ -156,7 +162,7 @@ jobs:
         env:
           KINDS: ${{ needs.plan.outputs.kinds }}
         run: |
-          pip install -e .
+          pip install -e . "psycopg[binary]"
           python -m modelroom nba ingest
           python -m modelroom nfl ingest
           python -m modelroom sources validate
@@ -170,17 +176,30 @@ jobs:
           # ODDS_API_KEY secret is set. Free tier = 500 credits a month; each league costs 3 credits a call, so
           # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
           # The 4:00 PM injury refresh reuses the midday prices (a third fetch would exceed the free 500).
-          # Snapshots are kept on the preview branch (append-only) so past games keep the line they had.
-          # Each row keeps the book, market, line, prices, the book's own update time (captured_at) and our fetch time
-          # (collected_at). Every call's remaining credits go to preview-ledger/odds_api_usage.jsonl (no key, no URL);
+          # Snapshots are kept in the append-only Supabase table odds.snapshots, NOT in this public repository (The Odds
+          # API's terms allow storing and displaying the data, not offering it as downloadable files). Each refresh rebuilds
+          # the working copy from the table, fetches (7 AM / noon only), and appends new rows; nothing is ever updated.
+          # Each row keeps the book, market, line, prices, the book's own update time (captured_at), our fetch time
+          # (collected_at) and the SHA-256 of the provider response. If the store can't be reached, lines are NOT fetched
+          # (no credits spent on data that couldn't be kept) and the board shows no lines for that refresh.
+          # Every call's remaining credits go to preview-ledger/odds_api_usage.jsonl (no key, no URL, no odds);
           # a call is skipped when fewer than 15 credits are left this month (forward-only: nothing is back-filled).
           for lg in nba nfl; do
             mkdir -p data/processed/$lg
-            [ -f preview-ledger/market_snapshots_$lg.parquet ] && cp preview-ledger/market_snapshots_$lg.parquet data/processed/$lg/market_snapshots.parquet
-            if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|midday|workflow_dispatch"; then
-              python -m modelroom $lg odds || echo "::warning::$lg lines not fetched; continuing without them"
+            if [ "${ODDS_STORE:-off}" = on ] && python -m modelroom odds-store load --league $lg > /tmp/odds_load_$lg.json; then
+              python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); print('$lg snapshots loaded from the store:', d['rows'])"
+              if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|midday|workflow_dispatch"; then
+                if python -m modelroom $lg odds; then
+                  python -m modelroom odds-store sync --league $lg --batch "collection" > /tmp/odds_sync_$lg.json \
+                    && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'])" \
+                    || echo "::warning::$lg new lines could not be written to the store"
+                else
+                  echo "::warning::$lg lines not fetched; continuing without them"
+                fi
+              fi
+            else
+              echo "::warning::sportsbook snapshot store not reachable: $lg lines not loaded or fetched this refresh"
             fi
-            [ -f data/processed/$lg/market_snapshots.parquet ] && cp data/processed/$lg/market_snapshots.parquet preview-ledger/market_snapshots_$lg.parquet
           done
           python -m modelroom nba project
           python -m modelroom nfl project
