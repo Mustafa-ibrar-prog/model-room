@@ -167,3 +167,51 @@ export async function loadLiveInjuries(league: League): Promise<LiveInjuries | n
     return null;
   }
 }
+
+/** Per-category prop validation (P4), published inside props_monitor_<league>.json. Null when not yet built. */
+export async function loadPropValidation(league: League): Promise<PropValidation | null> {
+  await connection();
+  try {
+    const d = JSON.parse(await readFile(path.join(publishedDir(), `props_monitor_${league}.json`), "utf8")) as { validation?: PropValidation };
+    return d.validation ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export interface PropMetrics {
+  player_games: number;
+  mae?: number | null;
+  bias?: number | null;
+  bias_pct?: number | null;
+  mean_projected?: number;
+  mean_actual?: number;
+  withheld_mean?: string;
+  ladder_rows?: number;
+  brier?: number | null;
+  log_loss?: number | null;
+  calibration_error?: number | null;
+  calibration?: { bin: string; n: number; predicted: number | null; actual: number | null }[] | null;
+  withheld_ladder?: string;
+  over_under?: { line: string; n: number; over: { n: number; predicted: number | null; hit_rate: number | null }; under: { n: number; predicted: number | null; hit_rate: number | null } };
+}
+
+export interface PropValidation {
+  schema: number;
+  league: string;
+  generated_at?: string;
+  error?: string;
+  active?: string;
+  shadows?: string[];
+  markets?: Record<string, string>;
+  rules?: { min_player_games: number; min_ladder_rows: number; min_bin: number; min_side: number; lean: number; recent_days: number };
+  evidence_labels?: { strong_historical_support: string; note: string };
+  recent_window?: { days: number; through: string } | null;
+  versions?: Record<string, {
+    role: "active" | "shadow" | "previous";
+    live: Record<string, { all: PropMetrics; recent: PropMetrics }>;
+    live_span: { first_game: string; last_game: string } | null;
+    historical: { version: string; test_seasons: number[]; source: string; markets: Record<string, { ladder_rows: number | null; brier: number | null; log_loss: number | null; baseline_log_loss: number | null; calibration_error: number | null; calibration: { bin: string; n: number; predicted: number; actual: number }[] | null; player_games: number | null; mae: number | null; bias: number | null; recent_form_mae: number | null }> } | null;
+    historical_note: string | null;
+  }>;
+}

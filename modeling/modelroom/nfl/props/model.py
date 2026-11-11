@@ -95,6 +95,40 @@ def _ratio(d: pd.Series | None, key: str, power: float) -> float:
     return float(d[key]) ** power
 
 
+CONTRIB_VERSION = 1
+CONTRIB_ORDER = ["baseline", "game_environment", "opportunity", "matchup_share", "lineup", "matchup_efficiency", "other", "simulation"]
+
+
+def _chain(base: float, steps: list, sims: np.ndarray) -> dict | None:
+    """Bookkeeping only (P3). The model's mean is volume x share x efficiency, each a product of the factors computed in
+    project_team. Starting from the player's history at his team's usual volume against an average opponent, each factor
+    is applied in a fixed order and the change in the expected value is recorded. The steps add up to the deterministic
+    expectation; "simulation" is the rest of the simulated mean (rounding and clipping of team volume, the beta share and
+    catch-rate clips, random variation). Order-dependent: an attribution in this order, not unique causes. Any factor
+    that isn't a finite number makes the whole chain unavailable (None) rather than estimated."""
+    if not np.isfinite(base):
+        return None
+    out, cur = {"baseline": round(float(base), 3)}, float(base)
+    for key, f in steps:
+        f = float(f)
+        if not np.isfinite(f):
+            return None
+        nxt = cur * f
+        out[key] = round(out.get(key, 0.0) + nxt - cur, 3)
+        cur = nxt
+    final = float(np.mean(sims))
+    out["simulation"] = round(final - cur, 3)
+    out["final"] = round(final, 3)
+    return out
+
+
+def _put(rows: dict, contrib: dict) -> None:
+    """Move this step's chains onto their player's row (keyed by market)."""
+    for mk, (pid, ch) in list(contrib.items()):
+        rows.setdefault(pid, {}).setdefault("_contrib", {})[mk] = ch
+        del contrib[mk]
+
+
 def team_volume(ctx: Context, team: str, opp: str, margin: float, total: float, p: PropParams) -> tuple[float, float]:
     T = ctx.teams
     base_pa = float(T["pa_base"].get(team, T["pa_base"].mean()))
@@ -331,6 +365,13 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                 t_share = concentrate(t_share, skill["group"], grp, gam)
             else:
                 c_share = concentrate(c_share, rushers["group"], grp, gam)
+    # Bookkeeping only (P3): pieces of the share chain before scaling / redistribution, from values computed above.
+    T_ = ctx.teams
+    base_pa = float(T_["pa_base"].get(team, T_["pa_base"].mean()))
+    base_ru = float(T_["ru_base"].get(team, T_["ru_base"].mean()))
+    t_snap, c_snap = snap_adj(skill), snap_adj(rushers).where(rushers["group"] != "QB", 1.0)
+    t_mt = skill["group"].map(lambda g: _ratio(D, f"tshare_{g}", s.matchup_strength))
+    contrib: dict = {}
     PA = np.clip(np.rint(rng.normal(mu_pa, p.volume.pass_sd, n)), 8, 75).astype(int)
     RU = np.clip(np.rint(rng.normal(mu_ru, p.volume.rush_sd, n)), 5, 60).astype(int)
 
@@ -377,6 +418,16 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         td = rng.binomial(tg, float(np.clip(x["rec_td_rate"] * _ratio(D, f"rectd_{grp}", s.matchup_strength), 0, 0.5)))
         r = rows[pid]
         r.update(targets=tg.astype(float), receptions=rec.astype(float), rec_yds=yds, long_rec=lng, rec_td=td.astype(float))
+        s0, sn, mt = float(x["target_share"]), float(t_snap[pid]), float(t_mt[pid])
+        cr0 = float(x["catch_rate"])
+        steps = [("game_environment", mu_pa / base_pa), ("opportunity", sn), ("matchup_share", mt),
+                 ("lineup", float(t_share[pid]) / (s0 * sn * mt) if s0 * sn * mt > 0 else float("nan")), ("matchup_efficiency", cr / cr0 if cr0 > 0 else float("nan"))]
+        contrib["receptions"] = (pid, _chain(base_pa * s0 * cr0, steps, r["receptions"]))
+        pool = float(np.mean(ctx.pools[f"rec_{grp}"])) if ctx.pools[f"rec_{grp}"].size else float("nan")
+        yb = float(x["ypr_factor"])
+        contrib["receiving_yards"] = (pid, _chain(base_pa * s0 * cr0 * pool * yb, steps[:-1] + [
+            ("matchup_efficiency", (cr / cr0 if cr0 > 0 else float("nan")) * _ratio(D, f"ypr_{grp}", s.matchup_strength) * cov * bz), ("other", qx)], yds))
+        _put(rows, contrib)
         r["_inputs"] = {"target_share": round(float(t_share[pid]), 4), "catch_rate": round(cr, 3), "yards_factor": round(f, 3),
                         **({"role_rank": int(role[pid]), "play_chance": round(float(pp[pid]), 3), "depth_rank": (depth or {}).get(pid)}
                            if s.opp_redistribution == "depth" else {}),
@@ -393,6 +444,13 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         td = rng.binomial(car, float(np.clip(x["rush_td_rate"] * _ratio(D, "rushtd", s.matchup_strength), 0, 0.5)))
         r = rows.setdefault(pid, {k: np.zeros(n) for k in STATS})
         r.update(carries=car.astype(float), rush_yds=yds, rush_td=td.astype(float))
+        c0, sn = float(x["carry_share"]), float(c_snap[pid])
+        steps = [("game_environment", mu_ru / base_ru), ("opportunity", sn),
+                 ("lineup", float(c_share[pid]) / (c0 * sn) if c0 * sn > 0 else float("nan"))]
+        contrib["rushing_attempts"] = (pid, _chain(base_ru * c0, steps, r["carries"]))
+        pool = float(np.mean(ctx.pools[f"rush_{grp}"])) if ctx.pools[f"rush_{grp}"].size else float("nan")
+        contrib["rushing_yards"] = (pid, _chain(base_ru * c0 * pool * float(x["ypc_factor"]), steps + [("matchup_efficiency", _ratio(D, "ypc", s.matchup_strength))], yds))
+        _put(rows, contrib)
         r.setdefault("_inputs", {})["carry_share"] = round(float(c_share[pid]), 4)
 
     # Starting QB passing
@@ -408,10 +466,20 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         ptd = rng.binomial(att, float(np.clip(x["pass_td_rate"] * _ratio(D, "passtd", s.matchup_strength), 0.001, 0.2)))
         r = rows.setdefault(starter, {k: np.zeros(n) for k in STATS})
         r.update(pass_att=att.astype(float), pass_cmp=cm.astype(float), pass_yds=yds, ints=ints.astype(float), pass_td=ptd.astype(float))
+        a0, cp0 = base_pa * 0.975, float(x["cmp_rate"])
+        env = [("game_environment", mu_pa / base_pa)]
+        contrib["passing_attempts"] = (starter, _chain(a0, env, r["pass_att"]))
+        contrib["passing_completions"] = (starter, _chain(a0 * cp0, env + [("matchup_efficiency", cmp_p / cp0 if cp0 > 0 else float("nan"))], r["pass_cmp"]))
+        pool = float(np.mean(ctx.pools["pass"])) if ctx.pools["pass"].size else float("nan")
+        contrib["passing_yards"] = (starter, _chain(a0 * cp0 * pool * float(x["ypcmp_factor"]), env + [
+            ("matchup_efficiency", (cmp_p / cp0 if cp0 > 0 else float("nan")) * _ratio(D, "ypcmp", s.matchup_strength) * bz), ("other", qx)], yds))
+        _put(rows, contrib)
         r.setdefault("_inputs", {}).update(completion_pct=round(cmp_p, 3), pass_yards_factor=round(f, 3), blitz_factor=round(bz, 3))
 
     for pid, r in rows.items():
         inputs = r.pop("_inputs", {})
+        cmk = r.pop("_contrib", {})
+        inputs["contributions"] = {"version": CONTRIB_VERSION, "order": CONTRIB_ORDER, "stats": cmk}
         r["rush_rec_yds"] = r["rush_yds"] + r["rec_yds"]
         r["td_any"] = r["rush_td"] + r["rec_td"]
         r["fantasy_ppr"] = (0.04 * r["pass_yds"] + 4 * r["pass_td"] - 2 * r["ints"] + 0.1 * r["rush_yds"] + 6 * r["rush_td"]

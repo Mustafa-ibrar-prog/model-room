@@ -93,7 +93,7 @@ describe("props explorer", () => {
     const d = await getExplorer("nfl", "plus", { cat: "receiving_yards", line: key }, now);
     if (!d.ok || isLocked(d.detail) || !d.detail) throw new Error("expected detail");
     expect(d.detail.row.id).toBe(r.id);
-    expect(d.detail.line.threshold).toBe(r.lines[0].threshold);
+    expect(d.detail.line?.threshold).toBe(r.lines[0].threshold);
     const bad = await getExplorer("nfl", "plus", { cat: "receiving_yards", line: "nope~ge1" }, now);
     expect(bad.ok && bad.detail).toBe(null);
     const free = await getExplorer("nfl", "free", { cat: "receiving_yards", line: key }, now);
@@ -107,5 +107,34 @@ describe("props explorer", () => {
     expect(s.rows.map((r) => r.name).sort()).toEqual(["Wide One", "Wide Two"]);
     const none = await getExplorer("nfl", "plus", { cat: "receiving_yards", date: "2030-02-01" }, now);
     expect(none.ok && none.games.length).toBe(0);
+  });
+
+  it("never presents the model's own threshold as a market line", async () => {
+    const x = await getExplorer("nfl", "plus", { cat: "receiving_yards" }, now);
+    if (!x.ok || isLocked(x.rows)) throw new Error("expected rows");
+    const rb = x.rows.find((r) => r.id === "rb")!; // no quotes at all
+    expect(rb.headline).toBeNull();
+    expect(rb.atLine).toBeNull();
+    expect(rb.preferred).toEqual({ kind: "none", reason: "no_market_line" });
+    expect(rb.ladder.length).toBe(rb.lines.length);
+    const wr = x.rows.find((r) => r.id === "wr1")!; // one quoted contract: 70+
+    expect(wr.headline?.threshold).toBe(70);
+    expect(wr.atLine).toMatchObject({ line: 69.5, push: 0 });
+    expect(wr.ladder).toHaveLength(0);
+    // The card with no market line opens by its own key.
+    const card = await getExplorer("nfl", "plus", { cat: "receiving_yards", line: "rb~card" }, now);
+    if (!card.ok || isLocked(card.detail) || !card.detail) throw new Error("expected detail");
+    expect(card.detail.line).toBeNull();
+  });
+
+  it("gates the model's contribution record to Pro and reads it per market", async () => {
+    const plus = await getExplorer("nfl", "plus", { cat: "receiving_yards" }, now);
+    const pro = await getExplorer("nfl", "pro", { cat: "receiving_yards" }, now);
+    if (!plus.ok || !pro.ok || isLocked(plus.rows) || isLocked(pro.rows)) throw new Error("expected rows");
+    expect(isLocked(plus.rows[0].contributions)).toBe(true);
+    const c = pro.rows[0].contributions;
+    if (isLocked(c)) throw new Error("expected contributions");
+    expect(c.steps).toBeNull(); // the synthetic board predates the recording
+    expect(c.reason).toBe("not recorded for this projection");
   });
 });

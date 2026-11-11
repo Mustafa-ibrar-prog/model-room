@@ -109,6 +109,10 @@ def run() -> dict:
     rep = build(pred, box)
     rep["note"] = ("Last pre-game prediction per player-game and model version, graded on players who played. "
                    "The ledger is append-only: earlier versions' predictions stay exactly as recorded.")
+    # Per-category validation (P4), published with the monitor; a failure there is recorded in the report, never raised.
+    from modelroom import props_validation
+
+    props_validation.attach("nba", rep)
     f = data_root() / "published" / "props_monitor_nba.json"
     f.parent.mkdir(parents=True, exist_ok=True)
     f.write_text(json.dumps(rep, indent=2, default=str))
