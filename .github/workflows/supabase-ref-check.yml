@@ -1,0 +1,63 @@
+name: Supabase project check (test site)
+
+# Manual, read-only. Answers: is the Supabase project the TEST scheduler uses the same one a production deployment
+# would use? Prints only fingerprints (first 4 characters of the project reference + an 8-character hash), never a
+# database URL, key or password. Reads the deployed sites' public JavaScript (the project URL is public by design:
+# Supabase ships it to every browser). Writes nothing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare project references (fingerprints only)
+        env:
+          DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+        run: |
+          python3 - <<'EOF'
+          import hashlib, os, re, urllib.request, urllib.error
+          fp = lambda r: f"{r[:4]}… #{hashlib.sha256(r.encode()).hexdigest()[:8]}" if r else "none"
+          def ref_from_db(u):
+              m = re.search(r"postgres\.([a-z0-9]{20})[:@]", u) or re.search(r"db\.([a-z0-9]{20})\.supabase\.co", u)
+              return m.group(1) if m else None
+          def ref_from_url(u):
+              m = re.search(r"([a-z0-9]{20})\.supabase\.co", u or ""); return m.group(1) if m else None
+          a, b = ref_from_db(os.environ.get("DB_URL", "")), ref_from_url(os.environ.get("SB_URL", ""))
+          print("TEST scheduler (Actions SUPABASE_DB_URL):", fp(a))
+          print("TEST Actions SUPABASE_URL:              ", fp(b), "| same project as DB URL:", a == b if a and b else "n/a")
+          def get(u):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "model-room-check"}), timeout=20) as r:
+                      return r.status, r.read().decode("utf-8", "replace"), dict(r.headers)
+              except urllib.error.HTTPError as e:
+                  return e.code, e.read().decode("utf-8", "replace")[:2000], dict(e.headers)
+              except Exception as e:
+                  return None, type(e).__name__, {}
+          def site_ref(base):
+              st, html, h = get(base)
+              info = f"HTTP {st}" + (f", x-vercel-error={h.get('x-vercel-error') or h.get('X-Vercel-Error')}" if (h.get('x-vercel-error') or h.get('X-Vercel-Error')) else "")
+              if st != 200:
+                  return info, None
+              refs = set(re.findall(r"([a-z0-9]{20})\.supabase\.co", html))
+              for src in re.findall(r'src="(/_next/static/[^"]+\.js)"', html)[:60]:
+                  s2, js, _ = get(base + src)
+                  if s2 == 200:
+                      refs |= set(re.findall(r"([a-z0-9]{20})\.supabase\.co", js))
+              return info, refs
+          sites = {"TEST site (preview branch)": "https://model-room-git-preview-computer-citi.vercel.app",
+                   "Vercel production alias (project-team)": "https://model-room-computer-citi.vercel.app",
+                   "Vercel production alias (project)": "https://model-room.vercel.app"}
+          for name, u in sites.items():
+              info, refs = site_ref(u)
+              if refs is None:
+                  print(f"{name}: {info}; no page to read")
+              else:
+                  rs = sorted(refs)
+                  print(f"{name}: {info}; Supabase projects referenced: {[fp(r) for r in rs] or 'none'}; same as TEST scheduler: {[r == a for r in rs]}")
+          EOF
