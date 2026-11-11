@@ -1,0 +1,111 @@
+name: Supabase link proof (test site)
+
+# Manual, read-only toward the database. Proves which Supabase project the TEST SITE's logins use, without reading
+# Vercel settings: it notes the test accounts' last sign-in times in the project the TEST scheduler uses (via the
+# Actions secret), signs in to the TEST SITE with those accounts, then checks the times moved in that same project.
+# Also reads the production deployment's sign-in page to see whether it has logins connected at all.
+# Every database query runs in a read-only transaction. Prints counts, booleans and times only: no URLs, keys,
+# passwords or email addresses.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  statuses: read
+
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PREVIEW_URL: https://model-room-git-preview-computer-citi.vercel.app
+      PROD_URL: https://model-room-computer-citi.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect to the TEST scheduler's project (read-only)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          [ -n "$SUPABASE_DB_URL" ] || { echo "SUPABASE_DB_URL is not set"; exit 1; }
+          echo "::add-mask::$SUPABASE_DB_URL"
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1 || true
+          url=""
+          case "$SUPABASE_DB_URL" in
+            *db.*.supabase.co*)
+              for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1; do
+                cands=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py 2>/dev/null) || continue
+                while IFS= read -r c; do
+                  echo "::add-mask::$c"
+                  PGCONNECT_TIMEOUT=8 psql "$c" -qtAc "select 1" >/dev/null 2>&1 && { url="$c"; break; }
+                done <<< "$cands"
+                [ -n "$url" ] && break
+              done;;
+            *) PGCONNECT_TIMEOUT=8 psql "$SUPABASE_DB_URL" -qtAc "select 1" >/dev/null 2>&1 && url="$SUPABASE_DB_URL";;
+          esac
+          [ -n "$url" ] || { echo "TEST project not reachable"; exit 1; }
+          echo "$url" > /tmp/dburl && chmod 600 /tmp/dburl
+          cat > /tmp/q.sql <<'SQL'
+          begin read only;
+          select json_build_object(
+            'test_accounts', (select count(*) from auth.users where email like '%@modelroom.test'),
+            'other_accounts', (select count(*) from auth.users where email not like '%@modelroom.test' or email is null),
+            'other_signins_30d', (select count(*) from auth.users where (email not like '%@modelroom.test' or email is null) and last_sign_in_at > now() - interval '30 days'),
+            'test_last_sign_in', (select coalesce(json_agg(extract(epoch from last_sign_in_at) order by id), '[]'::json) from auth.users where email like '%@modelroom.test'),
+            'db_now', extract(epoch from now()));
+          commit;
+          SQL
+          psql "$(cat /tmp/dburl)" -qtA -f /tmp/q.sql | grep '^{' > /tmp/before.json
+          python3 -c "import json; d=json.load(open('/tmp/before.json')); print('before: test accounts', d['test_accounts'], '| other accounts', d['other_accounts'], '| other accounts signed in, last 30 days', d['other_signins_30d'])"
+
+      - name: Wait for the TEST site deployment
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha=$(gh api repos/${{ github.repository }}/commits/preview -q .sha)
+          for i in $(seq 1 40); do
+            state=$(gh api repos/${{ github.repository }}/commits/$sha/status -q '[.statuses[] | select(.context=="Vercel")][0].state // "none"')
+            [ "$state" = success ] && exit 0
+            sleep 15
+          done
+          echo "TEST site deployment not ready"; exit 1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts && npx playwright install --with-deps chromium
+
+      - name: Sign in to the TEST SITE with the test accounts
+        env:
+          TEST_ACCOUNT_PASSWORD: ${{ secrets.TEST_ACCOUNT_PASSWORD }}
+        run: node e2e/preview-accounts.mjs
+
+      - name: Did those sign-ins land in the TEST scheduler's project?
+        run: |
+          psql "$(cat /tmp/dburl)" -qtA -f /tmp/q.sql | grep '^{' > /tmp/after.json
+          python3 - <<'EOF'
+          import json
+          b, a = json.load(open("/tmp/before.json")), json.load(open("/tmp/after.json"))
+          moved = [x is not None and (y is None or x > y) for x, y in zip(a["test_last_sign_in"], b["test_last_sign_in"])]
+          print("test accounts whose last sign-in moved during this run:", sum(moved), "of", len(moved))
+          print("RESULT: the TEST SITE's logins use the TEST scheduler's Supabase project:", "YES" if moved and all(moved) else "NOT PROVEN")
+          EOF
+
+      - name: Production deployment's sign-in page (is anything connected?)
+        run: |
+          python3 - <<'EOF'
+          import os, re, urllib.request, urllib.error
+          base = os.environ["PROD_URL"]
+          for path in ("/login", "/signup", "/account"):
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(base + path, headers={"User-Agent": "model-room-check"}), timeout=20) as r:
+                      st, html = r.status, r.read().decode("utf-8", "replace")
+              except urllib.error.HTTPError as e:
+                  st, html = e.code, e.read().decode("utf-8", "replace")
+              text = re.sub(r"<[^>]+>", " ", html)
+              flags = {"says accounts are not switched on": "switched on for this site yet" in text,
+                       "says logins are not connected": "Logins aren" in text and "connected" in text,
+                       "shows a password field": 'type="password"' in html,
+                       "mentions supabase.co": "supabase.co" in html}
+              print(f"production {path}: HTTP {st}", flags)
+          EOF
