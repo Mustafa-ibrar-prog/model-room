@@ -28,6 +28,8 @@
   markets backfill nfl --days 30  Kalshi: hourly price history of settled contracts (local only)
   markets replay nfl              price that history with the walk-forward model (then: markets report)
   ledger verify                   check the prediction ledgers' hash chains
+  odds-store load|sync|verify|import --league nba|nfl
+                                  sportsbook snapshots <-> append-only Supabase table odds.snapshots (TEST)
   history                         results history (recorded projections vs results) + performance files
 """
 from __future__ import annotations
@@ -264,6 +266,15 @@ def _injuries(args) -> int:
     return 0
 
 
+def _odds_store(args) -> int:
+    import json as _json
+    from modelroom.sources import odds_store as OS
+    res = OS.cmd(args.cmd, args.league, path=args.path, batch=args.batch)
+    print(_json.dumps(res, indent=1, default=str))
+    v = res.get("verify") if args.cmd != "verify" else res
+    return 0 if (v is None or v.get("ok", True)) else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="modelroom", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="group", required=True)
@@ -292,12 +303,17 @@ def main(argv: list[str] | None = None) -> int:
     mk.add_argument("--days", type=int, default=10)
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
+    os_ = sub.add_parser("odds-store", help="sportsbook snapshots <-> append-only Supabase table (TEST)")
+    os_.add_argument("cmd", choices=["load", "sync", "verify", "import"])
+    os_.add_argument("--league", required=True, choices=["nba", "nfl"])
+    os_.add_argument("--path", default=None)
+    os_.add_argument("--batch", default=None)
     sub.add_parser("history", help="results history + performance files for the website")
     ij = sub.add_parser("injuries", help="fetch + combine injury sources (official NBA report, ESPN, nflverse)")
     ij.add_argument("league", choices=["nba", "nfl"])
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "injuries": _injuries}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "injuries": _injuries, "odds-store": _odds_store}[args.group]
     return handler(args)
 
 
