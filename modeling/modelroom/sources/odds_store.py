@@ -187,6 +187,83 @@ def verify(conn, league: str) -> dict:
     return verify_rows(_rows(conn.cursor(), league)) | {"league": league}
 
 
+def load_with_hashes(conn, league: str) -> pd.DataFrame:
+    """Snapshots plus each row's seq and row_hash (to reference the exact stored record)."""
+    cur = conn.cursor()
+    cur.execute("select seq, row_hash, payload from odds.snapshots where league = %s order by seq", (league,))
+    rows = cur.fetchall()
+    df = frame_from_payloads([r[2] for r in rows])
+    df.insert(0, "snapshot_hash", [r[1] for r in rows])
+    df.insert(0, "snapshot_seq", [r[0] for r in rows])
+    return df
+
+
+# ------------------------------------------------------------------ derived records (odds.comparisons, odds.reports)
+# Same guarantees as odds.snapshots: canonical JSON payload, per-league hash chain, insert-only (migration 20261111000200).
+DERIVED = {"comparisons", "reports"}
+
+
+def canonical(obj: dict) -> str:
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False, default=str)
+
+
+def insert_payloads(conn, table: str, league: str, items: list[tuple[str, dict]], batch: str, run_id: str | None = None) -> dict:
+    """items: (content_key, record). Appends records whose key the table doesn't have; never updates."""
+    if table not in DERIVED:
+        raise StoreError(f"unknown table {table}")
+    with conn.transaction():
+        cur = conn.cursor()
+        cur.execute("select pg_advisory_xact_lock(hashtext(%s))", (f"odds.{table}.{league}",))
+        cur.execute(f"select content_key from odds.{table} where league = %s", (league,))
+        have = {r[0] for r in cur.fetchall()}
+        cur.execute(f"select seq, row_hash from odds.{table} where league = %s order by seq desc limit 1", (league,))
+        last = cur.fetchone()
+        seq, prev = (last[0], last[1]) if last else (0, GENESIS)
+        added = 0
+        for k, rec in items:
+            if k in have:
+                continue
+            have.add(k)
+            p = canonical(rec)
+            seq += 1
+            h = chain(prev, p)
+            cur.execute(f"insert into odds.{table} (league, seq, content_key, payload, prev_hash, row_hash, batch, run_id) "
+                        "values (%s, %s, %s, %s, %s, %s, %s, %s)", (league, seq, k, p, prev, h, batch, run_id))
+            prev = h
+            added += 1
+    return {"table": table, "league": league, "offered": len(items), "inserted": added}
+
+
+def verify_payload_rows(rows: list[dict]) -> dict:
+    problems, prev = [], GENESIS
+    for i, r in enumerate(rows, start=1):
+        if r["seq"] != i:
+            problems.append(f"seq {r['seq']} at position {i}")
+        if r["prev_hash"] != prev:
+            problems.append(f"seq {r['seq']}: prev_hash does not match the previous row")
+        if chain(r["prev_hash"], r["payload"]) != r["row_hash"]:
+            problems.append(f"seq {r['seq']}: row_hash does not match its payload")
+        prev = r["row_hash"]
+    return {"rows": len(rows), "ok": not problems, "problems": problems[:20], "head": prev if rows else None}
+
+
+def verify_table(conn, table: str, league: str) -> dict:
+    if table not in DERIVED:
+        raise StoreError(f"unknown table {table}")
+    cur = conn.cursor()
+    cur.execute(f"select seq, payload, prev_hash, row_hash from odds.{table} where league = %s order by seq", (league,))
+    cols = [c.name for c in cur.description]
+    return verify_payload_rows([dict(zip(cols, r)) for r in cur.fetchall()]) | {"league": league, "table": table}
+
+
+def load_payloads(conn, table: str, league: str) -> list[dict]:
+    if table not in DERIVED:
+        raise StoreError(f"unknown table {table}")
+    cur = conn.cursor()
+    cur.execute(f"select payload from odds.{table} where league = %s order by seq", (league,))
+    return [json.loads(r[0]) for r in cur.fetchall()]
+
+
 # ------------------------------------------------------------------ CLI helpers (used by the workflow)
 def parquet_path(league: str) -> Path:
     return ensure(processed_dir(league)) / "market_snapshots.parquet"
@@ -213,7 +290,16 @@ def cmd(action: str, league: str, path: str | None = None, batch: str | None = N
             res = insert(conn, league, pd.read_parquet(f), batch or "import", run_id)
             return res | {"action": "import", "verify": verify(conn, league)}
         if action == "verify":
-            return verify(conn, league)
+            out = verify(conn, league)
+            for t in sorted(DERIVED):
+                try:
+                    v = verify_table(conn, t, league)
+                    out[t] = {"rows": v["rows"], "ok": v["ok"], "problems": v["problems"]}
+                    out["ok"] = out["ok"] and v["ok"]
+                except Exception as e:  # table not created yet
+                    conn.rollback()
+                    out[t] = {"rows": 0, "ok": True, "note": type(e).__name__}
+            return out
         raise StoreError(f"unknown action {action}")
     finally:
         conn.close()
