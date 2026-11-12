@@ -380,7 +380,7 @@ export function BooksSection({ sb, league }: { sb: DbResult<SportsbookData>; lea
   const staleRows = r.coverage_detail?.stale_rows ?? [];
   return (
     <div className="space-y-6">
-      <Notice tone="warn">Private to the owner. Sportsbook names and book-level figures appear only on this page: never on subscriber pages, public reports or the repository.</Notice>
+      <Notice tone="warn">Private to the owner. Sportsbook names and book-level figures here are never shown on subscriber pages or in the public sportsbook reports. Note: the published game boards in the public repository still carry per-book lines (see the implementation report); that is a separate, open decision.</Notice>
       {!books.length ? <UnavailableState what="Book-level detail" reason="empty" /> : (
         <Block title="Coverage and movement by book" intro="Rows collected, series observed more than once, and how far observed lines moved. Upcoming comparisons = latest comparison per upcoming game and market for that book.">
           <Table head={["Book", "Rows collected", "Series", "Seen 2+ times", "Moved", "Mean |line change|", "Mean |no-vig change|", "Upcoming comparisons"]}>
