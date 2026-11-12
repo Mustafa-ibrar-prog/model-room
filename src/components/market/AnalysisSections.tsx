@@ -142,10 +142,11 @@ export function OpportunitySection({ league, r, contributions }: { league: Leagu
   const inp = isLocked(r.inputs) ? null : r.inputs;
   const main = h.opportunity[0];
   const last5 = main ? avgOpp(h, main.key, 5) : null;
+  const n5 = Math.min(5, h.games.length);
   const seasonV = main ? h.season?.opportunity[main.key] ?? null : null;
   const projMin = league === "nba" ? num(inp?.projected_minutes) ?? contributions?.minutes?.projected ?? null : null;
   const usualMin = contributions?.minutes?.usual ?? null;
-  const summary = projMin != null ? `${projMin.toFixed(1)} projected min` : last5 != null && main ? (main.key === "snap_pct" ? `${Math.round(last5)}% of snaps, last 5` : `${f1(last5)} ${main.label.toLowerCase()}, last 5`) : "No recent games";
+  const summary = projMin != null ? `${projMin.toFixed(1)} projected min` : last5 != null && main ? (main.key === "snap_pct" ? `${Math.round(last5)}% of snaps, ${n5 === 1 ? "1 game" : `last ${n5}`}` : `${f1(last5)} ${main.label.toLowerCase()}, ${n5 === 1 ? "1 game" : `last ${n5}`}`) : "No recent games";
   const roleShift = last5 != null && seasonV != null && h.season && h.season.games >= 3
     ? (league === "nba" ? Math.abs(last5 - seasonV) >= 4 : main?.key === "snap_pct" ? Math.abs(last5 - seasonV) >= 10 : false)
     : false;

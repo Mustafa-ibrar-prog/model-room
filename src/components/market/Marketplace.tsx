@@ -266,7 +266,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
     seasonNames: Object.fromEntries([...new Set(h.games.map((g) => g.season).filter((s): s is number => s != null))].map((s) => [s, seasonLabel(league, s)])),
   };
   const played = h.games.filter((g) => g.value != null).slice(0, 5);
-  const histSummary = played.length ? `last ${played.length}: ${fmt(played.reduce((a, g) => a + g.value!, 0) / played.length)} avg` : "no past games";
+  const histSummary = !played.length ? "no past games" : played.length === 1 ? `1 game: ${fmt(played[0].value!)}` : `last ${played.length}: ${fmt(played.reduce((a, g) => a + g.value!, 0) / played.length)} avg`;
   const others = r.lines.filter((l) => l !== market && l.quotes.length);
   const hrefFor = (l: PropLineView) => propsHref(league, { ...x.query, game: x.query.game ?? r.gameId }, { line: lineKey(r.id, l) });
   const inj = r.injury?.status && r.injury.status !== "available" ? r.injury : null;

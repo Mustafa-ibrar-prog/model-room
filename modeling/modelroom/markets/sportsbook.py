@@ -416,10 +416,14 @@ def analyse(league: str, snaps: pd.DataFrame, ledger_records: list[dict], sigmas
                     "note": "A difference is a disagreement between the model and the book, not a verified edge."}
     clv = {"status": "disabled", "reason": "no genuine closing line: lines are fetched at 7 AM and noon PT only",
            "observations_within_close_window": genuine_close, "close_window_minutes": CLOSE_WINDOW_MIN}
+    mv = movement_summary(H)
+    by_book = {"coverage_rows_by_book": cov_pub.pop("rows_by_book", None), "books_seen": cov_pub.pop("books_seen", None),
+               "movement_by_book": mv.pop("by_book", None)}
     public = {"league": league, "generated_at": now.isoformat(timespec="seconds"), "notice": NOTICE,
-              "accumulation": acc, "coverage": cov_pub, "movement": movement_summary(H),
+              "accumulation": acc, "coverage": cov_pub, "movement": mv,
               "upcoming": upcoming_pub, "settled": settled_summary(ev), "closing_line_value": clv,
-              "privacy": "Aggregates only. Line-level detail is kept in the private Supabase tables odds.comparisons and odds.reports."}
+              "privacy": "Aggregates only, with no sportsbook named. Book-level and line-level detail is kept in the private "
+                         "Supabase tables odds.comparisons and odds.reports."}
     # private detail: line histories, latest comparison per upcoming game/book/market, missing/stale, settled events
     latest_up = {}
     for c in C:
@@ -427,10 +431,21 @@ def analyse(league: str, snaps: pd.DataFrame, ledger_records: list[dict], sigmas
             k = (c["game_id"], c["sportsbook"], c["market"])
             if k not in latest_up or c["collected_at"] > latest_up[k]["collected_at"]:
                 latest_up[k] = c
-    private = {**public, "line_histories": H, "coverage_detail": cov_priv,
+    private = {**public, **by_book, "line_histories": H, "coverage_detail": cov_priv,
                "upcoming_latest_comparisons": sorted(latest_up.values(), key=lambda c: (c["commence_time"], c["game_id"], c["sportsbook"], c["market"])),
                "settled_events": ev}
+    names = list(S["sportsbook"].dropna().unique()) + (list(S["sportsbook_title"].dropna().unique()) if "sportsbook_title" in S.columns else [])
+    leaks = book_names_in(public, names)
+    if leaks:  # never publish a book's name: drop the report body rather than leak it
+        public = {"league": league, "generated_at": public["generated_at"], "notice": NOTICE,
+                  "withheld": f"public report withheld: it named {len(leaks)} sportsbook(s); detail kept privately"}
     return public, private, C
+
+
+def book_names_in(report: dict, books) -> list[str]:
+    """Sportsbook names (keys or titles) that appear anywhere in a report, compared case-insensitively."""
+    text = json.dumps(report, default=str).lower()
+    return sorted({b for b in books if isinstance(b, str) and len(b) > 2 and f'"{b.lower()}' in text})
 
 
 # ------------------------------------------------------------------ I/O (used by the CLI / workflow)
@@ -475,6 +490,7 @@ def run(league: str, write_store: bool = True) -> dict:
             usage = [u for u in usage if (u.get("league") == league)]
         public, private, C = analyse(league, snaps, recs, _sigmas(league), finals, sched, usage)
         res = {"league": league, "comparisons": len(C)}
+        public.setdefault("accumulation", {})
         if write_store:
             run_id = os.environ.get("GITHUB_RUN_ID") or datetime.now(timezone.utc).strftime("local-%Y%m%dT%H%M%S")
             r1 = S.insert_payloads(conn, "comparisons", league, [(comparison_key(c), c) for c in C], "analysis", run_id)
@@ -482,10 +498,23 @@ def run(league: str, write_store: bool = True) -> dict:
             v1, v2 = S.verify_table(conn, "comparisons", league), S.verify_table(conn, "reports", league)
             public["accumulation"]["stored_comparisons"] = v1["rows"]
             public["storage_verification"] = {"comparisons_chain_ok": v1["ok"], "reports_chain_ok": v2["ok"],
-                                              "snapshots_chain_ok": S.verify(conn, league)["ok"]}
+                                              "snapshots_chain_ok": S.verify(conn, league)["ok"],
+                                              "_expected_comparisons": len({comparison_key(c) for c in C})}
             res.update(new_comparisons=r1["inserted"], report_stored=r2["inserted"], **public["storage_verification"])
     finally:
         conn.close()
+    if write_store:
+        # What a later reader sees: committed rows only. A count below what this run inserted means nothing was kept.
+        after = S.verify_after_reconnect(league)
+        sv = public["storage_verification"]
+        sv.update(after_reconnect={t: {"rows": v["rows"], "ok": v["ok"]} for t, v in after.items()})
+        persisted = after["comparisons"]["rows"] >= sv.get("_expected_comparisons", 0) and after["reports"]["rows"] >= 1
+        sv["persisted"] = bool(persisted)
+        sv.pop("_expected_comparisons", None)
+        public["accumulation"]["stored_comparisons"] = after["comparisons"]["rows"]
+        res.update(persisted=sv["persisted"], after_reconnect=sv["after_reconnect"])
+        if not persisted:
+            print(f"::warning::{league} sportsbook analysis: records did not persist after the connection closed", flush=True)
     if not write_store:
         res["dry_run"] = True
         res["public_report"] = public
