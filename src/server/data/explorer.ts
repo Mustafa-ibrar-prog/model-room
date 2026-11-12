@@ -176,6 +176,65 @@ export interface ExplorerRow {
   inputs: Gate<Record<string, unknown>>;
   /** Last games before the run for this stat, newest first. */
   recent: { date: string; opp: string; value: number | null }[];
+  /** Past games and season averages, for display only (the model never reads them). */
+  history: HistoryView;
+}
+
+export interface HistoryGame {
+  date: string;
+  opp: string;
+  /** The game's season, when published; games from an earlier season are labelled. */
+  season: number | null;
+  value: number | null;
+  /** Opportunity in that game (minutes, attempts, snaps, targets...), keyed as in `opportunity`. */
+  opp_: Record<string, number | null>;
+}
+
+export interface HistoryView {
+  /** Played games before the run, newest first (up to 10; older boards publish 5). */
+  games: HistoryGame[];
+  /** How many games this board publishes per player (10 from Nov 2026; 5 before). */
+  published: number;
+  /** The board's season (labelled per league by seasonLabel). */
+  boardSeason: number;
+  /** Regular-season games this season and their per-game average; null when the board predates season averages. */
+  season: { season: number; games: number; avg: number | null; opportunity: Record<string, number> } | null;
+  /** Opportunity fields relevant to this category, in display order. */
+  opportunity: { key: string; label: string }[];
+}
+
+/** "2026–27" for an NBA season (named by its end year), "2026" for the NFL. */
+export const seasonLabel = (league: League, s: number) => (league === "nba" ? `${s - 1}–${String(s).slice(2)}` : String(s));
+
+/** Which opportunity fields matter for a category (the rest stay in the game log's data, not on screen). */
+function opportunityFor(league: League, cat: string): string[] {
+  if (league === "nba") return cat === "threes" ? ["minutes", "fg3a"] : cat === "points" || cat === "pra" ? ["minutes", "fga", "fta"] : ["minutes"];
+  if (cat.startsWith("passing") || cat === "interceptions") return ["snap_pct", "pass_att"];
+  if (cat.startsWith("rushing")) return ["snap_pct", "carries"];
+  if (cat.startsWith("receiving") || cat === "receptions" || cat === "longest_reception") return ["snap_pct", "targets"];
+  return ["snap_pct", "targets", "carries"];
+}
+
+function historyView(p: EnginePropPlayer, catKey: string, league: League, boardSeason: number): HistoryView {
+  const rc = p.recent;
+  const vals = rc?.values?.[catKey] ?? [];
+  const want = opportunityFor(league, catKey);
+  const opportunity = (rc?.opportunity ?? []).filter((o) => want.includes(o.key)).sort((a, b) => want.indexOf(a.key) - want.indexOf(b.key));
+  const games: HistoryGame[] = (rc?.games ?? []).map((g, i) => ({
+    date: g.date,
+    opp: g.opp,
+    season: typeof g.season === "number" ? g.season : null,
+    value: vals[i] ?? null,
+    opp_: Object.fromEntries(opportunity.map((o) => [o.key, typeof g[o.key] === "number" ? (g[o.key] as number) : null])),
+  }));
+  const s = rc?.season;
+  return {
+    games,
+    published: rc?.season !== undefined ? 10 : 5,
+    boardSeason,
+    season: s ? { season: s.season, games: s.games, avg: s.avg?.[catKey] ?? null, opportunity: Object.fromEntries(opportunity.filter((o) => s.opportunity?.[o.key] != null).map((o) => [o.key, s.opportunity[o.key]])) } : null,
+    opportunity,
+  };
 }
 
 export interface ContractDetail {
@@ -243,7 +302,7 @@ function headline(lines: PropLineView[]): PropLineView | null {
 /** Every quote on the line is stale (older than the comparison window): the line may have moved. */
 export const staleLine = (l: PropLineView) => !l.market && l.quotes.length > 0 && l.quotes.every((q) => q.flags.includes("stale"));
 
-function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: string, league: League = "nfl"): ExplorerRow | null {
+function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: string, league: League = "nfl", boardSeason = 0): ExplorerRow | null {
   const m = p.markets[cat.key];
   if (!m) return null;
   if (cat.positions && !cat.positions.includes(p.position)) return null;
@@ -284,6 +343,7 @@ function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: strin
     strong: lines.some((l) => l.edge?.grade === "strong"),
     inputs: gate(tier, "props.advanced", scalarInputs(p.inputs) as Record<string, unknown>),
     recent: (p.recent?.games ?? []).map((g, i) => ({ date: g.date, opp: g.opp, value: rv[i] ?? null })),
+    history: historyView(p, cat.key, league, boardSeason),
   };
 }
 
@@ -335,7 +395,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
     detail = query.line ? gate(tier, "props.projections", null) : null;
   } else {
     const pool = searchAll ? dayGames : selected ? [selected] : [];
-    let list = pool.flatMap((g) => g.players.map((p) => rowFor(p, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league))).filter((r): r is ExplorerRow => r !== null);
+    let list = pool.flatMap((g) => g.players.map((p) => rowFor(p, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season))).filter((r): r is ExplorerRow => r !== null);
     total = list.length;
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.team.toLowerCase() === q || r.matchup.toLowerCase().includes(q));
     if (query.team && selected && !searchAll && [selected.home.abbr, selected.away.abbr].includes(query.team)) list = list.filter((r) => r.team === query.team);
@@ -348,7 +408,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
       const pid = query.line.split("~")[0];
       const src = (selected?.players ?? []).concat(searchAll ? b.games.flatMap((g) => g.players) : []).find((p) => p.player_id === pid);
       const g = src ? b.games.find((x) => x.game_id === src.game_id) : undefined;
-      const row = src && g ? rowFor(src, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league) : null;
+      const row = src && g ? rowFor(src, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season) : null;
       const line = row?.lines.find((l) => lineKey(row.id, l) === query.line) ?? null;
       const cardOnly = row && query.line === `${row.id}~card`;
       detail = row && (line || cardOnly) ? { row, line, key: query.line, marketStats: b.performance.backtest?.by_market?.[category.key] ?? null } : null;

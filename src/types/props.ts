@@ -65,7 +65,15 @@ export interface EnginePropPlayer {
   /** Why the projection moved since the previous board (only when the injury picture changed). */
   changes?: { previous_at: string | null; reasons: string[]; markets: { market: string; label: string; from: number; to: number }[] } | null;
   /** Last few games before the run (newest first): context only, never an input to the board's numbers. */
-  recent?: { games: { date: string; opp: string }[]; values: Record<string, (number | null)[]> };
+  recent?: {
+    /** Newest first, up to 10 played games; opportunity fields (minutes, snaps, targets...) per game where published. */
+    games: ({ date: string; opp: string; season?: number } & Record<string, string | number | null | undefined>)[];
+    values: Record<string, (number | null)[]>;
+    /** Regular-season games this season before the run, and their per-game averages (boards from Nov 2026 on). */
+    season?: { season: number; games: number; avg: Record<string, number>; opportunity: Record<string, number> } | null;
+    /** Opportunity fields carried on each game, in display order. */
+    opportunity?: { key: string; label: string }[];
+  };
 }
 
 export interface EnginePropsBoard {

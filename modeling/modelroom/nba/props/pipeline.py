@@ -253,7 +253,9 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
                     shadow_errors[v] = f"ledger: {type(e).__name__}: {e}"[:300]
                     print(f"::warning::NBA props shadow {v} not recorded: {shadow_errors[v]}", flush=True)
 
-    recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool))
+    recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool),
+                  season=season, regular=inp.player_games["season_type"].astype(str).eq("2") if "season_type" in inp.player_games.columns else None,
+                  opportunity={"minutes": "Minutes", "fga": "Shot attempts", "fg3a": "3-pt attempts", "fta": "Free throw attempts"})
     try:
         prev_board = json.loads(published_path().read_text())
     except (OSError, ValueError):

@@ -137,4 +137,34 @@ describe("props explorer", () => {
     expect(c.steps).toBeNull(); // the synthetic board predates the recording
     expect(c.reason).toBe("not recorded for this projection");
   });
+
+  it("carries past games and season averages as published, without padding or mixing in opportunity", async () => {
+    const b = JSON.parse(JSON.stringify(board));
+    const wr = b.games[0].players.find((p: { player_id: string }) => p.player_id === "wr1");
+    wr.recent = {
+      games: [
+        { date: "2029-12-28", opp: "AAA", season: 2030, snap_pct: 80, targets: 9, carries: 0 },
+        { date: "2029-12-21", opp: "BBB", season: 2030, snap_pct: 70, targets: 6, carries: 1 },
+        { date: "2029-01-05", opp: "CCC", season: 2029, snap_pct: 60, targets: 4, carries: 0 },
+      ],
+      values: { receiving_yards: [88, 41, null], rushing_yards: [0, 3, 0] },
+      season: { season: 2030, games: 2, avg: { receiving_yards: 64.5 }, opportunity: { snap_pct: 75, targets: 7.5 } },
+      opportunity: [{ key: "snap_pct", label: "Snap share (%)" }, { key: "targets", label: "Targets" }, { key: "carries", label: "Carries" }],
+    };
+    writeFileSync(path.join(dir, "nfl_props.json"), JSON.stringify(b));
+    const x = await getExplorer("nfl", "plus", { cat: "receiving_yards" }, now);
+    if (!x.ok || isLocked(x.rows)) throw new Error("expected rows");
+    const h = x.rows.find((r) => r.id === "wr1")!.history;
+    expect(h.games.map((g) => g.value)).toEqual([88, 41, null]); // exactly the published games, newest first
+    expect(h.games[2].season).toBe(2029); // an earlier season stays labelled
+    expect(h.opportunity.map((o) => o.key)).toEqual(["snap_pct", "targets"]); // receiving: snaps and targets only
+    expect(h.games[0].opp_).toEqual({ snap_pct: 80, targets: 9 });
+    expect(h.season).toEqual({ season: 2030, games: 2, avg: 64.5, opportunity: { snap_pct: 75, targets: 7.5 } });
+    expect(h.published).toBe(10);
+    // A player on an older board (5 games, no season block) gets no season and no invented games.
+    const rb = x.rows.find((r) => r.id === "rb")!.history;
+    expect(rb.games).toEqual([]);
+    expect(rb.season).toBeNull();
+    expect(rb.published).toBe(5);
+  });
 });

@@ -51,11 +51,11 @@ export function ModelBox({ mean, median, range80, supportLabel, supportCls, comp
   return (
     <section aria-label="Model Room projection" className="rounded-md border border-navy-700 px-3 py-2">
       <div className="text-[0.68rem] text-model">Model Room projection</div>
-      <div className={`font-mono font-600 text-model ${compact ? "text-xl" : "text-3xl"} leading-tight`}>{fmt(mean)}</div>
+      <div className={`font-mono font-600 text-model ${compact ? "text-xl" : "text-3xl"} leading-tight`}>{mean >= 100 ? mean.toFixed(0) : mean.toFixed(1)}</div>
       <div className="text-[0.68rem] text-mute">
         average · middle {fmt(median)} · range {fmt(range80[0])}–{fmt(range80[1])}
       </div>
-      <div className={`text-[0.65rem] ${supportCls}`}>{supportLabel}</div>
+      {supportLabel ? <div className={`text-[0.65rem] ${supportCls}`}>{supportLabel}</div> : null}
     </section>
   );
 }
@@ -195,11 +195,11 @@ export function Contributions({ c, league }: { c: ContributionView; league: Leag
         {c.steps.map((s) => (
           <div key={s.key} className="flex justify-between gap-3">
             <dt className={s.key === "baseline" ? "text-ink" : "text-mute"}>{SENT[league][s.key] ?? s.key.replaceAll("_", " ")}</dt>
-            <dd className={`shrink-0 font-mono ${s.key === "baseline" ? "text-ink" : Math.abs(s.value) < 0.05 ? "text-faint" : "text-mute"}`}>{s.key === "baseline" ? fmt(s.value) : signed(s.value)}</dd>
+            <dd className={`shrink-0 font-mono ${s.key === "baseline" ? "text-ink" : Math.abs(s.value) < 0.05 ? "text-faint" : "text-mute"}`}>{s.key === "baseline" ? s.value.toFixed(1) : signed(s.value)}</dd>
           </div>
         ))}
         {c.final != null ? (
-          <div className="flex justify-between gap-3 border-t border-navy-700 pt-0.5"><dt className="text-model">Model Room average</dt><dd className="font-mono text-model">{fmt(c.final)}</dd></div>
+          <div className="flex justify-between gap-3 border-t border-navy-700 pt-0.5"><dt className="text-model">Model Room average</dt><dd className="font-mono text-model">{c.final.toFixed(1)}</dd></div>
         ) : null}
       </dl>
       {league === "nba" && c.minutes ? <p className="text-[0.68rem] text-faint">Minutes: usual {c.minutes.usual.toFixed(1)} · projected {c.minutes.projected.toFixed(1)}.</p> : null}
