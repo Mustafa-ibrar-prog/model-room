@@ -1,6 +1,6 @@
 {
  "league": "nfl",
- "generated_at": "2026-11-12T01:19:55+00:00",
+ "generated_at": "2026-11-12T01:32:25+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
   "snapshot_rows": 1696,
@@ -105,33 +105,11 @@
   "unchanged_rows_total": 814,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
   "post_start_rows_excluded": 0,
-  "books_seen": [
-   "betmgm",
-   "betonlineag",
-   "betrivers",
-   "betus",
-   "bovada",
-   "draftkings",
-   "fanduel",
-   "lowvig",
-   "mybookieag"
-  ],
   "markets_seen": [
    "moneyline",
    "spread",
    "total"
   ],
-  "rows_by_book": {
-   "betmgm": 126,
-   "betonlineag": 197,
-   "betrivers": 243,
-   "betus": 198,
-   "bovada": 126,
-   "draftkings": 243,
-   "fanduel": 243,
-   "lowvig": 197,
-   "mybookieag": 123
-  },
   "rows_by_market": {
    "moneyline": 493,
    "spread": 600,
@@ -167,71 +145,6 @@
     "moved": 61,
     "mean_abs_line_change": 0.162,
     "mean_abs_novig_change_pp": 0.24
-   }
-  },
-  "by_book": {
-   "betmgm": {
-    "series": 42,
-    "series_with_2plus_observations": 42,
-    "moved": 18,
-    "mean_abs_line_change": 0.196,
-    "mean_abs_novig_change_pp": 0.31
-   },
-   "betonlineag": {
-    "series": 66,
-    "series_with_2plus_observations": 66,
-    "moved": 27,
-    "mean_abs_line_change": 0.212,
-    "mean_abs_novig_change_pp": 0.47
-   },
-   "betrivers": {
-    "series": 81,
-    "series_with_2plus_observations": 81,
-    "moved": 24,
-    "mean_abs_line_change": 0.157,
-    "mean_abs_novig_change_pp": 0.37
-   },
-   "betus": {
-    "series": 66,
-    "series_with_2plus_observations": 66,
-    "moved": 24,
-    "mean_abs_line_change": 0.212,
-    "mean_abs_novig_change_pp": 0.32
-   },
-   "bovada": {
-    "series": 42,
-    "series_with_2plus_observations": 42,
-    "moved": 16,
-    "mean_abs_line_change": 0.143,
-    "mean_abs_novig_change_pp": 0.5
-   },
-   "draftkings": {
-    "series": 81,
-    "series_with_2plus_observations": 81,
-    "moved": 20,
-    "mean_abs_line_change": 0.065,
-    "mean_abs_novig_change_pp": 0.34
-   },
-   "fanduel": {
-    "series": 81,
-    "series_with_2plus_observations": 81,
-    "moved": 22,
-    "mean_abs_line_change": 0.065,
-    "mean_abs_novig_change_pp": 0.37
-   },
-   "lowvig": {
-    "series": 66,
-    "series_with_2plus_observations": 66,
-    "moved": 27,
-    "mean_abs_line_change": 0.221,
-    "mean_abs_novig_change_pp": 0.53
-   },
-   "mybookieag": {
-    "series": 41,
-    "series_with_2plus_observations": 41,
-    "moved": 10,
-    "mean_abs_line_change": 0.13,
-    "mean_abs_novig_change_pp": 0.13
    }
   },
   "by_team": {
@@ -395,10 +308,25 @@
   "observations_within_close_window": 0,
   "close_window_minutes": 10.0
  },
- "privacy": "Aggregates only. Line-level detail is kept in the private Supabase tables odds.comparisons and odds.reports.",
+ "privacy": "Aggregates only, with no sportsbook named. Book-level and line-level detail is kept in the private Supabase tables odds.comparisons and odds.reports.",
  "storage_verification": {
   "comparisons_chain_ok": true,
   "reports_chain_ok": true,
-  "snapshots_chain_ok": true
+  "snapshots_chain_ok": true,
+  "after_reconnect": {
+   "snapshots": {
+    "rows": 1696,
+    "ok": true
+   },
+   "comparisons": {
+    "rows": 1174,
+    "ok": true
+   },
+   "reports": {
+    "rows": 1,
+    "ok": true
+   }
+  },
+  "persisted": true
  }
 }
