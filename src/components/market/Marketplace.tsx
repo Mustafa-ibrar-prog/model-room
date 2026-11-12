@@ -2,14 +2,16 @@ import Link from "next/link";
 import { Confirmed, sourceLabel } from "@/components/injuries/InjuryFlags";
 import { formatKickoff, formatNumber, formatPct, formatTimestamp } from "@/lib/format";
 import { providerName } from "@/lib/providers";
-import { getExplorer, lineKey, marketMid, SORTS, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
+import { contractProbs, getExplorer, lineKey, marketMid, observedAt, SORTS, staleLine, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
+import { preferredOutcome } from "@/lib/propOutcome";
 import { getViewer } from "@/server/viewer";
 import { isLocked, type League } from "@/types/domain";
 import type { PropLineView } from "@/types/props";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { LockedCell, LockedPanel, Unavailable } from "@/components/ui/primitives";
 import { AutoSubmit } from "@/components/props/AutoSubmit";
-import { age, cents, EdgeTag, flagText, fmt, GapBar, lineLabel, PROVIDERS, quoteBy } from "./bits";
+import { age, cents, EdgeTag, flagText, lineLabel, PROVIDERS, quoteBy } from "./bits";
+import { Contributions, DistributionChart, InjuriesFreshness, MarketBox, ModelBox, OutcomeBar, PreferredBlock, PreferredChip, type PreferredView } from "./PropParts";
 import { FavoritesScope, FavoriteStar, RecentlyViewed, TrackView } from "./local";
 
 // Player data history behind the projection (the engine's "support"), not a confidence that the projection beats the market.
@@ -88,54 +90,8 @@ function GameChips({ league, x }: { league: League; x: Extract<Explorer, { ok: t
 }
 
 // ------------------------------------------------------------------ player cards
-/** Who is quoting this line ("Polymarket", "Kalshi"), for the market label. */
-function quotedBy(l: PropLineView): string | null {
-  const q = l.quotes.find((v) => v.usable && v.mid != null) ?? l.quotes.find((v) => v.mid != null && !v.flags.includes("crossed book"));
-  return q ? providerName(q.provider).replace(" US", "") : null;
-}
-
-/** The line that matters most for this player: the market's main line, or the model's coin-flip line. */
-function MainLine({ l, href, active, stat }: { l: PropLineView; href: string; active: boolean; stat: string }) {
-  const mid = marketMid(l);
-  const by = quotedBy(l);
-  const gap = mid != null ? Math.round((l.modelProb - mid) * 100) : null;
-  return (
-    <Link
-      href={href}
-      scroll={false}
-      aria-current={active ? "true" : undefined}
-      className={`block min-w-0 flex-1 rounded-md border px-3 py-2 transition-colors md:max-w-[19rem] ${active ? "border-model bg-model/10" : "border-navy-700 bg-navy-850 hover:border-navy-600"}`}
-    >
-      <section aria-label={mid != null ? "Market line" : "Main line"}>
-        <div className="flex items-center justify-between gap-2">
-          <span className="truncate text-sm">
-            <span className="font-mono font-700 text-ink">{lineLabel(l)}</span> <span className="text-mute">{stat}</span>
-          </span>
-          {l.edge ? <EdgeTag l={l} compact /> : gap != null && Math.abs(gap) >= 3 ? <span className="font-mono text-[0.7rem] text-mute">{gap > 0 ? "+" : ""}{gap} pts</span> : null}
-        </div>
-        <div className="mt-1 grid grid-cols-2 gap-3">
-          <div>
-            <div className="text-[0.65rem] text-faint">Model</div>
-            <div className="font-display text-2xl font-700 leading-none text-model">{formatPct(l.modelProb)}</div>
-          </div>
-          <div>
-            <div className="text-[0.65rem] text-faint">{by ? `${by}${l.market ? "" : " (wide)"}` : "Market"}</div>
-            {mid != null ? (
-              <div className="font-display text-2xl font-700 leading-none text-market">{formatPct(mid)}</div>
-            ) : (
-              <div className="pt-1.5 text-xs text-faint">No line listed</div>
-            )}
-          </div>
-        </div>
-        <GapBar model={l.modelProb} market={mid} edge={Boolean(l.edge)} className="mt-2" />
-      </section>
-    </Link>
-  );
-}
-
-/** Every other line, as a small pill: line, model %, market % when there is one. */
-function LinePill({ l, href, active }: { l: PropLineView; href: string; active: boolean }) {
-  const mid = marketMid(l);
+/** A model threshold (no market quote) as a small pill: "20+ 62%". Always labelled as the model's ladder. */
+function LadderPill({ l, href, active }: { l: PropLineView; href: string; active: boolean }) {
   return (
     <Link
       href={href}
@@ -144,6 +100,18 @@ function LinePill({ l, href, active }: { l: PropLineView; href: string; active: 
       className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${active ? "border-model bg-model/15" : "border-navy-700 bg-navy-900 hover:border-navy-600"}`}
     >
       <span className="font-mono text-mute">{lineLabel(l)}</span>
+      <span className="font-mono text-model">{formatPct(l.modelProb)}</span>
+    </Link>
+  );
+}
+
+/** Other quoted contracts for the player (beyond the main market line): line, model %, market %. */
+function QuotedPill({ l, href, active }: { l: PropLineView; href: string; active: boolean }) {
+  const mid = marketMid(l);
+  return (
+    <Link href={href} scroll={false} aria-current={active ? "true" : undefined}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${active ? "border-model bg-model/15" : "border-navy-600 bg-navy-900 hover:border-navy-500"}`}>
+      <span className="font-mono text-ink">{lineLabel(l)}</span>
       <span className="font-mono text-model">{formatPct(l.modelProb)}</span>
       {mid != null ? <span className="font-mono text-market">{formatPct(mid)}</span> : null}
       {l.edge ? <span className="h-1.5 w-1.5 rounded-full bg-edge" aria-label="edge" /> : null}
@@ -180,67 +148,127 @@ function AvailabilityPanel({ r }: { r: ExplorerRow }) {
   );
 }
 
-function PlayerRow({ r, league, q, activeKey, stat }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null; stat: string }) {
+function PlayerRow({ r, league, q, activeKey, now }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null; now: number }) {
   const c = CONF[r.support];
-  const href = (l: PropLineView) => propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: lineKey(r.id, l) });
+  const href = (l: PropLineView | null) => propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: l ? lineKey(r.id, l) : `${r.id}~card` });
   const main = r.headline;
-  const others = r.lines.filter((l) => l !== main);
+  const quotedOthers = r.lines.filter((l) => l !== main && l.quotes.length);
+  const cardKey = main ? lineKey(r.id, main) : `${r.id}~card`;
   return (
     <li data-fav-id={`${league}:${r.id}`} className="rounded-lg border border-navy-700 bg-navy-900 p-3">
-      <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:gap-4">
-        <div className="flex min-w-0 items-center gap-2 md:w-72 md:shrink-0">
-          <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
-          <TeamBadge league={league} abbr={r.team} size="sm" />
-          <div className="min-w-0 flex-1">
-            <div className="truncate font-600 text-ink">{r.name}</div>
-            <div className="flex flex-wrap gap-x-2 text-[0.72rem] text-faint">
-              <span>{r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}</span>
-              {r.injury?.status && r.injury.status !== "available" ? (
-                <span className="text-edge" title={`${sourceLabel(r.injury.source)}${r.injury.reportTime ? `, ${formatTimestamp(r.injury.reportTime)}` : ""}${r.injury.confirmed ? " (official)" : " (report)"}`}>
-                  {r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status}{r.injury.confirmed ? "" : "*"}
-                </span>
-              ) : r.injuryStatus && !r.injury ? <span className="text-edge">{r.injuryStatus}</span> : null}
-              {r.changes ? <span className="font-600 text-edge" title={r.changes.reasons.join("; ")}>Updated: injury news</span> : null}
+      <div className="flex items-center gap-2">
+        <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
+        <TeamBadge league={league} abbr={r.team} size="sm" />
+        <div className="min-w-0 flex-1">
+          <Link href={href(main)} scroll={false} className="block truncate font-600 text-ink hover:underline">{r.name}</Link>
+          <div className="flex flex-wrap gap-x-2 text-[0.72rem] text-faint">
+            <span>{r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}</span>
+            {r.injury?.status && r.injury.status !== "available" ? (
+              <span className="text-edge" title={`${sourceLabel(r.injury.source)}${r.injury.reportTime ? `, ${formatTimestamp(r.injury.reportTime)}` : ""}${r.injury.confirmed ? " (official)" : " (report)"}`}>
+                {r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status}{r.injury.confirmed ? "" : "*"}
+              </span>
+            ) : r.injuryStatus && !r.injury ? <span className="text-edge">{r.injuryStatus}</span> : null}
+            {r.changes ? <span className="font-600 text-edge" title={r.changes.reasons.join("; ")}>Updated: injury news</span> : null}
+          </div>
+        </div>
+        {main?.edge ? <EdgeTag l={main} compact /> : null}
+      </div>
+
+      <div className="mt-2.5 grid grid-cols-2 gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]">
+        <Link href={href(main)} scroll={false} aria-current={activeKey === cardKey ? "true" : undefined}
+          className={`col-span-2 grid grid-cols-2 gap-2 rounded-md ${activeKey === cardKey ? "ring-1 ring-model/60" : ""}`}>
+          <MarketBox l={main} observed={main ? observedAt(main) : null} now={now} stale={main ? staleLine(main) : false} compact />
+          <ModelBox mean={r.mean} median={r.median} range80={r.range80} supportLabel={c.label} supportCls={c.cls} compact />
+        </Link>
+        {main ? (
+          <Link href={href(main)} scroll={false} className="col-span-2 flex flex-col justify-center gap-1.5 md:col-span-1">
+            {r.atLine ? <OutcomeBar pr={r.atLine} l={main} compact /> : null}
+            <PreferredChip p={r.preferred} line={r.atLine?.line ?? null} />
+          </Link>
+        ) : (
+          <div className="col-span-2 flex flex-col justify-center gap-1 md:col-span-1">
+            <span className="text-[0.68rem] text-faint">Model ladder · no market line, so no preferred outcome</span>
+            <div className="flex flex-wrap gap-1.5">
+              {r.ladder.map((l) => {
+                const k = lineKey(r.id, l);
+                return <LadderPill key={k} l={l} href={href(l)} active={k === activeKey} />;
+              })}
             </div>
           </div>
-          <section aria-label="Model Room projection" className="shrink-0 text-right">
-            <div className="text-[0.6rem] text-faint">Projection</div>
-            <div className="font-display text-xl font-700 leading-none text-model">{fmt(r.median)}</div>
-            <div className={`text-[0.62rem] ${c.cls}`}>{c.label}</div>
-          </section>
-        </div>
-        {main ? <MainLine l={main} href={href(main)} active={lineKey(r.id, main) === activeKey} stat={stat} /> : null}
-        {others.length ? (
-          <div className="-mx-3 flex gap-1.5 overflow-x-auto px-3 md:mx-0 md:flex-1 md:flex-wrap md:px-0">
-            {others.map((l) => {
-              const k = lineKey(r.id, l);
-              return <LinePill key={k} l={l} href={href(l)} active={k === activeKey} />;
-            })}
-          </div>
-        ) : null}
+        )}
       </div>
+
+      {main && (quotedOthers.length || r.ladder.length) ? (
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
+          {quotedOthers.map((l) => {
+            const k = lineKey(r.id, l);
+            return <QuotedPill key={k} l={l} href={href(l)} active={k === activeKey} />;
+          })}
+          {r.ladder.length ? <span className="text-[0.65rem] text-faint">Model ladder</span> : null}
+          {r.ladder.map((l) => {
+            const k = lineKey(r.id, l);
+            return <LadderPill key={k} l={l} href={href(l)} active={k === activeKey} />;
+          })}
+        </div>
+      ) : null}
     </li>
   );
 }
 
 // ------------------------------------------------------------------ detail
-function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League; x: Extract<Explorer, { ok: true }>; explicit: boolean }) {
-  const { row: r, line: l } = d;
+function MarketQuotes({ l, x }: { l: PropLineView; x: Extract<Explorer, { ok: true }> }) {
   const qb = quoteBy(l);
-  const implied = marketMid(l);
-  const wide = implied != null && !l.market;
-  const diff = implied != null ? Math.round((l.modelProb - implied) * 100) : null;
-  const ms = d.marketStats;
-  const k = l.threshold;
-  const hit = (v: number | null) => (v == null ? null : l.op === ">=" ? v >= k : v > k);
+  return (
+    <table className="w-full text-xs">
+      <thead className="text-faint"><tr><th className="py-1 text-left font-500">Exchange</th><th className="text-right font-500">Bid/Ask</th><th className="text-right font-500">Implied</th><th className="text-right font-500">Size</th><th className="text-right font-500">Seen</th></tr></thead>
+      <tbody>
+        {PROVIDERS.map((p) => {
+          const qq = qb[p];
+          return (
+            <tr key={p} className="border-t border-navy-700/70">
+              <td className="py-1.5 text-ink">{providerName(p)}</td>
+              {qq ? (
+                <>
+                  <td className={`text-right font-mono ${qq.usable ? "text-market" : "text-faint line-through"}`}>{cents(qq.bid)}/{cents(qq.ask)}¢</td>
+                  <td className={`text-right font-mono ${qq.usable ? "text-market" : "text-faint"}`}>{qq.mid != null ? formatPct(qq.mid) : "–"}</td>
+                  <td className="text-right font-mono text-mute">{qq.askSize != null ? Math.round(qq.askSize) : "n/a"}</td>
+                  <td className="text-right font-mono text-faint">{qq.usable ? age(qq.capturedAt, x.now) : flagText(qq.flags)}</td>
+                </>
+              ) : (
+                <td colSpan={4} className="text-right text-faint">Not listed</td>
+              )}
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League; x: Extract<Explorer, { ok: true }>; explicit: boolean }) {
+  const { row: r, line: sel } = d;
+  const quoted = sel && sel.quotes.length ? sel : null;
+  // The market line on the card: the selected quoted contract, else the player's main market line.
+  const market = quoted ?? r.headline;
+  const pr = quoted ? contractProbs(quoted) : r.atLine;
+  const pref: PreferredView = quoted && quoted !== r.headline
+    ? (staleLine(quoted) ? { kind: "none", reason: "stale_line" } : preferredOutcome(pr, { support: r.support, mean: r.mean }))
+    : r.preferred;
+  // A model threshold the reader picked (no market quote): shown as the model's, never as a market line.
+  const ladderSel = sel && !sel.quotes.length ? sel : null;
+  const markLine = market ? pr?.line ?? null : ladderSel ? (ladderSel.op === ">=" ? ladderSel.threshold - 0.5 : ladderSel.threshold) : null;
+  const implied = market ? marketMid(market) : null;
+  const k = ladderSel?.threshold ?? (market ? market.threshold : null);
+  const hit = (v: number | null) => (v == null || k == null ? null : (ladderSel ?? market)!.op === ">=" ? v >= k : v > k);
   const recent = r.recent.filter((g) => g.value != null);
   const closeHref = propsHref(league, { ...x.query }, { line: undefined });
-  const title = `${r.name} ${lineLabel(l)} ${x.category.label.toLowerCase()}`;
+  const title = `${r.name} ${x.category.label.toLowerCase()}`;
+  const ms = d.marketStats;
   return (
     <div className={explicit ? "fixed inset-0 z-50 flex flex-col justify-end bg-black/60 lg:static lg:z-auto lg:block lg:bg-transparent" : "hidden lg:block"}>
     {explicit ? <Link href={closeHref} scroll={false} aria-label="Close details" className="min-h-[8vh] flex-1 lg:hidden" /> : null}
     <aside
-      aria-label="Contract detail"
+      aria-label="Prop detail"
       className={`${explicit ? "max-h-[90vh] overflow-y-auto rounded-t-2xl border-t border-navy-600 bg-navy-950 p-3 pb-8 shadow-2xl lg:max-h-none lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none" : ""} lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto`}
     >
       {explicit ? <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-navy-600 lg:hidden" aria-hidden="true" /> : null}
@@ -249,6 +277,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
         <div className="flex items-start gap-2">
           <TeamBadge league={league} abbr={r.team} />
           <div className="min-w-0 flex-1">
+            <p className="text-xs text-faint">{x.category.label}</p>
             <h2 className="font-display text-xl font-700 leading-tight text-ink">{r.name}</h2>
             <p className="text-xs text-faint">{r.position} · {r.matchup}{x.game ? ` · ${formatKickoff(x.game.startTime)}` : ""}</p>
           </div>
@@ -258,90 +287,50 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
 
         <AvailabilityPanel r={r} />
 
-        <div className="flex flex-wrap gap-1">
-          {r.lines.map((o) => {
-            const key = lineKey(r.id, o);
-            return (
-              <Link key={key} href={propsHref(league, { ...x.query, game: x.query.game ?? r.gameId }, { line: key })} scroll={false}
-                className={`rounded border px-1.5 py-0.5 font-mono text-xs ${key === d.key ? "border-model bg-model/10 text-ink" : "border-navy-700 text-mute hover:text-ink"}`}>
-                {lineLabel(o)}
-              </Link>
-            );
-          })}
-        </div>
-        <p className="text-sm text-ink">{lineLabel(l)} {x.category.label.toLowerCase()}</p>
+        <MarketBox l={market} observed={market ? observedAt(market) : null} now={x.now} stale={market ? staleLine(market) : false} />
+        {market ? (
+          <>
+            <MarketQuotes l={market} x={x} />
+            {implied != null ? <p className="text-[0.68rem] text-faint">Market-implied chance of Yes (bid/ask midpoint): {formatPct(implied)}{market.market ? "" : " (wide or thin quote, for reference only)"}.</p> : null}
+          </>
+        ) : null}
 
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="rounded-md bg-model/10 p-2">
-            <div className="text-[0.65rem] font-600 uppercase tracking-wider text-model">Model</div>
-            <div className="font-display text-2xl font-700 text-model">{formatPct(l.modelProb)}</div>
-          </div>
-          <div className={`rounded-md p-2 ${implied != null ? "bg-market/10" : "bg-navy-850"}`}>
-            <div className={`text-[0.65rem] font-600 uppercase tracking-wider ${implied != null ? "text-market" : "text-faint"}`}>Market{wide ? " (wide)" : ""}</div>
-            <div className={`font-display text-2xl font-700 ${implied != null ? "text-market" : "text-faint"}`}>{implied != null ? formatPct(implied) : "–"}</div>
-          </div>
-          <div className="rounded-md bg-navy-850 p-2">
-            <div className="text-[0.65rem] font-600 uppercase tracking-wider text-faint">Gap</div>
-            <div className="font-display text-2xl font-700 text-ink">{diff == null ? "–" : `${diff > 0 ? "+" : ""}${diff}`}</div>
-          </div>
-        </div>
-        <GapBar model={l.modelProb} market={implied} edge={Boolean(l.edge)} />
+        <ModelBox mean={r.mean} median={r.median} range80={r.range80} supportLabel={`${CONF[r.support].label}: ${r.supportNote}`} supportCls={CONF[r.support].cls} />
+        {r.grid ? <DistributionChart grid={r.grid} line={markLine} label={x.category.label.toLowerCase()} /> : null}
 
-        <section aria-label="Market quotes">
-          <h3 className="mb-1 text-xs font-600 uppercase tracking-wider text-market">Actual market</h3>
-          <table className="w-full text-xs">
-            <thead className="text-faint"><tr><th className="py-1 text-left font-500">Exchange</th><th className="text-right font-500">Bid/Ask</th><th className="text-right font-500">Implied</th><th className="text-right font-500">Size</th><th className="text-right font-500">Quote</th></tr></thead>
-            <tbody>
-              {PROVIDERS.map((p) => {
-                const qq = qb[p];
-                return (
-                  <tr key={p} className="border-t border-navy-700/70">
-                    <td className="py-1.5 text-ink">{providerName(p)}</td>
-                    {qq ? (
-                      <>
-                        <td className={`text-right font-mono ${qq.usable ? "text-market" : "text-faint line-through"}`}>{cents(qq.bid)}/{cents(qq.ask)}¢</td>
-                        <td className={`text-right font-mono ${qq.usable ? "text-market" : "text-faint"}`}>{qq.mid != null ? formatPct(qq.mid) : "–"}</td>
-                        <td className="text-right font-mono text-mute">{qq.askSize != null ? Math.round(qq.askSize) : "n/a"}</td>
-                        <td className="text-right font-mono text-faint">{qq.usable ? age(qq.capturedAt, x.now) : flagText(qq.flags)}</td>
-                      </>
-                    ) : (
-                      <td colSpan={4} className="text-right text-faint">Market unavailable</td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </section>
+        {pr && market ? <OutcomeBar pr={pr} l={market} /> : null}
+        {ladderSel ? (
+          <p className="rounded-md border border-navy-700 p-2.5 text-xs text-mute">
+            Model threshold, not a market line: Model Room gives <span className="text-model">{formatPct(ladderSel.modelProb)}</span> to {lineLabel(ladderSel)} {x.category.label.toLowerCase()}.
+          </p>
+        ) : null}
+        {market ? <PreferredBlock p={pref} pr={pr} mean={r.mean} /> : <p className="text-xs text-faint">No preferred outcome without a market line.</p>}
 
-        <section aria-label="Model-implied value" className="rounded-md border border-navy-700 p-2.5 text-xs">
-          {l.edge ? (
-            <>
-              <div className="flex items-center justify-between"><span className="font-600 text-edge">Model-implied expected value (unverified)</span><EdgeTag l={l} /></div>
-              <p className="mt-1 text-mute">
-                {l.edge.side === "yes" ? "Yes" : "No"} at {cents(l.edge.price)}¢ on {providerName(l.edge.provider)}. Model chance − price − fee ={" "}
-                <span className="text-edge">+{(l.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{l.edge.grade !== "strong" ? ` Data warnings: ${l.edge.reasons.join("; ")}.` : ""} This assumes the model&apos;s probability is right; prop probabilities have not been validated against market prices, so it is not a verified edge.
-              </p>
-            </>
+        {market?.edge ? (
+          <section aria-label="Model-implied value" className="rounded-md border border-navy-700 p-2.5 text-xs">
+            <div className="flex items-center justify-between"><span className="font-600 text-edge">Model-implied expected value (unverified)</span><EdgeTag l={market} /></div>
+            <p className="mt-1 text-mute">
+              {market.edge.side === "yes" ? "Yes" : "No"} at {cents(market.edge.price)}¢ on {providerName(market.edge.provider)}. Model chance − price − fee ={" "}
+              <span className="text-edge">+{(market.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{market.edge.grade !== "strong" ? ` Data warnings: ${market.edge.reasons.join("; ")}.` : ""} This assumes the model&apos;s probability is right; it is not a verified edge.
+            </p>
+          </section>
+        ) : null}
+
+        <section aria-label="Why the model lands here" className="space-y-1.5">
+          <h3 className="text-xs font-600 text-ink">Why the model lands here</h3>
+          {isLocked(r.contributions) ? (
+            <div className="flex items-center gap-2 text-xs text-faint"><span>The model&apos;s step-by-step record is part of Pro.</span><LockedCell requires={r.contributions.requires} /></div>
           ) : (
-            <p className="text-faint">{l.market ? "Model-implied value is not positive at the current executable price after fees." : "No usable exchange price, so nothing is compared."}</p>
+            <Contributions c={r.contributions} league={league} />
           )}
         </section>
 
-        <section aria-label="Model Room projection" className="space-y-1.5">
-          <h3 className="text-xs font-600 uppercase tracking-wider text-model">Model Room projection</h3>
-          <dl className="grid grid-cols-4 gap-2 text-center">
-            {[["Mean", r.mean], ["Median", r.median], ["SD", r.sd]].map(([lab, v]) => (
-              <div key={lab as string}><dt className="text-[0.65rem] text-faint">{lab}</dt><dd className="font-mono text-sm text-ink">{fmt(v as number)}</dd></div>
-            ))}
-            <div><dt className="text-[0.65rem] text-faint">80% range</dt><dd className="font-mono text-sm text-ink">{fmt(r.range80[0])}–{fmt(r.range80[1])}</dd></div>
-          </dl>
-          <p className="text-xs text-mute"><span className={CONF[r.support].cls}>{CONF[r.support].label}</span>: {r.supportNote}</p>
-        </section>
+        <InjuriesFreshness league={league} team={r.team} opp={r.opp} injuries={x.injuries} modelAbsences={r.modelAbsences}
+          generatedAt={x.generatedAt} feedAt={x.injuryFeedAt} lineSeen={market ? observedAt(market) : null} version={x.model.version} />
 
         {recent.length ? (
           <section aria-label="Recent games">
-            <h3 className="mb-1 text-xs font-600 uppercase tracking-wider text-faint">Last {recent.length} games</h3>
+            <h3 className="mb-1 text-xs font-600 text-faint">Last {recent.length} games</h3>
             <ul className="flex gap-1">
               {recent.map((g) => (
                 <li key={g.date} className={`flex-1 rounded border px-1 py-1 text-center ${hit(g.value) ? "border-good/50" : "border-navy-700"}`} title={`${g.date} vs ${g.opp}`}>
@@ -350,35 +339,35 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
                 </li>
               ))}
             </ul>
-            <p className="mt-1 text-[0.68rem] text-faint">Green cleared {lineLabel(l)}. Past games only.</p>
+            <p className="mt-1 text-[0.68rem] text-faint">{k != null ? `Green cleared ${lineLabel((ladderSel ?? market)!)}. ` : ""}Past games only; the model does not use this row.</p>
           </section>
         ) : null}
 
-        <section aria-label="Model inputs" className="text-xs">
-          <h3 className="mb-1 font-600 uppercase tracking-wider text-faint">Player and opponent inputs</h3>
+        <details className="text-xs">
+          <summary className="cursor-pointer font-600 text-faint">Player and opponent inputs</summary>
           {isLocked(r.inputs) ? (
-            <div className="flex items-center gap-2 text-faint">
+            <div className="mt-1 flex items-center gap-2 text-faint">
               <span>Model inputs (usage, matchup factors) are part of Pro.</span>
               <LockedCell requires={r.inputs.requires} />
             </div>
           ) : (
-            <dl className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+            <dl className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
               {Object.entries(r.inputs).filter(([, v]) => v !== null && typeof v !== "object").map(([kk, v]) => (
                 <div key={kk} className="flex justify-between gap-2"><dt className="text-faint">{kk.replaceAll("_", " ")}</dt><dd className="font-mono text-mute">{String(v)}</dd></div>
               ))}
             </dl>
           )}
-        </section>
+        </details>
 
         {ms ? (
           <section aria-label="Historical performance" className="text-xs text-mute">
-            <h3 className="mb-1 font-600 uppercase tracking-wider text-faint">How this market tested</h3>
-            {ms.n.toLocaleString()} {x.category.label.toLowerCase()} lines in held-out seasons: log loss {ms.log_loss.toFixed(3)}
+            <h3 className="mb-1 font-600 text-faint">How this category tested</h3>
+            {ms.n.toLocaleString()} {x.category.label.toLowerCase()} thresholds in held-out seasons: log loss {ms.log_loss.toFixed(3)}
             {ms.baseline_log_loss != null ? ` vs ${ms.baseline_log_loss.toFixed(3)} for recent form` : ""}
-            {ms.ece != null ? `, calibration error ${(ms.ece * 100).toFixed(1)}%` : ""}. <Link href={`/performance?sport=${league}`} className="text-model hover:underline">Details</Link>
+            {ms.ece != null ? `, calibration error ${(ms.ece * 100).toFixed(1)}%` : ""}. <Link href={`/performance/props?sport=${league}&cat=${x.category.key}`} className="text-model hover:underline">Validation by category</Link>
           </section>
         ) : null}
-        <p className="text-[0.65rem] text-faint">Model run {formatTimestamp(x.generatedAt)}. The model never sees exchange prices.</p>
+        <p className="text-[0.65rem] text-faint">The model never sees market prices; market lines are shown beside it, not fed into it.</p>
       </div>
     </aside>
     </div>
@@ -396,8 +385,9 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
   const game = x.game;
   const rows = x.rows;
   const explicit = Boolean(query.line);
+  const first = !isLocked(rows) && rows.length ? rows[0] : null;
   const detail: ContractDetail | null = !isLocked(x.detail) && x.detail ? x.detail
-    : !isLocked(rows) && rows.length && rows[0].headline ? { row: rows[0], line: rows[0].headline, key: lineKey(rows[0].id, rows[0].headline), marketStats: x.backtest?.by_market?.[x.category.key] ?? null }
+    : first ? { row: first, line: first.headline, key: first.headline ? lineKey(first.id, first.headline) : `${first.id}~card`, marketStats: x.backtest?.by_market?.[x.category.key] ?? null }
     : null;
   const activeKey = explicit ? query.line ?? null : detail?.key ?? null;
   const sel = "rounded-md border border-navy-700 bg-navy-900 px-2 py-1.5 text-sm text-ink";
@@ -444,8 +434,8 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
               </h2>
             ) : null}
             <span className="hidden items-center gap-3 text-[0.7rem] text-mute md:flex">
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-model" />Model</span>
-              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-market" />Market</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-market" />Market line (as listed)</span>
+              <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-model" />Model Room projection</span>
               <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-sm bg-edge" />Model-implied +EV after fees (unverified)</span>
             </span>
           </div>
@@ -506,7 +496,7 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             </p>
           ) : (
             <FavoritesScope>
-              <ul className="space-y-2">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} stat={statLabel} />)}</ul>
+              <ul className="space-y-2">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} now={x.now} />)}</ul>
             </FavoritesScope>
           )}
         </div>

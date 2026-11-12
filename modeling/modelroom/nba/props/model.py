@@ -161,6 +161,63 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
 
 _AUDIT_PARTS = os.environ.get("MODELROOM_AUDIT_USAGE_PARTS") == "1"
 
+# Each published stat as per-minute rates: (rate, coefficient, power of the usage factor on it). Points use the scoring
+# shock (usage^1) on fg2m / fg3m / ftm, assists usage^0.5, the rest none; exactly as in project_team's simulation.
+CONTRIB_PARTS = {
+    "pts": [("fg2m", 2.0, 1.0), ("fg3m", 3.0, 1.0), ("ftm", 1.0, 1.0)],
+    "fg3m": [("fg3m", 1.0, 1.0)],
+    "reb": [("reb", 1.0, 0.0)],
+    "ast": [("ast", 1.0, 0.5)],
+    "stl": [("stl", 1.0, 0.0)],
+    "blk": [("blk", 1.0, 0.0)],
+}
+CONTRIB_PARTS["pra"] = CONTRIB_PARTS["pts"] + CONTRIB_PARTS["reb"] + CONTRIB_PARTS["ast"]
+CONTRIB_VERSION = 1
+
+
+def contributions(x: pd.Series, mwp0: float | None, base_pid: float, starter_rate: float, margin: float, s: PropSettings,
+                  pace_f: float, opp_f, uf, sims: dict, scenarios: bool) -> dict:
+    """Measured contribution of each existing adjustment to one player's mean, per published stat (bookkeeping only).
+
+    The model's mean is rate x minutes x usage x pace x matchup (each a multiplier on the per-minute rate). Starting from
+    his history (recency-weighted rates x his usual minutes when he plays), the adjustments are applied one at a time in
+    this fixed order and each step's change in the expected value is recorded: minutes (the fill to the team's 240,
+    which includes minutes freed by absent teammates; the two are not separable), the blowout cut, the usage boost from
+    teammates ruled out, pace, opponent defense. The steps add up exactly to the deterministic expectation; what remains
+    to the simulated mean ("simulation") is minutes clipping to 1-48 and random variation. Steps are order-dependent
+    (a multiplicative chain), so they are an attribution in this order, not unique causes. With lineup scenarios (not
+    used by the active version) the minutes / usage steps can't be isolated and are marked unavailable."""
+    out = {"version": CONTRIB_VERSION, "order": ["baseline", "minutes", "blowout", "usage", "pace", "matchup", "simulation"], "stats": {}}
+    if scenarios or mwp0 is None or not np.isfinite(mwp0):
+        out["unavailable"] = "lineup scenarios or no usual-minutes figure: adjustments not isolated"
+        return out
+    blow = max(0.0, abs(float(margin)) - 6.0) * s.blowout_strength
+    b_fill = base_pid / (1.0 - blow) if starter_rate > 0.5 and blow < 1.0 else base_pid
+    u = float(np.mean(uf))
+    for stat, parts in CONTRIB_PARTS.items():
+        def mu(minutes, usage=False, pace=False, opp=False):
+            t = 0.0
+            for r, c, pw in parts:
+                v = float(x[f"{r}_pm"]) * c * minutes
+                if usage:
+                    v *= u ** pw
+                if pace:
+                    v *= pace_f
+                if opp:
+                    v *= opp_f(r)
+                t += v
+            return t
+        vals = [mu(mwp0), mu(b_fill), mu(base_pid), mu(base_pid, True), mu(base_pid, True, True), mu(base_pid, True, True, True)]
+        if not all(np.isfinite(vals)):
+            out["stats"][stat] = None
+            continue
+        final = float(np.mean(sims[stat]))
+        out["stats"][stat] = {"baseline": round(vals[0], 3), "minutes": round(vals[1] - vals[0], 3), "blowout": round(vals[2] - vals[1], 3),
+                              "usage": round(vals[3] - vals[2], 3), "pace": round(vals[4] - vals[3], 3), "matchup": round(vals[5] - vals[4], 3),
+                              "simulation": round(final - vals[5], 3), "final": round(final, 3)}
+    out["minutes"] = {"usual": round(mwp0, 2), "after_fill": round(b_fill, 2), "projected": round(base_pid, 2)}
+    return out
+
 
 def _shock(rng, sd: float, n: int) -> np.ndarray:
     return np.exp(rng.normal(-0.5 * sd * sd, sd, n)) if sd > 0 else np.ones(n)
@@ -357,6 +414,10 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                 "reb": rng.poisson(lam("reb", sh_reb)).astype(float), "ast": rng.poisson(lam("ast", sh_ast)).astype(float),
                 "stl": rng.poisson(lam("stl", sh_stk)).astype(float), "blk": rng.poisson(lam("blk", sh_stk)).astype(float)}
         sims["pra"] = sims["pts"] + sims["reb"] + sims["ast"]
+        # Bookkeeping only (P3): the measured contribution of each existing adjustment to the mean, from values already
+        # computed above. No random draws and nothing fed back into the simulation.
+        contrib = contributions(x, float(ctx.players.at[pid, "minutes_when_playing"]) if pid in ctx.players.index else None,
+                                base_pid, float(active.at[pid, "starter_rate"]), margin, s, pace_f, opp_f, uf, sims, bool(U))
         inputs = {"projected_minutes": round(base_pid, 1), "minutes_scale": round(scale, 3), "pace_factor": round(pace_f, 3),
                   "usage_freed_by_absences": round(float(np.mean(uf) - 1.0) / s.usage_boost if U and s.usage_boost else freed, 3), "starter_rate": round(float(x["starter_rate"]), 2),
                   "appear_rate_last10": round(float(x["appear_rate"]), 2),
@@ -365,7 +426,8 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
                                               for u in U if u != pid]} if U else {}),
                   "opp_points_factor": round(opp_f("fg2m"), 3), "opp_rebounds_factor": round(opp_f("reb"), 3),
                   "opp_assists_factor": round(opp_f("ast"), 3),
-                  "sample": {"games": int(x["n_games"]), "minutes": round(float(x["n_minutes"]), 0)}}
+                  "sample": {"games": int(x["n_games"]), "minutes": round(float(x["n_minutes"]), 0)},
+                  "contributions": contrib}
         if feed_on:
             me = avail["players"].get(str(pid)) or {}
             inputs["availability"] = {"status": me.get("status"), "raw_status": me.get("raw_status"), "source": me.get("source"),

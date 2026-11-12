@@ -211,6 +211,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
       </Section>
 
       <Section title="Player props backtest" intro="Every threshold the model priced in the test seasons, scored against the result.">
+        <p className="mb-3 text-sm"><Link href={`/performance/props?sport=${league}`} className="text-model hover:underline">Validation by prop category</Link> <span className="text-mute">· active model and shadow experiments, live and held-out</span></p>
         {!bt ? (
           <Unavailable title="No props backtest published yet" body="It appears here once the props backtest has run for this sport." />
         ) : (
