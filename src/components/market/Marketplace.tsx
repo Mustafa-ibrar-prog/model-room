@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { Confirmed, sourceLabel } from "@/components/injuries/InjuryFlags";
-import { formatKickoff, formatNumber, formatPct, formatTimestamp } from "@/lib/format";
+import { formatKickoff, formatPct, formatTimestamp } from "@/lib/format";
 import { providerName } from "@/lib/providers";
-import { contractProbs, getExplorer, lineKey, marketMid, observedAt, SORTS, staleLine, type ContractDetail, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
-import { preferredOutcome } from "@/lib/propOutcome";
+import { contractProbs, getExplorer, lineKey, marketMid, observedAt, SORTS, staleLine, seasonLabel, type ContractDetail, type ContributionView, type Explorer, type ExplorerGame, type ExplorerQuery, type ExplorerRow } from "@/server/data/explorer";
+import { lineText, preferredOutcome, type LineProbs } from "@/lib/propOutcome";
 import { getViewer } from "@/server/viewer";
 import { isLocked, type League } from "@/types/domain";
 import type { PropLineView } from "@/types/props";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { LockedCell, LockedPanel, Unavailable } from "@/components/ui/primitives";
 import { AutoSubmit } from "@/components/props/AutoSubmit";
-import { age, cents, EdgeTag, flagText, lineLabel, PROVIDERS, quoteBy } from "./bits";
-import { Contributions, DistributionChart, InjuriesFreshness, MarketBox, ModelBox, OutcomeBar, PreferredBlock, PreferredChip, type PreferredView } from "./PropParts";
+import { age, cents, EdgeTag, flagText, fmt, lineLabel, PROVIDERS, quoteBy } from "./bits";
+import { Contributions, DistributionChart, lineProvider, MarketBox, ModelBox, OutcomeBar, PreferredBlock, type PreferredView } from "./PropParts";
+import { DataSection, InjurySection, MatchupSection, OpportunitySection, Section } from "./AnalysisSections";
+import { HistoryTabs, type HistoryTabsData } from "./HistoryTabs";
 import { FavoritesScope, FavoriteStar, RecentlyViewed, TrackView } from "./local";
 
 // Player data history behind the projection (the engine's "support"), not a confidence that the projection beats the market.
@@ -119,98 +120,58 @@ function QuotedPill({ l, href, active }: { l: PropLineView; href: string; active
   );
 }
 
-function AvailabilityPanel({ r }: { r: ExplorerRow }) {
-  const i = r.injury;
-  if (!i && !r.teammatesOut.length && !r.changes) return null;
-  return (
-    <section aria-label="Availability" className="space-y-1 rounded-md border border-navy-700 p-2.5 text-xs">
-      <h3 className="text-[0.65rem] font-600 uppercase tracking-wider text-faint">Availability</h3>
-      {i?.status ? (
-        <p className="text-mute">
-          <span className={i.status === "available" ? "text-good" : "text-edge"}>{i.lateScratch ? "Late scratch: " : ""}{i.rawStatus ?? i.status}</span>
-          {" "}· <Confirmed confirmed={i.confirmed} /> · {sourceLabel(i.source)}{i.reportTime ? `, ${formatTimestamp(i.reportTime)}` : ""}
-          {i.starterConfirmed != null ? ` · ${i.starterConfirmed ? "confirmed starter" : "not in the confirmed starting five"}` : ""}
-        </p>
-      ) : i ? <p className="text-faint">Not on the injury report.</p> : null}
-      {i?.conflict ? <p className="text-edge">Sources disagree: {i.conflict}. The official designation is used.</p> : null}
-      {i?.startingQb ? <p className="text-mute">Projected starting QB: <span className="text-ink">{i.startingQb}</span></p> : null}
-      {i?.notes.map((n) => <p key={n} className="text-mute">{n}</p>)}
-      {r.teammatesOut.length ? (
-        <p className="text-mute">Teammates out: {r.teammatesOut.map((t) => `${t.name}${t.position ? ` (${t.position})` : ""}${t.status && t.status !== "out" ? `, ${t.status}` : ""}`).join("; ")}</p>
-      ) : null}
-      {r.changes ? (
-        <p className="text-edge">
-          Updated for injury news{r.changes.previous_at ? ` since ${formatTimestamp(r.changes.previous_at)}` : ""}: {r.changes.reasons.join("; ")}.{" "}
-          <span className="text-mute">{r.changes.markets.map((m) => `${m.label} ${m.from} → ${m.to}`).join(", ")}</span>
-        </p>
-      ) : null}
-    </section>
-  );
-}
+const SIDE = (p: PreferredView, line: number | null) =>
+  p.kind === "side" ? `${p.side === "over" ? "Over" : "Under"}${line != null ? ` ${lineText(line)}` : ""}` : p.kind === "close" ? "Too close to call" : "No preference";
 
-function PlayerRow({ r, league, q, activeKey, now }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null; now: number }) {
+function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League; q: ExplorerQuery; activeKey: string | null }) {
   const c = CONF[r.support];
-  const href = (l: PropLineView | null) => propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: l ? lineKey(r.id, l) : `${r.id}~card` });
   const main = r.headline;
-  const quotedOthers = r.lines.filter((l) => l !== main && l.quotes.length);
   const cardKey = main ? lineKey(r.id, main) : `${r.id}~card`;
+  const href = propsHref(league, { ...q, game: q.game ?? r.gameId }, { line: cardKey });
+  const on = activeKey != null && activeKey.split("~")[0] === r.id;
+  const stale = main ? staleLine(main) : false;
+  const prov = main ? lineProvider(main) : null;
+  const inj = r.injury?.status && r.injury.status !== "available" ? (r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status) : !r.injury && r.injuryStatus ? r.injuryStatus : null;
   return (
-    <li data-fav-id={`${league}:${r.id}`} className="rounded-lg border border-navy-700 bg-navy-900 p-3">
-      <div className="flex items-center gap-2">
-        <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
-        <TeamBadge league={league} abbr={r.team} size="sm" />
-        <div className="min-w-0 flex-1">
-          <Link href={href(main)} scroll={false} className="block truncate font-600 text-ink hover:underline">{r.name}</Link>
-          <div className="flex flex-wrap gap-x-2 text-[0.72rem] text-faint">
-            <span>{r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}</span>
-            {r.injury?.status && r.injury.status !== "available" ? (
-              <span className="text-edge" title={`${sourceLabel(r.injury.source)}${r.injury.reportTime ? `, ${formatTimestamp(r.injury.reportTime)}` : ""}${r.injury.confirmed ? " (official)" : " (report)"}`}>
-                {r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status}{r.injury.confirmed ? "" : "*"}
-              </span>
-            ) : r.injuryStatus && !r.injury ? <span className="text-edge">{r.injuryStatus}</span> : null}
-            {r.changes ? <span className="font-600 text-edge" title={r.changes.reasons.join("; ")}>Updated: injury news</span> : null}
-          </div>
-        </div>
-        {main?.edge ? <EdgeTag l={main} compact /> : null}
-      </div>
-
-      <div className="mt-2.5 grid grid-cols-2 gap-2 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.3fr)]">
-        <Link href={href(main)} scroll={false} aria-current={activeKey === cardKey ? "true" : undefined}
-          className={`col-span-2 grid grid-cols-2 gap-2 rounded-md ${activeKey === cardKey ? "ring-1 ring-model/60" : ""}`}>
-          <MarketBox l={main} observed={main ? observedAt(main) : null} now={now} stale={main ? staleLine(main) : false} compact />
-          <ModelBox mean={r.mean} median={r.median} range80={r.range80} supportLabel={c.label} supportCls={c.cls} compact />
-        </Link>
-        {main ? (
-          <Link href={href(main)} scroll={false} className="col-span-2 flex flex-col justify-center gap-1.5 md:col-span-1">
-            {r.atLine ? <OutcomeBar pr={r.atLine} l={main} compact /> : null}
-            <PreferredChip p={r.preferred} line={r.atLine?.line ?? null} />
-          </Link>
-        ) : (
-          <div className="col-span-2 flex flex-col justify-center gap-1 md:col-span-1">
-            <span className="text-[0.68rem] text-faint">Model ladder · no market line, so no preferred outcome</span>
-            <div className="flex flex-wrap gap-1.5">
-              {r.ladder.map((l) => {
-                const k = lineKey(r.id, l);
-                return <LadderPill key={k} l={l} href={href(l)} active={k === activeKey} />;
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {main && (quotedOthers.length || r.ladder.length) ? (
-        <div className="mt-2 flex flex-wrap items-center gap-1.5">
-          {quotedOthers.map((l) => {
-            const k = lineKey(r.id, l);
-            return <QuotedPill key={k} l={l} href={href(l)} active={k === activeKey} />;
-          })}
-          {r.ladder.length ? <span className="text-[0.65rem] text-faint">Model ladder</span> : null}
-          {r.ladder.map((l) => {
-            const k = lineKey(r.id, l);
-            return <LadderPill key={k} l={l} href={href(l)} active={k === activeKey} />;
-          })}
-        </div>
-      ) : null}
+    <li data-fav-id={`${league}:${r.id}`} className="flex items-stretch gap-1">
+      <div className="flex items-center"><FavoriteStar id={`${league}:${r.id}`} name={r.name} /></div>
+      <Link href={href} scroll={false} aria-current={on ? "true" : undefined}
+        className={`grid min-w-0 flex-1 grid-cols-3 items-center gap-x-3 gap-y-2 rounded-lg border px-3 py-2.5 @xl:grid-cols-[minmax(8rem,1.6fr)_4.5rem_4.5rem_minmax(6.5rem,1.2fr)_minmax(7rem,1fr)] ${on ? "border-model/70 bg-navy-800" : "border-transparent bg-navy-900 hover:bg-navy-850"}`}>
+        <span className="col-span-3 flex min-w-0 items-center gap-2 @xl:col-span-1">
+          <TeamBadge league={league} abbr={r.team} size="sm" />
+          <span className="min-w-0">
+            <span className="block truncate font-600 text-ink">{r.name}</span>
+            <span className="block truncate text-[0.72rem] text-faint">
+              {r.position} · {r.team === r.matchup.split(" @ ")[1] ? `vs ${r.opp}` : `@ ${r.opp}`}
+              {inj ? <span className="text-edge"> · {inj}{r.injury && !r.injury.confirmed ? "*" : ""}</span> : null}
+              {r.changes ? <span> · updated for injury news</span> : null}
+            </span>
+          </span>
+        </span>
+        <span className="min-w-0">
+          <span className={`block font-mono leading-tight ${main ? "text-lg text-market" : "text-sm text-faint"}`}>{main && r.atLine ? lineText(r.atLine.line) : "No line"}</span>
+          <span className={`block truncate text-[0.68rem] ${stale ? "text-edge" : "text-faint"}`}>{main ? (stale ? "may have moved" : prov ?? "Market") : "none listed"}</span>
+        </span>
+        <span className="min-w-0">
+          <span className="block font-mono text-lg leading-tight text-model">{r.mean.toFixed(1)}</span>
+          <span className="block text-[0.68rem] text-faint">model avg</span>
+        </span>
+        <span className="min-w-0">
+          {r.atLine ? (
+            <>
+              <span className="flex h-1.5 overflow-hidden rounded-full bg-navy-600" aria-hidden="true"><span className="bg-model" style={{ width: `${r.atLine.over * 100}%` }} /></span>
+              <span className="mt-1 flex justify-between text-[0.7rem]"><span className="text-ink">O {formatPct(r.atLine.over)}</span><span className="text-mute">U {formatPct(r.atLine.under)}</span></span>
+            </>
+          ) : <span className="text-[0.7rem] text-faint">Needs a market line</span>}
+        </span>
+        <span className="col-span-3 flex min-w-0 items-baseline justify-between gap-2 @xl:col-span-1 @xl:block">
+          <span className={`block truncate text-[0.8rem] ${r.preferred.kind === "side" ? "font-600 text-ink" : "text-mute"}`}>
+            {r.preferred.kind === "side" ? `${SIDE(r.preferred, r.atLine?.line ?? null)} · ${formatPct(r.preferred.prob)}` : r.preferred.kind === "close" ? "Too close to call" : main ? "No preference" : "–"}
+            {main?.edge ? <span className="ml-1.5 inline-block h-1.5 w-1.5 rounded-full bg-edge align-middle" title="Model-implied +EV after fees (unverified)" aria-label="Model-implied +EV (unverified)" /> : null}
+          </span>
+          <span className={`block text-[0.68rem] ${c.cls}`}>{c.label}</span>
+        </span>
+      </Link>
     </li>
   );
 }
@@ -245,6 +206,32 @@ function MarketQuotes({ l, x }: { l: PropLineView; x: Extract<Explorer, { ok: tr
   );
 }
 
+/** Short names for recorded adjustment steps, for the one-line reason. */
+const STEP: Record<string, string> = {
+  minutes: "minutes", blowout: "blowout risk", usage: "teammates out", pace: "pace", matchup: "matchup",
+  game_environment: "team volume", opportunity: "snap-share trend", matchup_share: "opponent's target share allowed",
+  lineup: "lineup", matchup_efficiency: "opponent's efficiency allowed", other: "QB adjustment",
+};
+
+const NO_PREF: Record<string, string> = {
+  no_market_line: "No market lists this prop, so there is no line to prefer a side of.",
+  insufficient_history: "Too little player history to prefer a side.",
+  outside_range: "The line is outside the model's simulated range, so no side is preferred.",
+  stale_line: "The market line is stale and may have moved, so no side is preferred.",
+};
+
+/** One short sentence: why the model lands on this side (or why it prefers neither). Reads only published numbers. */
+function whyLine(p: PreferredView, pr: LineProbs | null, mean: number, c: ContributionView | null): string {
+  if (p.kind === "close" && pr) return `Over ${formatPct(pr.over)} vs Under ${formatPct(pr.under)}: within 3 points of even, so no side is preferred.`;
+  if (p.kind !== "side" || !pr) return NO_PREF[(p as { reason?: string }).reason ?? "no_market_line"] ?? NO_PREF.no_market_line;
+  const side = p.side === "over" ? "above" : "below";
+  let t = `Model Room gives a ${formatPct(p.prob)} chance he finishes ${side} ${lineText(pr.line)}; its average is ${mean.toFixed(1)}.`;
+  if (p.againstAverage) t += ` The average sits on the other side because a few outlying games pull it; the chance at the line decides.`;
+  const big = c?.steps?.filter((s) => s.key !== "baseline" && s.key !== "simulation" && Math.abs(s.value) >= 0.3).sort((a, b) => Math.abs(b.value) - Math.abs(a.value))[0];
+  if (big) t += ` Largest recorded adjustment: ${STEP[big.key] ?? big.key.replaceAll("_", " ")} (${big.value > 0 ? "+" : "−"}${Math.abs(big.value).toFixed(1)}).`;
+  return t;
+}
+
 function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League; x: Extract<Explorer, { ok: true }>; explicit: boolean }) {
   const { row: r, line: sel } = d;
   const quoted = sel && sel.quotes.length ? sel : null;
@@ -258,118 +245,158 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
   const ladderSel = sel && !sel.quotes.length ? sel : null;
   const markLine = market ? pr?.line ?? null : ladderSel ? (ladderSel.op === ">=" ? ladderSel.threshold - 0.5 : ladderSel.threshold) : null;
   const implied = market ? marketMid(market) : null;
-  const k = ladderSel?.threshold ?? (market ? market.threshold : null);
-  const hit = (v: number | null) => (v == null || k == null ? null : (ladderSel ?? market)!.op === ">=" ? v >= k : v > k);
-  const recent = r.recent.filter((g) => g.value != null);
   const closeHref = propsHref(league, { ...x.query }, { line: undefined });
   const title = `${r.name} ${x.category.label.toLowerCase()}`;
   const ms = d.marketStats;
+  const contrib = isLocked(r.contributions) ? null : r.contributions;
+  const stale = market ? staleLine(market) : false;
+  const conf = CONF[r.support];
+  const clearOn = ladderSel ?? market;
+  const h = r.history;
+  const seasonText = seasonLabel(league, h.boardSeason);
+  const histData: HistoryTabsData = {
+    stat: x.category.label,
+    games: h.games,
+    published: h.published,
+    boardSeason: h.boardSeason,
+    seasonText,
+    season: h.season ? { games: h.season.games, avg: h.season.avg, opportunity: h.season.opportunity } : null,
+    opportunity: h.opportunity,
+    clear: clearOn ? { k: clearOn.threshold, op: clearOn.op === ">" ? ">" : ">=", label: ladderSel ? `${lineLabel(ladderSel)}` : `Over ${lineText(markLine ?? clearOn.threshold)}` } : null,
+    seasonNames: Object.fromEntries([...new Set(h.games.map((g) => g.season).filter((s): s is number => s != null))].map((s) => [s, seasonLabel(league, s)])),
+  };
+  const played = h.games.filter((g) => g.value != null).slice(0, 5);
+  const histSummary = played.length ? `last ${played.length}: ${fmt(played.reduce((a, g) => a + g.value!, 0) / played.length)} avg` : "no past games";
+  const others = r.lines.filter((l) => l !== market && l.quotes.length);
+  const hrefFor = (l: PropLineView) => propsHref(league, { ...x.query, game: x.query.game ?? r.gameId }, { line: lineKey(r.id, l) });
+  const inj = r.injury?.status && r.injury.status !== "available" ? r.injury : null;
   return (
-    <div className={explicit ? "fixed inset-0 z-50 flex flex-col justify-end bg-black/60 lg:static lg:z-auto lg:block lg:bg-transparent" : "hidden lg:block"}>
-    {explicit ? <Link href={closeHref} scroll={false} aria-label="Close details" className="min-h-[8vh] flex-1 lg:hidden" /> : null}
-    <aside
-      aria-label="Prop detail"
-      className={`${explicit ? "max-h-[90vh] overflow-y-auto rounded-t-2xl border-t border-navy-600 bg-navy-950 p-3 pb-8 shadow-2xl lg:max-h-none lg:rounded-none lg:border-0 lg:bg-transparent lg:p-0 lg:pb-0 lg:shadow-none" : ""} lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto`}
-    >
-      {explicit ? <div className="mx-auto mb-2 h-1 w-10 rounded-full bg-navy-600 lg:hidden" aria-hidden="true" /> : null}
-      <TrackView item={{ href: propsHref(league, { game: r.gameId, cat: x.category.key }, { line: d.key }), label: title, sub: `${r.matchup} · ${league.toUpperCase()}` }} />
-      <div className="space-y-3 rounded-lg border border-navy-700 bg-navy-900 p-4">
-        <div className="flex items-start gap-2">
-          <TeamBadge league={league} abbr={r.team} />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs text-faint">{x.category.label}</p>
-            <h2 className="font-display text-xl font-700 leading-tight text-ink">{r.name}</h2>
-            <p className="text-xs text-faint">{r.position} · {r.matchup}{x.game ? ` · ${formatKickoff(x.game.startTime)}` : ""}</p>
-          </div>
-          <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
-          {explicit ? <Link href={closeHref} scroll={false} className="rounded-md border border-navy-700 px-2 py-0.5 text-sm text-mute lg:hidden">Close</Link> : null}
+    <div key={d.key} className={explicit ? "fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-navy-950 lg:static lg:z-auto lg:overflow-visible lg:bg-transparent" : "hidden lg:block"}>
+      {explicit ? (
+        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-navy-700 bg-navy-950 px-3 py-1.5 lg:hidden">
+          <Link href={closeHref} scroll={false} className="flex min-h-11 items-center gap-1 pr-2 text-sm font-500 text-model">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3 5 8l5 5" /></svg>
+            Players
+          </Link>
+          <span className="ml-auto truncate text-xs text-faint">{r.matchup}{x.game ? ` · ${formatKickoff(x.game.startTime).split(", ").slice(-1)[0]}` : ""}</span>
         </div>
-
-        <AvailabilityPanel r={r} />
-
-        <MarketBox l={market} observed={market ? observedAt(market) : null} now={x.now} stale={market ? staleLine(market) : false} />
-        {market ? (
-          <>
-            <MarketQuotes l={market} x={x} />
-            {implied != null ? <p className="text-[0.68rem] text-faint">Market-implied chance of Yes (bid/ask midpoint): {formatPct(implied)}{market.market ? "" : " (wide or thin quote, for reference only)"}.</p> : null}
-          </>
-        ) : null}
-
-        <ModelBox mean={r.mean} median={r.median} range80={r.range80} supportLabel={`${CONF[r.support].label}: ${r.supportNote}`} supportCls={CONF[r.support].cls} />
-        {r.grid ? <DistributionChart grid={r.grid} line={markLine} label={x.category.label.toLowerCase()} /> : null}
-
-        {pr && market ? <OutcomeBar pr={pr} l={market} /> : null}
-        {ladderSel ? (
-          <p className="rounded-md border border-navy-700 p-2.5 text-xs text-mute">
-            Model threshold, not a market line: Model Room gives <span className="text-model">{formatPct(ladderSel.modelProb)}</span> to {lineLabel(ladderSel)} {x.category.label.toLowerCase()}.
-          </p>
-        ) : null}
-        {market ? <PreferredBlock p={pref} pr={pr} mean={r.mean} /> : <p className="text-xs text-faint">No preferred outcome without a market line.</p>}
-
-        {market?.edge ? (
-          <section aria-label="Model-implied value" className="rounded-md border border-navy-700 p-2.5 text-xs">
-            <div className="flex items-center justify-between"><span className="font-600 text-edge">Model-implied expected value (unverified)</span><EdgeTag l={market} /></div>
-            <p className="mt-1 text-mute">
-              {market.edge.side === "yes" ? "Yes" : "No"} at {cents(market.edge.price)}¢ on {providerName(market.edge.provider)}. Model chance − price − fee ={" "}
-              <span className="text-edge">+{(market.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{market.edge.grade !== "strong" ? ` Data warnings: ${market.edge.reasons.join("; ")}.` : ""} This assumes the model&apos;s probability is right; it is not a verified edge.
-            </p>
-          </section>
-        ) : null}
-
-        <section aria-label="Why the model lands here" className="space-y-1.5">
-          <h3 className="text-xs font-600 text-ink">Why the model lands here</h3>
-          {isLocked(r.contributions) ? (
-            <div className="flex items-center gap-2 text-xs text-faint"><span>The model&apos;s step-by-step record is part of Pro.</span><LockedCell requires={r.contributions.requires} /></div>
-          ) : (
-            <Contributions c={r.contributions} league={league} />
-          )}
-        </section>
-
-        <InjuriesFreshness league={league} team={r.team} opp={r.opp} injuries={x.injuries} modelAbsences={r.modelAbsences}
-          generatedAt={x.generatedAt} feedAt={x.injuryFeedAt} lineSeen={market ? observedAt(market) : null} version={x.model.version} />
-
-        {recent.length ? (
-          <section aria-label="Recent games">
-            <h3 className="mb-1 text-xs font-600 text-faint">Last {recent.length} games</h3>
-            <ul className="flex gap-1">
-              {recent.map((g) => (
-                <li key={g.date} className={`flex-1 rounded border px-1 py-1 text-center ${hit(g.value) ? "border-good/50" : "border-navy-700"}`} title={`${g.date} vs ${g.opp}`}>
-                  <div className={`font-mono text-sm ${hit(g.value) ? "text-good" : "text-ink"}`}>{formatNumber(g.value!)}</div>
-                  <div className="text-[0.6rem] text-faint">{g.opp}</div>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-1 text-[0.68rem] text-faint">{k != null ? `Green cleared ${lineLabel((ladderSel ?? market)!)}. ` : ""}Past games only; the model does not use this row.</p>
-          </section>
-        ) : null}
-
-        <details className="text-xs">
-          <summary className="cursor-pointer font-600 text-faint">Player and opponent inputs</summary>
-          {isLocked(r.inputs) ? (
-            <div className="mt-1 flex items-center gap-2 text-faint">
-              <span>Model inputs (usage, matchup factors) are part of Pro.</span>
-              <LockedCell requires={r.inputs.requires} />
+      ) : null}
+      <aside aria-label="Player analysis" className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:overscroll-contain">
+        <TrackView item={{ href: propsHref(league, { game: r.gameId, cat: x.category.key }, { line: d.key }), label: title, sub: `${r.matchup} · ${league.toUpperCase()}` }} />
+        <div className="space-y-4 p-4 lg:rounded-xl lg:bg-navy-900 lg:p-5">
+          <div className="flex items-start gap-2.5">
+            <TeamBadge league={league} abbr={r.team} />
+            <div className="min-w-0 flex-1">
+              <h2 className="font-display text-2xl font-700 leading-tight text-ink">{r.name}</h2>
+              <p className="text-xs text-mute">{r.position} · {r.matchup} · {x.category.label}</p>
             </div>
-          ) : (
-            <dl className="mt-1 grid grid-cols-2 gap-x-3 gap-y-0.5">
-              {Object.entries(r.inputs).filter(([, v]) => v !== null && typeof v !== "object").map(([kk, v]) => (
-                <div key={kk} className="flex justify-between gap-2"><dt className="text-faint">{kk.replaceAll("_", " ")}</dt><dd className="font-mono text-mute">{String(v)}</dd></div>
-              ))}
-            </dl>
-          )}
-        </details>
+            <span className={`shrink-0 rounded-full bg-navy-850 px-2.5 py-1 text-[0.7rem] ${conf.cls}`} title={r.supportNote}>{conf.label}</span>
+            <FavoriteStar id={`${league}:${r.id}`} name={r.name} />
+          </div>
+          {inj ? (
+            <p className="-mt-2 text-xs text-edge">{inj.lateScratch ? "Late scratch: " : ""}{inj.rawStatus ?? inj.status} · {inj.confirmed ? "official report" : "reported, not yet official"}</p>
+          ) : null}
 
-        {ms ? (
-          <section aria-label="Historical performance" className="text-xs text-mute">
-            <h3 className="mb-1 font-600 text-faint">How this category tested</h3>
-            {ms.n.toLocaleString()} {x.category.label.toLowerCase()} thresholds in held-out seasons: log loss {ms.log_loss.toFixed(3)}
-            {ms.baseline_log_loss != null ? ` vs ${ms.baseline_log_loss.toFixed(3)} for recent form` : ""}
-            {ms.ece != null ? `, calibration error ${(ms.ece * 100).toFixed(1)}%` : ""}. <Link href={`/performance/props?sport=${league}&cat=${x.category.key}`} className="text-model hover:underline">Validation by category</Link>
+          <div className="grid grid-cols-2 gap-2.5">
+            <MarketBox l={market} observed={market ? observedAt(market) : null} now={x.now} stale={stale} />
+            <ModelBox mean={r.mean} median={r.median} range80={r.range80} supportLabel="" supportCls="" />
+          </div>
+
+          {pr && market ? (
+            <div>
+              <OutcomeBar pr={pr} l={market} compact />
+              <p className="mt-0.5 text-[0.68rem] text-faint">Model Room&apos;s chance at {lineText(pr.line)}{pr.push ? `; push ${formatPct(pr.push)}` : ""}.</p>
+            </div>
+          ) : null}
+          {ladderSel ? (
+            <p className="rounded-md bg-navy-850 px-3 py-2 text-xs text-mute">
+              Model threshold, not a market line: Model Room gives <span className="text-model">{formatPct(ladderSel.modelProb)}</span> to {lineLabel(ladderSel)} {x.category.label.toLowerCase()}.
+            </p>
+          ) : null}
+
+          <section aria-label="Preferred outcome" className="rounded-lg bg-navy-850 px-3.5 py-3">
+            <p className="font-display text-xl font-700 text-ink">
+              {pref.kind === "side" && pr ? `${pref.side === "over" ? "Over" : "Under"} ${lineText(pr.line)} · ${formatPct(pref.prob)}` : pref.kind === "close" ? "Too close to call" : "No preferred outcome"}
+            </p>
+            <p className="mt-1 text-[0.8rem] leading-relaxed text-mute">{whyLine(pref, pr, r.mean, contrib)}</p>
           </section>
-        ) : null}
-        <p className="text-[0.65rem] text-faint">The model never sees market prices; market lines are shown beside it, not fed into it.</p>
-      </div>
-    </aside>
+
+          <div>
+            <Section title="Recent performance" summary={histSummary}>
+              <HistoryTabs d={histData} />
+            </Section>
+            <InjurySection league={league} r={r} feed={x.injuries} feedAt={x.injuryFeedAt} />
+            <OpportunitySection league={league} r={r} contributions={contrib} />
+            <MatchupSection league={league} r={r} cat={x.category.key} contributions={contrib} />
+            <Section title="Model explanation" summary={contrib?.steps ? `${contrib.steps.length} recorded steps` : isLocked(r.contributions) ? "Pro" : "final only"}>
+              <div className="space-y-1.5">
+                <h4 className="text-[0.68rem] text-faint">From his usual production to the projected average</h4>
+                {isLocked(r.contributions) ? (
+                  <div className="flex items-center gap-2 text-faint"><span>The model&apos;s step-by-step record is part of Pro.</span><LockedCell requires={r.contributions.requires} /></div>
+                ) : (
+                  <Contributions c={r.contributions} league={league} />
+                )}
+              </div>
+              {r.grid ? <DistributionChart grid={r.grid} line={markLine} label={x.category.label.toLowerCase()} /> : null}
+              {pr && market ? <OutcomeBar pr={pr} l={market} /> : null}
+              {market ? <PreferredBlock p={pref} pr={pr} mean={r.mean} /> : null}
+              <p>Average {fmt(r.mean)} · middle outcome {fmt(r.median)} · typical range {fmt(r.range80[0])}–{fmt(r.range80[1])} (80% of simulated games).</p>
+              {ms ? (
+                <p>
+                  How this category tested: {ms.n.toLocaleString()} {x.category.label.toLowerCase()} thresholds in held-out seasons, log loss {ms.log_loss.toFixed(3)}
+                  {ms.baseline_log_loss != null ? ` vs ${ms.baseline_log_loss.toFixed(3)} for recent form` : ""}
+                  {ms.ece != null ? `, calibration error ${(ms.ece * 100).toFixed(1)}%` : ""}.{" "}
+                  <Link href={`/performance/props?sport=${league}&cat=${x.category.key}`} className="text-model hover:underline">Validation by category</Link>
+                </p>
+              ) : null}
+              <div>
+                <h4 className="mb-1 text-[0.68rem] text-faint">All model inputs</h4>
+                {isLocked(r.inputs) ? (
+                  <div className="flex items-center gap-2 text-faint"><span>Model inputs (usage, matchup factors) are part of Pro.</span><LockedCell requires={r.inputs.requires} /></div>
+                ) : (
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                    {Object.entries(r.inputs).filter(([, v]) => v !== null && typeof v !== "object").map(([kk, v]) => (
+                      <div key={kk} className="flex justify-between gap-2"><dt className="text-faint">{kk.replaceAll("_", " ")}</dt><dd className="font-mono text-mute">{String(v)}</dd></div>
+                    ))}
+                  </dl>
+                )}
+              </div>
+            </Section>
+            <Section title="Market prices & other lines" summary={market ? `${lineProvider(market) ?? "Market"}${others.length ? ` · ${others.length + 1} lines` : ""}` : r.ladder.length ? "no market line · model ladder" : "no market line"} warn={stale}>
+              {market ? (
+                <>
+                  <MarketQuotes l={market} x={x} />
+                  {implied != null ? <p className="text-faint">Market-implied chance of Yes (bid/ask midpoint): {formatPct(implied)}{market.market ? "" : " (wide or thin quote, for reference only)"}.</p> : null}
+                </>
+              ) : <p>No market lists this prop. Model Room does not borrow a line from another provider or invent one.</p>}
+              {market?.edge ? (
+                <div className="rounded-md bg-navy-850 p-2.5">
+                  <div className="flex items-center justify-between"><span className="font-600 text-edge">Model-implied expected value (unverified)</span><EdgeTag l={market} /></div>
+                  <p className="mt-1">
+                    {market.edge.side === "yes" ? "Yes" : "No"} at {cents(market.edge.price)}¢ on {providerName(market.edge.provider)}. Model chance − price − fee ={" "}
+                    <span className="text-edge">+{(market.edge.ev * 100).toFixed(1)}¢</span> per $1 contract.{market.edge.grade !== "strong" ? ` Data warnings: ${market.edge.reasons.join("; ")}.` : ""} This assumes the model&apos;s probability is right; it is not a verified edge.
+                  </p>
+                </div>
+              ) : null}
+              {others.length ? (
+                <div>
+                  <h4 className="mb-1 text-[0.68rem] text-faint">Other quoted lines (line · model · market)</h4>
+                  <div className="flex flex-wrap gap-1.5">{others.map((l) => { const k = lineKey(r.id, l); return <QuotedPill key={k} l={l} href={hrefFor(l)} active={k === d.key} />; })}</div>
+                </div>
+              ) : null}
+              {r.ladder.length ? (
+                <div>
+                  <h4 className="mb-1 text-[0.68rem] text-faint">Model ladder (Model Room&apos;s own thresholds, not market lines)</h4>
+                  <div className="flex flex-wrap gap-1.5">{r.ladder.map((l) => { const k = lineKey(r.id, l); return <LadderPill key={k} l={l} href={hrefFor(l)} active={k === d.key} />; })}</div>
+                </div>
+              ) : null}
+            </Section>
+            <DataSection league={league} version={x.model.version} generatedAt={x.generatedAt} feedAt={x.injuryFeedAt} lineSeen={market ? observedAt(market) : null} lineStale={stale}
+              now={x.now} support={conf.label} supportNote={r.supportNote} history={h} seasonText={seasonText} />
+          </div>
+          <p className="text-[0.65rem] text-faint">Not a betting recommendation. Prop probabilities have not been validated against market prices.</p>
+        </div>
+      </aside>
     </div>
   );
 }
@@ -411,7 +438,7 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
         </details>
       ) : null}
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_23rem] xl:grid-cols-[13rem_minmax(0,1fr)_24rem]">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_25rem] xl:grid-cols-[12rem_minmax(0,1fr)_28rem]">
         <div className="hidden space-y-5 xl:block">
           <GameRail league={league} x={x} />
           <div>
@@ -496,7 +523,12 @@ export async function Marketplace({ league, query }: { league: League; query: Ex
             </p>
           ) : (
             <FavoritesScope>
-              <ul className="space-y-2">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} now={x.now} />)}</ul>
+              <div className="@container">
+              <div className="mb-1 hidden grid-cols-[minmax(8rem,1.6fr)_4.5rem_4.5rem_minmax(6.5rem,1.2fr)_minmax(7rem,1fr)] gap-x-3 pl-9 pr-3 text-[0.68rem] text-faint @xl:grid">
+                <span>Player</span><span className="text-market">Market line</span><span className="text-model">Model Room</span><span>Model chance</span><span>Preferred · history</span>
+              </div>
+              <ul className="space-y-1.5">{rows.map((r) => <PlayerRow key={`${r.gameId}:${r.id}`} r={r} league={league} q={x.query} activeKey={activeKey} />)}</ul>
+              </div>
             </FavoritesScope>
           )}
         </div>

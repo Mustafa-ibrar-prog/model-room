@@ -345,9 +345,12 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
 
     last_ingest = state.read().get("nflverse_games", {}).get("last_success")
     pgr = inp.player_games.assign(rush_rec_yds=inp.player_games["rush_yds"] + inp.player_games["rec_yds"],
-                                  td_any=inp.player_games["rush_td"] + inp.player_games["rec_td"])
+                                  td_any=inp.player_games["rush_td"] + inp.player_games["rec_td"],
+                                  snap_pct=inp.player_games["offense_pct"] * 100 if "offense_pct" in inp.player_games.columns else None)
     played = (pgr["offense_snaps"].fillna(0) > 0) | (pgr[["pass_att", "targets", "carries"]].sum(axis=1) > 0)
-    recent.attach(games_json, pgr, {k: m["stat"] for k, m in MARKETS.items()}, today, played)
+    recent.attach(games_json, pgr, {k: m["stat"] for k, m in MARKETS.items()}, today, played,
+                  season=season, regular=pgr["season_type"].astype(str).eq("REG") if "season_type" in pgr.columns else None,
+                  opportunity={"offense_snaps": "Snaps", "snap_pct": "Snap share (%)", "pass_att": "Pass attempts", "targets": "Targets", "carries": "Carries"})
     try:
         prev_board = json.loads(published_props_path().read_text())
     except (OSError, ValueError):
