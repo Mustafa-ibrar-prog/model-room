@@ -93,7 +93,7 @@ export function HistoryTabs({ d }: { d: HistoryTabsData }) {
             Oldest game on the left.{d.clear ? ` Blue: cleared ${d.clear.label.replace("Over ", "")}. Dashed line: the line.` : ""}
           </figcaption>
         </figure>
-        <OppBlock title={`Opportunity, average over these ${gs.length} games`} items={d.opportunity.map((o) => ({ label: o.label, value: avgOf(gs, o.key) }))} />
+        <OppBlock title={gs.length === 1 ? "Opportunity in that game" : `Opportunity, average over these ${gs.length} games`} items={d.opportunity.map((o) => ({ label: o.label, value: avgOf(gs, o.key) }))} />
         {gs.length < n ? (
           <p className="text-xs text-mute">
             {played.length < d.published

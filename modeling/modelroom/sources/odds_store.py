@@ -134,7 +134,9 @@ def connect(url: str | None = None):
     if not url:
         raise StoreError("MODELROOM_ODDS_DB_URL is not set")
     import psycopg  # installed by the workflow (psycopg[binary])
-    return psycopg.connect(url, connect_timeout=15)
+    # autocommit: each `with conn.transaction()` is then a real BEGIN ... COMMIT. Without it, a read before the insert
+    # opens an implicit transaction, the block becomes a savepoint, and closing the connection rolls the insert back.
+    return psycopg.connect(url, connect_timeout=15, autocommit=True)
 
 
 SELECT = ("select seq, payload, prev_hash, row_hash, content_key, " + ", ".join(TYPED) +
@@ -254,6 +256,18 @@ def verify_table(conn, table: str, league: str) -> dict:
     cur.execute(f"select seq, payload, prev_hash, row_hash from odds.{table} where league = %s order by seq", (league,))
     cols = [c.name for c in cur.description]
     return verify_payload_rows([dict(zip(cols, r)) for r in cur.fetchall()]) | {"league": league, "table": table}
+
+
+def verify_after_reconnect(league: str, url: str | None = None) -> dict:
+    """Chain checks on a fresh connection: what a later reader sees, i.e. only committed rows."""
+    c = connect(url)
+    try:
+        out = {"snapshots": verify(c, league)}
+        for t in sorted(DERIVED):
+            out[t] = verify_table(c, t, league)
+        return out
+    finally:
+        c.close()
 
 
 def load_payloads(conn, table: str, league: str) -> list[dict]:

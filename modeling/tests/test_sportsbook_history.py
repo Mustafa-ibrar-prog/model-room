@@ -166,3 +166,99 @@ def test_schedule_coverage_window_is_capped():
     sched = pd.DataFrame({"game_id": ["g1", "g2", "g3"], "start_ts": pd.to_datetime(["2026-11-12T01:00:00Z", "2026-11-12T03:00:00Z", "2026-12-01T01:00:00Z"], utc=True)})
     pub, _ = SB.coverage(P, sched)
     assert pub["fetches"][0]["scheduled_games_next_72h_without_lines"] == 1  # g2 only; g3 is beyond 72 h
+
+
+def test_public_report_names_no_sportsbook():
+    f = "2026-11-11T15:00:00+00:00"
+    snaps = pd.DataFrame([snap(f, book="draftkings"), snap(f, book="fanduel"), snap("2026-11-11T20:00:00+00:00", book="fanduel", line=-4.5)])
+    pub, priv, C = SB.analyse("nba", snaps, [rec("2026-11-11T14:00:00+00:00")], SIG, finals={})
+    txt = json.dumps(pub).lower()
+    assert "draftkings" not in txt and "fanduel" not in txt
+    assert "by_book" not in pub["movement"] and "rows_by_book" not in pub["coverage"] and "books_seen" not in pub["coverage"]
+    assert pub["accumulation"]["books"] == 2  # a count of books is fine; names are not
+    # the private report keeps the book-level detail
+    assert set(priv["coverage_rows_by_book"]) == {"draftkings", "fanduel"} and "fanduel" in priv["movement_by_book"]
+    assert SB.book_names_in({"x": {"DraftKings": 1}}, ["draftkings"]) == ["draftkings"]
+
+
+def _fresh_db():
+    import re
+    import uuid
+    from pathlib import Path
+
+    import psycopg
+    name = "mr_fx_" + uuid.uuid4().hex[:8]
+    admin = psycopg.connect(PG, autocommit=True)
+    admin.execute(f"create database {name}")
+    url = re.sub(r"dbname=\S+", f"dbname={name}", PG) if "dbname=" in PG else PG + f" dbname={name}"
+    c = psycopg.connect(url, autocommit=True)
+    for role in ("anon", "authenticated"):
+        c.execute(f"do $$ begin create role {role} nologin; exception when duplicate_object then null; end $$")
+    root = Path(__file__).resolve().parents[2] / "supabase/migrations"
+    c.execute((root / "20261111000100_odds_snapshots.sql").read_text())
+    c.execute((root / "20261111000200_odds_analysis.sql").read_text())
+    c.close()
+    return admin, name, url
+
+
+@pytest.mark.skipif(not PG, reason="MODELROOM_TEST_PG not set")
+def test_records_survive_connection_close_after_a_read():
+    """The defect: a read before the insert made the insert a savepoint, rolled back when the connection closed."""
+    admin, name, url = _fresh_db()
+    try:
+        conn = S.connect(url)
+        S.load_with_hashes(conn, "nba")  # read first, exactly as sportsbook.run does
+        assert S.insert_payloads(conn, "comparisons", "nba", [("k1", {"a": 1}), ("k2", {"a": 2})], "t")["inserted"] == 2
+        assert S.insert_payloads(conn, "reports", "nba", [("r1", {"x": 1})], "t")["inserted"] == 1
+        conn.close()
+        after = S.verify_after_reconnect("nba", url)
+        assert after["comparisons"]["rows"] == 2 and after["reports"]["rows"] == 1
+        assert all(v["ok"] for v in after.values())
+        # a second run re-offers the same keys: nothing duplicated, chain continues
+        conn = S.connect(url)
+        S.load_with_hashes(conn, "nba")
+        assert S.insert_payloads(conn, "comparisons", "nba", [("k1", {"a": 1}), ("k3", {"a": 3})], "t")["inserted"] == 1
+        conn.close()
+        after = S.verify_after_reconnect("nba", url)
+        assert after["comparisons"]["rows"] == 3 and after["comparisons"]["ok"]
+    finally:
+        admin.execute(f"drop database {name} with (force)")
+        admin.close()
+
+
+@pytest.mark.skipif(not PG, reason="MODELROOM_TEST_PG not set")
+def test_sportsbook_run_persists_end_to_end(monkeypatch, tmp_path):
+    from modelroom.common import ledger
+    import modelroom.history as hist
+    from modelroom.sources import odds as odds_mod
+    admin, name, url = _fresh_db()
+    try:
+        f1, f2 = "2026-11-11T15:00:00+00:00", "2026-11-11T20:00:00+00:00"
+        rows = [snap(f1), snap(f1, book="fanduel"), snap(f2, line=-4.5), snap(f2, book="fanduel", line=-4.0)]
+        df = pd.DataFrame(rows).drop(columns=["snapshot_hash"])
+        c = S.connect(url)
+        S.insert(c, "nba", df.reindex(columns=S.PAYLOAD_FIELDS), "test")
+        c.close()
+        monkeypatch.setenv("MODELROOM_ODDS_DB_URL", url)
+        monkeypatch.setenv("MODELROOM_LEDGER_DIR", str(tmp_path))
+        monkeypatch.setenv("GITHUB_RUN_ID", "run-1")
+        monkeypatch.setattr(ledger, "read", lambda p: [rec("2026-11-11T14:00:00+00:00")])
+        monkeypatch.setattr(hist, "_games_table", lambda lg: pd.DataFrame({"game_id": ["g1"], "status": ["scheduled"], "home_score": [None],
+                                                                           "away_score": [None], "start_time": ["2026-11-12T01:00:00Z"]}))
+        monkeypatch.setattr(odds_mod, "usage_log_path", lambda: tmp_path / "none.jsonl")
+        monkeypatch.setattr(SB, "_sigmas", lambda lg: SIG)
+        r = SB.run("nba")
+        assert r["persisted"] is True and r["new_comparisons"] == r["comparisons"] > 0 and r["report_stored"] == 1
+        assert r["after_reconnect"]["comparisons"]["rows"] == r["comparisons"] and r["after_reconnect"]["reports"]["rows"] == 1
+        assert all(v["ok"] for v in r["after_reconnect"].values())
+        pub = json.loads((tmp_path / "reports" / "sportsbook_nba.json").read_text())
+        assert "draftkings" not in json.dumps(pub).lower() and "fanduel" not in json.dumps(pub).lower()
+        assert pub["storage_verification"]["persisted"] is True
+        # the same run again: no duplicates, one more report (a new run id), chains intact
+        monkeypatch.setenv("GITHUB_RUN_ID", "run-2")
+        r2 = SB.run("nba")
+        assert r2["new_comparisons"] == 0 and r2["after_reconnect"]["comparisons"]["rows"] == r["comparisons"]
+        assert r2["after_reconnect"]["reports"]["rows"] == 2 and all(v["ok"] for v in r2["after_reconnect"].values())
+    finally:
+        admin.execute(f"drop database {name} with (force)")
+        admin.close()
