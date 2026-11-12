@@ -70,13 +70,20 @@ def implied_probabilities(home_ml: float | None, away_ml: float | None) -> tuple
 
 
 def market_by_game(consensus: pd.DataFrame, raw_snapshots: pd.DataFrame | None) -> dict:
-    """{game_id: {spread, total, home_ml, away_ml, books, captured_at, sources}} from consensus rows."""
+    """{game_id: {spread, total, home_ml, away_ml, books, captured_at, sources}} from consensus rows.
+
+    Public by construction (the board is committed to a public repository): only consensus values, and only where at
+    least privacy.MIN_PUBLIC_BOOKS books quoted that market, so no number is ever one sportsbook's. Book-level lines
+    and prices stay in the private odds tables (odds.snapshots), never on the board."""
+    from ..privacy import MIN_PUBLIC_BOOKS
+
     out: dict = {}
     for _, r in consensus.iterrows():
         g = out.setdefault(r["game_id"], {"spread": None, "total": None, "home_ml": None, "away_ml": None,
                                           "books": 0, "captured_at": None, "sources": set()})
         if r["market"] in ("spread", "total"):
-            g[r["market"]] = None if pd.isna(r["line"]) else float(r["line"])
+            enough = int(r["books"]) >= MIN_PUBLIC_BOOKS
+            g[r["market"]] = None if pd.isna(r["line"]) or not enough else float(r["line"])
         g["books"] = max(g["books"], int(r["books"]))
         if pd.notna(r["captured_at"]):
             ts = pd.Timestamp(r["captured_at"]).isoformat()
@@ -88,39 +95,15 @@ def market_by_game(consensus: pd.DataFrame, raw_snapshots: pd.DataFrame | None) 
             ml["ts"] = pd.to_datetime(ml["captured_at"], utc=True, errors="coerce")
             latest = ml.sort_values("ts").groupby(["game_id", "sportsbook"], dropna=False).tail(1)
             med = latest.groupby("game_id")[["home_price", "away_price"]].median()
+            n_books = latest.groupby("game_id")["sportsbook"].nunique()
             for gid, r in med.iterrows():
+                if int(n_books.get(gid, 0)) < MIN_PUBLIC_BOOKS:
+                    continue
                 g = out.setdefault(gid, {"spread": None, "total": None, "home_ml": None, "away_ml": None,
                                          "books": 0, "captured_at": None, "sources": set()})
                 g["home_ml"], g["away_ml"] = r["home_price"], r["away_price"]
-        out_books = by_book(raw_snapshots)
-        for gid, books in out_books.items():
-            if gid in out:
-                out[gid]["by_book"] = books
     for g in out.values():
         g["sources"] = sorted(s for s in g["sources"] if s and s != "nan")
-    return out
-
-
-def by_book(snaps: pd.DataFrame) -> dict:
-    """{game_id: {sportsbook: {spread, home_spread_price, ..., captured_at, source}}}: each book's latest
-    line and prices, kept separate so every price on the site names the book it came from."""
-    s = snaps.dropna(subset=["game_id"]).copy()
-    if s.empty:
-        return {}
-    s["ts"] = pd.to_datetime(s["captured_at"], utc=True, errors="coerce")
-    latest = s.sort_values("ts").groupby(["game_id", "sportsbook", "market"], dropna=False).tail(1)
-    f = lambda v: None if v is None or pd.isna(v) else float(v)  # noqa: E731
-    out: dict = {}
-    for r in latest.itertuples(index=False):
-        b = out.setdefault(r.game_id, {}).setdefault(str(r.sportsbook), {"source": r.source, "captured_at": None})
-        if pd.notna(r.ts):
-            b["captured_at"] = max(filter(None, [b["captured_at"], r.ts.isoformat()]))
-        if r.market == "spread":
-            b.update(spread=f(r.line), home_spread_price=f(r.home_price), away_spread_price=f(r.away_price))
-        elif r.market == "total":
-            b.update(total=f(r.line), over_price=f(r.over_price), under_price=f(r.under_price))
-        elif r.market == "moneyline":
-            b.update(home_ml=f(r.home_price), away_ml=f(r.away_price))
     return out
 
 
@@ -164,10 +147,6 @@ def market_detail(proj: dict, market: dict) -> dict:
     if market.get("home_ml") is not None and market.get("away_ml") is not None:
         hw = float(proj["home_win_prob"])
         out["moneyline"] = {"home": O.side_view(hw, 0.0, market.get("home_ml")), "away": O.side_view(1 - hw, 0.0, market.get("away_ml"))}
-    books = market.get("by_book") or {}
-    if books:
-        out["by_book"] = {name: {k: v for k, v in market_detail(proj, {**b, "by_book": None}).items() if k != "implied_scores"}
-                          | {"captured_at": b.get("captured_at"), "source": b.get("source")} for name, b in books.items()}
     return out
 
 

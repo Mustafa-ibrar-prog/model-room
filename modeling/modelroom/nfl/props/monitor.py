@@ -144,5 +144,8 @@ def run() -> dict:
     props_validation.attach("nfl", rep)
     f = data_root() / "published" / "props_monitor_nfl.json"
     f.parent.mkdir(parents=True, exist_ok=True)
+    from modelroom.privacy import assert_public
+
+    assert_public(json.loads(json.dumps(rep, default=str)), f.name)
     f.write_text(json.dumps(rep, indent=2, default=str))
     return {"file": str(f), "versions": {v: {"player_games": r["player_games"], "games": r["games"]} for v, r in rep["versions"].items()}}

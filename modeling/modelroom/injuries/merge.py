@@ -259,6 +259,9 @@ def run(league: str, now: datetime | None = None) -> dict:
                "counts": cur["status"].value_counts().to_dict(), "conflicts": int(meta["conflicts"]),
                "players": _jsonable(feed.drop(columns=[c for c in ("prev_start",) if c in feed]))}
     pub.parent.mkdir(parents=True, exist_ok=True)
+    from modelroom.privacy import assert_public
+
+    assert_public(json.loads(json.dumps(payload, default=str)), pub.name)
     pub.write_text(json.dumps(payload, default=str))
     h = hashlib.sha256(json.dumps(sorted((str(r.player_id), r.status, str(r.report_time)) for r in cur.itertuples())).encode()).hexdigest()[:16]
     log.update(status="success", rows=len(cur), hash=h, conflicts=int(meta["conflicts"]), late_scratches=int(cur["late_scratch"].sum()))

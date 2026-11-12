@@ -18,7 +18,7 @@ export default function ModelVsMarketPage({ searchParams }: { searchParams: SP }
     <>
       <PageHeader
         title="Model vs market"
-        intro="Every upcoming game line where a sportsbook price is on file, next to the model's probability at that exact line. Model fair odds and model-implied return are what the price would be worth if the model's probability were right. They are not verified edges: no betting record backs them yet."
+        intro="Every upcoming game line where a market consensus is on file (the median across sportsbooks, shown only when at least two books quote it), next to the model's probability at that exact line. Model fair odds and model-implied return are what the price would be worth if the model's probability were right. They are not verified edges: no betting record backs them yet."
       />
       <Suspense fallback={<div className="mx-auto max-w-7xl px-4 sm:px-6"><TableSkeleton rows={10} /></div>}>
         <Body searchParams={searchParams} />
@@ -50,9 +50,10 @@ function rowsFor(league: League, games: EngineGame[], version: string, generated
   for (const g of games) {
     const e = g.edges;
     if (!e) continue;
-    const books: [string, NonNullable<EngineGame["edges"]>, string | null][] = e.by_book && Object.keys(e.by_book).length
-      ? Object.entries(e.by_book).map(([b, x]) => [b, { ...e, ...x }, x.captured_at])
-      : [[(g.market?.sources ?? []).join(", ") || "unknown", e, g.market?.captured_at ?? null]];
+    // Public page: the consensus across books only. Individual sportsbooks' lines and prices are private
+    // (owner dashboard); they are not on the board this page reads.
+    const n = g.market?.books ?? 0;
+    const books: [string, NonNullable<EngineGame["edges"]>, string | null][] = [[n ? `Consensus of ${n} book${n === 1 ? "" : "s"}` : "Consensus", e, g.market?.captured_at ?? null]];
     for (const [book, x, cap] of books) {
       const base = { league, game: g, book, capturedAt: cap, version, generatedAt };
       if (x.at_spread) {
@@ -115,7 +116,7 @@ async function Body({ searchParams }: { searchParams: SP }) {
           <table className="w-full min-w-[56rem] text-sm">
             <thead className="text-faint">
               <tr className="text-left">
-                {["Game", "Market", "Side", "Model line", "Model prob", "Sportsbook implied prob", "Model fair odds", "Sportsbook odds", "Model-implied return per $1 (unverified)", "Source"].map((h) => <th key={h} className="px-3 py-2 font-500">{h}</th>)}
+                {["Game", "Market", "Side", "Model line", "Model prob", "Consensus implied prob", "Model fair odds", "Consensus odds", "Model-implied return per $1 (unverified)", "Source"].map((h) => <th key={h} className="px-3 py-2 font-500">{h}</th>)}
               </tr>
             </thead>
             <tbody>
