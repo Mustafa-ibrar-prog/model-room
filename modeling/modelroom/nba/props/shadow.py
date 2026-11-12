@@ -304,6 +304,9 @@ def run() -> dict:
                    "players who played. Nothing here is published to users; the ledger is read, never changed.")
     f = ledger_path("nba_props").parent / "reports" / "nba_props_shadow.json"
     f.parent.mkdir(parents=True, exist_ok=True)
+    from modelroom.privacy import assert_public
+
+    assert_public(json.loads(json.dumps(rep, default=str)), f.name)
     f.write_text(json.dumps(rep, indent=2, default=str))
     ov = rep.get("overall", {})
     return {"file": str(f), "player_games": rep.get("player_games", 0), "coverage": rep.get("coverage"),

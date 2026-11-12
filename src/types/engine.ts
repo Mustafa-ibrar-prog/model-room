@@ -45,7 +45,6 @@ export interface EngineEdges {
   at_spread?: { line: number; home: EngineSide; away: EngineSide } | null;
   at_total?: { line: number; over: EngineSide; under: EngineSide } | null;
   moneyline?: { home: EngineSide; away: EngineSide } | null;
-  by_book?: Record<string, { at_spread: EngineEdges["at_spread"]; at_total: EngineEdges["at_total"]; moneyline: EngineEdges["moneyline"]; captured_at: string | null; source: string | null }>;
 }
 
 export interface EngineSide {

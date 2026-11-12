@@ -521,6 +521,9 @@ def run(league: str, write_store: bool = True) -> dict:
         return res
     out = Path(os.environ.get("MODELROOM_LEDGER_DIR", "preview-ledger")) / "reports"
     out.mkdir(parents=True, exist_ok=True)
+    from modelroom.privacy import assert_public
+
+    assert_public(json.loads(json.dumps(public, default=str)), f"sportsbook_{league}.json")
     (out / f"sportsbook_{league}.json").write_text(json.dumps(public, indent=1, default=str))
     res["report"] = str(out / f"sportsbook_{league}.json")
     return res

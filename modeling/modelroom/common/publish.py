@@ -23,8 +23,15 @@ def _clean(value: Any) -> Any:
 
 
 def write_board(path: Path, board: dict) -> Path:
+    """Every board, history file and results file goes through here, and all of them are public (committed to the
+    public repository and served to the site). Anything that would expose an individual sportsbook is refused
+    before the file is touched (privacy.assert_public), so a leak fails the step instead of publishing."""
+    from ..privacy import assert_public
+
+    data = _clean({"schema_version": BOARD_SCHEMA_VERSION, **board})
+    assert_public(data, path.name)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(_clean({"schema_version": BOARD_SCHEMA_VERSION, **board}), indent=2), encoding="utf-8")
+    tmp.write_text(json.dumps(data, indent=2), encoding="utf-8")
     tmp.replace(path)
     return path
