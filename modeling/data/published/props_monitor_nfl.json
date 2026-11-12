@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T00:33:26+00:00",
+  "generated_at": "2026-11-12T00:47:23+00:00",
   "versions": {
     "0.1.0": {
       "player_games": 208,
@@ -1143,5 +1143,5945 @@
       }
     }
   },
-  "note": "Last pre-game prediction per player-game and model version, graded on players who played. Depth rank = the depth chart as of kickoff, the same lookup for every version. The ledger is append-only: earlier versions' predictions stay exactly as recorded."
+  "note": "Last pre-game prediction per player-game and model version, graded on players who played. Depth rank = the depth chart as of kickoff, the same lookup for every version. The ledger is append-only: earlier versions' predictions stay exactly as recorded.",
+  "validation": {
+    "schema": 1,
+    "league": "nfl",
+    "generated_at": "2026-11-12T00:47:25+00:00",
+    "active": "0.1.1",
+    "shadows": [
+      "0.1.0",
+      "0.1.3"
+    ],
+    "markets": {
+      "passing_yards": "Passing yards",
+      "passing_attempts": "Pass attempts",
+      "passing_completions": "Completions",
+      "passing_tds": "Passing TDs",
+      "interceptions": "Interceptions",
+      "rushing_yards": "Rushing yards",
+      "rushing_attempts": "Rush attempts",
+      "receiving_yards": "Receiving yards",
+      "receptions": "Receptions",
+      "rush_rec_yards": "Rush + rec yards",
+      "anytime_td": "Anytime TD",
+      "longest_reception": "Longest reception",
+      "fantasy_points": "Fantasy points (PPR)"
+    },
+    "rules": {
+      "min_player_games": 100,
+      "min_ladder_rows": 300,
+      "min_bin": 30,
+      "min_side": 50,
+      "lean": 0.03,
+      "recent_days": 14,
+      "ladder_probability_range": [
+        0.02,
+        0.98
+      ]
+    },
+    "evidence_labels": {
+      "strong_historical_support": "not awarded",
+      "note": "Evidence labels on cards (P5) are not approved; no category is labelled strong."
+    },
+    "recent_window": {
+      "days": 14,
+      "through": "2026-11-10T01:15:00+00:00"
+    },
+    "versions": {
+      "0.1.1": {
+        "role": "active",
+        "live": {
+          "passing_yards": {
+            "all": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 266,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 9,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 266,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 9,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_attempts": {
+            "all": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 145,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 7,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 12,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 145,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 7,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 12,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_completions": {
+            "all": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 239,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 239,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_tds": {
+            "all": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 90,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 4,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 23,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 90,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 4,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 23,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "interceptions": {
+            "all": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 60,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 3,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 17,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 30,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 60,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 30,
+                "over": {
+                  "n": 3,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 17,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "rushing_yards": {
+            "all": {
+              "player_games": 158,
+              "mae": 9.48,
+              "bias": 0.89,
+              "bias_pct": 5.11,
+              "mean_projected": 18.314,
+              "mean_actual": 17.424,
+              "ladder_rows": 712,
+              "brier": 0.13854,
+              "log_loss": 0.43189,
+              "calibration_error": 0.0507,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 211,
+                  "predicted": 0.0507,
+                  "actual": 0.0664
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 113,
+                  "predicted": 0.1449,
+                  "actual": 0.1416
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 70,
+                  "predicted": 0.2474,
+                  "actual": 0.1857
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 54,
+                  "predicted": 0.3435,
+                  "actual": 0.2407
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 57,
+                  "predicted": 0.4501,
+                  "actual": 0.3509
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 40,
+                  "predicted": 0.5591,
+                  "actual": 0.425
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 36,
+                  "predicted": 0.6521,
+                  "actual": 0.4444
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 41,
+                  "predicted": 0.7528,
+                  "actual": 0.6829
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 44,
+                  "predicted": 0.8516,
+                  "actual": 0.8636
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 46,
+                  "predicted": 0.9425,
+                  "actual": 0.9565
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 72,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 34,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 158,
+              "mae": 9.48,
+              "bias": 0.89,
+              "bias_pct": 5.11,
+              "mean_projected": 18.314,
+              "mean_actual": 17.424,
+              "ladder_rows": 712,
+              "brier": 0.13854,
+              "log_loss": 0.43189,
+              "calibration_error": 0.0507,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 211,
+                  "predicted": 0.0507,
+                  "actual": 0.0664
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 113,
+                  "predicted": 0.1449,
+                  "actual": 0.1416
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 70,
+                  "predicted": 0.2474,
+                  "actual": 0.1857
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 54,
+                  "predicted": 0.3435,
+                  "actual": 0.2407
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 57,
+                  "predicted": 0.4501,
+                  "actual": 0.3509
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 40,
+                  "predicted": 0.5591,
+                  "actual": 0.425
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 36,
+                  "predicted": 0.6521,
+                  "actual": 0.4444
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 41,
+                  "predicted": 0.7528,
+                  "actual": 0.6829
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 44,
+                  "predicted": 0.8516,
+                  "actual": 0.8636
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 46,
+                  "predicted": 0.9425,
+                  "actual": 0.9565
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 72,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 34,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "rushing_attempts": {
+            "all": {
+              "player_games": 75,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 244,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 64,
+                "over": {
+                  "n": 31,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 26,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 75,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 244,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 64,
+                "over": {
+                  "n": 31,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 26,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "receiving_yards": {
+            "all": {
+              "player_games": 167,
+              "mae": 18.557,
+              "bias": 0.249,
+              "bias_pct": 0.72,
+              "mean_projected": 34.884,
+              "mean_actual": 34.635,
+              "ladder_rows": 1520,
+              "brier": 0.12712,
+              "log_loss": 0.40423,
+              "calibration_error": 0.0291,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 453,
+                  "predicted": 0.0527,
+                  "actual": 0.0486
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 263,
+                  "predicted": 0.145,
+                  "actual": 0.0989
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 160,
+                  "predicted": 0.2465,
+                  "actual": 0.2375
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 134,
+                  "predicted": 0.3462,
+                  "actual": 0.2985
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 105,
+                  "predicted": 0.448,
+                  "actual": 0.4762
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 95,
+                  "predicted": 0.5499,
+                  "actual": 0.5053
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 96,
+                  "predicted": 0.6511,
+                  "actual": 0.7188
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 77,
+                  "predicted": 0.7517,
+                  "actual": 0.7532
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 78,
+                  "predicted": 0.8483,
+                  "actual": 0.9359
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 59,
+                  "predicted": 0.9374,
+                  "actual": 0.9661
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 163,
+                "over": {
+                  "n": 47,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 57,
+                  "predicted": 0.587,
+                  "hit_rate": 0.614
+                }
+              }
+            },
+            "recent": {
+              "player_games": 167,
+              "mae": 18.557,
+              "bias": 0.249,
+              "bias_pct": 0.72,
+              "mean_projected": 34.884,
+              "mean_actual": 34.635,
+              "ladder_rows": 1520,
+              "brier": 0.12712,
+              "log_loss": 0.40423,
+              "calibration_error": 0.0291,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 453,
+                  "predicted": 0.0527,
+                  "actual": 0.0486
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 263,
+                  "predicted": 0.145,
+                  "actual": 0.0989
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 160,
+                  "predicted": 0.2465,
+                  "actual": 0.2375
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 134,
+                  "predicted": 0.3462,
+                  "actual": 0.2985
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 105,
+                  "predicted": 0.448,
+                  "actual": 0.4762
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 95,
+                  "predicted": 0.5499,
+                  "actual": 0.5053
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 96,
+                  "predicted": 0.6511,
+                  "actual": 0.7188
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 77,
+                  "predicted": 0.7517,
+                  "actual": 0.7532
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 78,
+                  "predicted": 0.8483,
+                  "actual": 0.9359
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 59,
+                  "predicted": 0.9374,
+                  "actual": 0.9661
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 163,
+                "over": {
+                  "n": 47,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 57,
+                  "predicted": 0.587,
+                  "hit_rate": 0.614
+                }
+              }
+            }
+          },
+          "receptions": {
+            "all": {
+              "player_games": 167,
+              "mae": 1.334,
+              "bias": 0.157,
+              "bias_pct": 5.2,
+              "mean_projected": 3.181,
+              "mean_actual": 3.024,
+              "ladder_rows": 1332,
+              "brier": 0.1152,
+              "log_loss": 0.37055,
+              "calibration_error": 0.0365,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 375,
+                  "predicted": 0.0522,
+                  "actual": 0.024
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 196,
+                  "predicted": 0.1471,
+                  "actual": 0.0816
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 121,
+                  "predicted": 0.2479,
+                  "actual": 0.1983
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 105,
+                  "predicted": 0.3444,
+                  "actual": 0.2857
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 88,
+                  "predicted": 0.4559,
+                  "actual": 0.4091
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 78,
+                  "predicted": 0.5494,
+                  "actual": 0.5385
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 78,
+                  "predicted": 0.6536,
+                  "actual": 0.7051
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 81,
+                  "predicted": 0.7533,
+                  "actual": 0.7654
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 103,
+                  "predicted": 0.8531,
+                  "actual": 0.8738
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 107,
+                  "predicted": 0.9446,
+                  "actual": 0.9533
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 166,
+                "over": {
+                  "n": 46,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 63,
+                  "predicted": 0.569,
+                  "hit_rate": 0.5873
+                }
+              }
+            },
+            "recent": {
+              "player_games": 167,
+              "mae": 1.334,
+              "bias": 0.157,
+              "bias_pct": 5.2,
+              "mean_projected": 3.181,
+              "mean_actual": 3.024,
+              "ladder_rows": 1332,
+              "brier": 0.1152,
+              "log_loss": 0.37055,
+              "calibration_error": 0.0365,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 375,
+                  "predicted": 0.0522,
+                  "actual": 0.024
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 196,
+                  "predicted": 0.1471,
+                  "actual": 0.0816
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 121,
+                  "predicted": 0.2479,
+                  "actual": 0.1983
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 105,
+                  "predicted": 0.3444,
+                  "actual": 0.2857
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 88,
+                  "predicted": 0.4559,
+                  "actual": 0.4091
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 78,
+                  "predicted": 0.5494,
+                  "actual": 0.5385
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 78,
+                  "predicted": 0.6536,
+                  "actual": 0.7051
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 81,
+                  "predicted": 0.7533,
+                  "actual": 0.7654
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 103,
+                  "predicted": 0.8531,
+                  "actual": 0.8738
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 107,
+                  "predicted": 0.9446,
+                  "actual": 0.9533
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 166,
+                "over": {
+                  "n": 46,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 63,
+                  "predicted": 0.569,
+                  "hit_rate": 0.5873
+                }
+              }
+            }
+          },
+          "rush_rec_yards": {
+            "all": {
+              "player_games": 167,
+              "mae": 22.08,
+              "bias": 0.788,
+              "bias_pct": 1.62,
+              "mean_projected": 49.375,
+              "mean_actual": 48.587,
+              "ladder_rows": 776,
+              "brier": 0.12872,
+              "log_loss": 0.40681,
+              "calibration_error": 0.0391,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 249,
+                  "predicted": 0.0537,
+                  "actual": 0.0402
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 124,
+                  "predicted": 0.1479,
+                  "actual": 0.1452
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 79,
+                  "predicted": 0.2508,
+                  "actual": 0.1772
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 62,
+                  "predicted": 0.3548,
+                  "actual": 0.3065
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 57,
+                  "predicted": 0.4522,
+                  "actual": 0.3509
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 43,
+                  "predicted": 0.546,
+                  "actual": 0.6744
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.6427,
+                  "actual": 0.5897
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 49,
+                  "predicted": 0.7474,
+                  "actual": 0.7959
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 39,
+                  "predicted": 0.8494,
+                  "actual": 0.8205
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 35,
+                  "predicted": 0.9418,
+                  "actual": 0.9143
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 167,
+                "over": {
+                  "n": 45,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 86,
+                  "predicted": 0.6099,
+                  "hit_rate": 0.6512
+                }
+              }
+            },
+            "recent": {
+              "player_games": 167,
+              "mae": 22.08,
+              "bias": 0.788,
+              "bias_pct": 1.62,
+              "mean_projected": 49.375,
+              "mean_actual": 48.587,
+              "ladder_rows": 776,
+              "brier": 0.12872,
+              "log_loss": 0.40681,
+              "calibration_error": 0.0391,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 249,
+                  "predicted": 0.0537,
+                  "actual": 0.0402
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 124,
+                  "predicted": 0.1479,
+                  "actual": 0.1452
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 79,
+                  "predicted": 0.2508,
+                  "actual": 0.1772
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 62,
+                  "predicted": 0.3548,
+                  "actual": 0.3065
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 57,
+                  "predicted": 0.4522,
+                  "actual": 0.3509
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 43,
+                  "predicted": 0.546,
+                  "actual": 0.6744
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.6427,
+                  "actual": 0.5897
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 49,
+                  "predicted": 0.7474,
+                  "actual": 0.7959
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 39,
+                  "predicted": 0.8494,
+                  "actual": 0.8205
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 35,
+                  "predicted": 0.9418,
+                  "actual": 0.9143
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 167,
+                "over": {
+                  "n": 45,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 86,
+                  "predicted": 0.6099,
+                  "hit_rate": 0.6512
+                }
+              }
+            }
+          },
+          "anytime_td": {
+            "all": {
+              "player_games": 197,
+              "mae": 0.399,
+              "bias": 0.034,
+              "bias_pct": 12.02,
+              "mean_projected": 0.313,
+              "mean_actual": 0.279,
+              "ladder_rows": 335,
+              "brier": 0.11604,
+              "log_loss": 0.37388,
+              "calibration_error": 0.021,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 120,
+                  "predicted": 0.0467,
+                  "actual": 0.0333
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 92,
+                  "predicted": 0.1453,
+                  "actual": 0.1304
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 65,
+                  "predicted": 0.2439,
+                  "actual": 0.2308
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 30,
+                  "predicted": 0.3412,
+                  "actual": 0.3
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 16,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 8,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 117,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 102,
+                  "predicted": 0.7037,
+                  "hit_rate": 0.7353
+                }
+              }
+            },
+            "recent": {
+              "player_games": 197,
+              "mae": 0.399,
+              "bias": 0.034,
+              "bias_pct": 12.02,
+              "mean_projected": 0.313,
+              "mean_actual": 0.279,
+              "ladder_rows": 335,
+              "brier": 0.11604,
+              "log_loss": 0.37388,
+              "calibration_error": 0.021,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 120,
+                  "predicted": 0.0467,
+                  "actual": 0.0333
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 92,
+                  "predicted": 0.1453,
+                  "actual": 0.1304
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 65,
+                  "predicted": 0.2439,
+                  "actual": 0.2308
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 30,
+                  "predicted": 0.3412,
+                  "actual": 0.3
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 16,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 8,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 117,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 102,
+                  "predicted": 0.7037,
+                  "hit_rate": 0.7353
+                }
+              }
+            }
+          },
+          "longest_reception": {
+            "all": {
+              "player_games": 167,
+              "mae": 8.891,
+              "bias": -1.58,
+              "bias_pct": -9.37,
+              "mean_projected": 15.288,
+              "mean_actual": 16.868,
+              "ladder_rows": 943,
+              "brier": 0.15279,
+              "log_loss": 0.46983,
+              "calibration_error": 0.0343,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 220,
+                  "predicted": 0.0567,
+                  "actual": 0.0545
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 176,
+                  "predicted": 0.1456,
+                  "actual": 0.1875
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 123,
+                  "predicted": 0.2448,
+                  "actual": 0.2358
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 101,
+                  "predicted": 0.3406,
+                  "actual": 0.2574
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 87,
+                  "predicted": 0.4474,
+                  "actual": 0.4828
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 75,
+                  "predicted": 0.5488,
+                  "actual": 0.6
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 57,
+                  "predicted": 0.6452,
+                  "actual": 0.6667
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 53,
+                  "predicted": 0.7518,
+                  "actual": 0.8679
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 37,
+                  "predicted": 0.8498,
+                  "actual": 0.8649
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 14,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 160,
+                "over": {
+                  "n": 45,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 72,
+                  "predicted": 0.5941,
+                  "hit_rate": 0.5972
+                }
+              }
+            },
+            "recent": {
+              "player_games": 167,
+              "mae": 8.891,
+              "bias": -1.58,
+              "bias_pct": -9.37,
+              "mean_projected": 15.288,
+              "mean_actual": 16.868,
+              "ladder_rows": 943,
+              "brier": 0.15279,
+              "log_loss": 0.46983,
+              "calibration_error": 0.0343,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 220,
+                  "predicted": 0.0567,
+                  "actual": 0.0545
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 176,
+                  "predicted": 0.1456,
+                  "actual": 0.1875
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 123,
+                  "predicted": 0.2448,
+                  "actual": 0.2358
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 101,
+                  "predicted": 0.3406,
+                  "actual": 0.2574
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 87,
+                  "predicted": 0.4474,
+                  "actual": 0.4828
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 75,
+                  "predicted": 0.5488,
+                  "actual": 0.6
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 57,
+                  "predicted": 0.6452,
+                  "actual": 0.6667
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 53,
+                  "predicted": 0.7518,
+                  "actual": 0.8679
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 37,
+                  "predicted": 0.8498,
+                  "actual": 0.8649
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 14,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 160,
+                "over": {
+                  "n": 45,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 72,
+                  "predicted": 0.5941,
+                  "hit_rate": 0.5972
+                }
+              }
+            }
+          },
+          "fantasy_points": {
+            "all": {
+              "player_games": 197,
+              "mae": 5.128,
+              "bias": 0.703,
+              "bias_pct": 6.81,
+              "mean_projected": 11.03,
+              "mean_actual": 10.327,
+              "ladder_rows": 1588,
+              "brier": 0.14358,
+              "log_loss": 0.44494,
+              "calibration_error": 0.0359,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 383,
+                  "predicted": 0.0537,
+                  "actual": 0.047
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 270,
+                  "predicted": 0.1494,
+                  "actual": 0.1
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 181,
+                  "predicted": 0.2505,
+                  "actual": 0.2376
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 156,
+                  "predicted": 0.3504,
+                  "actual": 0.3205
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 125,
+                  "predicted": 0.4448,
+                  "actual": 0.336
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 121,
+                  "predicted": 0.5459,
+                  "actual": 0.5124
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 105,
+                  "predicted": 0.6532,
+                  "actual": 0.5048
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 89,
+                  "predicted": 0.7513,
+                  "actual": 0.7528
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 89,
+                  "predicted": 0.8496,
+                  "actual": 0.8427
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 69,
+                  "predicted": 0.9409,
+                  "actual": 0.942
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 197,
+                "over": {
+                  "n": 49,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 67,
+                  "predicted": 0.589,
+                  "hit_rate": 0.6567
+                }
+              }
+            },
+            "recent": {
+              "player_games": 197,
+              "mae": 5.128,
+              "bias": 0.703,
+              "bias_pct": 6.81,
+              "mean_projected": 11.03,
+              "mean_actual": 10.327,
+              "ladder_rows": 1588,
+              "brier": 0.14358,
+              "log_loss": 0.44494,
+              "calibration_error": 0.0359,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 383,
+                  "predicted": 0.0537,
+                  "actual": 0.047
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 270,
+                  "predicted": 0.1494,
+                  "actual": 0.1
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 181,
+                  "predicted": 0.2505,
+                  "actual": 0.2376
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 156,
+                  "predicted": 0.3504,
+                  "actual": 0.3205
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 125,
+                  "predicted": 0.4448,
+                  "actual": 0.336
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 121,
+                  "predicted": 0.5459,
+                  "actual": 0.5124
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 105,
+                  "predicted": 0.6532,
+                  "actual": 0.5048
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 89,
+                  "predicted": 0.7513,
+                  "actual": 0.7528
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 89,
+                  "predicted": 0.8496,
+                  "actual": 0.8427
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 69,
+                  "predicted": 0.9409,
+                  "actual": 0.942
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 197,
+                "over": {
+                  "n": 49,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 67,
+                  "predicted": 0.589,
+                  "hit_rate": 0.6567
+                }
+              }
+            }
+          }
+        },
+        "live_span": {
+          "first_game": "2026-11-06T01:15:00+00:00",
+          "last_game": "2026-11-10T01:15:00+00:00"
+        },
+        "historical": {
+          "version": "0.1.0",
+          "test_seasons": [
+            2023,
+            2024,
+            2025
+          ],
+          "generated_at": "2026-11-02T21:29:56+00:00",
+          "source": "docs/models/results/nfl-props-backtest-0.1.0.json",
+          "markets": {
+            "anytime_td": {
+              "ladder_rows": 19175,
+              "brier": 0.1239,
+              "log_loss": 0.3938,
+              "baseline_log_loss": 0.4177,
+              "calibration_error": 0.0133,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 8017,
+                  "predicted": 0.046,
+                  "actual": 0.047
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 4863,
+                  "predicted": 0.148,
+                  "actual": 0.16
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3379,
+                  "predicted": 0.247,
+                  "actual": 0.276
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1846,
+                  "predicted": 0.344,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 802,
+                  "predicted": 0.443,
+                  "actual": 0.483
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 229,
+                  "predicted": 0.535,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.629,
+                  "actual": 0.538
+                }
+              ],
+              "player_games": 10892,
+              "mae": 0.415,
+              "bias": -0.022,
+              "recent_form_mae": 0.415
+            },
+            "fantasy_points": {
+              "ladder_rows": 91853,
+              "brier": 0.1476,
+              "log_loss": 0.4527,
+              "baseline_log_loss": 0.4826,
+              "calibration_error": 0.0143,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 25126,
+                  "predicted": 0.049,
+                  "actual": 0.048
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14720,
+                  "predicted": 0.147,
+                  "actual": 0.158
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 10821,
+                  "predicted": 0.248,
+                  "actual": 0.259
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 8892,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 7403,
+                  "predicted": 0.448,
+                  "actual": 0.474
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 6325,
+                  "predicted": 0.549,
+                  "actual": 0.585
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 5607,
+                  "predicted": 0.649,
+                  "actual": 0.674
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 5014,
+                  "predicted": 0.749,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4597,
+                  "predicted": 0.849,
+                  "actual": 0.852
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3348,
+                  "predicted": 0.944,
+                  "actual": 0.921
+                }
+              ],
+              "player_games": 10892,
+              "mae": 5.496,
+              "bias": -0.365,
+              "recent_form_mae": 5.74
+            },
+            "interceptions": {
+              "ladder_rows": 3340,
+              "brier": 0.1902,
+              "log_loss": 0.5621,
+              "baseline_log_loss": 0.6022,
+              "calibration_error": 0.0175,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 19,
+                  "predicted": 0.092,
+                  "actual": 0.053
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1242,
+                  "predicted": 0.164,
+                  "actual": 0.15
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 409,
+                  "predicted": 0.223,
+                  "actual": 0.186
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 108,
+                  "predicted": 0.379,
+                  "actual": 0.37
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1110,
+                  "predicted": 0.459,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 449,
+                  "predicted": 0.526,
+                  "actual": 0.568
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3,
+                  "predicted": 0.602,
+                  "actual": 1.0
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.699,
+              "bias": 0.003,
+              "recent_form_mae": 0.701
+            },
+            "longest_reception": {
+              "ladder_rows": 53429,
+              "brier": 0.1587,
+              "log_loss": 0.4846,
+              "baseline_log_loss": 0.5099,
+              "calibration_error": 0.0198,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 13413,
+                  "predicted": 0.052,
+                  "actual": 0.069
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 9968,
+                  "predicted": 0.147,
+                  "actual": 0.162
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7021,
+                  "predicted": 0.248,
+                  "actual": 0.267
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5702,
+                  "predicted": 0.349,
+                  "actual": 0.373
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4564,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4112,
+                  "predicted": 0.548,
+                  "actual": 0.574
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3290,
+                  "predicted": 0.649,
+                  "actual": 0.68
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2693,
+                  "predicted": 0.748,
+                  "actual": 0.777
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2019,
+                  "predicted": 0.847,
+                  "actual": 0.873
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 647,
+                  "predicted": 0.925,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 9.092,
+              "bias": -1.384,
+              "recent_form_mae": 9.624
+            },
+            "passing_attempts": {
+              "ladder_rows": 8188,
+              "brier": 0.1657,
+              "log_loss": 0.5023,
+              "baseline_log_loss": 0.5495,
+              "calibration_error": 0.0252,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1750,
+                  "predicted": 0.055,
+                  "actual": 0.073
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1238,
+                  "predicted": 0.146,
+                  "actual": 0.166
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 830,
+                  "predicted": 0.249,
+                  "actual": 0.281
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 791,
+                  "predicted": 0.349,
+                  "actual": 0.379
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 634,
+                  "predicted": 0.451,
+                  "actual": 0.505
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 724,
+                  "predicted": 0.552,
+                  "actual": 0.575
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 683,
+                  "predicted": 0.65,
+                  "actual": 0.682
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 798,
+                  "predicted": 0.751,
+                  "actual": 0.781
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 637,
+                  "predicted": 0.842,
+                  "actual": 0.835
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 103,
+                  "predicted": 0.92,
+                  "actual": 0.913
+                }
+              ],
+              "player_games": 1670,
+              "mae": 6.782,
+              "bias": 0.071,
+              "recent_form_mae": 8.143
+            },
+            "passing_completions": {
+              "ladder_rows": 13350,
+              "brier": 0.1749,
+              "log_loss": 0.5264,
+              "baseline_log_loss": 0.5766,
+              "calibration_error": 0.0338,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1352,
+                  "predicted": 0.066,
+                  "actual": 0.092
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1934,
+                  "predicted": 0.148,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1525,
+                  "predicted": 0.248,
+                  "actual": 0.29
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1283,
+                  "predicted": 0.349,
+                  "actual": 0.408
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1179,
+                  "predicted": 0.45,
+                  "actual": 0.5
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1153,
+                  "predicted": 0.55,
+                  "actual": 0.605
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1201,
+                  "predicted": 0.65,
+                  "actual": 0.69
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1398,
+                  "predicted": 0.751,
+                  "actual": 0.774
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1560,
+                  "predicted": 0.851,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 765,
+                  "predicted": 0.93,
+                  "actual": 0.924
+                }
+              ],
+              "player_games": 1670,
+              "mae": 4.724,
+              "bias": 0.044,
+              "recent_form_mae": 5.653
+            },
+            "passing_tds": {
+              "ladder_rows": 5010,
+              "brier": 0.1833,
+              "log_loss": 0.5472,
+              "baseline_log_loss": 0.5838,
+              "calibration_error": 0.036,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 425,
+                  "predicted": 0.081,
+                  "actual": 0.104
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1114,
+                  "predicted": 0.138,
+                  "actual": 0.164
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 419,
+                  "predicted": 0.256,
+                  "actual": 0.334
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 871,
+                  "predicted": 0.351,
+                  "actual": 0.397
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 421,
+                  "predicted": 0.439,
+                  "actual": 0.504
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 91,
+                  "predicted": 0.537,
+                  "actual": 0.725
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 275,
+                  "predicted": 0.667,
+                  "actual": 0.676
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1078,
+                  "predicted": 0.752,
+                  "actual": 0.762
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 314,
+                  "predicted": 0.83,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2,
+                  "predicted": 0.903,
+                  "actual": 0.5
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.909,
+              "bias": -0.014,
+              "recent_form_mae": 0.93
+            },
+            "passing_yards": {
+              "ladder_rows": 15030,
+              "brier": 0.1618,
+              "log_loss": 0.4912,
+              "baseline_log_loss": 0.5273,
+              "calibration_error": 0.0408,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 3441,
+                  "predicted": 0.058,
+                  "actual": 0.065
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2562,
+                  "predicted": 0.145,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1655,
+                  "predicted": 0.247,
+                  "actual": 0.32
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1271,
+                  "predicted": 0.348,
+                  "actual": 0.436
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1148,
+                  "predicted": 0.449,
+                  "actual": 0.544
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1030,
+                  "predicted": 0.549,
+                  "actual": 0.615
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1098,
+                  "predicted": 0.65,
+                  "actual": 0.704
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1162,
+                  "predicted": 0.752,
+                  "actual": 0.772
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1213,
+                  "predicted": 0.849,
+                  "actual": 0.857
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 450,
+                  "predicted": 0.925,
+                  "actual": 0.902
+                }
+              ],
+              "player_games": 1670,
+              "mae": 59.297,
+              "bias": 0.361,
+              "recent_form_mae": 68.231
+            },
+            "receiving_yards": {
+              "ladder_rows": 94064,
+              "brier": 0.1303,
+              "log_loss": 0.4055,
+              "baseline_log_loss": 0.4292,
+              "calibration_error": 0.0123,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 35075,
+                  "predicted": 0.042,
+                  "actual": 0.043
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14492,
+                  "predicted": 0.145,
+                  "actual": 0.157
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 9502,
+                  "predicted": 0.247,
+                  "actual": 0.278
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 7167,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 5881,
+                  "predicted": 0.448,
+                  "actual": 0.48
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 5289,
+                  "predicted": 0.551,
+                  "actual": 0.569
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4969,
+                  "predicted": 0.649,
+                  "actual": 0.668
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4454,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4154,
+                  "predicted": 0.849,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3081,
+                  "predicted": 0.941,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 21.135,
+              "bias": -1.385,
+              "recent_form_mae": 21.814
+            },
+            "receptions": {
+              "ladder_rows": 83140,
+              "brier": 0.1194,
+              "log_loss": 0.3756,
+              "baseline_log_loss": 0.4027,
+              "calibration_error": 0.0098,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 29138,
+                  "predicted": 0.041,
+                  "actual": 0.034
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 11122,
+                  "predicted": 0.145,
+                  "actual": 0.143
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7257,
+                  "predicted": 0.248,
+                  "actual": 0.263
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5407,
+                  "predicted": 0.348,
+                  "actual": 0.363
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4813,
+                  "predicted": 0.449,
+                  "actual": 0.478
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4479,
+                  "predicted": 0.549,
+                  "actual": 0.56
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4036,
+                  "predicted": 0.65,
+                  "actual": 0.679
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4512,
+                  "predicted": 0.752,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 5529,
+                  "predicted": 0.851,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 6847,
+                  "predicted": 0.951,
+                  "actual": 0.95
+                }
+              ],
+              "player_games": 9222,
+              "mae": 1.574,
+              "bias": -0.095,
+              "recent_form_mae": 1.637
+            },
+            "rush_rec_yards": {
+              "ladder_rows": 50155,
+              "brier": 0.1227,
+              "log_loss": 0.3847,
+              "baseline_log_loss": 0.4101,
+              "calibration_error": 0.0066,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 20110,
+                  "predicted": 0.04,
+                  "actual": 0.04
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 7440,
+                  "predicted": 0.144,
+                  "actual": 0.149
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4430,
+                  "predicted": 0.248,
+                  "actual": 0.266
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3735,
+                  "predicted": 0.35,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2975,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2602,
+                  "predicted": 0.549,
+                  "actual": 0.556
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2513,
+                  "predicted": 0.649,
+                  "actual": 0.659
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2264,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2199,
+                  "predicted": 0.849,
+                  "actual": 0.851
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1887,
+                  "predicted": 0.945,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 25.741,
+              "bias": -2.028,
+              "recent_form_mae": 26.752
+            },
+            "rushing_attempts": {
+              "ladder_rows": 17947,
+              "brier": 0.1042,
+              "log_loss": 0.3316,
+              "baseline_log_loss": 0.3632,
+              "calibration_error": 0.0116,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 7127,
+                  "predicted": 0.034,
+                  "actual": 0.025
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2116,
+                  "predicted": 0.145,
+                  "actual": 0.132
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1478,
+                  "predicted": 0.246,
+                  "actual": 0.217
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1029,
+                  "predicted": 0.349,
+                  "actual": 0.346
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 865,
+                  "predicted": 0.449,
+                  "actual": 0.44
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 758,
+                  "predicted": 0.552,
+                  "actual": 0.518
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 819,
+                  "predicted": 0.65,
+                  "actual": 0.619
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 950,
+                  "predicted": 0.751,
+                  "actual": 0.745
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 993,
+                  "predicted": 0.852,
+                  "actual": 0.845
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1812,
+                  "predicted": 0.958,
+                  "actual": 0.959
+                }
+              ],
+              "player_games": 4225,
+              "mae": 3.314,
+              "bias": -0.582,
+              "recent_form_mae": 3.492
+            },
+            "rushing_yards": {
+              "ladder_rows": 48132,
+              "brier": 0.1149,
+              "log_loss": 0.3626,
+              "baseline_log_loss": 0.3857,
+              "calibration_error": 0.0119,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 18623,
+                  "predicted": 0.039,
+                  "actual": 0.029
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 6545,
+                  "predicted": 0.146,
+                  "actual": 0.131
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4410,
+                  "predicted": 0.248,
+                  "actual": 0.229
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3279,
+                  "predicted": 0.349,
+                  "actual": 0.34
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2840,
+                  "predicted": 0.448,
+                  "actual": 0.438
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2433,
+                  "predicted": 0.55,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2263,
+                  "predicted": 0.65,
+                  "actual": 0.626
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2323,
+                  "predicted": 0.752,
+                  "actual": 0.737
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2452,
+                  "predicted": 0.852,
+                  "actual": 0.844
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2964,
+                  "predicted": 0.951,
+                  "actual": 0.942
+                }
+              ],
+              "player_games": 9138,
+              "mae": 10.192,
+              "bias": -0.931,
+              "recent_form_mae": 10.616
+            }
+          }
+        },
+        "historical_note": "0.1.0's backtest: 0.1.1 is 0.1.0's share and efficiency model and calibration plus the live injury feed and the inexperienced-QB factor, which the backtest does not include."
+      },
+      "0.1.0": {
+        "role": "shadow",
+        "live": {
+          "passing_yards": {
+            "all": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 285,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 12,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 285,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 12,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_attempts": {
+            "all": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 155,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 7,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 155,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 7,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_completions": {
+            "all": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 255,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 255,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 14,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 8,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "passing_tds": {
+            "all": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 96,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 5,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 26,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 96,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 5,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 26,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "interceptions": {
+            "all": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 64,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 3,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 18,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 32,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 64,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 32,
+                "over": {
+                  "n": 3,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 18,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "rushing_yards": {
+            "all": {
+              "player_games": 167,
+              "mae": 9.385,
+              "bias": 0.278,
+              "bias_pct": 1.6,
+              "mean_projected": 17.673,
+              "mean_actual": 17.395,
+              "ladder_rows": 749,
+              "brier": 0.13541,
+              "log_loss": 0.42491,
+              "calibration_error": 0.0444,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 230,
+                  "predicted": 0.051,
+                  "actual": 0.0609
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 118,
+                  "predicted": 0.1445,
+                  "actual": 0.161
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 76,
+                  "predicted": 0.2477,
+                  "actual": 0.2105
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 57,
+                  "predicted": 0.3446,
+                  "actual": 0.2105
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 55,
+                  "predicted": 0.4508,
+                  "actual": 0.3091
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 43,
+                  "predicted": 0.5525,
+                  "actual": 0.5116
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.6543,
+                  "actual": 0.4872
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 40,
+                  "predicted": 0.7504,
+                  "actual": 0.725
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 42,
+                  "predicted": 0.8471,
+                  "actual": 0.881
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 49,
+                  "predicted": 0.9398,
+                  "actual": 0.9388
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 75,
+                "over": {
+                  "n": 16,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 35,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 167,
+              "mae": 9.385,
+              "bias": 0.278,
+              "bias_pct": 1.6,
+              "mean_projected": 17.673,
+              "mean_actual": 17.395,
+              "ladder_rows": 749,
+              "brier": 0.13541,
+              "log_loss": 0.42491,
+              "calibration_error": 0.0444,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 230,
+                  "predicted": 0.051,
+                  "actual": 0.0609
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 118,
+                  "predicted": 0.1445,
+                  "actual": 0.161
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 76,
+                  "predicted": 0.2477,
+                  "actual": 0.2105
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 57,
+                  "predicted": 0.3446,
+                  "actual": 0.2105
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 55,
+                  "predicted": 0.4508,
+                  "actual": 0.3091
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 43,
+                  "predicted": 0.5525,
+                  "actual": 0.5116
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.6543,
+                  "actual": 0.4872
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 40,
+                  "predicted": 0.7504,
+                  "actual": 0.725
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 42,
+                  "predicted": 0.8471,
+                  "actual": 0.881
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 49,
+                  "predicted": 0.9398,
+                  "actual": 0.9388
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 75,
+                "over": {
+                  "n": 16,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 35,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "rushing_attempts": {
+            "all": {
+              "player_games": 79,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 256,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 67,
+                "over": {
+                  "n": 29,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 33,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            },
+            "recent": {
+              "player_games": 79,
+              "mae": null,
+              "bias": null,
+              "bias_pct": null,
+              "withheld_mean": "fewer than 100 player-games",
+              "ladder_rows": 256,
+              "brier": null,
+              "log_loss": null,
+              "calibration_error": null,
+              "calibration": null,
+              "withheld_ladder": "fewer than 300 ladder rows",
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 67,
+                "over": {
+                  "n": 29,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 33,
+                  "predicted": null,
+                  "hit_rate": null
+                }
+              }
+            }
+          },
+          "receiving_yards": {
+            "all": {
+              "player_games": 176,
+              "mae": 18.511,
+              "bias": -1.845,
+              "bias_pct": -5.26,
+              "mean_projected": 33.212,
+              "mean_actual": 35.057,
+              "ladder_rows": 1582,
+              "brier": 0.13067,
+              "log_loss": 0.41268,
+              "calibration_error": 0.0245,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 496,
+                  "predicted": 0.0523,
+                  "actual": 0.0544
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 268,
+                  "predicted": 0.1436,
+                  "actual": 0.1231
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 175,
+                  "predicted": 0.245,
+                  "actual": 0.2629
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 137,
+                  "predicted": 0.3478,
+                  "actual": 0.3431
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 104,
+                  "predicted": 0.447,
+                  "actual": 0.5192
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 106,
+                  "predicted": 0.5504,
+                  "actual": 0.5755
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 91,
+                  "predicted": 0.6535,
+                  "actual": 0.6703
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 78,
+                  "predicted": 0.752,
+                  "actual": 0.859
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 72,
+                  "predicted": 0.8483,
+                  "actual": 0.9306
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 55,
+                  "predicted": 0.9363,
+                  "actual": 0.9818
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 169,
+                "over": {
+                  "n": 57,
+                  "predicted": 0.5609,
+                  "hit_rate": 0.5789
+                },
+                "under": {
+                  "n": 57,
+                  "predicted": 0.5777,
+                  "hit_rate": 0.5263
+                }
+              }
+            },
+            "recent": {
+              "player_games": 176,
+              "mae": 18.511,
+              "bias": -1.845,
+              "bias_pct": -5.26,
+              "mean_projected": 33.212,
+              "mean_actual": 35.057,
+              "ladder_rows": 1582,
+              "brier": 0.13067,
+              "log_loss": 0.41268,
+              "calibration_error": 0.0245,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 496,
+                  "predicted": 0.0523,
+                  "actual": 0.0544
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 268,
+                  "predicted": 0.1436,
+                  "actual": 0.1231
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 175,
+                  "predicted": 0.245,
+                  "actual": 0.2629
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 137,
+                  "predicted": 0.3478,
+                  "actual": 0.3431
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 104,
+                  "predicted": 0.447,
+                  "actual": 0.5192
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 106,
+                  "predicted": 0.5504,
+                  "actual": 0.5755
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 91,
+                  "predicted": 0.6535,
+                  "actual": 0.6703
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 78,
+                  "predicted": 0.752,
+                  "actual": 0.859
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 72,
+                  "predicted": 0.8483,
+                  "actual": 0.9306
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 55,
+                  "predicted": 0.9363,
+                  "actual": 0.9818
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 169,
+                "over": {
+                  "n": 57,
+                  "predicted": 0.5609,
+                  "hit_rate": 0.5789
+                },
+                "under": {
+                  "n": 57,
+                  "predicted": 0.5777,
+                  "hit_rate": 0.5263
+                }
+              }
+            }
+          },
+          "receptions": {
+            "all": {
+              "player_games": 176,
+              "mae": 1.322,
+              "bias": -0.07,
+              "bias_pct": -2.27,
+              "mean_projected": 2.993,
+              "mean_actual": 3.062,
+              "ladder_rows": 1374,
+              "brier": 0.11663,
+              "log_loss": 0.37176,
+              "calibration_error": 0.0309,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 393,
+                  "predicted": 0.0521,
+                  "actual": 0.0204
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 210,
+                  "predicted": 0.1459,
+                  "actual": 0.1143
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 130,
+                  "predicted": 0.2495,
+                  "actual": 0.2538
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 99,
+                  "predicted": 0.3447,
+                  "actual": 0.3636
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 95,
+                  "predicted": 0.4505,
+                  "actual": 0.4632
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 78,
+                  "predicted": 0.5518,
+                  "actual": 0.5641
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 78,
+                  "predicted": 0.6498,
+                  "actual": 0.7564
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 83,
+                  "predicted": 0.7548,
+                  "actual": 0.7831
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 105,
+                  "predicted": 0.8522,
+                  "actual": 0.9143
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 103,
+                  "predicted": 0.946,
+                  "actual": 0.9612
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 175,
+                "over": {
+                  "n": 54,
+                  "predicted": 0.5733,
+                  "hit_rate": 0.6667
+                },
+                "under": {
+                  "n": 72,
+                  "predicted": 0.5679,
+                  "hit_rate": 0.5972
+                }
+              }
+            },
+            "recent": {
+              "player_games": 176,
+              "mae": 1.322,
+              "bias": -0.07,
+              "bias_pct": -2.27,
+              "mean_projected": 2.993,
+              "mean_actual": 3.062,
+              "ladder_rows": 1374,
+              "brier": 0.11663,
+              "log_loss": 0.37176,
+              "calibration_error": 0.0309,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 393,
+                  "predicted": 0.0521,
+                  "actual": 0.0204
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 210,
+                  "predicted": 0.1459,
+                  "actual": 0.1143
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 130,
+                  "predicted": 0.2495,
+                  "actual": 0.2538
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 99,
+                  "predicted": 0.3447,
+                  "actual": 0.3636
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 95,
+                  "predicted": 0.4505,
+                  "actual": 0.4632
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 78,
+                  "predicted": 0.5518,
+                  "actual": 0.5641
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 78,
+                  "predicted": 0.6498,
+                  "actual": 0.7564
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 83,
+                  "predicted": 0.7548,
+                  "actual": 0.7831
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 105,
+                  "predicted": 0.8522,
+                  "actual": 0.9143
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 103,
+                  "predicted": 0.946,
+                  "actual": 0.9612
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 175,
+                "over": {
+                  "n": 54,
+                  "predicted": 0.5733,
+                  "hit_rate": 0.6667
+                },
+                "under": {
+                  "n": 72,
+                  "predicted": 0.5679,
+                  "hit_rate": 0.5972
+                }
+              }
+            }
+          },
+          "rush_rec_yards": {
+            "all": {
+              "player_games": 176,
+              "mae": 21.747,
+              "bias": -1.831,
+              "bias_pct": -3.73,
+              "mean_projected": 47.208,
+              "mean_actual": 49.04,
+              "ladder_rows": 809,
+              "brier": 0.13131,
+              "log_loss": 0.41298,
+              "calibration_error": 0.0275,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 275,
+                  "predicted": 0.0532,
+                  "actual": 0.0473
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 130,
+                  "predicted": 0.1511,
+                  "actual": 0.1615
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 74,
+                  "predicted": 0.2488,
+                  "actual": 0.2027
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 66,
+                  "predicted": 0.3498,
+                  "actual": 0.303
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 64,
+                  "predicted": 0.4451,
+                  "actual": 0.5
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 44,
+                  "predicted": 0.5569,
+                  "actual": 0.6591
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 42,
+                  "predicted": 0.6516,
+                  "actual": 0.6905
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 44,
+                  "predicted": 0.748,
+                  "actual": 0.75
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 39,
+                  "predicted": 0.8515,
+                  "actual": 0.8974
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 31,
+                  "predicted": 0.943,
+                  "actual": 0.9032
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 176,
+                "over": {
+                  "n": 51,
+                  "predicted": 0.5911,
+                  "hit_rate": 0.6078
+                },
+                "under": {
+                  "n": 97,
+                  "predicted": 0.6144,
+                  "hit_rate": 0.6082
+                }
+              }
+            },
+            "recent": {
+              "player_games": 176,
+              "mae": 21.747,
+              "bias": -1.831,
+              "bias_pct": -3.73,
+              "mean_projected": 47.208,
+              "mean_actual": 49.04,
+              "ladder_rows": 809,
+              "brier": 0.13131,
+              "log_loss": 0.41298,
+              "calibration_error": 0.0275,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 275,
+                  "predicted": 0.0532,
+                  "actual": 0.0473
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 130,
+                  "predicted": 0.1511,
+                  "actual": 0.1615
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 74,
+                  "predicted": 0.2488,
+                  "actual": 0.2027
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 66,
+                  "predicted": 0.3498,
+                  "actual": 0.303
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 64,
+                  "predicted": 0.4451,
+                  "actual": 0.5
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 44,
+                  "predicted": 0.5569,
+                  "actual": 0.6591
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 42,
+                  "predicted": 0.6516,
+                  "actual": 0.6905
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 44,
+                  "predicted": 0.748,
+                  "actual": 0.75
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 39,
+                  "predicted": 0.8515,
+                  "actual": 0.8974
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 31,
+                  "predicted": 0.943,
+                  "actual": 0.9032
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 176,
+                "over": {
+                  "n": 51,
+                  "predicted": 0.5911,
+                  "hit_rate": 0.6078
+                },
+                "under": {
+                  "n": 97,
+                  "predicted": 0.6144,
+                  "hit_rate": 0.6082
+                }
+              }
+            }
+          },
+          "anytime_td": {
+            "all": {
+              "player_games": 208,
+              "mae": 0.397,
+              "bias": 0.004,
+              "bias_pct": 1.48,
+              "mean_projected": 0.298,
+              "mean_actual": 0.293,
+              "ladder_rows": 348,
+              "brier": 0.11829,
+              "log_loss": 0.37912,
+              "calibration_error": 0.0154,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 129,
+                  "predicted": 0.0472,
+                  "actual": 0.031
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 102,
+                  "predicted": 0.148,
+                  "actual": 0.1569
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 58,
+                  "predicted": 0.2408,
+                  "actual": 0.2414
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 35,
+                  "predicted": 0.3389,
+                  "actual": 0.3143
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 10,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 11,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 112,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 98,
+                  "predicted": 0.7044,
+                  "hit_rate": 0.7143
+                }
+              }
+            },
+            "recent": {
+              "player_games": 208,
+              "mae": 0.397,
+              "bias": 0.004,
+              "bias_pct": 1.48,
+              "mean_projected": 0.298,
+              "mean_actual": 0.293,
+              "ladder_rows": 348,
+              "brier": 0.11829,
+              "log_loss": 0.37912,
+              "calibration_error": 0.0154,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 129,
+                  "predicted": 0.0472,
+                  "actual": 0.031
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 102,
+                  "predicted": 0.148,
+                  "actual": 0.1569
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 58,
+                  "predicted": 0.2408,
+                  "actual": 0.2414
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 35,
+                  "predicted": 0.3389,
+                  "actual": 0.3143
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 10,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 11,
+                  "predicted": null,
+                  "actual": null
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 112,
+                "over": {
+                  "n": 11,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 98,
+                  "predicted": 0.7044,
+                  "hit_rate": 0.7143
+                }
+              }
+            }
+          },
+          "longest_reception": {
+            "all": {
+              "player_games": 176,
+              "mae": 8.749,
+              "bias": -1.975,
+              "bias_pct": -11.71,
+              "mean_projected": 14.894,
+              "mean_actual": 16.869,
+              "ladder_rows": 992,
+              "brier": 0.15434,
+              "log_loss": 0.47372,
+              "calibration_error": 0.0278,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 247,
+                  "predicted": 0.0571,
+                  "actual": 0.0567
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 186,
+                  "predicted": 0.1485,
+                  "actual": 0.1882
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 129,
+                  "predicted": 0.2469,
+                  "actual": 0.2481
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 100,
+                  "predicted": 0.3393,
+                  "actual": 0.32
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 101,
+                  "predicted": 0.4483,
+                  "actual": 0.4752
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 66,
+                  "predicted": 0.5511,
+                  "actual": 0.5909
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 67,
+                  "predicted": 0.6424,
+                  "actual": 0.7313
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 46,
+                  "predicted": 0.7525,
+                  "actual": 0.8261
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 34,
+                  "predicted": 0.8387,
+                  "actual": 0.9118
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 16,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 167,
+                "over": {
+                  "n": 38,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 88,
+                  "predicted": 0.5898,
+                  "hit_rate": 0.5455
+                }
+              }
+            },
+            "recent": {
+              "player_games": 176,
+              "mae": 8.749,
+              "bias": -1.975,
+              "bias_pct": -11.71,
+              "mean_projected": 14.894,
+              "mean_actual": 16.869,
+              "ladder_rows": 992,
+              "brier": 0.15434,
+              "log_loss": 0.47372,
+              "calibration_error": 0.0278,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 247,
+                  "predicted": 0.0571,
+                  "actual": 0.0567
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 186,
+                  "predicted": 0.1485,
+                  "actual": 0.1882
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 129,
+                  "predicted": 0.2469,
+                  "actual": 0.2481
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 100,
+                  "predicted": 0.3393,
+                  "actual": 0.32
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 101,
+                  "predicted": 0.4483,
+                  "actual": 0.4752
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 66,
+                  "predicted": 0.5511,
+                  "actual": 0.5909
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 67,
+                  "predicted": 0.6424,
+                  "actual": 0.7313
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 46,
+                  "predicted": 0.7525,
+                  "actual": 0.8261
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 34,
+                  "predicted": 0.8387,
+                  "actual": 0.9118
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 16,
+                  "predicted": null,
+                  "actual": null
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 167,
+                "over": {
+                  "n": 38,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 88,
+                  "predicted": 0.5898,
+                  "hit_rate": 0.5455
+                }
+              }
+            }
+          },
+          "fantasy_points": {
+            "all": {
+              "player_games": 208,
+              "mae": 4.963,
+              "bias": 0.094,
+              "bias_pct": 0.89,
+              "mean_projected": 10.601,
+              "mean_actual": 10.508,
+              "ladder_rows": 1655,
+              "brier": 0.14381,
+              "log_loss": 0.4457,
+              "calibration_error": 0.0201,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 413,
+                  "predicted": 0.0539,
+                  "actual": 0.0484
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 283,
+                  "predicted": 0.1471,
+                  "actual": 0.1201
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 192,
+                  "predicted": 0.2473,
+                  "actual": 0.25
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 168,
+                  "predicted": 0.3463,
+                  "actual": 0.3393
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 141,
+                  "predicted": 0.4475,
+                  "actual": 0.4043
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 109,
+                  "predicted": 0.5473,
+                  "actual": 0.5138
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 106,
+                  "predicted": 0.6505,
+                  "actual": 0.6038
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 92,
+                  "predicted": 0.7519,
+                  "actual": 0.8152
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 81,
+                  "predicted": 0.8476,
+                  "actual": 0.8519
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 70,
+                  "predicted": 0.9404,
+                  "actual": 0.9286
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 208,
+                "over": {
+                  "n": 42,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 90,
+                  "predicted": 0.5844,
+                  "hit_rate": 0.6222
+                }
+              }
+            },
+            "recent": {
+              "player_games": 208,
+              "mae": 4.963,
+              "bias": 0.094,
+              "bias_pct": 0.89,
+              "mean_projected": 10.601,
+              "mean_actual": 10.508,
+              "ladder_rows": 1655,
+              "brier": 0.14381,
+              "log_loss": 0.4457,
+              "calibration_error": 0.0201,
+              "calibration": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 413,
+                  "predicted": 0.0539,
+                  "actual": 0.0484
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 283,
+                  "predicted": 0.1471,
+                  "actual": 0.1201
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 192,
+                  "predicted": 0.2473,
+                  "actual": 0.25
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 168,
+                  "predicted": 0.3463,
+                  "actual": 0.3393
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 141,
+                  "predicted": 0.4475,
+                  "actual": 0.4043
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 109,
+                  "predicted": 0.5473,
+                  "actual": 0.5138
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 106,
+                  "predicted": 0.6505,
+                  "actual": 0.6038
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 92,
+                  "predicted": 0.7519,
+                  "actual": 0.8152
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 81,
+                  "predicted": 0.8476,
+                  "actual": 0.8519
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 70,
+                  "predicted": 0.9404,
+                  "actual": 0.9286
+                }
+              ],
+              "over_under": {
+                "line": "the model's ladder rung closest to 50% for each player-game",
+                "n": 208,
+                "over": {
+                  "n": 42,
+                  "predicted": null,
+                  "hit_rate": null
+                },
+                "under": {
+                  "n": 90,
+                  "predicted": 0.5844,
+                  "hit_rate": 0.6222
+                }
+              }
+            }
+          }
+        },
+        "live_span": {
+          "first_game": "2026-11-03T01:15:00+00:00",
+          "last_game": "2026-11-10T01:15:00+00:00"
+        },
+        "historical": {
+          "version": "0.1.0",
+          "test_seasons": [
+            2023,
+            2024,
+            2025
+          ],
+          "generated_at": "2026-11-02T21:29:56+00:00",
+          "source": "docs/models/results/nfl-props-backtest-0.1.0.json",
+          "markets": {
+            "anytime_td": {
+              "ladder_rows": 19175,
+              "brier": 0.1239,
+              "log_loss": 0.3938,
+              "baseline_log_loss": 0.4177,
+              "calibration_error": 0.0133,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 8017,
+                  "predicted": 0.046,
+                  "actual": 0.047
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 4863,
+                  "predicted": 0.148,
+                  "actual": 0.16
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3379,
+                  "predicted": 0.247,
+                  "actual": 0.276
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1846,
+                  "predicted": 0.344,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 802,
+                  "predicted": 0.443,
+                  "actual": 0.483
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 229,
+                  "predicted": 0.535,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.629,
+                  "actual": 0.538
+                }
+              ],
+              "player_games": 10892,
+              "mae": 0.415,
+              "bias": -0.022,
+              "recent_form_mae": 0.415
+            },
+            "fantasy_points": {
+              "ladder_rows": 91853,
+              "brier": 0.1476,
+              "log_loss": 0.4527,
+              "baseline_log_loss": 0.4826,
+              "calibration_error": 0.0143,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 25126,
+                  "predicted": 0.049,
+                  "actual": 0.048
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14720,
+                  "predicted": 0.147,
+                  "actual": 0.158
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 10821,
+                  "predicted": 0.248,
+                  "actual": 0.259
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 8892,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 7403,
+                  "predicted": 0.448,
+                  "actual": 0.474
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 6325,
+                  "predicted": 0.549,
+                  "actual": 0.585
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 5607,
+                  "predicted": 0.649,
+                  "actual": 0.674
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 5014,
+                  "predicted": 0.749,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4597,
+                  "predicted": 0.849,
+                  "actual": 0.852
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3348,
+                  "predicted": 0.944,
+                  "actual": 0.921
+                }
+              ],
+              "player_games": 10892,
+              "mae": 5.496,
+              "bias": -0.365,
+              "recent_form_mae": 5.74
+            },
+            "interceptions": {
+              "ladder_rows": 3340,
+              "brier": 0.1902,
+              "log_loss": 0.5621,
+              "baseline_log_loss": 0.6022,
+              "calibration_error": 0.0175,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 19,
+                  "predicted": 0.092,
+                  "actual": 0.053
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1242,
+                  "predicted": 0.164,
+                  "actual": 0.15
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 409,
+                  "predicted": 0.223,
+                  "actual": 0.186
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 108,
+                  "predicted": 0.379,
+                  "actual": 0.37
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1110,
+                  "predicted": 0.459,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 449,
+                  "predicted": 0.526,
+                  "actual": 0.568
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3,
+                  "predicted": 0.602,
+                  "actual": 1.0
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.699,
+              "bias": 0.003,
+              "recent_form_mae": 0.701
+            },
+            "longest_reception": {
+              "ladder_rows": 53429,
+              "brier": 0.1587,
+              "log_loss": 0.4846,
+              "baseline_log_loss": 0.5099,
+              "calibration_error": 0.0198,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 13413,
+                  "predicted": 0.052,
+                  "actual": 0.069
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 9968,
+                  "predicted": 0.147,
+                  "actual": 0.162
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7021,
+                  "predicted": 0.248,
+                  "actual": 0.267
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5702,
+                  "predicted": 0.349,
+                  "actual": 0.373
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4564,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4112,
+                  "predicted": 0.548,
+                  "actual": 0.574
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3290,
+                  "predicted": 0.649,
+                  "actual": 0.68
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2693,
+                  "predicted": 0.748,
+                  "actual": 0.777
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2019,
+                  "predicted": 0.847,
+                  "actual": 0.873
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 647,
+                  "predicted": 0.925,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 9.092,
+              "bias": -1.384,
+              "recent_form_mae": 9.624
+            },
+            "passing_attempts": {
+              "ladder_rows": 8188,
+              "brier": 0.1657,
+              "log_loss": 0.5023,
+              "baseline_log_loss": 0.5495,
+              "calibration_error": 0.0252,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1750,
+                  "predicted": 0.055,
+                  "actual": 0.073
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1238,
+                  "predicted": 0.146,
+                  "actual": 0.166
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 830,
+                  "predicted": 0.249,
+                  "actual": 0.281
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 791,
+                  "predicted": 0.349,
+                  "actual": 0.379
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 634,
+                  "predicted": 0.451,
+                  "actual": 0.505
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 724,
+                  "predicted": 0.552,
+                  "actual": 0.575
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 683,
+                  "predicted": 0.65,
+                  "actual": 0.682
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 798,
+                  "predicted": 0.751,
+                  "actual": 0.781
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 637,
+                  "predicted": 0.842,
+                  "actual": 0.835
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 103,
+                  "predicted": 0.92,
+                  "actual": 0.913
+                }
+              ],
+              "player_games": 1670,
+              "mae": 6.782,
+              "bias": 0.071,
+              "recent_form_mae": 8.143
+            },
+            "passing_completions": {
+              "ladder_rows": 13350,
+              "brier": 0.1749,
+              "log_loss": 0.5264,
+              "baseline_log_loss": 0.5766,
+              "calibration_error": 0.0338,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1352,
+                  "predicted": 0.066,
+                  "actual": 0.092
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1934,
+                  "predicted": 0.148,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1525,
+                  "predicted": 0.248,
+                  "actual": 0.29
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1283,
+                  "predicted": 0.349,
+                  "actual": 0.408
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1179,
+                  "predicted": 0.45,
+                  "actual": 0.5
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1153,
+                  "predicted": 0.55,
+                  "actual": 0.605
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1201,
+                  "predicted": 0.65,
+                  "actual": 0.69
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1398,
+                  "predicted": 0.751,
+                  "actual": 0.774
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1560,
+                  "predicted": 0.851,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 765,
+                  "predicted": 0.93,
+                  "actual": 0.924
+                }
+              ],
+              "player_games": 1670,
+              "mae": 4.724,
+              "bias": 0.044,
+              "recent_form_mae": 5.653
+            },
+            "passing_tds": {
+              "ladder_rows": 5010,
+              "brier": 0.1833,
+              "log_loss": 0.5472,
+              "baseline_log_loss": 0.5838,
+              "calibration_error": 0.036,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 425,
+                  "predicted": 0.081,
+                  "actual": 0.104
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1114,
+                  "predicted": 0.138,
+                  "actual": 0.164
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 419,
+                  "predicted": 0.256,
+                  "actual": 0.334
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 871,
+                  "predicted": 0.351,
+                  "actual": 0.397
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 421,
+                  "predicted": 0.439,
+                  "actual": 0.504
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 91,
+                  "predicted": 0.537,
+                  "actual": 0.725
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 275,
+                  "predicted": 0.667,
+                  "actual": 0.676
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1078,
+                  "predicted": 0.752,
+                  "actual": 0.762
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 314,
+                  "predicted": 0.83,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2,
+                  "predicted": 0.903,
+                  "actual": 0.5
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.909,
+              "bias": -0.014,
+              "recent_form_mae": 0.93
+            },
+            "passing_yards": {
+              "ladder_rows": 15030,
+              "brier": 0.1618,
+              "log_loss": 0.4912,
+              "baseline_log_loss": 0.5273,
+              "calibration_error": 0.0408,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 3441,
+                  "predicted": 0.058,
+                  "actual": 0.065
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2562,
+                  "predicted": 0.145,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1655,
+                  "predicted": 0.247,
+                  "actual": 0.32
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1271,
+                  "predicted": 0.348,
+                  "actual": 0.436
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1148,
+                  "predicted": 0.449,
+                  "actual": 0.544
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1030,
+                  "predicted": 0.549,
+                  "actual": 0.615
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1098,
+                  "predicted": 0.65,
+                  "actual": 0.704
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1162,
+                  "predicted": 0.752,
+                  "actual": 0.772
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1213,
+                  "predicted": 0.849,
+                  "actual": 0.857
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 450,
+                  "predicted": 0.925,
+                  "actual": 0.902
+                }
+              ],
+              "player_games": 1670,
+              "mae": 59.297,
+              "bias": 0.361,
+              "recent_form_mae": 68.231
+            },
+            "receiving_yards": {
+              "ladder_rows": 94064,
+              "brier": 0.1303,
+              "log_loss": 0.4055,
+              "baseline_log_loss": 0.4292,
+              "calibration_error": 0.0123,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 35075,
+                  "predicted": 0.042,
+                  "actual": 0.043
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14492,
+                  "predicted": 0.145,
+                  "actual": 0.157
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 9502,
+                  "predicted": 0.247,
+                  "actual": 0.278
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 7167,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 5881,
+                  "predicted": 0.448,
+                  "actual": 0.48
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 5289,
+                  "predicted": 0.551,
+                  "actual": 0.569
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4969,
+                  "predicted": 0.649,
+                  "actual": 0.668
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4454,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4154,
+                  "predicted": 0.849,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3081,
+                  "predicted": 0.941,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 21.135,
+              "bias": -1.385,
+              "recent_form_mae": 21.814
+            },
+            "receptions": {
+              "ladder_rows": 83140,
+              "brier": 0.1194,
+              "log_loss": 0.3756,
+              "baseline_log_loss": 0.4027,
+              "calibration_error": 0.0098,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 29138,
+                  "predicted": 0.041,
+                  "actual": 0.034
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 11122,
+                  "predicted": 0.145,
+                  "actual": 0.143
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7257,
+                  "predicted": 0.248,
+                  "actual": 0.263
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5407,
+                  "predicted": 0.348,
+                  "actual": 0.363
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4813,
+                  "predicted": 0.449,
+                  "actual": 0.478
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4479,
+                  "predicted": 0.549,
+                  "actual": 0.56
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4036,
+                  "predicted": 0.65,
+                  "actual": 0.679
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4512,
+                  "predicted": 0.752,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 5529,
+                  "predicted": 0.851,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 6847,
+                  "predicted": 0.951,
+                  "actual": 0.95
+                }
+              ],
+              "player_games": 9222,
+              "mae": 1.574,
+              "bias": -0.095,
+              "recent_form_mae": 1.637
+            },
+            "rush_rec_yards": {
+              "ladder_rows": 50155,
+              "brier": 0.1227,
+              "log_loss": 0.3847,
+              "baseline_log_loss": 0.4101,
+              "calibration_error": 0.0066,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 20110,
+                  "predicted": 0.04,
+                  "actual": 0.04
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 7440,
+                  "predicted": 0.144,
+                  "actual": 0.149
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4430,
+                  "predicted": 0.248,
+                  "actual": 0.266
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3735,
+                  "predicted": 0.35,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2975,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2602,
+                  "predicted": 0.549,
+                  "actual": 0.556
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2513,
+                  "predicted": 0.649,
+                  "actual": 0.659
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2264,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2199,
+                  "predicted": 0.849,
+                  "actual": 0.851
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1887,
+                  "predicted": 0.945,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 25.741,
+              "bias": -2.028,
+              "recent_form_mae": 26.752
+            },
+            "rushing_attempts": {
+              "ladder_rows": 17947,
+              "brier": 0.1042,
+              "log_loss": 0.3316,
+              "baseline_log_loss": 0.3632,
+              "calibration_error": 0.0116,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 7127,
+                  "predicted": 0.034,
+                  "actual": 0.025
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2116,
+                  "predicted": 0.145,
+                  "actual": 0.132
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1478,
+                  "predicted": 0.246,
+                  "actual": 0.217
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1029,
+                  "predicted": 0.349,
+                  "actual": 0.346
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 865,
+                  "predicted": 0.449,
+                  "actual": 0.44
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 758,
+                  "predicted": 0.552,
+                  "actual": 0.518
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 819,
+                  "predicted": 0.65,
+                  "actual": 0.619
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 950,
+                  "predicted": 0.751,
+                  "actual": 0.745
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 993,
+                  "predicted": 0.852,
+                  "actual": 0.845
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1812,
+                  "predicted": 0.958,
+                  "actual": 0.959
+                }
+              ],
+              "player_games": 4225,
+              "mae": 3.314,
+              "bias": -0.582,
+              "recent_form_mae": 3.492
+            },
+            "rushing_yards": {
+              "ladder_rows": 48132,
+              "brier": 0.1149,
+              "log_loss": 0.3626,
+              "baseline_log_loss": 0.3857,
+              "calibration_error": 0.0119,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 18623,
+                  "predicted": 0.039,
+                  "actual": 0.029
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 6545,
+                  "predicted": 0.146,
+                  "actual": 0.131
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4410,
+                  "predicted": 0.248,
+                  "actual": 0.229
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3279,
+                  "predicted": 0.349,
+                  "actual": 0.34
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2840,
+                  "predicted": 0.448,
+                  "actual": 0.438
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2433,
+                  "predicted": 0.55,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2263,
+                  "predicted": 0.65,
+                  "actual": 0.626
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2323,
+                  "predicted": 0.752,
+                  "actual": 0.737
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2452,
+                  "predicted": 0.852,
+                  "actual": 0.844
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2964,
+                  "predicted": 0.951,
+                  "actual": 0.942
+                }
+              ],
+              "player_games": 9138,
+              "mae": 10.192,
+              "bias": -0.931,
+              "recent_form_mae": 10.616
+            }
+          }
+        },
+        "historical_note": null
+      },
+      "0.1.3": {
+        "role": "shadow",
+        "live": {},
+        "live_span": null,
+        "historical": {
+          "version": "0.1.0",
+          "test_seasons": [
+            2023,
+            2024,
+            2025
+          ],
+          "generated_at": "2026-11-02T21:29:56+00:00",
+          "source": "docs/models/results/nfl-props-backtest-0.1.0.json",
+          "markets": {
+            "anytime_td": {
+              "ladder_rows": 19175,
+              "brier": 0.1239,
+              "log_loss": 0.3938,
+              "baseline_log_loss": 0.4177,
+              "calibration_error": 0.0133,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 8017,
+                  "predicted": 0.046,
+                  "actual": 0.047
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 4863,
+                  "predicted": 0.148,
+                  "actual": 0.16
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3379,
+                  "predicted": 0.247,
+                  "actual": 0.276
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1846,
+                  "predicted": 0.344,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 802,
+                  "predicted": 0.443,
+                  "actual": 0.483
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 229,
+                  "predicted": 0.535,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 39,
+                  "predicted": 0.629,
+                  "actual": 0.538
+                }
+              ],
+              "player_games": 10892,
+              "mae": 0.415,
+              "bias": -0.022,
+              "recent_form_mae": 0.415
+            },
+            "fantasy_points": {
+              "ladder_rows": 91853,
+              "brier": 0.1476,
+              "log_loss": 0.4527,
+              "baseline_log_loss": 0.4826,
+              "calibration_error": 0.0143,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 25126,
+                  "predicted": 0.049,
+                  "actual": 0.048
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14720,
+                  "predicted": 0.147,
+                  "actual": 0.158
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 10821,
+                  "predicted": 0.248,
+                  "actual": 0.259
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 8892,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 7403,
+                  "predicted": 0.448,
+                  "actual": 0.474
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 6325,
+                  "predicted": 0.549,
+                  "actual": 0.585
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 5607,
+                  "predicted": 0.649,
+                  "actual": 0.674
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 5014,
+                  "predicted": 0.749,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4597,
+                  "predicted": 0.849,
+                  "actual": 0.852
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3348,
+                  "predicted": 0.944,
+                  "actual": 0.921
+                }
+              ],
+              "player_games": 10892,
+              "mae": 5.496,
+              "bias": -0.365,
+              "recent_form_mae": 5.74
+            },
+            "interceptions": {
+              "ladder_rows": 3340,
+              "brier": 0.1902,
+              "log_loss": 0.5621,
+              "baseline_log_loss": 0.6022,
+              "calibration_error": 0.0175,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 19,
+                  "predicted": 0.092,
+                  "actual": 0.053
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1242,
+                  "predicted": 0.164,
+                  "actual": 0.15
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 409,
+                  "predicted": 0.223,
+                  "actual": 0.186
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 108,
+                  "predicted": 0.379,
+                  "actual": 0.37
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1110,
+                  "predicted": 0.459,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 449,
+                  "predicted": 0.526,
+                  "actual": 0.568
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3,
+                  "predicted": 0.602,
+                  "actual": 1.0
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.699,
+              "bias": 0.003,
+              "recent_form_mae": 0.701
+            },
+            "longest_reception": {
+              "ladder_rows": 53429,
+              "brier": 0.1587,
+              "log_loss": 0.4846,
+              "baseline_log_loss": 0.5099,
+              "calibration_error": 0.0198,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 13413,
+                  "predicted": 0.052,
+                  "actual": 0.069
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 9968,
+                  "predicted": 0.147,
+                  "actual": 0.162
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7021,
+                  "predicted": 0.248,
+                  "actual": 0.267
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5702,
+                  "predicted": 0.349,
+                  "actual": 0.373
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4564,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4112,
+                  "predicted": 0.548,
+                  "actual": 0.574
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 3290,
+                  "predicted": 0.649,
+                  "actual": 0.68
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2693,
+                  "predicted": 0.748,
+                  "actual": 0.777
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2019,
+                  "predicted": 0.847,
+                  "actual": 0.873
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 647,
+                  "predicted": 0.925,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 9.092,
+              "bias": -1.384,
+              "recent_form_mae": 9.624
+            },
+            "passing_attempts": {
+              "ladder_rows": 8188,
+              "brier": 0.1657,
+              "log_loss": 0.5023,
+              "baseline_log_loss": 0.5495,
+              "calibration_error": 0.0252,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1750,
+                  "predicted": 0.055,
+                  "actual": 0.073
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1238,
+                  "predicted": 0.146,
+                  "actual": 0.166
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 830,
+                  "predicted": 0.249,
+                  "actual": 0.281
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 791,
+                  "predicted": 0.349,
+                  "actual": 0.379
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 634,
+                  "predicted": 0.451,
+                  "actual": 0.505
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 724,
+                  "predicted": 0.552,
+                  "actual": 0.575
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 683,
+                  "predicted": 0.65,
+                  "actual": 0.682
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 798,
+                  "predicted": 0.751,
+                  "actual": 0.781
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 637,
+                  "predicted": 0.842,
+                  "actual": 0.835
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 103,
+                  "predicted": 0.92,
+                  "actual": 0.913
+                }
+              ],
+              "player_games": 1670,
+              "mae": 6.782,
+              "bias": 0.071,
+              "recent_form_mae": 8.143
+            },
+            "passing_completions": {
+              "ladder_rows": 13350,
+              "brier": 0.1749,
+              "log_loss": 0.5264,
+              "baseline_log_loss": 0.5766,
+              "calibration_error": 0.0338,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 1352,
+                  "predicted": 0.066,
+                  "actual": 0.092
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1934,
+                  "predicted": 0.148,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1525,
+                  "predicted": 0.248,
+                  "actual": 0.29
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1283,
+                  "predicted": 0.349,
+                  "actual": 0.408
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1179,
+                  "predicted": 0.45,
+                  "actual": 0.5
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1153,
+                  "predicted": 0.55,
+                  "actual": 0.605
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1201,
+                  "predicted": 0.65,
+                  "actual": 0.69
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1398,
+                  "predicted": 0.751,
+                  "actual": 0.774
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1560,
+                  "predicted": 0.851,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 765,
+                  "predicted": 0.93,
+                  "actual": 0.924
+                }
+              ],
+              "player_games": 1670,
+              "mae": 4.724,
+              "bias": 0.044,
+              "recent_form_mae": 5.653
+            },
+            "passing_tds": {
+              "ladder_rows": 5010,
+              "brier": 0.1833,
+              "log_loss": 0.5472,
+              "baseline_log_loss": 0.5838,
+              "calibration_error": 0.036,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 425,
+                  "predicted": 0.081,
+                  "actual": 0.104
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1114,
+                  "predicted": 0.138,
+                  "actual": 0.164
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 419,
+                  "predicted": 0.256,
+                  "actual": 0.334
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 871,
+                  "predicted": 0.351,
+                  "actual": 0.397
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 421,
+                  "predicted": 0.439,
+                  "actual": 0.504
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 91,
+                  "predicted": 0.537,
+                  "actual": 0.725
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 275,
+                  "predicted": 0.667,
+                  "actual": 0.676
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1078,
+                  "predicted": 0.752,
+                  "actual": 0.762
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 314,
+                  "predicted": 0.83,
+                  "actual": 0.863
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2,
+                  "predicted": 0.903,
+                  "actual": 0.5
+                }
+              ],
+              "player_games": 1670,
+              "mae": 0.909,
+              "bias": -0.014,
+              "recent_form_mae": 0.93
+            },
+            "passing_yards": {
+              "ladder_rows": 15030,
+              "brier": 0.1618,
+              "log_loss": 0.4912,
+              "baseline_log_loss": 0.5273,
+              "calibration_error": 0.0408,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 3441,
+                  "predicted": 0.058,
+                  "actual": 0.065
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2562,
+                  "predicted": 0.145,
+                  "actual": 0.174
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1655,
+                  "predicted": 0.247,
+                  "actual": 0.32
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1271,
+                  "predicted": 0.348,
+                  "actual": 0.436
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1148,
+                  "predicted": 0.449,
+                  "actual": 0.544
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1030,
+                  "predicted": 0.549,
+                  "actual": 0.615
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1098,
+                  "predicted": 0.65,
+                  "actual": 0.704
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 1162,
+                  "predicted": 0.752,
+                  "actual": 0.772
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 1213,
+                  "predicted": 0.849,
+                  "actual": 0.857
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 450,
+                  "predicted": 0.925,
+                  "actual": 0.902
+                }
+              ],
+              "player_games": 1670,
+              "mae": 59.297,
+              "bias": 0.361,
+              "recent_form_mae": 68.231
+            },
+            "receiving_yards": {
+              "ladder_rows": 94064,
+              "brier": 0.1303,
+              "log_loss": 0.4055,
+              "baseline_log_loss": 0.4292,
+              "calibration_error": 0.0123,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 35075,
+                  "predicted": 0.042,
+                  "actual": 0.043
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 14492,
+                  "predicted": 0.145,
+                  "actual": 0.157
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 9502,
+                  "predicted": 0.247,
+                  "actual": 0.278
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 7167,
+                  "predicted": 0.349,
+                  "actual": 0.38
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 5881,
+                  "predicted": 0.448,
+                  "actual": 0.48
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 5289,
+                  "predicted": 0.551,
+                  "actual": 0.569
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4969,
+                  "predicted": 0.649,
+                  "actual": 0.668
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4454,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 4154,
+                  "predicted": 0.849,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 3081,
+                  "predicted": 0.941,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 21.135,
+              "bias": -1.385,
+              "recent_form_mae": 21.814
+            },
+            "receptions": {
+              "ladder_rows": 83140,
+              "brier": 0.1194,
+              "log_loss": 0.3756,
+              "baseline_log_loss": 0.4027,
+              "calibration_error": 0.0098,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 29138,
+                  "predicted": 0.041,
+                  "actual": 0.034
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 11122,
+                  "predicted": 0.145,
+                  "actual": 0.143
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7257,
+                  "predicted": 0.248,
+                  "actual": 0.263
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5407,
+                  "predicted": 0.348,
+                  "actual": 0.363
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4813,
+                  "predicted": 0.449,
+                  "actual": 0.478
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4479,
+                  "predicted": 0.549,
+                  "actual": 0.56
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 4036,
+                  "predicted": 0.65,
+                  "actual": 0.679
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 4512,
+                  "predicted": 0.752,
+                  "actual": 0.77
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 5529,
+                  "predicted": 0.851,
+                  "actual": 0.854
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 6847,
+                  "predicted": 0.951,
+                  "actual": 0.95
+                }
+              ],
+              "player_games": 9222,
+              "mae": 1.574,
+              "bias": -0.095,
+              "recent_form_mae": 1.637
+            },
+            "rush_rec_yards": {
+              "ladder_rows": 50155,
+              "brier": 0.1227,
+              "log_loss": 0.3847,
+              "baseline_log_loss": 0.4101,
+              "calibration_error": 0.0066,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 20110,
+                  "predicted": 0.04,
+                  "actual": 0.04
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 7440,
+                  "predicted": 0.144,
+                  "actual": 0.149
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4430,
+                  "predicted": 0.248,
+                  "actual": 0.266
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3735,
+                  "predicted": 0.35,
+                  "actual": 0.369
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2975,
+                  "predicted": 0.449,
+                  "actual": 0.463
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2602,
+                  "predicted": 0.549,
+                  "actual": 0.556
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2513,
+                  "predicted": 0.649,
+                  "actual": 0.659
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2264,
+                  "predicted": 0.749,
+                  "actual": 0.765
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2199,
+                  "predicted": 0.849,
+                  "actual": 0.851
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1887,
+                  "predicted": 0.945,
+                  "actual": 0.94
+                }
+              ],
+              "player_games": 9222,
+              "mae": 25.741,
+              "bias": -2.028,
+              "recent_form_mae": 26.752
+            },
+            "rushing_attempts": {
+              "ladder_rows": 17947,
+              "brier": 0.1042,
+              "log_loss": 0.3316,
+              "baseline_log_loss": 0.3632,
+              "calibration_error": 0.0116,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 7127,
+                  "predicted": 0.034,
+                  "actual": 0.025
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 2116,
+                  "predicted": 0.145,
+                  "actual": 0.132
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1478,
+                  "predicted": 0.246,
+                  "actual": 0.217
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1029,
+                  "predicted": 0.349,
+                  "actual": 0.346
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 865,
+                  "predicted": 0.449,
+                  "actual": 0.44
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 758,
+                  "predicted": 0.552,
+                  "actual": 0.518
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 819,
+                  "predicted": 0.65,
+                  "actual": 0.619
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 950,
+                  "predicted": 0.751,
+                  "actual": 0.745
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 993,
+                  "predicted": 0.852,
+                  "actual": 0.845
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1812,
+                  "predicted": 0.958,
+                  "actual": 0.959
+                }
+              ],
+              "player_games": 4225,
+              "mae": 3.314,
+              "bias": -0.582,
+              "recent_form_mae": 3.492
+            },
+            "rushing_yards": {
+              "ladder_rows": 48132,
+              "brier": 0.1149,
+              "log_loss": 0.3626,
+              "baseline_log_loss": 0.3857,
+              "calibration_error": 0.0119,
+              "calibration": [
+                {
+                  "bin": "-0.0-0.1",
+                  "n": 18623,
+                  "predicted": 0.039,
+                  "actual": 0.029
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 6545,
+                  "predicted": 0.146,
+                  "actual": 0.131
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 4410,
+                  "predicted": 0.248,
+                  "actual": 0.229
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 3279,
+                  "predicted": 0.349,
+                  "actual": 0.34
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 2840,
+                  "predicted": 0.448,
+                  "actual": 0.438
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2433,
+                  "predicted": 0.55,
+                  "actual": 0.546
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 2263,
+                  "predicted": 0.65,
+                  "actual": 0.626
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 2323,
+                  "predicted": 0.752,
+                  "actual": 0.737
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2452,
+                  "predicted": 0.852,
+                  "actual": 0.844
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2964,
+                  "predicted": 0.951,
+                  "actual": 0.942
+                }
+              ],
+              "player_games": 9138,
+              "mae": 10.192,
+              "bias": -0.931,
+              "recent_form_mae": 10.616
+            }
+          }
+        },
+        "historical_note": "0.1.0's backtest, for reference: 0.1.3 (0.1.1 + RB/TE share concentration) is a shadow experiment evaluated in the research replay, not this backtest."
+      }
+    }
+  }
 }
