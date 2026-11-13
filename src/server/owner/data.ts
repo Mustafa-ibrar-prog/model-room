@@ -79,6 +79,9 @@ export async function loadSportsbook(league: League): Promise<DbResult<Sportsboo
 
 export interface SchedulerHealth {
   last_dispatch: string | null; last_accepted: string | null; failures_24h: number; no_token_notes_24h: number; awaiting_response: number; token_stored: boolean; enabled: string;
+  /** The wake plan: the scheduler starts a refresh run only once next_check_at has arrived. */
+  next_check_at: string | null; next_check_reason: string | null; plan_updated_at: string | null;
+  dispatches_since_update: number; minutes_overdue: number | null; plan_stale: boolean;
 }
 
 export async function loadSchedulerHealth(): Promise<DbResult<SchedulerHealth | null>> {
@@ -90,6 +93,9 @@ export async function loadSchedulerHealth(): Promise<DbResult<SchedulerHealth | 
       last_dispatch: iso(r[0].last_dispatch), last_accepted: iso(r[0].last_accepted), failures_24h: Number(r[0].failures_24h ?? 0),
       no_token_notes_24h: Number(r[0].no_token_notes_24h ?? 0), awaiting_response: Number(r[0].awaiting_response ?? 0),
       token_stored: Boolean(r[0].token_stored), enabled: String(r[0].enabled ?? "off"),
+      next_check_at: iso(r[0].next_check_at), next_check_reason: r[0].next_check_reason ? String(r[0].next_check_reason) : null,
+      plan_updated_at: iso(r[0].plan_updated_at), dispatches_since_update: Number(r[0].dispatches_since_update ?? 0),
+      minutes_overdue: r[0].minutes_overdue == null ? null : Number(r[0].minutes_overdue), plan_stale: Boolean(r[0].plan_stale),
     };
   });
 }

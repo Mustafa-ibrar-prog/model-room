@@ -33,7 +33,8 @@ LABEL = "health-alert"
 PREFIX = "[health]"
 STALE_AFTER = timedelta(hours=3)
 STUCK_AFTER = timedelta(minutes=60)
-DISPATCH_QUIET = timedelta(minutes=20)
+# A wake time that passed this long ago without a dispatch means the scheduler is not firing.
+OVERDUE_MINUTES = 20
 BAD = {"failure", "cancelled", "timed_out", "startup_failure"}
 
 
@@ -76,9 +77,22 @@ def evaluate(now: datetime, status: dict, runs: list[dict], supa: dict) -> list[
             why.append("no GitHub token in Vault")
         if int(supa.get("failures_24h") or 0) > 0:
             why.append(f"{supa.get('failures_24h')} dispatch failure(s) in the last 24 h")
+        # The scheduler now dispatches only when a refresh slot is due, so long quiet stretches are normal and a
+        # dispatch every few minutes is not. What matters instead: has a wake time passed without a dispatch, has
+        # any run reported back lately, and are dispatches going unanswered.
         la = _ts(supa.get("last_accepted"))
-        if la is None or now - la > DISPATCH_QUIET:
-            why.append("no dispatch accepted by GitHub in the last 20 minutes" + (f" (last {la.isoformat(timespec='minutes')})" if la else ""))
+        overdue = supa.get("minutes_overdue")
+        if overdue is not None and float(overdue) > OVERDUE_MINUTES:
+            why.append(f"a refresh was due {int(float(overdue))} minutes ago and no run has started"
+                       + (f" (last accepted dispatch {la.isoformat(timespec='minutes')})" if la else ""))
+        if supa.get("plan_stale"):
+            pu = _ts(supa.get("plan_updated_at"))
+            why.append("no refresh run has reported to the scheduler for over 6 hours"
+                       + (f" (last {pu.isoformat(timespec='minutes')})" if pu else ""))
+        if int(supa.get("dispatches_since_update") or 0) >= 12:
+            why.append(f"{supa.get('dispatches_since_update')} dispatches with no run reporting back")
+        if la is None and not supa.get("plan_stale"):
+            why.append("no dispatch has ever been accepted by GitHub")
         if why:
             out.append({"key": "supabase-dispatch", "title": "Supabase refresh dispatch is not healthy", "detail": "; ".join(why) + "."})
     return out
@@ -125,7 +139,9 @@ def summary_of(now: datetime, status: dict, runs: list[dict], supa: dict) -> str
     by = {}
     for r in recent:
         by[r.get("conclusion") or r.get("status")] = by.get(r.get("conclusion") or r.get("status"), 0) + 1
-    s = {k: supa.get(k) for k in ("enabled", "token_stored", "last_dispatch", "last_accepted", "failures_24h", "no_token_notes_24h", "awaiting_response")} if supa.get("ok", True) else {"reachable": False}
+    s = {k: supa.get(k) for k in ("enabled", "token_stored", "last_dispatch", "last_accepted", "failures_24h", "no_token_notes_24h",
+                                  "awaiting_response", "next_check_at", "next_check_reason", "plan_updated_at",
+                                  "dispatches_since_update", "minutes_overdue")} if supa.get("ok", True) else {"reachable": False}
     return (f"- Last successful refresh: {last.get('at')} ({last.get('slot')})\n- Missed slots: {len(status.get('missed') or [])}\n"
             f"- Preview runs in the last 24 h: {len(recent)} {json.dumps(by)}\n- Supabase scheduler: {json.dumps(s, default=str)}")
 
