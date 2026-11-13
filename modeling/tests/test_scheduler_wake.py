@@ -85,6 +85,20 @@ def test_pregame_slot_is_the_next_wake(tmp_path, monkeypatch):
     assert "pregame:nba" in why
 
 
+def test_missed_slots_stop_being_reported_once_they_are_old(tmp_path, monkeypatch):
+    """A game slot that failed days ago can never be refreshed now, so it must drop out of `missed` and let the
+    health alert close. Six such slots from 2026-11-08 were keeping the missed-slots alert permanently open."""
+    now = datetime(2026, 11, 13, 17, 30, tzinfo=UTC)
+    rows = [{"slot": f"{k}:2026-11-12", "status": "success", "at": "2026-11-12T15:00:00+00:00"} for k in ("morning", "midday", "afternoon")]
+    rows += [{"slot": f"{k}:2026-11-13", "status": "success", "at": "2026-11-13T15:00:00+00:00"} for k in ("morning",)]
+    rows += [{"slot": "pregame:nba:2026-11-08T20:30:00+00:00", "status": "failed", "at": "2026-11-08T20:30:00+00:00"},
+             {"slot": "pregame:nfl:2026-11-12T20:30:00+00:00", "status": "failed", "at": "2026-11-12T20:30:00+00:00"}]
+    _plan(tmp_path, monkeypatch, rows)
+    missed = R.status(now)["missed"]
+    assert "pregame:nfl:2026-11-12T20:30:00+00:00" in missed      # yesterday: still actionable, still reported
+    assert "pregame:nba:2026-11-08T20:30:00+00:00" not in missed  # five days ago: gone, so the alert can clear
+
+
 # ------------------------------------------------------------------ the Postgres gate
 @pytest.fixture
 def db():

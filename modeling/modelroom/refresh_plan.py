@@ -37,6 +37,8 @@ LOG = Path(os.environ.get("MODELROOM_LEDGER_DIR", ROOT / "preview-ledger")) / "r
 PUBLISHED = ROOT / "data" / "published"
 DAILY = (("morning", 7, 0), ("midday", 12, 0), ("afternoon", 16, 0))
 DAILY_WINDOW = timedelta(hours=3)
+# How far back "missed" looks. The two daily days below, so a stale miss stops being reported and the alert clears.
+MISSED_LOOKBACK = timedelta(days=2)
 INACTIVES_BEFORE = timedelta(minutes=90)
 PREGAME_BEFORE = timedelta(minutes=30)
 # A slot that is due but has not succeeded is retried this often while its window is open.
@@ -191,14 +193,18 @@ def status(now: datetime | None = None) -> dict:
                 missed.append(f"inactives:nfl:{t.isoformat()}")
             if f"pregame:{lg}:{t.isoformat()}" not in done:
                 missed.append(f"pregame:{lg}:{t.isoformat()}")
+    # A game slot that was attempted and never succeeded, from the ledger rather than the boards (the boards only
+    # hold recent games). Bounded to the same two days as the daily slots: a refresh for a game that kicked off
+    # last week can never happen now, and an alert that can never clear is an alert nobody reads.
     for r in rows:
         sl = r.get("slot", "")
         if sl.startswith(("pregame:", "inactives:")) and sl not in done and sl not in missed:
             try:
-                if _ts(sl.split(":", 2)[2]) <= now:
-                    missed.append(sl)
+                t = _ts(sl.split(":", 2)[2])
             except ValueError:
-                pass
+                continue
+            if now - MISSED_LOOKBACK <= t <= now:
+                missed.append(sl)
     return {"last_success": ok[-1] if ok else None, "last_success_by_kind": by_kind, "recent_failures": bad, "missed": missed[-20:],
             "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min",
             "next_check": next_check(now)[0].isoformat(timespec="seconds"),
