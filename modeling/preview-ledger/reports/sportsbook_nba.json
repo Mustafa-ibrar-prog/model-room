@@ -1,64 +1,64 @@
 {
  "league": "nba",
- "generated_at": "2026-11-13T01:34:14+00:00",
+ "generated_at": "2026-11-13T15:05:17+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
-  "snapshot_rows": 1012,
-  "fetches": 5,
+  "snapshot_rows": 1267,
+  "fetches": 6,
   "first_collected_at": "2026-11-10T22:53:37+00:00",
-  "last_collected_at": "2026-11-12T20:01:51+00:00",
-  "days_of_history": 1.88,
-  "calendar_days_with_fetches": 3,
+  "last_collected_at": "2026-11-13T15:01:56+00:00",
+  "days_of_history": 2.67,
+  "calendar_days_with_fetches": 4,
   "books": 9,
-  "games": 24,
-  "games_matched_to_schedule": 24,
-  "series_game_book_market": 552,
+  "games": 33,
+  "games_matched_to_schedule": 33,
+  "series_game_book_market": 795,
   "rows_by_market": {
-   "moneyline": 330,
-   "spread": 341,
-   "total": 341
+   "moneyline": 415,
+   "spread": 426,
+   "total": 426
   },
   "comparisons": {
-   "matched": 952,
+   "matched": 1195,
    "not_matched": {
     "post_start": 0,
     "not_matched_to_schedule": 0,
-    "no_prediction_before_line": 60,
+    "no_prediction_before_line": 72,
     "no_model_probability": 0
    },
    "rule": "each line is paired only with the latest game prediction recorded before that line was collected"
   },
   "games_with_comparisons": {
-   "settled": 16,
-   "upcoming_or_unsettled": 4
+   "settled": 20,
+   "upcoming_or_unsettled": 9
   },
   "settled_events_by_market": {
-   "spread": 16,
-   "total": 16,
-   "moneyline": 16
+   "spread": 20,
+   "total": 20,
+   "moneyline": 20
   },
   "gate": {
    "spread": {
-    "settled": 16,
+    "settled": 20,
     "required": 250
    },
    "total": {
-    "settled": 16,
+    "settled": 20,
     "required": 250
    },
    "moneyline": {
-    "settled": 16,
+    "settled": 20,
     "required": 250
    }
   },
   "odds_api": {
-   "calls_logged": 5,
-   "calls_this_month": 5,
-   "credits_used_this_month_logged": 15,
-   "credits_remaining_last_reported": "473",
-   "as_of": "2026-11-12T20:01:51+00:00"
+   "calls_logged": 6,
+   "calls_this_month": 6,
+   "credits_used_this_month_logged": 18,
+   "credits_remaining_last_reported": "467",
+   "as_of": "2026-11-13T15:01:56+00:00"
   },
-  "stored_comparisons": 952
+  "stored_comparisons": 1195
  },
  "coverage": {
   "fetches": [
@@ -121,12 +121,24 @@
     "stale_rows": 0,
     "unmatched_to_schedule_rows": 0,
     "unchanged_since_previous_fetch_rows": 35
+   },
+   {
+    "collected_at": "2026-11-13T15:01:56+00:00",
+    "rows": 255,
+    "games": 13,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 32,
+    "missing_market_slots": 0,
+    "scheduled_games_next_72h_without_lines": 14,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 12
    }
   ],
-  "rows_total": 1012,
+  "rows_total": 1267,
   "stale_rows_total": 0,
   "stale_rule": "book's own update time older than 6 h when collected",
-  "unchanged_rows_total": 106,
+  "unchanged_rows_total": 118,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
   "post_start_rows_excluded": 0,
   "markets_seen": [
@@ -135,14 +147,14 @@
    "total"
   ],
   "rows_by_market": {
-   "moneyline": 330,
-   "spread": 341,
-   "total": 341
+   "moneyline": 415,
+   "spread": 426,
+   "total": 426
   }
  },
  "movement": {
   "overall": {
-   "series": 552,
+   "series": 795,
    "series_with_2plus_observations": 389,
    "moved": 301,
    "mean_abs_line_change": 0.656,
@@ -150,21 +162,21 @@
   },
   "by_market": {
    "moneyline": {
-    "series": 184,
+    "series": 265,
     "series_with_2plus_observations": 129,
     "moved": 99,
     "mean_abs_line_change": null,
     "mean_abs_novig_change_pp": 1.45
    },
    "spread": {
-    "series": 184,
+    "series": 265,
     "series_with_2plus_observations": 130,
     "moved": 102,
     "mean_abs_line_change": 0.612,
     "mean_abs_novig_change_pp": 0.71
    },
    "total": {
-    "series": 184,
+    "series": 265,
     "series_with_2plus_observations": 130,
     "moved": 100,
     "mean_abs_line_change": 0.7,
@@ -282,31 +294,31 @@
  },
  "upcoming": {
   "status": "unvalidated comparisons (games not settled)",
-  "games": 4,
-  "comparisons": 216,
+  "games": 9,
+  "comparisons": 243,
   "abs_model_minus_book_novig_pp": {
-   "median": 4.22,
-   "p90": 10.19
+   "median": 3.56,
+   "p90": 10.28
   },
   "note": "A difference is a disagreement between the model and the book, not a verified edge."
  },
  "settled": {
   "spread": {
-   "settled_games": 16,
+   "settled_games": 20,
    "required_for_summary": 250,
-   "progress_pct": 6.4,
+   "progress_pct": 8.0,
    "status": "insufficient sample: counts only until 250 settled games"
   },
   "total": {
-   "settled_games": 16,
+   "settled_games": 20,
    "required_for_summary": 250,
-   "progress_pct": 6.4,
+   "progress_pct": 8.0,
    "status": "insufficient sample: counts only until 250 settled games"
   },
   "moneyline": {
-   "settled_games": 16,
+   "settled_games": 20,
    "required_for_summary": 250,
-   "progress_pct": 6.4,
+   "progress_pct": 8.0,
    "status": "insufficient sample: counts only until 250 settled games"
   }
  },
@@ -323,15 +335,15 @@
   "snapshots_chain_ok": true,
   "after_reconnect": {
    "snapshots": {
-    "rows": 1012,
+    "rows": 1267,
     "ok": true
    },
    "comparisons": {
-    "rows": 952,
+    "rows": 1195,
     "ok": true
    },
    "reports": {
-    "rows": 16,
+    "rows": 17,
     "ok": true
    }
   },
