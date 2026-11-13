@@ -116,6 +116,21 @@ def plan_row(c) -> dict:
     return dict(zip(cols.replace(" ", "").split(","), r))
 
 
+def test_the_owner_dashboard_keeps_its_read_on_the_health_view(db):
+    """The migration drops and recreates scheduler.health, which loses its grants, so it re-grants them. The owner
+    dashboard reads that view as owner_reader and would show nothing without this."""
+    db.execute("do $$ begin if not exists (select 1 from pg_roles where rolname = 'owner_reader') "
+               "then create role owner_reader; end if; end $$")
+    db.execute("revoke all on scheduler.health from owner_reader")
+    assert not db.execute("select has_table_privilege('owner_reader', 'scheduler.health', 'select')").fetchone()[0]
+    db.execute(MIGRATION.read_text())  # idempotent; this time the role exists
+    assert db.execute("select has_table_privilege('owner_reader', 'scheduler.health', 'select')").fetchone()[0]
+    # and only select: the dashboard can never change the wake plan
+    for priv in ("insert", "update", "delete"):
+        assert not db.execute(f"select has_table_privilege('owner_reader', 'scheduler.health', '{priv}')").fetchone()[0]
+    assert not db.execute("select has_table_privilege('owner_reader', 'scheduler.plan', 'select')").fetchone()[0]
+
+
 def test_the_refresh_script_records_the_next_check(db):
     """The step every refresh ends with. It runs the real script against the real function, because the failure
     mode here is in the plumbing, not the logic: psql does not interpolate :'var' into a -c string."""
