@@ -7,6 +7,7 @@ Supabase pieces (pg_net, Vault, private.app_settings) that cannot run locally.
 import json
 import os
 import re
+import subprocess
 import uuid
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -113,6 +114,22 @@ def plan_row(c) -> dict:
     cols = "next_check_at, reason, updated_at, dispatches_since_update"
     r = c.execute(f"select {cols} from scheduler.plan where id").fetchone()
     return dict(zip(cols.replace(" ", "").split(","), r))
+
+
+def test_the_refresh_script_records_the_next_check(db):
+    """The step every refresh ends with. It runs the real script against the real function, because the failure
+    mode here is in the plumbing, not the logic: psql does not interpolate :'var' into a -c string."""
+    repo = Path(__file__).resolve().parents[2]
+    env = {**os.environ, "MODELROOM_ODDS_DB_URL": db.info.dsn, "GITHUB_RUN_ID": "test-run-42"}
+    p = subprocess.run(["bash", "scripts/scheduler-next.sh"], cwd=repo, env=env, capture_output=True, text=True)
+    assert p.returncode == 0, p.stderr
+    assert "next check" in p.stdout and "could not" not in p.stdout, p.stdout
+    at, why, by = db.execute("select next_check_at, reason, updated_by from scheduler.plan where id").fetchone()
+    assert by == "test-run-42" and at > datetime.now(UTC) - timedelta(minutes=1) and why
+    # The script never fails a refresh, whatever the database does.
+    broken = {**os.environ, "MODELROOM_ODDS_DB_URL": "host=127.0.0.1 port=1 dbname=nope", "SUPABASE_DB_URL": ""}
+    q = subprocess.run(["bash", "scripts/scheduler-next.sh"], cwd=repo, env=broken, capture_output=True, text=True)
+    assert q.returncode == 0 and "safety nets apply" in q.stdout, q.stdout
 
 
 def test_dispatch_only_when_the_wake_time_has_arrived(db):

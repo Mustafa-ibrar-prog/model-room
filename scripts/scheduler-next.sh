@@ -16,9 +16,13 @@ plan=$(cd modeling && python3 modelroom/refresh_plan.py next 2>&1) || { say "cou
 at=$(printf '%s' "$plan" | python3 -c 'import json,sys; print(json.load(sys.stdin)["at"])' 2>/dev/null) || { say "unreadable plan: $plan"; exit 0; }
 why=$(printf '%s' "$plan" | python3 -c 'import json,sys; print(json.load(sys.stdin)["reason"])' 2>/dev/null)
 
-# :'var' is quoted by psql itself, so a slot id can never be read as SQL.
+# :'var' is quoted by psql itself, so a slot id can never be read as SQL. The statement comes in on stdin, not
+# through -c, because psql does not interpolate variables into a -c string.
 if out=$(PGCONNECT_TIMEOUT=10 psql "$url" -v ON_ERROR_STOP=1 -v at="$at" -v why="${why:-}" -v run="${GITHUB_RUN_ID:-local}" \
-         -qtAc "select scheduler.set_next_check(:'at'::timestamptz, :'why', :'run')" 2>&1); then
+         -qtA 2>&1 <<'SQL'
+select scheduler.set_next_check(:'at'::timestamptz, :'why', :'run');
+SQL
+      ); then
   say "next check $out (${why:-no reason given})"
 else
   say "could not record the next check (${out}); the safety nets apply"
