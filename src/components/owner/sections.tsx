@@ -341,13 +341,17 @@ export function FreshnessSection({ files, sched, sb, now, league }: { files: Own
           <p className="text-xs text-mute">Recent failures: {files.refresh.recent_failures.slice(-5).map((f) => `${f.slot} (${ts(f.at)})`).join(" · ")}</p>
         ) : null}
       </Block>
-      <Block title="Scheduler health" intro="From the scheduler.health view in the TEST database: dispatches to GitHub Actions. The dispatch token itself is never read, only whether it exists.">
+      <Block title="Scheduler health" intro="From the scheduler.health view in the TEST database. The scheduler starts a GitHub Actions run only once the next check time has arrived, and every refresh run reports the next one back; the dispatch token itself is never read, only whether it exists.">
         {!sched.ok ? <UnavailableState what="Scheduler health" reason={sched.reason} /> : !sched.data ? <UnavailableState what="Scheduler health" reason="empty" /> : (
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
             <Stat label="Scheduler" value={sched.data.enabled} tone={sched.data.enabled === "on" ? "ink" : "edge"} />
             <Stat label="Last dispatch" value={ago(sched.data.last_dispatch, now)} sub={ts(sched.data.last_dispatch)} />
             <Stat label="Last accepted (204)" value={ago(sched.data.last_accepted, now)} sub={ts(sched.data.last_accepted)} />
             <Stat label="Failures, 24 h" value={sched.data.failures_24h} tone={sched.data.failures_24h ? "edge" : "ink"} />
+            <Stat label="Next refresh check" value={sched.data.minutes_overdue != null && sched.data.minutes_overdue > 0 ? `${Math.round(sched.data.minutes_overdue)} min overdue` : ago(sched.data.next_check_at, now).replace(" ago", " from now")}
+              tone={(sched.data.minutes_overdue ?? 0) > 20 ? "edge" : "ink"} sub={sched.data.next_check_reason ?? undefined} />
+            <Stat label="Last reported by a run" value={ago(sched.data.plan_updated_at, now)} tone={sched.data.plan_stale ? "edge" : "ink"}
+              sub={sched.data.dispatches_since_update ? `${sched.data.dispatches_since_update} dispatch(es) since` : "up to date"} />
             <Stat label="Awaiting response" value={sched.data.awaiting_response} />
             <Stat label="Dispatch token stored" value={sched.data.token_stored ? "yes" : "no"} tone={sched.data.token_stored ? "ink" : "edge"} />
           </div>

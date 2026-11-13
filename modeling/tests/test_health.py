@@ -5,8 +5,13 @@ from modelroom import health as H
 
 NOW = datetime(2026, 11, 8, 22, 13, tzinfo=UTC)
 OK_STATUS = {"last_success": {"at": (NOW - timedelta(minutes=70)).isoformat(), "slot": "midday:2026-11-08"}, "missed": []}
+# A healthy scheduler now sleeps between refresh slots: the next wake is in the future, a run reported it, and the
+# last dispatch may be hours old. Quiet is normal; an overdue wake or unanswered dispatches are not.
 OK_SUPA = {"ok": True, "enabled": "on", "token_stored": True, "failures_24h": 0,
-           "last_accepted": (NOW - timedelta(minutes=3)).isoformat(), "last_dispatch": (NOW - timedelta(minutes=3)).isoformat()}
+           "last_accepted": (NOW - timedelta(hours=4)).isoformat(), "last_dispatch": (NOW - timedelta(hours=4)).isoformat(),
+           "next_check_at": (NOW + timedelta(hours=1)).isoformat(), "next_check_reason": "next slot midday:2026-11-09",
+           "plan_updated_at": (NOW - timedelta(hours=4)).isoformat(), "dispatches_since_update": 0,
+           "minutes_overdue": 0, "plan_stale": False}
 OK_RUNS = [{"id": 1, "event": "workflow_dispatch", "status": "completed", "conclusion": "success", "created_at": (NOW - timedelta(hours=1)).isoformat()}]
 
 
@@ -38,8 +43,14 @@ def test_missed_slots_and_workflow_problems():
 
 def test_supabase_checks():
     assert keys(H.evaluate(NOW, OK_STATUS, OK_RUNS, {"ok": False, "error": "connection refused"})) == ["supabase-unreachable"]
-    for bad in ({"enabled": "off"}, {"token_stored": False}, {"failures_24h": 2}, {"last_accepted": (NOW - timedelta(minutes=25)).isoformat()}, {"last_accepted": None}):
+    for bad in ({"enabled": "off"}, {"token_stored": False}, {"failures_24h": 2}, {"last_accepted": None},
+                {"minutes_overdue": 45},            # a wake time passed and no run started
+                {"plan_stale": True},               # no run has reported back for over 6 hours
+                {"dispatches_since_update": 12}):   # dispatches going unanswered
         assert keys(H.evaluate(NOW, OK_STATUS, OK_RUNS, {**OK_SUPA, **bad})) == ["supabase-dispatch"], bad
+    # A long quiet stretch between slots is not an incident any more.
+    assert H.evaluate(NOW, OK_STATUS, OK_RUNS, {**OK_SUPA, "last_dispatch": (NOW - timedelta(hours=5)).isoformat()}) == []
+    assert H.evaluate(NOW, OK_STATUS, OK_RUNS, {**OK_SUPA, "minutes_overdue": 15}) == []
 
 
 def test_plan_opens_updates_closes_without_duplicates():

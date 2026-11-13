@@ -8,13 +8,23 @@ Allowed publicly: a consensus line or price only when at least MIN_PUBLIC_BOOKS 
 one book's number), plus counts (how many books) and timestamps. The data source's own name ("the_odds_api") is not
 a sportsbook.
 
+Secrets and private database identifiers are never published either: the same scan looks for connection strings,
+Supabase hosts, known token shapes, and the literal value of any secret in the environment it runs with.
+
 `sanitize_market` / `sanitize_edges` strip book-level structures from a board before it is written; `violations`
-finds anything that slipped through and `assert_public` refuses to write it (fail closed).
+finds anything that slipped through and `assert_public` refuses to write it (fail closed). The refresh workflow runs
+
+    python3 -m modelroom.privacy scan data/published preview-ledger
+
+over everything it is about to commit, and publishes nothing if that exits non-zero.
 """
 from __future__ import annotations
 
+import argparse
 import json
+import os
 import re
+import sys
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -58,6 +68,41 @@ PUBLIC_LINE_SOURCES = {"nflverse"}
 # Words that are not sportsbook names even though a name may contain them (e.g. "Circa" the word is rare; "Underdog"
 # alone is a normal betting word): only these exact, whole values are exempt.
 _EXEMPT_VALUES = {"underdog", "circa", "novig", "pick6", "courtside", "limitless", "the_odds_api", "theoddsapi"}
+
+
+# Private infrastructure: a connection string or a database host identifies the private store.
+DB_PATTERNS: list[tuple[str, str]] = [
+    (r"postgres(?:ql)?://[^\s\"']{4,}", "database connection string"),
+    (r"\b[a-z0-9-]+\.pooler\.supabase\.com\b", "Supabase pooler host"),
+    (r"\bdb\.[a-z]{16,24}\.supabase\.co\b", "Supabase database host"),
+    (r"\bproject[_-]?ref\s*[:=]\s*['\"]?[a-z]{20}\b", "Supabase project ref"),
+]
+# Credentials, by shape. The literal values of secrets in the environment are checked separately (and never printed).
+SECRET_PATTERNS: list[tuple[str, str]] = [
+    (r"\bgh[pousr]_[A-Za-z0-9]{20,}", "GitHub token"),
+    (r"\bgithub_pat_[A-Za-z0-9_]{20,}", "GitHub fine-grained token"),
+    (r"\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}", "JSON Web Token"),
+    (r"\bAKIA[0-9A-Z]{16}\b", "AWS access key id"),
+    (r"-----BEGIN [A-Z ]*PRIVATE KEY-----", "private key"),
+    (r"(?i)\b(?:api[_-]?key|secret|password|token)['\"]?\s*[:=]\s*['\"][^'\"\s]{12,}['\"]", "credential assignment"),
+    (r"(?i)[?&]apikey=[A-Za-z0-9]{8,}", "API key in a URL"),
+]
+# Environment variables whose value must never appear in a published file. The value is compared, never printed.
+SECRET_ENV_VARS = ("ODDS_API_KEY", "SUPABASE_DB_URL", "MODELROOM_ODDS_DB_URL", "MODELROOM_OWNER_DB_URL",
+                   "SUPABASE_SERVICE_ROLE_KEY", "SUPABASE_ACCESS_TOKEN", "GITHUB_TOKEN", "GH_TOKEN")
+
+
+def secret_violations(text: str, label: str, env: dict[str, str] | None = None) -> list[str]:
+    """Credentials and private database identifiers in a text that is about to be published."""
+    out: list[str] = []
+    for pat, what in DB_PATTERNS + SECRET_PATTERNS:
+        if re.search(pat, text):
+            out.append(f"{label}: {what}")
+    for var in SECRET_ENV_VARS:
+        val = (env or os.environ).get(var, "")
+        if len(val) >= 8 and val in text:
+            out.append(f"{label}: the value of {var} appears in this file")
+    return out
 
 
 def _name_hits(text: str) -> list[str]:
@@ -136,10 +181,11 @@ def sanitize_edges(edges: dict | None) -> dict | None:
 
 # ------------------------------------------------------------------ scanning files (tests and audits)
 def scan_text(text: str, label: str) -> list[str]:
-    """JSON or JSON-lines text: structural violations; anything unparseable is scanned as plain text for names."""
-    out: list[str] = []
+    """JSON or JSON-lines text: structural violations; anything unparseable is scanned as plain text for names.
+    Credentials and private database identifiers are looked for in every file, whatever its shape."""
+    out: list[str] = secret_violations(text, label)
     try:
-        return [f"{label} {v}" for v in violations(json.loads(text))]
+        return out + [f"{label} {v}" for v in violations(json.loads(text))]
     except ValueError:
         pass
     for i, line in enumerate(text.splitlines(), 1):
@@ -164,3 +210,29 @@ def scan_paths(paths: Iterable[Path], root: Path | None = None) -> list[str]:
         elif p.suffix == ".parquet":
             out.append(f"{label}: parquet file in a public directory (raw tables are never published)")
     return out
+
+
+def main(argv: list[str] | None = None) -> int:
+    """`python3 -m modelroom.privacy scan <path>...` — exits 1 if anything in those paths may not be published."""
+    ap = argparse.ArgumentParser(description="Refuse to publish sportsbook-level data, credentials or private database identifiers.")
+    ap.add_argument("cmd", choices=["scan"])
+    ap.add_argument("paths", nargs="+")
+    a = ap.parse_args(argv)
+    files: list[Path] = []
+    for p in map(Path, a.paths):
+        files += sorted(f for f in ([p] if p.is_file() else p.rglob("*")) if f.is_file())
+    findings = scan_paths(files)
+    print(f"privacy scan: {len(files)} file(s) in {', '.join(a.paths)}")
+    if not findings:
+        print("privacy scan: nothing to withhold")
+        return 0
+    print(f"::error::privacy scan found {len(findings)} problem(s); nothing will be published")
+    for f in findings[:50]:
+        print(f"  {f}")
+    if len(findings) > 50:
+        print(f"  ... and {len(findings) - 50} more")
+    return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

@@ -105,3 +105,28 @@ def test_public_output_files_expose_no_sportsbook():
     files = [p for d in _public_dirs() for p in d.rglob("*") if p.is_file() and p.suffix in (".json", ".jsonl", ".parquet", ".csv", ".txt")]
     findings = P.scan_paths(files)
     assert findings == [], f"{len(findings)} finding(s), e.g. {findings[:5]}"
+
+
+def test_secrets_and_private_database_identifiers_are_caught():
+    env = {"ODDS_API_KEY": "0123456789abcdef0123456789abcdef", "SUPABASE_DB_URL": "postgresql://u:p@db.abcdefghijklmnopqrst.supabase.co:5432/postgres"}
+    assert P.secret_violations('{"key": "0123456789abcdef0123456789abcdef"}', "f", env)
+    assert P.secret_violations("see postgresql://user:pw@aws-0-us-east-1.pooler.supabase.com:6543/postgres", "f", {})
+    assert P.secret_violations("db.abcdefghijklmnopqrst.supabase.co", "f", {})
+    assert P.secret_violations("ghp_" + "a" * 36, "f", {})
+    assert P.secret_violations("github_pat_" + "B" * 30, "f", {})
+    assert P.secret_violations("eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIn0.c2lnbmF0dXJlX2hlcmU", "f", {})
+    assert P.secret_violations('"api_key": "supersecretvalue123"', "f", {})
+    assert P.secret_violations("https://api.example.com/v4/odds?apiKey=abcd1234efgh", "f", {})
+    assert P.secret_violations("-----BEGIN RSA PRIVATE KEY-----", "f", {})
+    # What a published file really contains must stay clean.
+    clean = '{"league":"nba","sources":["the_odds_api"],"books":9,"hash":"' + "a" * 64 + '","generated_at":"2026-11-12T20:00:00Z"}'
+    assert P.secret_violations(clean, "f", env) == [] and P.scan_text(clean, "f") == []
+
+
+def test_scan_cli_fails_closed(tmp_path, capsys):
+    good = tmp_path / "ok.json"
+    good.write_text('{"league":"nba","books":4,"spread":-3.5,"captured_at":"x","sources":["the_odds_api"]}')
+    assert P.main(["scan", str(tmp_path)]) == 0
+    (tmp_path / "leak.json").write_text('{"by_book":{"draftkings":{"spread":-3.5}}}')
+    assert P.main(["scan", str(tmp_path)]) == 1
+    assert "nothing will be published" in capsys.readouterr().out

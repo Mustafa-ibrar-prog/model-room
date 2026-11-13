@@ -1,6 +1,7 @@
 """Refresh planner: decides whether a data refresh is due right now, and which one.
 
     python -m modelroom.refresh_plan due     [--now ISO]  → prints JSON; with GITHUB_OUTPUT set, writes run=, slots=, kind=
+    python -m modelroom.refresh_plan next    [--now ISO]  → when the scheduler should next ask (JSON: at, reason)
     python -m modelroom.refresh_plan record  --slots a,b --status success|failed [--note ...]
 
 Standard library only, so the scheduler's every-few-minutes check runs in seconds without installing anything.
@@ -16,6 +17,10 @@ A slot is due from its time until its window closes (morning / midday / afternoo
 slot; pregame: until the game starts). Games sharing a start time share one slot. A slot that succeeded is
 never run again (no duplicate refreshes); a failed one is retried on the next check while its window is open.
 Every attempt is appended to modeling/preview-ledger/refresh_log.jsonl (append-only; nothing is rewritten).
+
+`next` is what keeps the scheduler cheap: Supabase only dispatches a workflow once this time has arrived
+(supabase/migrations/20261113000100_scheduler_wake.sql), instead of starting one every 5 minutes to ask. The slot
+rules below stay the only source of truth; SQL never computes a slot time.
 """
 from __future__ import annotations
 
@@ -34,6 +39,11 @@ DAILY = (("morning", 7, 0), ("midday", 12, 0), ("afternoon", 16, 0))
 DAILY_WINDOW = timedelta(hours=3)
 INACTIVES_BEFORE = timedelta(minutes=90)
 PREGAME_BEFORE = timedelta(minutes=30)
+# A slot that is due but has not succeeded is retried this often while its window is open.
+RETRY_AFTER = timedelta(minutes=10)
+# Never tell the scheduler to sleep longer than this, however far off the next slot looks: a game added to the
+# schedule after this run would otherwise be missed.
+MAX_SLEEP = timedelta(hours=4)
 
 
 def _ts(s: str) -> datetime:
@@ -79,11 +89,12 @@ def recent_starts(now: datetime, hours: float = 36) -> dict[str, set[datetime]]:
     return out
 
 
-def slots(now: datetime) -> list[dict]:
-    """Every slot whose window contains `now`."""
+def all_slots(now: datetime) -> list[dict]:
+    """Every slot around `now`: the daily ones for yesterday, today and tomorrow, and one per game start time
+    on the published boards (which reach 36 hours ahead)."""
     local = now.astimezone(PT)
     out = []
-    for day in (local.date() - timedelta(days=1), local.date()):
+    for day in (local.date() - timedelta(days=1), local.date(), local.date() + timedelta(days=1)):
         for name, h, m in DAILY:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
             out.append({"id": f"{name}:{day.isoformat()}", "kind": name, "at": at, "until": at + DAILY_WINDOW})
@@ -93,7 +104,12 @@ def slots(now: datetime) -> list[dict]:
             if lg == "nfl":
                 out.append({"id": f"inactives:nfl:{t.isoformat()}", "kind": "inactives", "at": t - INACTIVES_BEFORE, "until": t - PREGAME_BEFORE})
             out.append({"id": f"pregame:{lg}:{t.isoformat()}", "kind": "pregame", "at": t - PREGAME_BEFORE, "until": t})
-    return [s for s in out if s["at"] <= now < s["until"]]
+    return out
+
+
+def slots(now: datetime) -> list[dict]:
+    """Every slot whose window contains `now`."""
+    return [s for s in all_slots(now) if s["at"] <= now < s["until"]]
 
 
 def log_entries() -> list[dict]:
@@ -111,6 +127,25 @@ def log_entries() -> list[dict]:
 def due(now: datetime) -> list[dict]:
     done = {r["slot"] for r in log_entries() if r.get("status") == "success"}
     return sorted((s for s in slots(now) if s["id"] not in done), key=lambda s: s["at"])
+
+
+def next_check(now: datetime) -> tuple[datetime, str]:
+    """When the scheduler should next ask whether a refresh is due, and why.
+
+    Something still due now  → a short retry, so a failed slot is tried again while its window is open.
+    Nothing due              → the start of the next slot that has not succeeded, never more than MAX_SLEEP away.
+    Earlier than `now` is never returned, so the scheduler cannot be put into a dispatch loop."""
+    d = due(now)
+    if d:
+        return now + RETRY_AFTER, "retry: " + ",".join(s["id"] for s in d[:4])
+    done = {r["slot"] for r in log_entries() if r.get("status") == "success"}
+    ahead = sorted((s for s in all_slots(now) if s["at"] > now and s["id"] not in done), key=lambda s: s["at"])
+    if not ahead:
+        return now + MAX_SLEEP, "no slot ahead on the boards; sleeping the maximum"
+    nxt = ahead[0]
+    if nxt["at"] <= now + MAX_SLEEP:
+        return nxt["at"], f"next slot {nxt['id']}"
+    return now + MAX_SLEEP, f"sleeping the maximum; next slot {nxt['id']} at {nxt['at'].isoformat(timespec='minutes')}"
 
 
 def record(slot_ids: list[str], status: str, note: str | None = None, now: datetime | None = None) -> None:
@@ -166,12 +201,14 @@ def status(now: datetime | None = None) -> dict:
                 pass
     return {"last_success": ok[-1] if ok else None, "last_success_by_kind": by_kind, "recent_failures": bad, "missed": missed[-20:],
             "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min",
-            "triggers": "Supabase pg_cron every 5 min (primary) and GitHub's own schedule every 10 min (backup)"}
+            "next_check": next_check(now)[0].isoformat(timespec="seconds"),
+            "triggers": "Supabase wakes a run only when a slot is due (pg_cron checks every 5 min inside Postgres); "
+                        "GitHub's own schedule every 6 hours is the backup"}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["due", "record", "status", "pending"])
+    ap.add_argument("cmd", choices=["due", "next", "record", "status", "pending"])
     ap.add_argument("--now")
     ap.add_argument("--slots", default="")
     ap.add_argument("--status", default="success", choices=["success", "failed"])
@@ -188,6 +225,14 @@ def main(argv=None) -> int:
         if gh:
             with open(gh, "a") as f:
                 f.write(f"pending={','.join(left)}\n")
+        return 0
+    if a.cmd == "next":
+        at, why = next_check(now)
+        print(json.dumps({"at": at.isoformat(timespec="seconds"), "reason": why}))
+        gh = os.environ.get("GITHUB_OUTPUT")
+        if gh:
+            with open(gh, "a") as f:
+                f.write(f"next_check={at.isoformat(timespec='seconds')}\nnext_reason={why}\n")
         return 0
     if a.cmd == "status":
         print(json.dumps(status(now), indent=1, default=str))
