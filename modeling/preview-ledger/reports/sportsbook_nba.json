@@ -1,25 +1,25 @@
 {
  "league": "nba",
- "generated_at": "2026-11-14T15:04:15+00:00",
+ "generated_at": "2026-11-14T20:03:24+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
-  "snapshot_rows": 1644,
-  "fetches": 8,
+  "snapshot_rows": 1779,
+  "fetches": 9,
   "first_collected_at": "2026-11-10T22:53:37+00:00",
-  "last_collected_at": "2026-11-14T15:01:45+00:00",
-  "days_of_history": 3.67,
+  "last_collected_at": "2026-11-14T20:01:34+00:00",
+  "days_of_history": 3.88,
   "calendar_days_with_fetches": 5,
   "books": 9,
   "games": 38,
   "games_matched_to_schedule": 38,
-  "series_game_book_market": 929,
+  "series_game_book_market": 930,
   "rows_by_market": {
-   "moneyline": 540,
-   "spread": 552,
-   "total": 552
+   "moneyline": 585,
+   "spread": 597,
+   "total": 597
   },
   "comparisons": {
-   "matched": 1572,
+   "matched": 1707,
    "not_matched": {
     "post_start": 0,
     "not_matched_to_schedule": 0,
@@ -52,13 +52,13 @@
    }
   },
   "odds_api": {
-   "calls_logged": 8,
-   "calls_this_month": 8,
-   "credits_used_this_month_logged": 24,
-   "credits_remaining_last_reported": "455",
-   "as_of": "2026-11-14T15:01:45+00:00"
+   "calls_logged": 9,
+   "calls_this_month": 9,
+   "credits_used_this_month_logged": 27,
+   "credits_remaining_last_reported": "449",
+   "as_of": "2026-11-14T20:01:34+00:00"
   },
-  "stored_comparisons": 1572
+  "stored_comparisons": 1707
  },
  "coverage": {
   "fetches": [
@@ -157,12 +157,24 @@
     "stale_rows": 0,
     "unmatched_to_schedule_rows": 0,
     "unchanged_since_previous_fetch_rows": 0
+   },
+   {
+    "collected_at": "2026-11-14T20:01:34+00:00",
+    "rows": 135,
+    "games": 5,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 0,
+    "missing_market_slots": 0,
+    "scheduled_games_next_72h_without_lines": 0,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 16
    }
   ],
-  "rows_total": 1644,
+  "rows_total": 1779,
   "stale_rows_total": 0,
   "stale_rule": "book's own update time older than 6 h when collected",
-  "unchanged_rows_total": 165,
+  "unchanged_rows_total": 181,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
   "post_start_rows_excluded": 0,
   "markets_seen": [
@@ -171,40 +183,40 @@
    "total"
   ],
   "rows_by_market": {
-   "moneyline": 540,
-   "spread": 552,
-   "total": 552
+   "moneyline": 585,
+   "spread": 597,
+   "total": 597
   }
  },
  "movement": {
   "overall": {
-   "series": 929,
-   "series_with_2plus_observations": 632,
-   "moved": 475,
-   "mean_abs_line_change": 0.598,
-   "mean_abs_novig_change_pp": 0.82
+   "series": 930,
+   "series_with_2plus_observations": 766,
+   "moved": 586,
+   "mean_abs_line_change": 0.731,
+   "mean_abs_novig_change_pp": 1.02
   },
   "by_market": {
    "moneyline": {
-    "series": 309,
-    "series_with_2plus_observations": 210,
-    "moved": 153,
+    "series": 310,
+    "series_with_2plus_observations": 254,
+    "moved": 194,
     "mean_abs_line_change": null,
-    "mean_abs_novig_change_pp": 1.3
+    "mean_abs_novig_change_pp": 1.9
    },
    "spread": {
     "series": 310,
-    "series_with_2plus_observations": 211,
-    "moved": 165,
-    "mean_abs_line_change": 0.545,
-    "mean_abs_novig_change_pp": 0.73
+    "series_with_2plus_observations": 256,
+    "moved": 206,
+    "mean_abs_line_change": 0.707,
+    "mean_abs_novig_change_pp": 0.74
    },
    "total": {
     "series": 310,
-    "series_with_2plus_observations": 211,
-    "moved": 157,
-    "mean_abs_line_change": 0.652,
-    "mean_abs_novig_change_pp": 0.43
+    "series_with_2plus_observations": 256,
+    "moved": 186,
+    "mean_abs_line_change": 0.756,
+    "mean_abs_novig_change_pp": 0.42
    }
   },
   "by_team": {
@@ -217,7 +229,7 @@
     "moved_against": 18
    },
    "Brooklyn Nets": {
-    "moved_toward": 18,
+    "moved_toward": 36,
     "moved_against": 0
    },
    "Charlotte Hornets": {
@@ -226,23 +238,23 @@
    },
    "Chicago Bulls": {
     "moved_toward": 1,
-    "moved_against": 29
+    "moved_against": 45
    },
    "Cleveland Cavaliers": {
     "moved_toward": 16,
-    "moved_against": 4
+    "moved_against": 21
    },
    "Dallas Mavericks": {
-    "moved_toward": 1,
+    "moved_toward": 18,
     "moved_against": 5
    },
    "Denver Nuggets": {
-    "moved_toward": 0,
-    "moved_against": 11
+    "moved_toward": 10,
+    "moved_against": 14
    },
    "Detroit Pistons": {
     "moved_toward": 1,
-    "moved_against": 13
+    "moved_against": 31
    },
    "Golden State Warriors": {
     "moved_toward": 6,
@@ -266,10 +278,10 @@
    },
    "Memphis Grizzlies": {
     "moved_toward": 29,
-    "moved_against": 0
+    "moved_against": 18
    },
    "Miami Heat": {
-    "moved_toward": 3,
+    "moved_toward": 21,
     "moved_against": 1
    },
    "Milwaukee Bucks": {
@@ -277,12 +289,12 @@
     "moved_against": 32
    },
    "Minnesota Timberwolves": {
-    "moved_toward": 5,
+    "moved_toward": 21,
     "moved_against": 1
    },
    "New Orleans Pelicans": {
-    "moved_toward": 0,
-    "moved_against": 36
+    "moved_toward": 3,
+    "moved_against": 46
    },
    "New York Knicks": {
     "moved_toward": 12,
@@ -329,16 +341,16 @@
     "moved_against": 9
    }
   },
-  "games_with_any_movement": 23,
-  "games_with_repeat_observations": 27
+  "games_with_any_movement": 28,
+  "games_with_repeat_observations": 32
  },
  "upcoming": {
   "status": "unvalidated comparisons (games not settled)",
   "games": 5,
-  "comparisons": 134,
+  "comparisons": 269,
   "abs_model_minus_book_novig_pp": {
-   "median": 5.71,
-   "p90": 13.12
+   "median": 6.54,
+   "p90": 13.97
   },
   "note": "A difference is a disagreement between the model and the book, not a verified edge."
  },
@@ -375,15 +387,15 @@
   "snapshots_chain_ok": true,
   "after_reconnect": {
    "snapshots": {
-    "rows": 1644,
+    "rows": 1779,
     "ok": true
    },
    "comparisons": {
-    "rows": 1572,
+    "rows": 1707,
     "ok": true
    },
    "reports": {
-    "rows": 26,
+    "rows": 27,
     "ok": true
    }
   },
