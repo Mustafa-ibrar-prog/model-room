@@ -184,8 +184,10 @@ for (const device of ["desktop", "phone"]) {
   check(qs(page).get("line") !== null && label !== "" && (await det.getAttribute("data-detail").catch(() => null)) === label, `opening ${label} shows his detail`);
   const dt = (await det.innerText().catch(() => "")) ?? "";
   check(/Market line/.test(dt) && /Model Room projection/.test(dt) && /average · middle [\d.]+ · range [\d.]+–[\d.]+/.test(dt), "detail shows the market line, the model's average, middle and range");
-  check(/None available/.test(dt) ? /does not borrow a line from another provider or invent one/.test(dt) : /Market line\s+(Over|Under)?\s*[\d.]+/.test(dt),
-    "detail shows a quoted market line, or says plainly that none is available");
+  // The market box holds a quoted line (a number, with who quoted it) or the plain statement that there is none.
+  const mk = (await det.locator('section[aria-label="Market line"]').first().innerText().catch(() => "")) ?? "";
+  check(/None available/.test(mk) ? /does not borrow a line from another provider or invent one/.test(mk) : /^\d+(\.\d+)?$/m.test(mk) && /·/.test(mk),
+    `detail shows a quoted market line, or says plainly that none is available (${/None available/.test(mk) ? "none" : "quoted"})`);
   check(["Recent performance", "Injuries & availability", "Matchup", "Model explanation", "Data & model"].every((x) => dt.includes(x)), "detail keeps recent games, injuries, matchup, the model explanation and data notes");
   // Favorites (this browser) and recently viewed.
   const star = page.locator("li[data-fav-id] button[aria-pressed]").first();
