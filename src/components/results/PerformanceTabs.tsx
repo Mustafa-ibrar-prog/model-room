@@ -5,8 +5,8 @@ export type PerfTab = "nba-props" | "nfl-props" | "nba" | "nfl" | "stats";
 const TABS: { key: PerfTab; href: string; label: string }[] = [
   { key: "nba-props", href: "/performance?tab=nba-props", label: "NBA Props" },
   { key: "nfl-props", href: "/performance?tab=nfl-props", label: "NFL Props" },
-  { key: "nba", href: "/performance?tab=nba", label: "NBA" },
-  { key: "nfl", href: "/performance?tab=nfl", label: "NFL" },
+  { key: "nba", href: "/performance?tab=nba", label: "NBA Games" },
+  { key: "nfl", href: "/performance?tab=nfl", label: "NFL Games" },
 ];
 
 /** Performance: one results tab per sports section, and the technical record off to the side. */

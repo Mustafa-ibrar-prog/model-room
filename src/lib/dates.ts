@@ -19,3 +19,8 @@ export function longDate(date: string): string {
   const [y, m, d] = date.split("-").map(Number);
   return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
+
+/** The current instant. Call only at request time, after the request's own data has been read. */
+export function nowMs(): number {
+  return Date.now();
+}

@@ -4,6 +4,7 @@
 //   BASE=https://<preview> TEST_ACCOUNT_PASSWORD=… node e2e/site-features.mjs  (test site: logs in as pro-test)
 //
 // Prints ok / FAIL per check; exits 1 on any failure. Uses only what the page shows; never edits data.
+import { existsSync } from "node:fs";
 import { chromium, devices } from "playwright";
 
 const BASE = (process.env.BASE ?? "").replace(/\/$/, "");
@@ -41,6 +42,12 @@ async function nav(page, locator) {
   await page.waitForURL((u) => u.toString() !== before, { timeout: 30000 }).catch(() => null);
   await page.waitForLoadState("networkidle");
 }
+/** Keep a picture of the page as tested, when the run asks for them (the workflow uploads the folder). */
+const shot = async (page, name) => {
+  if (!existsSync("e2e-shots")) return;
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: `e2e-shots/${name}.png`, fullPage: true }).catch(() => null);
+};
 const noHScroll = (page) => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1);
 const qs = (page) => new URL(page.url()).searchParams;
 const rows = (page) => page.locator("li[data-fav-id]:visible");
@@ -48,7 +55,7 @@ const rows = (page) => page.locator("li[data-fav-id]:visible");
 // ------------------------------------------------------------------ every page, both sizes
 for (const device of ["desktop", "phone"]) {
   const { ctx, page, errors } = await session(device);
-  for (const path of ["/", "/nfl", "/nba", "/nba-props", "/nfl-props", "/performance?tab=nfl-props", "/nfl?view=games", "/nba?view=games", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/performance/stats?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
+  for (const path of ["/", "/nfl", "/nba", "/nba-props", "/nfl-props", "/performance?tab=nfl-props", "/performance?tab=nba-props", "/performance?tab=nba", "/performance?tab=nfl", "/nfl?view=games", "/nba?view=games", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/performance/stats?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
     errors.length = 0;
     const st = await go(page, path);
     check(st === 200, `${device} ${path}: loads (HTTP ${st})`);
@@ -70,7 +77,8 @@ for (const device of ["desktop", "phone"]) {
   check(/Last successful data refresh/.test(body), "yesterday: shows the last refresh");
   await go(page, "/model-vs-market?sport=nfl");
   const t = await page.locator("main").innerText();
-  check(/Fair odds/.test(t) && /EV per \$1/.test(t), "model vs market: NFL rows with fair odds and EV");
+  // The columns were renamed so nothing reads as a verified edge: they are the model's own numbers, marked unverified.
+  check(/Model fair odds/.test(t) && /Model-implied return per \$1 \(unverified\)/.test(t), "model vs market: NFL rows with model fair odds and model-implied return, marked unverified");
   await ctx.close();
 }
 
@@ -80,8 +88,15 @@ for (const device of ["desktop", "phone"]) {
   await go(page, "/nfl?view=games");
   const nfl = await page.locator("main").innerText();
   check(/Injury info as of/.test(nfl), "nfl: games show the injury feed time and sources");
-  check(/Projected QBs: JAX Trevor Lawrence, BAL Joe Fagnano/.test(nfl) || !/BAL/.test(nfl), "nfl: Ravens QB is Joe Fagnano (Jackson and Huntley out)");
-  check(!/Projected QBs: [^\n]*BAL Tyler Huntley/.test(nfl), "nfl: Huntley (out) is not the projected Ravens QB");
+  // No quarterback the injury feed lists as Out may be the projected starter (first caught with the Ravens in week 10).
+  const projected = [...nfl.matchAll(/Projected QBs: ([^\n]+)/g)].flatMap((m) => m[1].split(", ").map((x) => x.replace(/^[A-Z]{2,3} /, "").trim()));
+  await go(page, "/injuries?sport=nfl");
+  const outQbs = await page.locator("main").evaluate((m) =>
+    [...m.querySelectorAll("li, tbody tr")].map((r) => r.innerText.replace(/\s+/g, " ")).filter((t) => /QB\b/.test(t) && /\bOut\b/.test(t)));
+  const benched = projected.filter((q) => outQbs.some((t) => t.startsWith(q)));
+  check(projected.length >= 2, `nfl: games name their projected quarterbacks (${projected.length})`);
+  check(outQbs.length > 0, `injuries: the feed lists quarterbacks who are out (${outQbs.length})`);
+  check(benched.length === 0, `nfl: no projected quarterback is listed Out on the injury feed${benched.length ? ` (${benched.join(", ")})` : ""}`);
   await go(page, "/nba?view=games");
   const nba = await page.locator("main").innerText();
   check(/NBA official report|ESPN report/.test(nba) || /Injury info as of/.test(nba), "nba: injury flags with source");
@@ -121,11 +136,11 @@ for (const device of ["desktop", "phone"]) {
 
   // Sort.
   await go(page, "/props?sport=nfl&cat=receiving_yards&sort=player");
-  const names = (await page.locator("li[data-fav-id] .font-600.text-ink").allInnerTexts()).map((s) => s.trim());
-  check(names.length > 1 && names.every((n, i) => i === 0 || names[i - 1].localeCompare(n) <= 0), "sort by player is alphabetical");
+  const names = await page.locator("li[data-fav-id]").evaluateAll((els) => els.map((e) => e.dataset.player ?? ""));
+  check(names.length > 1 && names.every((n, i) => n && (i === 0 || names[i - 1].localeCompare(n) <= 0)), `sort by player is alphabetical (${names.length})`);
   await go(page, "/props?sport=nfl&cat=receiving_yards&sort=projection");
-  const med = (await page.locator('li[data-fav-id] section[aria-label="Model Room projection"]:visible .font-display').allInnerTexts()).map(Number);
-  check(med.length > 1 && med.every((m, i) => i === 0 || med[i - 1] >= m), "sort by projection is descending");
+  const med = await page.locator("li[data-fav-id]").evaluateAll((els) => els.map((e) => Number(e.dataset.modelAvg)));
+  check(med.length > 1 && med.every((m, i) => Number.isFinite(m) && (i === 0 || med[i - 1] >= m)), `sort by projection is descending (${med.length})`);
   await go(page, "/props?sport=nfl&cat=receiving_yards&sort=edge");
   check((await rows(page).count()) > 0, "sort by edge renders");
 
@@ -146,7 +161,7 @@ for (const device of ["desktop", "phone"]) {
 
   // Search across every game.
   await go(page, "/props?sport=nfl&cat=receiving_yards");
-  const first = (await page.locator("li[data-fav-id] .font-600.text-ink").first().innerText()).trim();
+  const first = ((await page.locator("li[data-fav-id]").first().getAttribute("data-player")) ?? "").trim();
   const term = first.split(" ").pop();
   await page.fill("#q", term);
   {
@@ -155,7 +170,7 @@ for (const device of ["desktop", "phone"]) {
     await page.waitForURL((u) => u.toString() !== before, { timeout: 30000 }).catch(() => null);
     await page.waitForLoadState("networkidle");
   }
-  const found = (await page.locator("li[data-fav-id] .font-600.text-ink").allInnerTexts()).map((s) => s.toLowerCase());
+  const found = await page.locator("li[data-fav-id]").evaluateAll((els) => els.map((e) => (e.dataset.player ?? "").toLowerCase()));
   check(found.length > 0 && found.every((n) => n.includes(term.toLowerCase())), `search "${term}" returns only matching players (${found.length})`);
   check((await page.locator("text=across every NFL game").count()) > 0, "search covers every game");
 
@@ -237,8 +252,85 @@ for (const device of ["desktop", "phone"]) {
   check(qs(page).get("game") !== null && page.url().includes("/props"), "game row Props link opens that game's props");
   await go(page, "/performance/stats?sport=nba");
   check((await page.locator("text=Settled market record").count()) > 0 && (await page.locator("text=Player props backtest").count()) > 0, "stats for nerds keeps the performance sections");
-  await go(page, "/performance?tab=nba");
-  check((await page.locator("text=Stats for Nerds").count()) > 0 && (await page.locator("text=NBA game picks").count()) > 0, "performance opens on results, with the stats tab");
+  const stats = await page.locator("main").innerText();
+  check(["Brier", "Log loss", "Calibration", "Settled market record", "model versions", "shadow experiments", "prop category"].every((x) => new RegExp(x, "i").test(stats)),
+    "stats for nerds keeps Brier, log loss, calibration, the model-vs-market record, model versions, shadow comparisons and category analysis");
+  await ctx.close();
+}
+
+// ------------------------------------------------------------------ performance: picks and results
+for (const device of ["desktop", "phone"]) {
+  const { ctx, page } = await session(device);
+  const main = () => page.locator("main").innerText();
+  const num = (t, label) => Number((t.match(new RegExp(`${label}\\s+(\\d[\\d,]*)`)) ?? [])[1]?.replace(/,/g, ""));
+  for (const league of ["nba", "nfl"]) {
+    const L = league.toUpperCase();
+    // ---- games
+    await go(page, `/performance?tab=${league}`);
+    let t = await main();
+    check(["NBA Props", "NFL Props", "NBA Games", "NFL Games", "Stats for Nerds"].every((x) => t.includes(x)), `${device} ${L} games: four results tabs and Stats for Nerds`);
+    check(["Winner picks", "Spread picks", "Total picks"].every((x) => t.includes(x)) && !/All .* game picks/.test(t), `${device} ${L} games: winner, spread and total keep separate records`);
+    check(/Recorded pre-game\./.test(t) && /Reconstructed\./.test(t) && /not published before the game/.test(t), `${device} ${L} games: reconstructed picks are told apart from picks recorded pre-game`);
+    // the hit rate on the page is hits / (hits + misses), from the counts on the page
+    const panel = await page.locator('section[aria-label="Winner picks"]').innerText();
+    const [hits, misses, settled, pushes] = [num(panel, "Hits"), num(panel, "Misses"), num(panel, "Settled"), num(panel, "Pushes")];
+    const shown = Number((panel.match(/([\d.]+)%/) ?? [])[1]);
+    check(hits + misses > 0 && Math.abs(shown - (100 * hits) / (hits + misses)) < 0.06 && settled === hits + misses + pushes,
+      `${device} ${L} games: winner hit rate ${shown}% = ${hits} / (${hits} + ${misses}); settled ${settled}`);
+    // date navigation
+    const dated = page.locator('nav[aria-label="Date"] a[href*="date="]');
+    check((await dated.count()) > 1, `${device} ${L} games: date strip lists ${await dated.count()} days`);
+    const earlier = page.locator('nav[aria-label="Date"] a[aria-label^="Earlier"]');
+    if (await earlier.count()) {
+      const before = qs(page).get("date");
+      await nav(page, earlier);
+      check(/^\d{4}-\d{2}-\d{2}$/.test(qs(page).get("date") ?? "") && qs(page).get("date") !== before, `${device} ${L} games: Earlier opens ${qs(page).get("date")}`);
+    }
+    // a settled game: collapsed shows the score and the grades; expanded shows every prediction
+    const card = page.locator("main details", { hasText: "Final" }).first();
+    check((await card.count()) > 0, `${device} ${L} games: a settled game is listed`);
+    if (await card.count()) {
+      const head = await card.locator("summary").first().innerText();
+      check(/\d+[\s\S]*\d+/.test(head) && /Winner/.test(head) && /Spread/.test(head) && /Total/.test(head) && /HIT|MISS|PUSH/.test(head),
+        `${device} ${L} games: collapsed card shows the final score and result labels`);
+      check(!(await card.locator("text=Team totals:").isVisible()), `${device} ${L} games: details start closed`);
+      await card.locator("summary").first().click();
+      const body = await card.innerText();
+      check(/to win/.test(body) && /Win probability: [A-Z]+ \d+%, [A-Z]+ \d+%/.test(body) && /won by \d+|Tied/.test(body), `${device} ${L} games: expanded card shows the winner pick, both win probabilities and the actual winner`);
+      for (const [what, re] of [["spread", /Spread\s+(No recorded pick|[A-Z]{2,4} (?:[+−][\d.]+|pick'em))/], ["total", /Game total\s+(No recorded pick|(?:Over|Under) [\d.]+)/]]) {
+        const m = body.match(re);
+        check(Boolean(m), `${device} ${L} games: ${what} shows the recorded pick or "No recorded pick" (${m ? m[1] : "missing"})`);
+      }
+      check(/[\d.]+ projected\s+\d+ actual/.test(body) && /team score/.test(body) && /Margin/.test(body) && /Total points/.test(body), `${device} ${L} games: projected and actual team scores with the difference`);
+      const proj = await card.locator("ul").nth(1).innerText();
+      check(!/HIT|MISS|PUSH/.test(proj), `${device} ${L} games: projected scores carry no HIT or MISS`);
+      check(/no team-total pick to grade/.test(body), `${device} ${L} games: no team-total pick is invented`);
+      check(/Reconstructed|Recorded pre-game/.test(body), `${device} ${L} games: each pick says how it was recorded`);
+    }
+    check(await noHScroll(page), `${device} ${L} games: no sideways scrolling with a card open`);
+    await shot(page, `performance-${league}-games-${device}`);
+
+    // ---- props
+    await go(page, `/performance?tab=${league}-props`);
+    t = await main();
+    const pp = await page.locator(`section[aria-label="${L} player picks"]`).innerText();
+    const [h, m, s, pu, v] = [num(pp, "Hits"), num(pp, "Misses"), num(pp, "Settled"), num(pp, "Pushes"), num(pp, "Voids")];
+    const rate = Number((pp.match(/([\d.]+)%/) ?? [])[1]);
+    check(h + m > 0 && Math.abs(rate - (100 * h) / (h + m)) < 0.06 && s === h + m + pu, `${device} ${L} props: hit rate ${rate}% = ${h} / (${h} + ${m}); ${v} void left out`);
+    check(/reconstructed/.test(pp) && /recorded pre-game/.test(pp), `${device} ${L} props: record says how many picks were reconstructed`);
+    const pc = page.locator("main details", { hasText: "Final" }).first();
+    if (await pc.count()) {
+      await pc.locator("summary").first().click();
+      check(/Reconstructed: these \d+ picks were written after the game started|recorded before the game started/.test(await pc.innerText()), `${device} ${L} props: the game says whether its picks were reconstructed`);
+      const player = pc.locator("details").first();
+      await player.locator("summary").click();
+      const pt = await player.innerText();
+      check(/(\d[\d.]*\+ |Under \d)/.test(pt) && /Finished with \d|Did not play|Awaiting box score/.test(pt) && /HIT|MISS|VOID|PUSH|PENDING/.test(pt) && /chance/.test(pt),
+        `${device} ${L} props: a player shows stat, projection, pick, final stat and grade`);
+      check(await noHScroll(page), `${device} ${L} props: no sideways scrolling with a player open`);
+      await shot(page, `performance-${league}-props-${device}`);
+    } else bad(`${device} ${L} props: no settled game to open`);
+  }
   await ctx.close();
 }
 

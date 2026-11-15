@@ -273,6 +273,9 @@ def _settle_picks(league: str, candidates: list[dict], day_ctx: dict, days_out: 
         by_game.setdefault(pk["league_game_id"], []).append(pk)
     order = {"moneyline": 0, "spread": 1, "total": 2, "prop": 3}
     graded, by_date, all_results = [], [], {"moneyline": [], "spread": [], "total": [], "prop": []}
+    # How each stored pick came to exist: written before its game started, or written afterwards from the
+    # projection that was recorded before it. The page labels the two apart; neither is ever relabelled.
+    provenance = {k: {"pre_game": 0, "reconstructed": 0} for k in all_results}
     for day in sorted(day_ctx):
         rows = []
         for g in day_ctx[day]:
@@ -293,6 +296,7 @@ def _settle_picks(league: str, candidates: list[dict], day_ctx: dict, days_out: 
                     evidence = {"status": g["status"]}
                 graded.append({"pick_id": pk["game_id"], "result": res, "evidence": evidence})
                 all_results[pk["market"]].append(res)
+                provenance[pk["market"]]["pre_game" if pk.get("frozen_before_start") else "reconstructed"] += 1
                 row = {"id": pk["game_id"], "game_id": g["game_id"], "market": pk["market"], "selection": pk["selection"], "team": pk.get("team"),
                        "line": pk.get("line"), "model_number": pk.get("model_number"), "model_prob": pk.get("model_prob"),
                        "model_version": pk["model_version"], "recorded_at": pk["generated_at"], "backfilled": pk.get("backfilled", False),
@@ -308,7 +312,9 @@ def _settle_picks(league: str, candidates: list[dict], day_ctx: dict, days_out: 
             days_out[day]["picks"] = rows
         if rows:
             by_date.append({"date": day, "games": P.record_of([r["result"] for r in rows if r["market"] != "prop"]),
-                            "props": P.record_of([r["result"] for r in rows if r["market"] == "prop"])})
+                            "props": P.record_of([r["result"] for r in rows if r["market"] == "prop"]),
+                            # winner, spread and total are different bets: each keeps its own record for the day
+                            **{k: P.record_of([r["result"] for r in rows if r["market"] == k]) for k in ("moneyline", "spread", "total")}})
     log = P.record_grades(league, graded, now)
     game_results = all_results["moneyline"] + all_results["spread"] + all_results["total"]
     summary = {"league": league, "kind": "picks_summary", "generated_at": now.isoformat(timespec="seconds"),
@@ -317,6 +323,7 @@ def _settle_picks(league: str, candidates: list[dict], day_ctx: dict, days_out: 
                "overall": {"games": P.record_of(game_results), "props": P.record_of(all_results["prop"]),
                            **{k: P.record_of(v) for k, v in all_results.items()}},
                "by_date": by_date,
+               "provenance": provenance,
                "backfilled_picks": sum(1 for v in by_game.values() for pk in v if pk.get("backfilled"))}
     write_board(_out(league) / "picks_summary.json", summary)
     return {**froze, **log, "graded": summary["overall"]["games"]["graded"] + summary["overall"]["props"]["graded"]}
