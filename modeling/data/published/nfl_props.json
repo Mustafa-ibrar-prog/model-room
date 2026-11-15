@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-15T22:13:02+00:00",
+  "generated_at": "2026-11-15T22:32:41+00:00",
   "season": 2026,
   "week": 11,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "469ace9054a5e57d",
+    "inputs_hash": "c2369dde0fbbc639",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,11 +20,11 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-15T22:11:54.598466+00:00",
+      "generated_at": "2026-11-15T22:31:47.694836+00:00",
       "sources": {
         "espn": {
           "ok": true,
-          "rows": 1085,
+          "rows": 1087,
           "errors": []
         },
         "nflverse": {
@@ -41,7 +41,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-15T22:11:25+00:00",
+    "last_ingest": "2026-11-15T22:31:22+00:00",
     "results_through": "2026-11-15",
     "markets": [
       {
@@ -12921,6 +12921,51 @@
             "conflict": null
           },
           {
+            "player": "Jalen Davis",
+            "player_id": "00-0034446",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-12T21:30:00+00:00",
+            "detail": "Left Hamstring Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Injured Reserve (Nov 12 21:30 UTC)"
+          },
+          {
+            "player": "Tanner Hudson",
+            "player_id": "00-0034613",
+            "position": "TE",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-19T23:18:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Brian Parker II",
+            "player_id": "espn:4689117",
+            "position": "OT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-12T22:57:00+00:00",
+            "detail": "Not Specified Knee Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Cashius Howell",
             "player_id": "00-0041546",
             "position": "DE",
@@ -12946,51 +12991,6 @@
             "report_time": "2026-11-14T01:56:00+00:00",
             "detail": "Left Quadriceps Not Specified",
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Tanner Hudson",
-            "player_id": "00-0034613",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-19T23:18:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jalen Davis",
-            "player_id": "00-0034446",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-12T21:30:00+00:00",
-            "detail": "Left Hamstring Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 12 21:30 UTC)"
-          },
-          {
-            "player": "Brian Parker II",
-            "player_id": "espn:4689117",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-12T22:57:00+00:00",
-            "detail": "Not Specified Knee Not Specified",
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -13071,21 +13071,6 @@
             "conflict": null
           },
           {
-            "player": "Dalton Risner",
-            "player_id": "espn:3125082",
-            "position": "G",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:29:00+00:00",
-            "detail": "Not Specified Illness Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Myles Hinton",
             "player_id": "espn:4429000",
             "position": "OT",
@@ -13094,6 +13079,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-15T16:28:00+00:00",
+            "detail": "Not Specified Illness Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Dalton Risner",
+            "player_id": "espn:3125082",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:29:00+00:00",
             "detail": "Not Specified Illness Not Specified",
             "long_term": false,
             "late_scratch": false,
@@ -13178,21 +13178,6 @@
             "conflict": null
           },
           {
-            "player": "Sebastian Joseph-Day",
-            "player_id": "00-0034810",
-            "position": "DT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-23T00:28:00+00:00",
-            "detail": "Not Specified Triceps Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Gennings Dunker",
             "player_id": "espn:4431258",
             "position": "G",
@@ -13248,6 +13233,21 @@
             "report_time": "2026-09-19T19:22:00+00:00",
             "detail": null,
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Sebastian Joseph-Day",
+            "player_id": "00-0034810",
+            "position": "DT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-23T00:28:00+00:00",
+            "detail": "Not Specified Triceps Not Specified",
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -22300,20 +22300,6 @@
                 "carries": 4.5
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 8.82,
-                "to": 10.02
-              }
-            ]
           }
         },
         {
@@ -23309,21 +23295,6 @@
                 "carries": 12.75
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 9.4,
-                "to": 10.46
-              }
-            ]
           }
         },
         {
@@ -24203,20 +24174,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 22.21,
-                "to": 24.93
-              }
-            ]
           }
         },
         {
@@ -25172,21 +25129,6 @@
                 "carries": 0.43
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 35.21,
-                "to": 40.05
-              }
-            ]
           }
         },
         {
@@ -25991,20 +25933,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 22.02,
-                "to": 25.2
-              }
-            ]
           }
         },
         {
@@ -26933,20 +26861,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 30.81,
-                "to": 35.1
-              }
-            ]
           }
         },
         {
@@ -27760,20 +27674,6 @@
                 "carries": 0.17
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 17.94,
-                "to": 20.06
-              }
-            ]
           }
         },
         {
@@ -28615,20 +28515,6 @@
                 "carries": 0.12
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 21.07,
-                "to": 24.25
-              }
-            ]
           }
         }
       ],
@@ -28680,30 +28566,30 @@
             "conflict": null
           },
           {
-            "player": "Durham Smythe",
-            "player_id": "00-0034798",
-            "position": "TE",
+            "player": "Gerad Lichtenhan",
+            "player_id": "espn:4686768",
+            "position": "OT",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-07T23:18:00+00:00",
+            "report_time": "2026-11-13T01:13:00+00:00",
             "detail": null,
-            "long_term": true,
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
           {
-            "player": "Lamar Jackson",
-            "player_id": "00-0034796",
-            "position": "QB",
+            "player": "Jahquez Robinson",
+            "player_id": "espn:4433887",
+            "position": "S",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-13T14:48:00+00:00",
-            "detail": "Right Thumb Surgery",
+            "report_time": "2026-08-20T00:15:00+00:00",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -28785,30 +28671,30 @@
             "conflict": null
           },
           {
-            "player": "Gerad Lichtenhan",
-            "player_id": "espn:4686768",
-            "position": "OT",
+            "player": "Durham Smythe",
+            "player_id": "00-0034798",
+            "position": "TE",
             "status": "out",
-            "raw_status": "Out",
+            "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-13T01:13:00+00:00",
+            "report_time": "2026-10-07T23:18:00+00:00",
             "detail": null,
-            "long_term": false,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
           {
-            "player": "Jahquez Robinson",
-            "player_id": "espn:4433887",
-            "position": "S",
+            "player": "Lamar Jackson",
+            "player_id": "00-0034796",
+            "position": "QB",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-08-20T00:15:00+00:00",
-            "detail": null,
+            "report_time": "2026-11-13T14:48:00+00:00",
+            "detail": "Right Thumb Surgery",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -28907,16 +28793,16 @@
             "conflict": "espn: Out (Nov 15 19:52 UTC)"
           },
           {
-            "player": "Derwin James Jr.",
-            "player_id": "00-0034790",
-            "position": "S",
+            "player": "Branson Taylor",
+            "player_id": "espn:4433914",
+            "position": "G",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-01T00:11:00+00:00",
-            "detail": null,
-            "long_term": true,
+            "report_time": "2026-11-15T01:24:00+00:00",
+            "detail": "Not Specified Ankle Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -28952,14 +28838,29 @@
             "conflict": null
           },
           {
-            "player": "Alec Ingold",
-            "player_id": "00-0035125",
-            "position": "FB",
+            "player": "David Njoku",
+            "player_id": "00-0033885",
+            "position": "TE",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-15T20:06:00+00:00",
+            "report_time": "2026-11-14T21:37:00+00:00",
+            "detail": "Not Specified Lower Leg Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Injured Reserve (Nov 14 21:37 UTC)"
+          },
+          {
+            "player": "Tyler Biadasz",
+            "player_id": "espn:4035788",
+            "position": "C",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-23T16:55:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -28997,21 +28898,6 @@
             "conflict": null
           },
           {
-            "player": "Tyler Biadasz",
-            "player_id": "espn:4035788",
-            "position": "C",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-23T16:55:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Trey Lance",
             "player_id": "00-0037012",
             "position": "QB",
@@ -29027,36 +28913,6 @@
             "conflict": null
           },
           {
-            "player": "Branson Taylor",
-            "player_id": "espn:4433914",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T01:24:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "David Njoku",
-            "player_id": "00-0033885",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-14T21:37:00+00:00",
-            "detail": "Not Specified Lower Leg Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 14 21:37 UTC)"
-          },
-          {
             "player": "Denzel Perryman",
             "player_id": "00-0032103",
             "position": "LB",
@@ -29070,6 +28926,36 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": "espn: Injured Reserve (Nov 14 23:54 UTC)"
+          },
+          {
+            "player": "Alec Ingold",
+            "player_id": "00-0035125",
+            "position": "FB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-15T20:06:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Derwin James Jr.",
+            "player_id": "00-0034790",
+            "position": "S",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-01T00:11:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
           },
           {
             "player": "Kendall Williamson",
@@ -29102,21 +28988,6 @@
             "conflict": null
           },
           {
-            "player": "Kayode Awosika",
-            "player_id": "00-0036736",
-            "position": null,
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nflverse",
-            "confirmed": true,
-            "report_time": null,
-            "detail": null,
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Trey Pipkins",
             "player_id": "00-0035688",
             "position": null,
@@ -29141,6 +29012,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T01:18:00+00:00",
             "detail": "Not Specified Lower Leg Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kayode Awosika",
+            "player_id": "00-0036736",
+            "position": null,
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nflverse",
+            "confirmed": true,
+            "report_time": null,
+            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -30312,26 +30198,6 @@
                 "carries": 2.5
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 10.51,
-                "to": 14.84
-              },
-              {
-                "market": "rushing_attempts",
-                "label": "Rush attempts",
-                "from": 2.24,
-                "to": 3.24
-              }
-            ]
           }
         },
         {
@@ -31434,32 +31300,6 @@
                 "carries": 11.88
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 questionable"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 13.48,
-                "to": 15.69
-              },
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 45.34,
-                "to": 65.34
-              },
-              {
-                "market": "rushing_attempts",
-                "label": "Rush attempts",
-                "from": 11.71,
-                "to": 16.8
-              }
-            ]
           }
         },
         {
@@ -32386,20 +32226,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 25.67,
-                "to": 29.59
-              }
-            ]
           }
         },
         {
@@ -32409,7 +32235,7 @@
           "opp": "IND",
           "position": "WR",
           "game_id": "2026_11_IND_HOU",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -33130,9 +32956,18 @@
             "qb_note": null,
             "team_pass_attempts": 33.8,
             "team_carries": 26.8,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.709,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-15T22:17:00+00:00",
+              "comment": "Collins secured nine of 16 targets for 94 yards and a touchdown in the Texans' 27-24 loss to the Browns on Sunday. Collins comfortably paced the Texans across the board in receptions, receiving yards and targets, and he added his fifth touchdown of the season on a 12-yard catch in the first quarter. Collins also had a 16-yard reception on Houston's last-gasp drive wiped out by an offensive holding penalty, but he still finished with season highs in receptions and targets. Collins retains an unquestioned No. 1 role in the Texans' prolific air attack, affording him an enticing combination of floor and upside heading into a favorable Week 11 home matchup against the Colts on Thursday night.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "David Montgomery",
@@ -33430,26 +33265,6 @@
                 "carries": 0.33
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 58.25,
-                "to": 66.41
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 4.27,
-                "to": 4.85
-              }
-            ]
           }
         },
         {
@@ -35417,20 +35232,6 @@
                 "carries": 0.5
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 available"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 34.23,
-                "to": 39.69
-              }
-            ]
           }
         },
         {
@@ -36305,20 +36106,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 33.95,
-                "to": 38.25
-              }
-            ]
           }
         },
         {
@@ -41377,16 +41164,16 @@
             "conflict": null
           },
           {
-            "player": "E.J. Speed",
-            "player_id": "00-0034987",
+            "player": "K.C. Ossai",
+            "player_id": "espn:4687188",
             "position": "LB",
             "status": "out",
-            "raw_status": "Out",
+            "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-08-31T17:01:00+00:00",
+            "report_time": "2026-08-22T16:30:00+00:00",
             "detail": null,
-            "long_term": false,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -41402,36 +41189,6 @@
             "report_time": "2026-09-02T00:13:00+00:00",
             "detail": null,
             "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "David Montgomery",
-            "player_id": "00-0035685",
-            "position": "RB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-14T18:18:00+00:00",
-            "detail": "Not Specified Groin Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Out (Nov 14 18:18 UTC)"
-          },
-          {
-            "player": "Azeez Al-Shaair",
-            "player_id": "00-0035166",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:37:00+00:00",
-            "detail": "Not Specified Groin Not Specified",
-            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -41482,6 +41239,21 @@
             "conflict": null
           },
           {
+            "player": "David Montgomery",
+            "player_id": "00-0035685",
+            "position": "RB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-14T18:18:00+00:00",
+            "detail": "Not Specified Groin Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Out (Nov 14 18:18 UTC)"
+          },
+          {
             "player": "Brevin Jordan",
             "player_id": "00-0036556",
             "position": "TE",
@@ -41492,36 +41264,6 @@
             "report_time": "2026-11-15T16:37:00+00:00",
             "detail": "Not Specified Finger Not Specified",
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Keylan Rutledge",
-            "player_id": "espn:4839498",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:37:00+00:00",
-            "detail": "Not Specified Neck Stinger",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "K.C. Ossai",
-            "player_id": "espn:4687188",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-22T16:30:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -41551,6 +41293,51 @@
             "confirmed": false,
             "report_time": "2026-11-15T16:37:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Keylan Rutledge",
+            "player_id": "espn:4839498",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:37:00+00:00",
+            "detail": "Not Specified Neck Stinger",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "E.J. Speed",
+            "player_id": "00-0034987",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-31T17:01:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Azeez Al-Shaair",
+            "player_id": "00-0035166",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:37:00+00:00",
+            "detail": "Not Specified Groin Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -41587,6 +41374,21 @@
             "conflict": null
           },
           {
+            "player": "Trent Brown",
+            "player_id": "00-0032071",
+            "position": null,
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nflverse",
+            "confirmed": true,
+            "report_time": null,
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Wyatt Teller",
             "player_id": "00-0034399",
             "position": null,
@@ -41611,21 +41413,6 @@
             "confirmed": false,
             "report_time": "2026-11-15T20:25:00+00:00",
             "detail": "Not Specified Concussion Concussion",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Trent Brown",
-            "player_id": "00-0032071",
-            "position": null,
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nflverse",
-            "confirmed": true,
-            "report_time": null,
-            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -41679,30 +41466,15 @@
             "conflict": null
           },
           {
-            "player": "D.J. Montgomery",
-            "player_id": "00-0035045",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-31T17:16:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jerry Tillery",
-            "player_id": "00-0035674",
-            "position": "DT",
+            "player": "Jalen Travis",
+            "player_id": "espn:4892240",
+            "position": "OT",
             "status": "out",
             "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-15T16:36:00+00:00",
-            "detail": "Not Specified Calf Not Specified",
+            "detail": "Not Specified Knee Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -41724,15 +41496,30 @@
             "conflict": null
           },
           {
-            "player": "Jalen Travis",
-            "player_id": "espn:4892240",
-            "position": "OT",
+            "player": "Jerry Tillery",
+            "player_id": "00-0035674",
+            "position": "DT",
             "status": "out",
             "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-15T16:36:00+00:00",
-            "detail": "Not Specified Knee Not Specified",
+            "detail": "Not Specified Calf Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Luke Rhodes",
+            "player_id": "00-0032753",
+            "position": "LS",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:36:00+00:00",
+            "detail": "Not Specified Hamstring Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -41747,6 +41534,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-08T20:42:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "D.J. Montgomery",
+            "player_id": "00-0035045",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-31T17:16:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -41769,19 +41571,19 @@
             "conflict": null
           },
           {
-            "player": "Luke Rhodes",
-            "player_id": "00-0032753",
-            "position": "LS",
+            "player": "Will Mallory",
+            "player_id": "00-0038394",
+            "position": "TE",
             "status": "out",
             "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-15T16:36:00+00:00",
+            "report_time": "2026-11-14T17:22:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": null
+            "conflict": "espn: Out (Nov 14 17:22 UTC)"
           },
           {
             "player": "Cameron Mitchell",
@@ -41797,21 +41599,6 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": null
-          },
-          {
-            "player": "Will Mallory",
-            "player_id": "00-0038394",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-14T17:22:00+00:00",
-            "detail": "Not Specified Hamstring Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Out (Nov 14 17:22 UTC)"
           },
           {
             "player": "Micheal Clemons",
@@ -41859,21 +41646,6 @@
             "conflict": null
           },
           {
-            "player": "Charvarius Ward",
-            "player_id": "00-0034573",
-            "position": "CB",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:07:00+00:00",
-            "detail": "Not Specified Shin Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Sauce Gardner",
             "player_id": "00-0037190",
             "position": "CB",
@@ -41883,6 +41655,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T20:35:00+00:00",
             "detail": "Calf",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Charvarius Ward",
+            "player_id": "00-0034573",
+            "position": "CB",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:07:00+00:00",
+            "detail": "Not Specified Shin Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -50457,8 +50244,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-15T13:25:00+00:00",
-              "comment": "In addition to the Chiefs team doctors reviewing Mahomes' (throwing) elbow scans, the team sought further feedback from renowned doctors from the Kansas City Royals and Texas Rangers, Adam Schefter of ESPN reports. After getting second and third opinions from Dr. Vincent Key (the Royals' head team physician) and Dr. Keith Meister (the Rangers' team physician and orthopedic consultant), it was determined that Mahomes had suffered a muscle strain as well as what a source described as \"a very small sprain of his UCL.\" Per Schefter's report, all of the doctors believed that it was safe for Mahomes play through the issue, despite the fact that the star QB was sore and continued receiving treatment throughout this week. In any case, Mahomes was listed as a full practice participant Wednesday through Friday, and approaches Sunday's game against the Falcons -- which is in line to be the Chiefs debut of trade-deadline acquisition WR Josh Downs -- without an injury designation, thus confirming his Week 10 availability.",
+              "report_time": "2026-11-15T22:08:00+00:00",
+              "comment": "Mahomes completed 22 of 35 passes for 348 yards with five touchdowns and no interceptions while adding two rushes for 15 yards in the Chiefs' 35-13 win over the Falcons on Sunday. Taking advantage of a controlled environment and a fast track at Mercedes-Benz Stadium -- not to mention the presence of the debuting Josh Downs -- Mahomes repeatedly exploited the vulnerabilities of the Falcons defense throughout the afternoon. The legendary signal-caller showed no ill effects from the elbow injury that he'd suffered in Week 9, and he connected with Emmett Johnson (12, six yards), Downs (18 yards), Cyrus Allen (39 yards) and Andrew Armstrong (43 yards) for his quintet of touchdown passes. Mahomes now has multiple scoring strikes and zero interceptions in three straight games, and Sunday's five TD tosses represented a new season high. Mahomes will take 2,385 passing yards and a 19:4 TD:INT into a Week 11 home matchup against the Cardinals next Sunday.",
               "conflict": null,
               "notes": []
             },
@@ -50792,26 +50579,6 @@
                 "carries": 2.88
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Jared Wiley"
-            ],
-            "markets": [
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 12.58,
-                "to": 22.36
-              },
-              {
-                "market": "rushing_attempts",
-                "label": "Rush attempts",
-                "from": 2.65,
-                "to": 4.8
-              }
-            ]
           }
         },
         {
@@ -52605,26 +52372,6 @@
                 "carries": 0.11
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Jared Wiley"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 37.44,
-                "to": 43.06
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.25,
-                "to": 3.8
-              }
-            ]
           }
         },
         {
@@ -53616,27 +53363,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 unknown",
-              "teammate out: Jared Wiley"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 37.38,
-                "to": 43.3
-              },
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 0.62,
-                "to": 1.12
-              }
-            ]
           }
         },
         {
@@ -54614,26 +54340,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "teammate out: Jared Wiley"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 34.68,
-                "to": 39.96
-              },
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 1.4,
-                "to": 2.49
-              }
-            ]
           }
         },
         {
@@ -55564,21 +55270,6 @@
                 "carries": 0.12
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: unknown \u2192 available",
-              "teammate out: Jared Wiley"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 39.7,
-                "to": 45.41
-              }
-            ]
           }
         }
       ],
@@ -55595,21 +55286,6 @@
             "report_time": "2026-07-29T00:21:00+00:00",
             "detail": null,
             "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Garrett Nussmeier",
-            "player_id": "00-0040906",
-            "position": "QB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:54:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -55660,6 +55336,21 @@
             "conflict": null
           },
           {
+            "player": "Garrett Nussmeier",
+            "player_id": "00-0040906",
+            "position": "QB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:54:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Omarr Norman-Lott",
             "player_id": "00-0040748",
             "position": "DT",
@@ -55670,36 +55361,6 @@
             "report_time": "2026-10-29T01:48:00+00:00",
             "detail": null,
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jared Wiley",
-            "player_id": "00-0039824",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T21:50:00+00:00",
-            "detail": "Right Ankle Fracture",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Brashard Smith",
-            "player_id": "00-0040078",
-            "position": "RB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-24T18:05:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -55720,6 +55381,36 @@
             "conflict": null
           },
           {
+            "player": "Brashard Smith",
+            "player_id": "00-0040078",
+            "position": "RB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-24T18:05:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jared Wiley",
+            "player_id": "00-0039824",
+            "position": "TE",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T21:50:00+00:00",
+            "detail": "Right Ankle Fracture",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Jimmy Holiday",
             "player_id": "espn:4431142",
             "position": "WR",
@@ -55728,6 +55419,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-08-31T17:40:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Josh Simmons",
+            "player_id": "espn:4569659",
+            "position": "OT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-22T18:25:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -55805,21 +55511,6 @@
             "report_time": null,
             "detail": null,
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Josh Simmons",
-            "player_id": "espn:4569659",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-22T18:25:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -55977,31 +55668,16 @@
             "conflict": null
           },
           {
-            "player": "Gardner Minshew II",
-            "player_id": "00-0035289",
-            "position": "QB",
+            "player": "James Conner",
+            "player_id": "00-0033553",
+            "position": "RB",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-15T12:49:00+00:00",
-            "detail": "Right Elbow Surgery",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Hjalte Froholdt",
-            "player_id": "00-0035258",
-            "position": null,
-            "status": "out",
-            "raw_status": "Out",
-            "source": "nflverse",
-            "confirmed": true,
-            "report_time": null,
+            "report_time": "2026-11-04T00:31:00+00:00",
             "detail": null,
-            "long_term": false,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -56032,7 +55708,7 @@
             "report_time": "2026-11-15T19:51:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -56067,29 +55743,14 @@
             "conflict": null
           },
           {
-            "player": "Jayden Williams",
-            "player_id": "espn:4709718",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:26:00+00:00",
-            "detail": "Not Specified Knee Not Specified",
-            "long_term": false,
-            "late_scratch": true,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "James Conner",
-            "player_id": "00-0033553",
-            "position": "RB",
+            "player": "Chase Bisontis",
+            "player_id": "espn:4870596",
+            "position": "G",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-04T00:31:00+00:00",
+            "report_time": "2026-08-19T12:07:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -56112,16 +55773,46 @@
             "conflict": null
           },
           {
-            "player": "Chase Bisontis",
-            "player_id": "espn:4870596",
-            "position": "G",
+            "player": "Jayden Williams",
+            "player_id": "espn:4709718",
+            "position": "OT",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:26:00+00:00",
+            "detail": "Not Specified Knee Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Gardner Minshew II",
+            "player_id": "00-0035289",
+            "position": "QB",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-08-19T12:07:00+00:00",
-            "detail": null,
+            "report_time": "2026-11-15T12:49:00+00:00",
+            "detail": "Right Elbow Surgery",
             "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Hjalte Froholdt",
+            "player_id": "00-0035258",
+            "position": null,
+            "status": "out",
+            "raw_status": "Out",
+            "source": "nflverse",
+            "confirmed": true,
+            "report_time": null,
+            "detail": null,
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -56137,7 +55828,7 @@
             "report_time": "2026-11-15T19:37:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -56212,7 +55903,7 @@
             "report_time": "2026-11-15T19:37:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -70671,51 +70362,6 @@
             "conflict": null
           },
           {
-            "player": "Bobby Okereke",
-            "player_id": "00-0035687",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:38:00+00:00",
-            "detail": "Not Specified Foot Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Mike Jackson",
-            "player_id": "00-0035277",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-14T19:23:00+00:00",
-            "detail": "Not Specified Groin Surgery",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 14 19:23 UTC)"
-          },
-          {
-            "player": "Taylor Moton",
-            "player_id": "espn:2973051",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-26T23:15:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Haynes King",
             "player_id": "00-0041149",
             "position": "QB",
@@ -70746,6 +70392,21 @@
             "conflict": null
           },
           {
+            "player": "Taylor Moton",
+            "player_id": "espn:2973051",
+            "position": "OT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-26T23:15:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "AJ Dillon",
             "player_id": "00-0036265",
             "position": "RB",
@@ -70755,6 +70416,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T16:38:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Bobby Okereke",
+            "player_id": "00-0035687",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:38:00+00:00",
+            "detail": "Not Specified Foot Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -70789,6 +70465,21 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": null
+          },
+          {
+            "player": "Mike Jackson",
+            "player_id": "00-0035277",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-14T19:23:00+00:00",
+            "detail": "Not Specified Groin Surgery",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Injured Reserve (Nov 14 19:23 UTC)"
           },
           {
             "player": "Akayleb Evans",
@@ -70913,30 +70604,30 @@
             "conflict": null
           },
           {
-            "player": "Durham Smythe",
-            "player_id": "00-0034798",
-            "position": "TE",
+            "player": "Gerad Lichtenhan",
+            "player_id": "espn:4686768",
+            "position": "OT",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-07T23:18:00+00:00",
+            "report_time": "2026-11-13T01:13:00+00:00",
             "detail": null,
-            "long_term": true,
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
           {
-            "player": "Lamar Jackson",
-            "player_id": "00-0034796",
-            "position": "QB",
+            "player": "Jahquez Robinson",
+            "player_id": "espn:4433887",
+            "position": "S",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-13T14:48:00+00:00",
-            "detail": "Right Thumb Surgery",
+            "report_time": "2026-08-20T00:15:00+00:00",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -71018,30 +70709,30 @@
             "conflict": null
           },
           {
-            "player": "Gerad Lichtenhan",
-            "player_id": "espn:4686768",
-            "position": "OT",
+            "player": "Durham Smythe",
+            "player_id": "00-0034798",
+            "position": "TE",
             "status": "out",
-            "raw_status": "Out",
+            "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-13T01:13:00+00:00",
+            "report_time": "2026-10-07T23:18:00+00:00",
             "detail": null,
-            "long_term": false,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
           {
-            "player": "Jahquez Robinson",
-            "player_id": "espn:4433887",
-            "position": "S",
+            "player": "Lamar Jackson",
+            "player_id": "00-0034796",
+            "position": "QB",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-08-20T00:15:00+00:00",
-            "detail": null,
+            "report_time": "2026-11-13T14:48:00+00:00",
+            "detail": "Right Thumb Surgery",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -84634,21 +84325,6 @@
             "conflict": null
           },
           {
-            "player": "Tremaine Edmunds",
-            "player_id": "00-0034673",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-24T23:28:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Rico Payton",
             "player_id": "00-0039620",
             "position": "CB",
@@ -84672,21 +84348,6 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-10-27T21:04:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Gunner Olszewski",
-            "player_id": "00-0035645",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-06-02T00:10:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -84719,6 +84380,21 @@
             "report_time": "2026-11-12T23:53:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Braxton Berrios",
+            "player_id": "00-0034419",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-14T21:17:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -84769,14 +84445,14 @@
             "conflict": null
           },
           {
-            "player": "Braxton Berrios",
-            "player_id": "00-0034419",
+            "player": "Gunner Olszewski",
+            "player_id": "00-0035645",
             "position": "WR",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-14T21:17:00+00:00",
+            "report_time": "2026-06-02T00:10:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -84822,6 +84498,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-08T20:42:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Tremaine Edmunds",
+            "player_id": "00-0034673",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-24T23:28:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -84966,16 +84657,16 @@
             "conflict": null
           },
           {
-            "player": "Jessie Bates III",
-            "player_id": "00-0034675",
-            "position": "S",
+            "player": "Garrett DiGiorgio",
+            "player_id": "espn:4684542",
+            "position": "OT",
             "status": "out",
-            "raw_status": "Out",
+            "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-15T16:36:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
+            "report_time": "2026-08-19T12:07:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -85086,6 +84777,21 @@
             "conflict": null
           },
           {
+            "player": "Eric Murray",
+            "player_id": "00-0033038",
+            "position": "S",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-04T01:11:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Anton Harrison",
             "player_id": "espn:4692525",
             "position": "OT",
@@ -85101,31 +84807,16 @@
             "conflict": null
           },
           {
-            "player": "Garrett DiGiorgio",
-            "player_id": "espn:4684542",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-19T12:07:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Eric Murray",
-            "player_id": "00-0033038",
+            "player": "Jessie Bates III",
+            "player_id": "00-0034675",
             "position": "S",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-04T01:11:00+00:00",
-            "detail": null,
-            "long_term": true,
+            "report_time": "2026-11-15T16:36:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -85147,21 +84838,6 @@
           },
           {
             "player": "Robert Hainsey",
-            "player_id": "espn:4242391",
-            "position": "C",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:19:00+00:00",
-            "detail": "Not Specified Knee Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Robert Hainsey",
             "player_id": "00-0036985",
             "position": null,
             "status": "questionable",
@@ -85170,6 +84846,21 @@
             "confirmed": true,
             "report_time": null,
             "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Robert Hainsey",
+            "player_id": "espn:4242391",
+            "position": "C",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:19:00+00:00",
+            "detail": "Not Specified Knee Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -85214,7 +84905,7 @@
           "opp": "MIA",
           "position": "QB",
           "game_id": "2026_11_MIA_BUF",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "passing_yards": {
               "label": "Passing yards",
@@ -86068,9 +85759,18 @@
             "qb_note": null,
             "team_pass_attempts": 29.5,
             "team_carries": 31.8,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.975,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-15T22:00:00+00:00",
+              "comment": "Allen completed 11 of 21 passes for 196 yards, one touchdown and one interception while rushing five times for five yards and two touchdowns in Sunday's 31-12 win over the Jets. Allen scored one-yard rushing touchdowns in the first and third quarters, bringing his season total up to 11 rushing TDs. He added his 13th touchdown pass of the campaign on a 45-yard strike to DJ Moore later in the third quarter, and Allen's fourth-quarter interception on third-and-long was basically an arm punt. Heading into a Week 11 home game against the Dolphins, the star QB has accounted for multiple touchdowns in all but one outing this season.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Shane Buechele",
@@ -86361,7 +86061,7 @@
           "opp": "MIA",
           "position": "RB",
           "game_id": "2026_11_MIA_BUF",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -87150,9 +86850,18 @@
             "qb_note": null,
             "team_pass_attempts": 29.5,
             "team_carries": 31.8,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.621,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-15T21:58:00+00:00",
+              "comment": "Cook rushed 18 times for 157 yards and a touchdown but didn't catch his only target in Sunday's 31-12 win over the Jets. Buffalo relied primarily on its ground game in the lopsided victory, as Cook's 74-yard touchdown run in the fourth quarter provided the cherry on top after a pair of one-yard Josh Allen rushing scores helped the Bills pull away. Cook extended his touchdown streak to eight games by scoring his ninth rushing TD over that span. He has topped 100 scrimmage yards in all but one game during this productive stretch, bouncing back effectively after being held to 69 scoreless yards by the Texans in the season opener. Cook has a nice opportunity to keep rolling in Week 11, when the 8-1 Bills host the 1-8 Dolphins.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Shane Buechele",
@@ -91066,7 +90775,7 @@
           "opp": "MIA",
           "position": "TE",
           "game_id": "2026_11_MIA_BUF",
-          "injury_status": "Available",
+          "injury_status": null,
           "markets": {
             "receiving_yards": {
               "label": "Receiving yards",
@@ -91599,18 +91308,9 @@
             "qb_note": null,
             "team_pass_attempts": 29.5,
             "team_carries": 31.8,
-            "injury_status": "Available",
+            "injury_status": null,
             "snap_share_recent": 0.697,
-            "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-11-11T00:26:00+00:00",
-              "comment": "Knox caught four passes for 37 yards on five targets in Monday night's 23-6 win over the Vikings. Knox's targets, catches and yards were all season highs. He also played 58 offensive snaps against Minnesota. With the blitz-happy Vikings defense opposite them, the Buffalo offense went with heavy tight end sets to try and get more blockers on the field. Knox won't be a recommended fantasy target for Sunday's game against the Jets. He has 13 grabs for 79 yards and a touchdown across eight games this season.",
-              "conflict": null,
-              "notes": []
-            },
+            "availability": null,
             "teammates_out_detail": [
               {
                 "name": "Shane Buechele",
@@ -93839,20 +93539,6 @@
                 "carries": 13.38
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 7.82,
-                "to": 9.28
-              }
-            ]
           }
         },
         {
@@ -94715,26 +94401,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 42.7,
-                "to": 50.58
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.25,
-                "to": 3.84
-              }
-            ]
           }
         },
         {
@@ -95703,26 +95369,6 @@
                 "carries": 1.12
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 38.93,
-                "to": 46.14
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.53,
-                "to": 4.19
-              }
-            ]
           }
         },
         {
@@ -96581,42 +96227,22 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 29.96,
-                "to": 35.32
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 2.83,
-                "to": 3.35
-              }
-            ]
           }
         }
       ],
       "injuries": {
         "home": [
           {
-            "player": "Zane Durant",
-            "player_id": "00-0041091",
-            "position": "DT",
+            "player": "Dorian Strong",
+            "player_id": "00-0040197",
+            "position": "CB",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-08T20:42:00+00:00",
             "detail": null,
-            "long_term": true,
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -96637,15 +96263,30 @@
             "conflict": null
           },
           {
-            "player": "Dorian Strong",
-            "player_id": "00-0040197",
-            "position": "CB",
+            "player": "Zane Durant",
+            "player_id": "00-0041091",
+            "position": "DT",
             "status": "out",
-            "raw_status": "Out",
+            "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-08T20:42:00+00:00",
             "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Ar'maj Reed-Adams",
+            "player_id": "espn:4606712",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:35:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -96712,21 +96353,6 @@
             "conflict": null
           },
           {
-            "player": "Ar'maj Reed-Adams",
-            "player_id": "espn:4606712",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:35:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Jude Bowry",
             "player_id": "espn:4869533",
             "position": "OT",
@@ -96772,21 +96398,6 @@
             "conflict": null
           },
           {
-            "player": "Dorian Williams",
-            "player_id": "00-0038557",
-            "position": "LB",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:57:00+00:00",
-            "detail": "Not Specified Calf Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Dee Alford",
             "player_id": "00-0037034",
             "position": "CB",
@@ -96796,6 +96407,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T20:52:00+00:00",
             "detail": "Not Specified Concussion Concussion",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Dorian Williams",
+            "player_id": "00-0038557",
+            "position": "LB",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:57:00+00:00",
+            "detail": "Not Specified Calf Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -96849,21 +96475,6 @@
             "conflict": null
           },
           {
-            "player": "Ronnie Harrison Jr.",
-            "player_id": "00-0034779",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-09-19T21:21:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Caedan Wallace",
             "player_id": "espn:4426446",
             "position": "OT",
@@ -96874,6 +96485,21 @@
             "report_time": "2026-11-15T16:36:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Zach Sieler",
+            "player_id": "00-0034285",
+            "position": "DT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-11T00:23:00+00:00",
+            "detail": "Not Specified Biceps Surgery",
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -96939,21 +96565,6 @@
             "conflict": null
           },
           {
-            "player": "Zach Sieler",
-            "player_id": "00-0034285",
-            "position": "DT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-11T00:23:00+00:00",
-            "detail": "Not Specified Biceps Surgery",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Rene Konga",
             "player_id": "espn:4698109",
             "position": "DT",
@@ -96962,6 +96573,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-08-19T12:07:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Ronnie Harrison Jr.",
+            "player_id": "00-0034779",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-09-19T21:21:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -104284,20 +103910,6 @@
                 "carries": 4.25
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 14.22,
-                "to": 15.81
-              }
-            ]
           }
         },
         {
@@ -110857,6 +110469,21 @@
             "conflict": null
           },
           {
+            "player": "Kentavius Street",
+            "player_id": "00-0034320",
+            "position": "DT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-05T04:55:00+00:00",
+            "detail": "Left Knee Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Braxton Jones",
             "player_id": "espn:4251007",
             "position": "OT",
@@ -110881,21 +110508,6 @@
             "confirmed": false,
             "report_time": "2026-10-23T21:36:00+00:00",
             "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Kentavius Street",
-            "player_id": "00-0034320",
-            "position": "DT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-05T04:55:00+00:00",
-            "detail": "Left Knee Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -111022,21 +110634,6 @@
             "conflict": null
           },
           {
-            "player": "Luther Burden III",
-            "player_id": "00-0040735",
-            "position": "WR",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-09T05:13:00+00:00",
-            "detail": "Not Specified Concussion Concussion",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Tyrique Stevenson Sr.",
             "player_id": "00-0039071",
             "position": "CB",
@@ -111046,6 +110643,21 @@
             "confirmed": false,
             "report_time": "2026-11-09T03:13:00+00:00",
             "detail": "Not Specified Hand Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Luther Burden III",
+            "player_id": "00-0040735",
+            "position": "WR",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-09T05:13:00+00:00",
+            "detail": "Not Specified Concussion Concussion",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -111114,15 +110726,15 @@
             "conflict": null
           },
           {
-            "player": "Erik McCoy",
-            "player_id": "00-0035242",
-            "position": null,
+            "player": "Taliese Fuaga",
+            "player_id": "espn:4606711",
+            "position": "OT",
             "status": "out",
             "raw_status": "Out",
-            "source": "nflverse",
-            "confirmed": true,
-            "report_time": null,
-            "detail": null,
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:34:00+00:00",
+            "detail": "Left Knee Sprain",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -111234,15 +110846,15 @@
             "conflict": null
           },
           {
-            "player": "Taliese Fuaga",
-            "player_id": "espn:4606711",
-            "position": "OT",
+            "player": "Erik McCoy",
+            "player_id": "00-0035242",
+            "position": null,
             "status": "out",
             "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:34:00+00:00",
-            "detail": "Left Knee Sprain",
+            "source": "nflverse",
+            "confirmed": true,
+            "report_time": null,
+            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -123202,6 +122814,21 @@
             "conflict": null
           },
           {
+            "player": "Ben Bartch",
+            "player_id": "espn:4611506",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-17T04:09:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Giovanni Manu",
             "player_id": "espn:5209589",
             "position": "OT",
@@ -123212,81 +122839,6 @@
             "report_time": "2026-08-31T23:13:00+00:00",
             "detail": null,
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Keith Abney II",
-            "player_id": "00-0041445",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T13:02:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Kendrick Law",
-            "player_id": "00-0041446",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-06-17T20:34:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jimmy Rolder",
-            "player_id": "00-0041442",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-04T02:07:00+00:00",
-            "detail": "Not Specified Hamstring Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Cade Mays",
-            "player_id": "espn:4361788",
-            "position": "C",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T13:02:00+00:00",
-            "detail": "Not Specified Ankle Sprain",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Devin White",
-            "player_id": "00-0035707",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-17T02:00:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -123315,6 +122867,96 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-23T00:33:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jimmy Rolder",
+            "player_id": "00-0041442",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-04T02:07:00+00:00",
+            "detail": "Not Specified Hamstring Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kendrick Law",
+            "player_id": "00-0041446",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-06-17T20:34:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Keith Abney II",
+            "player_id": "00-0041445",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T13:02:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Cade Mays",
+            "player_id": "espn:4361788",
+            "position": "C",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T13:02:00+00:00",
+            "detail": "Not Specified Ankle Sprain",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Mason Miller",
+            "player_id": "espn:4693332",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-09-08T00:24:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Devin White",
+            "player_id": "00-0035707",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-17T02:00:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -123360,36 +123002,6 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-10-17T01:51:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Mason Miller",
-            "player_id": "espn:4693332",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-09-08T00:24:00+00:00",
-            "detail": null,
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Ben Bartch",
-            "player_id": "espn:4611506",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-17T04:09:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -123534,21 +123146,6 @@
             "conflict": null
           },
           {
-            "player": "Josh Hayes",
-            "player_id": "00-0039051",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-29T01:52:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Yaya Diaby",
             "player_id": "00-0039068",
             "position": "LB",
@@ -123559,6 +123156,21 @@
             "report_time": "2026-11-09T21:35:00+00:00",
             "detail": "Not Specified Knee - MCL Sprain",
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Josh Hayes",
+            "player_id": "00-0039051",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-29T01:52:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -131458,20 +131070,6 @@
                 "carries": 3.25
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 12.03,
-                "to": 13.34
-              }
-            ]
           }
         },
         {
@@ -136213,20 +135811,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 25.42,
-                "to": 32.22
-              }
-            ]
           }
         },
         {
@@ -137171,26 +136755,6 @@
                 "carries": 0.12
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 questionable"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 41.71,
-                "to": 52.41
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 3.94,
-                "to": 4.91
-              }
-            ]
           }
         },
         {
@@ -137994,46 +137558,11 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 19.71,
-                "to": 25.67
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 2.01,
-                "to": 2.59
-              }
-            ]
           }
         }
       ],
       "injuries": {
         "home": [
-          {
-            "player": "Donovan Ezeiruaku",
-            "player_id": "00-0040725",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:04:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
           {
             "player": "Devin Moore",
             "player_id": "00-0040875",
@@ -138050,6 +137579,21 @@
             "conflict": "espn: Injured Reserve (Nov 11 22:11 UTC)"
           },
           {
+            "player": "Donovan Ezeiruaku",
+            "player_id": "00-0040725",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:04:00+00:00",
+            "detail": "Not Specified Ankle Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Kelvin Gilliam Jr.",
             "player_id": "espn:4431547",
             "position": "DT",
@@ -138060,21 +137604,6 @@
             "report_time": "2026-08-26T00:19:00+00:00",
             "detail": null,
             "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "P.J. Locke",
-            "player_id": "00-0035227",
-            "position": "S",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:04:00+00:00",
-            "detail": "Not Specified Concussion Concussion",
-            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -138135,7 +137664,22 @@
             "report_time": "2026-11-15T20:04:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "P.J. Locke",
+            "player_id": "00-0035227",
+            "position": "S",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:04:00+00:00",
+            "detail": "Not Specified Concussion Concussion",
+            "long_term": false,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -138165,7 +137709,7 @@
             "report_time": "2026-11-15T20:04:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -138245,6 +137789,21 @@
             "conflict": null
           },
           {
+            "player": "Otito Ogbonnia",
+            "player_id": "00-0037270",
+            "position": "DT",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T22:30:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "DaRon Bland",
             "player_id": "00-0037275",
             "position": "CB",
@@ -138253,7 +137812,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-15T22:04:00+00:00",
-            "detail": null,
+            "detail": "Ankle Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -138367,31 +137926,16 @@
             "conflict": null
           },
           {
-            "player": "Fernando Carmona",
-            "player_id": "espn:4710000",
-            "position": "G",
+            "player": "Tanoh Kpassagnon",
+            "player_id": "00-0033902",
+            "position": "DE",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-09-30T00:57:00+00:00",
+            "report_time": "2026-09-01T00:25:00+00:00",
             "detail": null,
             "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Cody Barton",
-            "player_id": "00-0035672",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:34:00+00:00",
-            "detail": "Not Specified Concussion Concussion",
-            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -138442,6 +137986,21 @@
             "conflict": null
           },
           {
+            "player": "Cody Barton",
+            "player_id": "00-0035672",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:34:00+00:00",
+            "detail": "Not Specified Concussion Concussion",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Milo Eifler",
             "player_id": "00-0036511",
             "position": "LB",
@@ -138457,14 +138016,14 @@
             "conflict": null
           },
           {
-            "player": "Tanoh Kpassagnon",
-            "player_id": "00-0033902",
-            "position": "DE",
+            "player": "Fernando Carmona",
+            "player_id": "espn:4710000",
+            "position": "G",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-09-01T00:25:00+00:00",
+            "report_time": "2026-09-30T00:57:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -138502,21 +138061,6 @@
             "conflict": null
           },
           {
-            "player": "Kendell Brooks",
-            "player_id": "00-0038703",
-            "position": "S",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-09-01T03:56:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Peter Skoronski",
             "player_id": "00-0039034",
             "position": null,
@@ -138527,6 +138071,21 @@
             "report_time": null,
             "detail": null,
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kendell Brooks",
+            "player_id": "00-0038703",
+            "position": "S",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-09-01T03:56:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -142721,21 +142280,6 @@
                 "carries": 12.75
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: not listed \u2192 nan",
-              "teammate out: Ladd McConkey"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 9.11,
-                "to": 8.58
-              }
-            ]
           }
         },
         {
@@ -151643,8 +151187,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-08T21:31:00+00:00",
-              "comment": "Hall (quadriceps) rushed 15 times for 61 yards and caught three of four targets for 26 yards in Sunday's 35-12 loss to the Chiefs. Hall reclaimed the lead role in his first action since Week 3, notching 87 yards on 18 touches compared to 54 yards and a lost fumble on 10 touches for Braelon Allen. The 25-year-old Hall has racked up at least 16 touches in all four of his appearances this season, and the 22-year-old Allen's four consecutive games over 100 scrimmage yards entering Sunday's action weren't enough to pry the starting role away from Hall. Expect Hall to continue leading the backfield in Week 10 against the Bills, with his superior receiving ability likely to come into play if the 2-7 Jets fall behind as expected.",
+              "report_time": "2026-11-15T22:06:00+00:00",
+              "comment": "Hall rushed 11 times for 41 yards and caught all four of his targets for 67 yards in Sunday's 31-12 loss to the Bills. Hall narrowly topped Braelon Allen (eight carries for 40 yards) for the team lead in rushing yards and finished second behind Garrett Wilson (seven catches for 106 yards) in both receptions and receiving yards. While Allen continues to be more efficient as a rusher, Hall's superior receiving ability should help the latter maintain the edge in playing time for a 2-8 Jets team that often finds itself playing catch-up. Rookie QB Cade Klubnik, who played most of the second half Sunday, could be more reliant on check downs to Hall than veteran Geno Smith (ankle) was, but it remains to be seen who will get the nod under center in Week 11 against the Chargers.",
               "conflict": null,
               "notes": []
             },
@@ -153525,9 +153069,9 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-15T16:37:00+00:00",
-              "comment": "Wilson (concussion) is listed as active Sunday against the Bills. Wilson emerged from a Week 8 loss to the Raiders with a concussion and required nearly two weeks to make his way through the protocol for head injuries, seemingly getting the all-clear from an independent neurologist either Friday evening or Saturday. In any case, all three of the Jets' top three injured wide receivers -- also, Omar Cooper (ankle) and Adonai Mitchell (knee) -- are available Sunday, but Wilson should retain his standing as the clear No. 1 among the group, which has translated to a 43-527-3 line on 63 targets in eight games.",
-              "conflict": "espn: Active (Nov 15 16:37 UTC)",
+              "report_time": "2026-11-15T22:05:00+00:00",
+              "comment": "Wilson (concussion) caught seven of 14 targets for 106 yards and lost a fumble in Sunday's 31-12 loss to the Bills. Wilson set a new season high in targets and came one yard short of his Week 3 season high Sunday in his return from a one-game absence due to a concussion. His production came on a mix of passes from Geno Smith (ankle) and rookie Cade Klubnik, the latter of whom saw his first NFL action after Smith exited in the second half. Wilson figures to work as the top target for whomever starts under center in a Week 11 road game against the Chargers.",
+              "conflict": "espn: Active (Nov 15 22:05 UTC)",
               "notes": []
             },
             "teammates_out_detail": [
@@ -154625,20 +154169,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 questionable"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 34.18,
-                "to": 36.93
-              }
-            ]
           }
         },
         {
@@ -156267,16 +155797,16 @@
             "conflict": "espn: Out (Nov 15 19:52 UTC)"
           },
           {
-            "player": "Derwin James Jr.",
-            "player_id": "00-0034790",
-            "position": "S",
+            "player": "Branson Taylor",
+            "player_id": "espn:4433914",
+            "position": "G",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-01T00:11:00+00:00",
-            "detail": null,
-            "long_term": true,
+            "report_time": "2026-11-15T01:24:00+00:00",
+            "detail": "Not Specified Ankle Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -156312,14 +155842,29 @@
             "conflict": null
           },
           {
-            "player": "Alec Ingold",
-            "player_id": "00-0035125",
-            "position": "FB",
+            "player": "David Njoku",
+            "player_id": "00-0033885",
+            "position": "TE",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-15T20:06:00+00:00",
+            "report_time": "2026-11-14T21:37:00+00:00",
+            "detail": "Not Specified Lower Leg Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Injured Reserve (Nov 14 21:37 UTC)"
+          },
+          {
+            "player": "Tyler Biadasz",
+            "player_id": "espn:4035788",
+            "position": "C",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-23T16:55:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -156357,21 +155902,6 @@
             "conflict": null
           },
           {
-            "player": "Tyler Biadasz",
-            "player_id": "espn:4035788",
-            "position": "C",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-23T16:55:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Trey Lance",
             "player_id": "00-0037012",
             "position": "QB",
@@ -156387,36 +155917,6 @@
             "conflict": null
           },
           {
-            "player": "Branson Taylor",
-            "player_id": "espn:4433914",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T01:24:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "David Njoku",
-            "player_id": "00-0033885",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-14T21:37:00+00:00",
-            "detail": "Not Specified Lower Leg Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 14 21:37 UTC)"
-          },
-          {
             "player": "Denzel Perryman",
             "player_id": "00-0032103",
             "position": "LB",
@@ -156430,6 +155930,36 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": "espn: Injured Reserve (Nov 14 23:54 UTC)"
+          },
+          {
+            "player": "Alec Ingold",
+            "player_id": "00-0035125",
+            "position": "FB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-15T20:06:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Derwin James Jr.",
+            "player_id": "00-0034790",
+            "position": "S",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-01T00:11:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
           },
           {
             "player": "Kendall Williamson",
@@ -156462,21 +155992,6 @@
             "conflict": null
           },
           {
-            "player": "Kayode Awosika",
-            "player_id": "00-0036736",
-            "position": null,
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "nflverse",
-            "confirmed": true,
-            "report_time": null,
-            "detail": null,
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Trey Pipkins",
             "player_id": "00-0035688",
             "position": null,
@@ -156501,6 +156016,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T01:18:00+00:00",
             "detail": "Not Specified Lower Leg Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kayode Awosika",
+            "player_id": "00-0036736",
+            "position": null,
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "nflverse",
+            "confirmed": true,
+            "report_time": null,
+            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -156552,6 +156082,36 @@
             "late_scratch": false,
             "restriction": false,
             "conflict": null
+          },
+          {
+            "player": "Nate Lynn",
+            "player_id": "00-0039447",
+            "position": "DE",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:36:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jarvis Brownlee Jr.",
+            "player_id": "00-0039372",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T17:09:00+00:00",
+            "detail": "Not Specified Illness Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Out (Nov 15 17:09 UTC)"
           },
           {
             "player": "Kiko Mauigoa",
@@ -156614,51 +156174,6 @@
             "conflict": null
           },
           {
-            "player": "Chip Trayanum",
-            "player_id": "00-0041239",
-            "position": "RB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-31T18:44:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Nate Lynn",
-            "player_id": "00-0039447",
-            "position": "DE",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:36:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jarvis Brownlee Jr.",
-            "player_id": "00-0039372",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T17:09:00+00:00",
-            "detail": "Not Specified Illness Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Out (Nov 15 17:09 UTC)"
-          },
-          {
             "player": "Tim Patrick",
             "player_id": "00-0033375",
             "position": "WR",
@@ -156669,6 +156184,21 @@
             "report_time": "2026-11-15T17:07:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Chip Trayanum",
+            "player_id": "00-0041239",
+            "position": "RB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-31T18:44:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -156719,21 +156249,6 @@
             "conflict": null
           },
           {
-            "player": "Marcelino McCrary-Ball",
-            "player_id": "00-0037526",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-09-23T00:35:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Kingsley Jonathan",
             "player_id": "00-0037431",
             "position": "DE",
@@ -156742,6 +156257,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-09-08T20:42:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Marcelino McCrary-Ball",
+            "player_id": "00-0037526",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-09-23T00:35:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -156758,6 +156288,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T16:36:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Geno Smith",
+            "player_id": "00-0030565",
+            "position": "QB",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T20:55:00+00:00",
+            "detail": "Not Specified Ankle Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -156788,21 +156333,6 @@
             "confirmed": false,
             "report_time": "2026-11-15T19:02:00+00:00",
             "detail": "Not Specified Knee Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Geno Smith",
-            "player_id": "00-0030565",
-            "position": "QB",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:55:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -170491,8 +170021,8 @@
               "raw_status": "Questionable",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-15T21:47:00+00:00",
-              "comment": null,
+              "report_time": "2026-11-15T22:08:00+00:00",
+              "comment": "Bowers headed to the locker room during Sunday's game against the Seahawks due to an ankle issue, Adam Schefter of ESPN reports. It remains to be seen if Bowers will re-enter the contest, as he continues to manage his ankle issue Sunday. Prior to his latest exit, the TE had caught both of his targets for 18 yards.",
               "conflict": null,
               "notes": [
                 "starting QB Fernando Mendoza has 8 career pass attempts: team passing yards x0.93"
@@ -171689,21 +171219,6 @@
             "conflict": null
           },
           {
-            "player": "Kris Abrams-Draine",
-            "player_id": "00-0039371",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-09T21:04:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Eyioma Uwazurike",
             "player_id": "00-0038106",
             "position": "DE",
@@ -171714,6 +171229,21 @@
             "report_time": "2026-11-08T03:38:00+00:00",
             "detail": "Not Specified Shoulder Not Specified",
             "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Kris Abrams-Draine",
+            "player_id": "00-0039371",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-09T21:04:00+00:00",
+            "detail": "Not Specified Ankle Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -171791,7 +171321,7 @@
             "report_time": "2026-11-15T19:48:00+00:00",
             "detail": "Not Specified Back Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": "espn: Out (Nov 15 19:48 UTC)"
           },
@@ -171806,7 +171336,7 @@
             "report_time": "2026-11-15T19:59:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -171821,7 +171351,7 @@
             "report_time": "2026-11-15T19:45:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -171844,6 +171374,36 @@
             "player": "Brennan Jackson",
             "player_id": "00-0039836",
             "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-19T12:07:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Bryce Cabeldue",
+            "player_id": "espn:4612077",
+            "position": "G",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T19:45:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Justin Pickett",
+            "player_id": "espn:4688538",
+            "position": "G",
             "status": "out",
             "raw_status": "Injured Reserve",
             "source": "espn",
@@ -171886,36 +171446,6 @@
             "conflict": null
           },
           {
-            "player": "Justin Pickett",
-            "player_id": "espn:4688538",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-19T12:07:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Bryce Cabeldue",
-            "player_id": "espn:4612077",
-            "position": "G",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T19:45:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
-            "late_scratch": true,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Tristin McCollum",
             "player_id": "00-0037461",
             "position": "S",
@@ -171926,7 +171456,7 @@
             "report_time": "2026-11-15T19:45:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -171941,7 +171471,7 @@
             "report_time": "2026-11-15T19:50:00+00:00",
             "detail": "Not Specified Ankle Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": "espn: Out (Nov 15 19:50 UTC)"
           },
@@ -171953,8 +171483,8 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-15T21:47:00+00:00",
-            "detail": null,
+            "report_time": "2026-11-15T22:08:00+00:00",
+            "detail": "Ankle",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -185609,6 +185139,21 @@
             "conflict": null
           },
           {
+            "player": "DeVonta Smith",
+            "player_id": "00-0036912",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-09T21:32:00+00:00",
+            "detail": "Not Specified Hamstring Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Michael Carter II",
             "player_id": "00-0036501",
             "position": "CB",
@@ -185634,21 +185179,6 @@
             "report_time": "2026-10-19T14:18:00+00:00",
             "detail": null,
             "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "DeVonta Smith",
-            "player_id": "00-0036912",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-09T21:32:00+00:00",
-            "detail": "Not Specified Hamstring Not Specified",
-            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -185851,21 +185381,6 @@
             "conflict": null
           },
           {
-            "player": "Sebastian Joseph-Day",
-            "player_id": "00-0034810",
-            "position": "DT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-23T00:28:00+00:00",
-            "detail": "Not Specified Triceps Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Gennings Dunker",
             "player_id": "espn:4431258",
             "position": "G",
@@ -185921,6 +185436,21 @@
             "report_time": "2026-09-19T19:22:00+00:00",
             "detail": null,
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Sebastian Joseph-Day",
+            "player_id": "00-0034810",
+            "position": "DT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-23T00:28:00+00:00",
+            "detail": "Not Specified Triceps Not Specified",
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -188132,26 +187662,6 @@
                 "carries": 14.38
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 11.92,
-                "to": 17.91
-              },
-              {
-                "market": "receptions",
-                "label": "Receptions",
-                "from": 1.74,
-                "to": 2.6
-              }
-            ]
           }
         },
         {
@@ -189171,20 +188681,6 @@
                 "carries": 11.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-15T17:32:23+00:00",
-            "reasons": [
-              "his status: available \u2192 nan"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 5.23,
-                "to": 7.76
-              }
-            ]
           }
         },
         {
@@ -197177,21 +196673,6 @@
       "injuries": {
         "home": [
           {
-            "player": "Alfred Collins",
-            "player_id": "00-0040721",
-            "position": "DT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-09-10T23:28:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "C.J. West",
             "player_id": "00-0040711",
             "position": "DT",
@@ -197217,7 +196698,22 @@
             "report_time": "2026-11-15T20:00:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Alfred Collins",
+            "player_id": "00-0040721",
+            "position": "DT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-09-10T23:28:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -197247,7 +196743,7 @@
             "report_time": "2026-11-15T20:00:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -197282,16 +196778,16 @@
             "conflict": null
           },
           {
-            "player": "Christian Kirk",
-            "player_id": "00-0034775",
-            "position": "WR",
+            "player": "Enrique Cruz Jr.",
+            "player_id": "espn:4691556",
+            "position": "OT",
             "status": "out",
-            "raw_status": "Injured Reserve",
+            "raw_status": "Out",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-07T21:50:00+00:00",
-            "detail": null,
-            "long_term": true,
+            "report_time": "2026-11-15T20:00:00+00:00",
+            "detail": "Not Specified Coach's Decision Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -197387,36 +196883,6 @@
             "conflict": null
           },
           {
-            "player": "Mikail Kamara",
-            "player_id": "espn:4696051",
-            "position": "DE",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-03T23:12:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Enrique Cruz Jr.",
-            "player_id": "espn:4691556",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T20:00:00+00:00",
-            "detail": "Not Specified Coach's Decision Not Specified",
-            "long_term": false,
-            "late_scratch": true,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Mike Evans",
             "player_id": "00-0031408",
             "position": "WR",
@@ -197442,7 +196908,22 @@
             "report_time": "2026-11-15T20:14:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Mikail Kamara",
+            "player_id": "espn:4696051",
+            "position": "DE",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-03T23:12:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
             "restriction": false,
             "conflict": null
           },
@@ -197457,6 +196938,21 @@
             "report_time": "2026-08-30T21:10:00+00:00",
             "detail": null,
             "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Christian Kirk",
+            "player_id": "00-0034775",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-07T21:50:00+00:00",
+            "detail": null,
+            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -197569,21 +197065,6 @@
             "conflict": null
           },
           {
-            "player": "Demond Claiborne",
-            "player_id": "00-0041104",
-            "position": "RB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-10T00:10:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Donovan Jackson",
             "player_id": "espn:4431553",
             "position": "G",
@@ -197609,6 +197090,66 @@
             "report_time": "2026-09-26T21:28:00+00:00",
             "detail": null,
             "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jamal Adams",
+            "player_id": "00-0033872",
+            "position": "LB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-08-19T12:07:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Michael Briscoe",
+            "player_id": "espn:4688418",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-28T23:37:00+00:00",
+            "detail": null,
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Demond Claiborne",
+            "player_id": "00-0041104",
+            "position": "RB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-10T00:10:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jauan Jennings",
+            "player_id": "00-0036259",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Out",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:32:00+00:00",
+            "detail": "Not Specified Calf Not Specified",
+            "long_term": false,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -197674,51 +197215,6 @@
             "conflict": null
           },
           {
-            "player": "Jauan Jennings",
-            "player_id": "00-0036259",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:32:00+00:00",
-            "detail": "Not Specified Calf Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Michael Briscoe",
-            "player_id": "espn:4688418",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Out",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-28T23:37:00+00:00",
-            "detail": null,
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jamal Adams",
-            "player_id": "00-0033872",
-            "position": "LB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-08-19T12:07:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Jordan Addison",
             "player_id": "00-0038994",
             "position": "WR",
@@ -197749,21 +197245,6 @@
             "conflict": null
           },
           {
-            "player": "Bo Richter",
-            "player_id": "00-0039718",
-            "position": "LB",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T19:23:00+00:00",
-            "detail": "Not Specified Foot Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Andrew Van Ginkel",
             "player_id": "00-0035272",
             "position": "LB",
@@ -197773,6 +197254,21 @@
             "confirmed": false,
             "report_time": "2026-11-15T20:53:00+00:00",
             "detail": "Not Specified Quadriceps Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Bo Richter",
+            "player_id": "00-0039718",
+            "position": "LB",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T19:23:00+00:00",
+            "detail": "Not Specified Foot Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -211881,9 +211377,9 @@
             "conflict": null
           },
           {
-            "player": "Isaac Yiadom",
-            "player_id": "00-0034780",
-            "position": "CB",
+            "player": "Tanoa Togiai",
+            "player_id": "espn:4605488",
+            "position": "G",
             "status": "out",
             "raw_status": "Out",
             "source": "espn",
@@ -211891,21 +211387,6 @@
             "report_time": "2026-11-12T23:47:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Terry McLaurin",
-            "player_id": "00-0035659",
-            "position": "WR",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-30T17:12:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -211919,6 +211400,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-04T19:13:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Jeremy McNichols",
+            "player_id": "00-0033955",
+            "position": "RB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-04T17:09:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -211986,6 +211482,21 @@
             "conflict": null
           },
           {
+            "player": "Terry McLaurin",
+            "player_id": "00-0035659",
+            "position": "WR",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-30T17:12:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Dyami Brown",
             "player_id": "00-0036626",
             "position": "WR",
@@ -212001,9 +211512,9 @@
             "conflict": null
           },
           {
-            "player": "Tanoa Togiai",
-            "player_id": "espn:4605488",
-            "position": "G",
+            "player": "Isaac Yiadom",
+            "player_id": "00-0034780",
+            "position": "CB",
             "status": "out",
             "raw_status": "Out",
             "source": "espn",
@@ -212011,21 +211522,6 @@
             "report_time": "2026-11-12T23:47:00+00:00",
             "detail": "Not Specified Coach's Decision Not Specified",
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jeremy McNichols",
-            "player_id": "00-0033955",
-            "position": "RB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-04T17:09:00+00:00",
-            "detail": null,
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -212078,6 +211574,51 @@
             "conflict": null
           },
           {
+            "player": "Jalen Davis",
+            "player_id": "00-0034446",
+            "position": "CB",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-12T21:30:00+00:00",
+            "detail": "Left Hamstring Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": "espn: Injured Reserve (Nov 12 21:30 UTC)"
+          },
+          {
+            "player": "Tanner Hudson",
+            "player_id": "00-0034613",
+            "position": "TE",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-10-19T23:18:00+00:00",
+            "detail": null,
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Brian Parker II",
+            "player_id": "espn:4689117",
+            "position": "OT",
+            "status": "out",
+            "raw_status": "Injured Reserve",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-12T22:57:00+00:00",
+            "detail": "Not Specified Knee Not Specified",
+            "long_term": true,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
             "player": "Cashius Howell",
             "player_id": "00-0041546",
             "position": "DE",
@@ -212103,51 +211644,6 @@
             "report_time": "2026-11-14T01:56:00+00:00",
             "detail": "Left Quadriceps Not Specified",
             "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Tanner Hudson",
-            "player_id": "00-0034613",
-            "position": "TE",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-10-19T23:18:00+00:00",
-            "detail": null,
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
-            "player": "Jalen Davis",
-            "player_id": "00-0034446",
-            "position": "CB",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-12T21:30:00+00:00",
-            "detail": "Left Hamstring Not Specified",
-            "long_term": true,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 12 21:30 UTC)"
-          },
-          {
-            "player": "Brian Parker II",
-            "player_id": "espn:4689117",
-            "position": "OT",
-            "status": "out",
-            "raw_status": "Injured Reserve",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-12T22:57:00+00:00",
-            "detail": "Not Specified Knee Not Specified",
-            "long_term": true,
             "late_scratch": false,
             "restriction": false,
             "conflict": null
@@ -212228,21 +211724,6 @@
             "conflict": null
           },
           {
-            "player": "Dalton Risner",
-            "player_id": "espn:3125082",
-            "position": "G",
-            "status": "questionable",
-            "raw_status": "Questionable",
-            "source": "espn",
-            "confirmed": false,
-            "report_time": "2026-11-15T16:29:00+00:00",
-            "detail": "Not Specified Illness Not Specified",
-            "long_term": false,
-            "late_scratch": false,
-            "restriction": false,
-            "conflict": null
-          },
-          {
             "player": "Myles Hinton",
             "player_id": "espn:4429000",
             "position": "OT",
@@ -212251,6 +211732,21 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-15T16:28:00+00:00",
+            "detail": "Not Specified Illness Not Specified",
+            "long_term": false,
+            "late_scratch": false,
+            "restriction": false,
+            "conflict": null
+          },
+          {
+            "player": "Dalton Risner",
+            "player_id": "espn:3125082",
+            "position": "G",
+            "status": "questionable",
+            "raw_status": "Questionable",
+            "source": "espn",
+            "confirmed": false,
+            "report_time": "2026-11-15T16:29:00+00:00",
             "detail": "Not Specified Illness Not Specified",
             "long_term": false,
             "late_scratch": false,
