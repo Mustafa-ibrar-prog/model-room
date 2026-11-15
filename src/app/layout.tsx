@@ -9,6 +9,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { MobileTabs } from "@/components/layout/MobileTabs";
 import { AccountMenu } from "@/components/auth/AccountMenu";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Suspense } from "react";
@@ -54,10 +55,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={<DataStatusFallback />}>
           <DataStatus />
         </Suspense>
-        <main id="main" className="flex-1">
+        <main id="main" className="flex-1 pb-16 lg:pb-0">
           {children}
         </main>
         <SiteFooter />
+        <MobileTabs />
       </body>
     </html>
   );

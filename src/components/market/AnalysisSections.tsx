@@ -57,15 +57,16 @@ function handling(league: League, own: boolean, r: InjRow, modelOut: Set<string>
   return { text: "Out or Doubtful players are removed from projections; no change recorded on this player's projection.", recorded: false };
 }
 
-export function InjurySection({ league, r, feed, feedAt }: { league: League; r: ExplorerRow; feed: InjuryFeed; feedAt: string | null }) {
+export function InjurySection({ league, r, feed, feedAt, title = "Injuries & availability" }: { league: League; r: ExplorerRow; feed: InjuryFeed; feedAt: string | null; title?: string }) {
   const modelOut = new Set((r.modelAbsences ?? "").split(", ").filter(Boolean));
   const recorded = new Set(r.teammatesOut.map((t) => t.name));
   const i = r.injury;
   const teams = [{ abbr: r.team, own: true }, { abbr: r.opp, own: false }];
   const listed = new Set((feed ?? []).flatMap((t) => t.rows.map((x) => x.player)));
   const modelOnly = [...modelOut].filter((n) => !listed.has(n));
+  const feedRow = (feed ?? []).find((t) => t.team === r.team)?.rows.find((x) => x.player === r.name) ?? null;
   return (
-    <Section title="Injuries & availability" summary={injurySummary(feed, r.modelAbsences)}>
+    <Section title={title} summary={injurySummary(feed, r.modelAbsences)}>
       <p className="rounded-md bg-navy-850 px-3 py-2 leading-relaxed">
         {league === "nba"
           ? <><span className="text-ink">How the active NBA model handles absences:</span> it does not read the injury report. A rotation player who missed his team&apos;s last 2 games counts as out, and his minutes and shots go to available teammates. Everyone else is projected as playing.</>
@@ -80,7 +81,7 @@ export function InjurySection({ league, r, feed, feedAt }: { league: League; r: 
             {" "}· {i.confirmed ? "official report" : "reported, not yet official"} · {sourceLabel(i.source)}{i.reportTime ? `, ${formatTimestamp(i.reportTime)}` : ""}
             {i.starterConfirmed != null ? ` · ${i.starterConfirmed ? "confirmed starter" : "not in the confirmed starting five"}` : ""}
           </p>
-        ) : r.injuryStatus ? <p className="text-edge">{r.injuryStatus}</p> : <p>Not on the injury report.</p>}
+        ) : r.injuryStatus ? <p className="text-edge">{r.injuryStatus}</p> : feedRow ? <p className="text-edge">Listed {feedRow.status} on the injury report.</p> : <p>Not on the injury report.</p>}
         {i?.conflict ? <p className="text-edge">Sources disagree: {i.conflict}. The official designation is used.</p> : null}
         {i?.startingQb ? <p>Projected starting QB: <span className="text-ink">{i.startingQb}</span></p> : null}
         {i?.notes.map((n) => <p key={n}>{n}</p>)}
@@ -218,7 +219,7 @@ export function OpportunitySection({ league, r, contributions }: { league: Leagu
 // ------------------------------------------------------------------ matchup
 const NBA_OPP: Record<string, string> = { points: "opp_points_factor", rebounds: "opp_rebounds_factor", assists: "opp_assists_factor", pra: "opp_points_factor", threes: "opp_points_factor" };
 
-export function MatchupSection({ league, r, cat, contributions }: { league: League; r: ExplorerRow; cat: string; contributions: ContributionView | null }) {
+export function MatchupSection({ league, r, cat, contributions, title = "Matchup" }: { league: League; r: ExplorerRow; cat: string; contributions: ContributionView | null; title?: string }) {
   const inp = isLocked(r.inputs) ? null : r.inputs;
   const lines: string[] = [];
   let summary = "Part of Pro";
@@ -253,7 +254,7 @@ export function MatchupSection({ league, r, cat, contributions }: { league: Leag
   if (inp) summary = lean == null ? "See details" : Math.abs(lean - 1) < 0.03 ? "opponent about average" : lean > 1 ? "softer opponent" : "tougher opponent";
   const step = contributions?.steps?.find((s) => s.key === "matchup" || s.key === "matchup_efficiency");
   return (
-    <Section title="Matchup" summary={summary}>
+    <Section title={title} summary={summary}>
       {inp ? (
         <>
           {lines.length ? <ul className="space-y-1">{lines.map((l) => <li key={l}>{l}</li>)}</ul> : <p>No matchup factors recorded for this projection.</p>}

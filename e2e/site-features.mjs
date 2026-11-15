@@ -48,7 +48,7 @@ const rows = (page) => page.locator("li[data-fav-id]:visible");
 // ------------------------------------------------------------------ every page, both sizes
 for (const device of ["desktop", "phone"]) {
   const { ctx, page, errors } = await session(device);
-  for (const path of ["/", "/nfl", "/nba", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
+  for (const path of ["/", "/nfl", "/nba", "/nfl?view=games", "/nba?view=games", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
     errors.length = 0;
     const st = await go(page, path);
     check(st === 200, `${device} ${path}: loads (HTTP ${st})`);
@@ -77,12 +77,12 @@ for (const device of ["desktop", "phone"]) {
 // ------------------------------------------------------------------ injury feed (test site)
 {
   const { ctx, page } = await session("phone");
-  await go(page, "/nfl");
+  await go(page, "/nfl?view=games");
   const nfl = await page.locator("main").innerText();
   check(/Injury info as of/.test(nfl), "nfl: games show the injury feed time and sources");
   check(/Projected QBs: JAX Trevor Lawrence, BAL Joe Fagnano/.test(nfl) || !/BAL/.test(nfl), "nfl: Ravens QB is Joe Fagnano (Jackson and Huntley out)");
   check(!/Projected QBs: [^\n]*BAL Tyler Huntley/.test(nfl), "nfl: Huntley (out) is not the projected Ravens QB");
-  await go(page, "/nba");
+  await go(page, "/nba?view=games");
   const nba = await page.locator("main").innerText();
   check(/NBA official report|ESPN report/.test(nba) || /Injury info as of/.test(nba), "nba: injury flags with source");
   await go(page, "/injuries?sport=nba");
