@@ -174,18 +174,19 @@ for (const device of ["desktop", "phone"]) {
   check(found.length > 0 && found.every((n) => n.includes(term.toLowerCase())), `search "${term}" returns only matching players (${found.length})`);
   check((await page.locator("text=across every NFL game").count()) > 0, "search covers every game");
 
-  // Contract detail.
+  // Player detail. The panel was redesigned (sections instead of a quotes table), so it is found by its own hook.
   await go(page, "/props?sport=nfl&cat=receiving_yards");
   const c = page.locator("li[data-fav-id] a[href*='line=']").nth(1);
-  const label = (await c.locator(".font-mono").first().innerText()).trim();
+  const label = ((await page.locator("li[data-fav-id]").nth(1).getAttribute("data-player")) ?? "").trim();
   await nav(page, c);
-  const det = page.locator('aside[aria-label="Contract detail"]');
-  check(qs(page).get("line") !== null && (await det.innerText()).includes(label), `opening ${label} shows its detail`);
-  const dt = await det.innerText();
-  check(/Model/.test(dt) && /Market/.test(dt) && /Polymarket US/.test(dt) && /Kalshi/.test(dt), "detail shows model, market and both exchanges");
-  check(/Mean/.test(dt) && /Median/.test(dt) && /80% range/.test(dt) && /confidence/.test(dt), "detail shows mean, median, 80% range and sample size");
-  const marketCell = (await det.locator(".text-faint", { hasText: "Market unavailable" }).count()) + (await det.locator("td", { hasText: /\d+\/\d+¢|–\/|\/–/ }).count());
-  check(marketCell >= 2, "each exchange shows a price or 'Market unavailable'");
+  const det = page.locator("[data-detail]");
+  await det.waitFor({ state: "visible", timeout: 30000 }).catch(() => null);
+  check(qs(page).get("line") !== null && label !== "" && (await det.getAttribute("data-detail").catch(() => null)) === label, `opening ${label} shows his detail`);
+  const dt = (await det.innerText().catch(() => "")) ?? "";
+  check(/Market line/.test(dt) && /Model Room projection/.test(dt) && /average · middle [\d.]+ · range [\d.]+–[\d.]+/.test(dt), "detail shows the market line, the model's average, middle and range");
+  check(/None available/.test(dt) ? /does not borrow a line from another provider or invent one/.test(dt) : /Market line\s+(Over|Under)?\s*[\d.]+/.test(dt),
+    "detail shows a quoted market line, or says plainly that none is available");
+  check(["Recent performance", "Injuries & availability", "Matchup", "Model explanation", "Data & model"].every((x) => dt.includes(x)), "detail keeps recent games, injuries, matchup, the model explanation and data notes");
   // Favorites (this browser) and recently viewed.
   const star = page.locator("li[data-fav-id] button[aria-pressed]").first();
   await star.click();
@@ -196,7 +197,7 @@ for (const device of ["desktop", "phone"]) {
   check((await rows(page).count()) === 1, `favorites-only shows the starred player (${await rows(page).count()})`);
   await page.locator("text=Favorites only").click();
   await page.locator("li[data-fav-id] button[aria-pressed='true']").first().click();
-  check((await page.locator("text=Recently viewed").count()) > 0 && (await page.locator('a[href*="line="]', { hasText: label }).count()) >= 0, "recently viewed lists the opened contract");
+  check((await page.locator("text=Recently viewed").count()) > 0 && (await page.locator("h3:has-text('Recently viewed') + ul", { hasText: label }).count()) > 0, `recently viewed lists ${label}`);
   const recent = await page.locator("h3:has-text('Recently viewed') + ul").innerText().catch(() => "");
   check(recent.length > 0 && !/appear here/.test(recent), "recently viewed is filled");
 
@@ -213,17 +214,19 @@ for (const device of ["desktop", "phone"]) {
   await go(page, "/props?sport=nba&cat=points");
   const c = page.locator("li[data-fav-id] a[href*='line=']").first();
   await nav(page, c);
-  const det = page.locator('aside[aria-label="Contract detail"]');
-  check(await det.isVisible(), "phone: tapping a line opens the detail");
-  await nav(page, page.locator('aside[aria-label="Contract detail"] a:has-text("Close")'));
-  check(!(await det.isVisible().catch(() => false)) && qs(page).get("line") === null, "phone: Close returns to the list");
+  const det = page.locator("[data-detail]");
+  await det.waitFor({ state: "visible", timeout: 30000 }).catch(() => null);
+  check(await det.isVisible(), "phone: tapping a player opens the detail");
+  await nav(page, det.locator('a:has-text("Players")').first());
+  check(!(await det.isVisible().catch(() => false)) && qs(page).get("line") === null, "phone: Players returns to the list");
   await ctx.close();
 }
 
 // ------------------------------------------------------------------ date navigation
 {
   const { ctx, page } = await session("desktop");
-  for (const base of ["/nfl", "/nba", "/props?sport=nfl"]) {
+  // The dated game board lives at ?view=games since /nfl and /nba became the game-prediction pages.
+  for (const base of ["/nfl?view=games", "/nba?view=games", "/props?sport=nfl"]) {
     await go(page, base);
     for (const name of ["Tomorrow", "Today", "Yesterday"]) {
       await nav(page, page.locator(`main a:has-text("${name}")`).first());
@@ -243,10 +246,10 @@ for (const device of ["desktop", "phone"]) {
     await page.waitForLoadState("networkidle");
     check(qs(page).get("date") === "2026-10-26", `${base}: calendar picks a date`);
   }
-  await go(page, "/nfl?date=2026-11-01");
+  await go(page, "/nfl?view=games&date=2026-11-01");
   const t = await page.locator("main").innerText();
-  check(/Final/.test(t), "/nfl past date shows final scores");
-  await go(page, "/nfl");
+  check(/Final/.test(t), "/nfl board, past date: shows final scores");
+  await go(page, "/nfl?view=games");
   const propsLink = page.locator('a[href*="/props?sport=nfl&game="]:visible').first();
   await nav(page, propsLink);
   check(qs(page).get("game") !== null && page.url().includes("/props"), "game row Props link opens that game's props");
