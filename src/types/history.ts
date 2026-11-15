@@ -74,6 +74,8 @@ export interface PickRow {
   recorded_at: string;
   /** True for picks reconstructed from pre-game records when the picks ledger was first created. */
   backfilled: boolean;
+  /** True only when the pick itself was written before the game started. False: written afterwards from the projection recorded before it. */
+  frozen_before_start?: boolean;
   result: PickResult;
   line_source?: string | null;
   line_books?: number | null;
@@ -94,8 +96,10 @@ export interface PicksSummary {
   generated_at: string;
   note: string;
   overall: Record<"games" | "props" | "moneyline" | "spread" | "total" | "prop", PickRecord>;
-  by_date: { date: string; games: PickRecord; props: PickRecord }[];
+  by_date: { date: string; games: PickRecord; props: PickRecord; moneyline?: PickRecord; spread?: PickRecord; total?: PickRecord }[];
   backfilled_picks: number;
+  /** Per market: picks written before the game started, and picks written afterwards from the pre-game projection. */
+  provenance?: Record<"moneyline" | "spread" | "total" | "prop", { pre_game: number; reconstructed: number }>;
 }
 
 export interface ProbBlock { n: number; brier: number; log_loss: number; avg_predicted: number; hit_rate: number }

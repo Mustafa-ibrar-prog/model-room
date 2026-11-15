@@ -166,3 +166,45 @@ def test_a_pick_is_written_once_and_a_changed_result_is_logged_as_a_correction(t
     f.write_text(f.read_text().replace('"result":"miss"', '"result":"hit"', 1))
     with pytest.raises(ledger.LedgerError):
         P.verify_grades("nba")
+
+
+# ---------------------------------------------------------------- each league on its own, every outcome
+LEAGUE_CASES = {
+    # league: (home score, away score, spread line that pushes for the home side, total line that pushes)
+    "nba": (121, 99, -22, 220),
+    "nfl": (27, 24, -3, 51),
+}
+
+
+@pytest.mark.parametrize("league", ["nba", "nfl"])
+def test_every_market_and_outcome_per_league(league):
+    h, a, push_spread, push_total = LEAGUE_CASES[league]
+    f = final(h, a)
+    game = {"game_id": f"{league}-g", "date": "2026-11-13", "home": "HOM", "away": "AWY"}
+    # winner: the stored side, whatever the probability was
+    assert P.grade(pick("moneyline", "home"), "final", f) == "hit"
+    assert P.grade(pick("moneyline", "away"), "final", f) == "miss"
+    # spread: the selected team's own line against the final margin
+    assert P.grade(pick("spread", "home", push_spread + 0.5), "final", f) == "hit"     # favourite covers by half a point
+    assert P.grade(pick("spread", "home", push_spread - 0.5), "final", f) == "miss"
+    assert P.grade(pick("spread", "away", -push_spread + 0.5), "final", f) == "hit"    # underdog loses but covers
+    assert P.grade(pick("spread", "away", -push_spread - 0.5), "final", f) == "miss"
+    assert P.grade(pick("spread", "home", push_spread), "final", f) == "push"
+    assert P.grade(pick("spread", "away", -push_spread), "final", f) == "push"
+    # total: Over and Under against the combined score
+    assert P.grade(pick("total", "over", push_total - 0.5), "final", f) == "hit"
+    assert P.grade(pick("total", "under", push_total - 0.5), "final", f) == "miss"
+    assert P.grade(pick("total", "under", push_total + 0.5), "final", f) == "hit"
+    assert P.grade(pick("total", "over", push_total + 0.5), "final", f) == "miss"
+    assert P.grade(pick("total", "over", push_total), "final", f) == "push"
+    assert P.grade(pick("total", "under", push_total), "final", f) == "push"
+    # not final, not played
+    for m, sel, line in (("moneyline", "home", None), ("spread", "home", -3.5), ("total", "over", 44.5)):
+        assert P.grade(pick(m, sel, line), "scheduled", None) == "pending"
+        assert P.grade(pick(m, sel, line), "postponed", None) == "cancelled"
+    assert P.grade(pick("prop", "at_least", 5), "final", f, actual=None, played=False) == "void"
+    # a spread or total pick only exists with a pre-game line; without one nothing is invented
+    ids = [c["game_id"] for c in P.game_picks(league, game, REC, None)]
+    assert ids == [f"{league}:{league}-g:moneyline"]
+    with_line = {c["market"]: c for c in P.game_picks(league, game, REC, {"spread": -7.5, "total": 225.5, "books": 5})}
+    assert set(with_line) == {"moneyline", "spread", "total"}

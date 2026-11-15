@@ -1,6 +1,6 @@
 /** The results page words a stored pick and its outcome; it never decides a result itself. */
 import { describe, expect, it } from "vitest";
-import { modelText, outcomeText, pickText, rateText, recordText, tally } from "@/components/results/picks";
+import { gameStatus, marginText, modelText, outcomeText, pickText, provenanceOf, rateText, recordText, scoreDiff, tally, winProbs } from "@/components/results/picks";
 import type { PickRow } from "@/types/history";
 
 const p = (o: Partial<PickRow>): PickRow =>
@@ -46,5 +46,36 @@ describe("the record", () => {
     const none = tally(["pending", "void"]);
     expect(none.hit_rate).toBeNull();
     expect(rateText(none)).toBe("–");
+  });
+});
+
+describe("the expanded game card", () => {
+  it("shows both teams' recorded win probability", () => {
+    expect(winProbs(p({ selection: "away", model_prob: 0.73 }))).toEqual({ home: 0.27, away: 0.73 });
+    expect(winProbs(p({ selection: "home", model_prob: 0.6 }))).toEqual({ home: 0.6, away: 0.4 });
+    expect(winProbs(p({ market: "spread", model_prob: null }))).toBeNull();
+  });
+  it("a projected score gets a signed difference, actual minus projected, and no grade", () => {
+    expect(scoreDiff(118, 121)).toBe("+3");
+    expect(scoreDiff(110, 99)).toBe("−11");
+    expect(scoreDiff(104.1, 106)).toBe("+1.9");
+    expect(scoreDiff(100, 100)).toBe("0");
+    expect(marginText({ home: "AAA", away: "BBB" }, -8.11)).toBe("BBB by 8.1");
+    expect(marginText({ home: "AAA", away: "BBB" }, 22)).toBe("AAA by 22");
+    expect(marginText({ home: "AAA", away: "BBB" }, 0)).toBe("Tied");
+  });
+  it("only a pick written before the game started is labelled recorded pre-game", () => {
+    expect(provenanceOf(p({ frozen_before_start: true }))).toBe("pre_game");
+    expect(provenanceOf(p({ frozen_before_start: false, backfilled: true }))).toBe("reconstructed");
+    expect(provenanceOf(p({ frozen_before_start: false, backfilled: false }))).toBe("reconstructed");
+    expect(provenanceOf(p({}))).toBe("reconstructed"); // older rows without the flag are never promoted
+  });
+  it("status: Final needs a stored final score", () => {
+    const start = "2026-11-14T00:00:00+00:00", t = Date.parse(start);
+    expect(gameStatus({ status: "final", start_time: start, final: { home: 1, away: 0 } }, t + 9e6)).toBe("Final");
+    expect(gameStatus({ status: "scheduled", start_time: start, final: null }, t - 1)).toBe("Upcoming");
+    expect(gameStatus({ status: "scheduled", start_time: start, final: null }, t + 3600_000)).toBe("Live");
+    expect(gameStatus({ status: "scheduled", start_time: start, final: null }, t + 6 * 3600_000)).toBe("Awaiting final");
+    expect(gameStatus({ status: "postponed", start_time: start, final: null }, t + 1)).toBe("Not played");
   });
 });

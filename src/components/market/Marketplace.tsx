@@ -133,7 +133,7 @@ function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League
   const prov = main ? lineProvider(main) : null;
   const inj = r.injury?.status && r.injury.status !== "available" ? (r.injury.lateScratch ? "Late scratch" : r.injury.rawStatus ?? r.injury.status) : !r.injury && r.injuryStatus ? r.injuryStatus : null;
   return (
-    <li data-fav-id={`${league}:${r.id}`} className="flex items-stretch gap-1">
+    <li data-fav-id={`${league}:${r.id}`} data-player={r.name} data-model-avg={r.mean} className="flex items-stretch gap-1">
       <div className="flex items-center"><FavoriteStar id={`${league}:${r.id}`} name={r.name} /></div>
       <Link href={href} scroll={false} aria-current={on ? "true" : undefined}
         className={`grid min-w-0 flex-1 grid-cols-3 items-center gap-x-3 gap-y-2 rounded-lg border px-3 py-2.5 @xl:grid-cols-[minmax(8rem,1.6fr)_4.5rem_4.5rem_minmax(6.5rem,1.2fr)_minmax(7rem,1fr)] ${on ? "border-model/70 bg-navy-800" : "border-transparent bg-navy-900 hover:bg-navy-850"}`}>

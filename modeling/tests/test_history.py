@@ -74,6 +74,13 @@ def test_build_grades_recorded_projections_only(tmp_path, monkeypatch):
     assert not any(k.startswith("nfl:g2") for k in picks)                # g2 has no recorded projection: no pick, nothing invented
     summary = json.loads((tmp_path / "data" / "published" / "history" / "nfl" / "picks_summary.json").read_text())
     assert summary["overall"]["games"]["hit"] == 1 and summary["overall"]["props"]["miss"] == 1
+    # this game had already started when its picks were written: both are labelled reconstructed, never pre-game
+    assert summary["provenance"]["moneyline"] == {"pre_game": 0, "reconstructed": 1}
+    assert summary["provenance"]["prop"] == {"pre_game": 0, "reconstructed": 1}
+    assert summary["provenance"]["spread"] == summary["provenance"]["total"] == {"pre_game": 0, "reconstructed": 0}  # never backfilled
+    assert picks["nfl:g1:moneyline"]["frozen_before_start"] is False
+    row = summary["by_date"][-1]                                          # winner, spread and total keep separate records
+    assert row["moneyline"]["hit"] == 1 and row["spread"]["graded"] == 0 and row["total"]["graded"] == 0
     # a second build changes nothing and writes nothing
     again = history.build("nfl")["picks"]
     assert (again["game_picks_added"], again["prop_picks_added"], again["settled"], again["corrections"]) == (0, 0, 0, 0)
@@ -124,4 +131,7 @@ def test_spread_and_total_picks_are_only_written_before_the_game(tmp_path, monke
     res = {p["id"]: p["result"] for p in out["picks"]}
     assert res["nba:soon:spread"] == "pending" and res["nba:soon:total"] == "pending"   # not played: stays pending
     summary = json.loads((tmp_path / "data" / "published" / "history" / "nba" / "picks_summary.json").read_text())
+    assert summary["provenance"]["spread"] == {"pre_game": 1, "reconstructed": 0}        # written before the game started
+    assert summary["provenance"]["total"] == {"pre_game": 1, "reconstructed": 0}
+    assert all(p["frozen_before_start"] for p in out["picks"] if p["id"].startswith("nba:soon:"))
     assert summary["overall"]["spread"]["pending"] == 1 and summary["overall"]["spread"]["graded"] == 0 and summary["overall"]["spread"]["hit_rate"] is None

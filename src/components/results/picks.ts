@@ -61,3 +61,40 @@ export function tally(results: PickRow["result"][]): PickRecord {
   const decided = c.hit + c.miss;
   return { ...c, graded: decided + c.push, hit_rate: decided ? c.hit / decided : null };
 }
+
+/** How a stored pick came to exist. Only a pick written before its game started counts as recorded pre-game. */
+export type Provenance = "pre_game" | "reconstructed";
+export const provenanceOf = (p: PickRow): Provenance => (p.frozen_before_start ? "pre_game" : "reconstructed");
+
+/** Both teams' recorded win probabilities, from the stored winner pick. */
+export function winProbs(p: PickRow): { home: number; away: number } | null {
+  if (p.market !== "moneyline" || p.model_prob == null) return null;
+  const mine = p.model_prob;
+  return p.selection === "home" ? { home: mine, away: 1 - mine } : { home: 1 - mine, away: mine };
+}
+
+/** Actual minus projected, signed: 118 projected and 121 scored is "+3". A projection error, never a grade. */
+export function scoreDiff(projected: number, actual: number): string {
+  const d = Math.round((actual - projected) * 10) / 10;
+  return d === 0 ? "0" : signed(d);
+}
+
+/** "BOS by 22", or "Tied". `margin` is home minus away. */
+export function marginText(g: { home: string; away: string }, margin: number): string {
+  const m = Math.round(margin * 10) / 10;
+  return m === 0 ? "Tied" : `${m > 0 ? g.home : g.away} by ${n(Math.abs(m))}`;
+}
+
+export type GameStatus = "Final" | "Live" | "Upcoming" | "Not played" | "Awaiting final";
+
+/** Final only when a verified final score is stored. Live is a started game inside a normal game's length. */
+export function gameStatus(g: { status: string; start_time: string | null; final: Final }, nowMs: number): GameStatus {
+  if (/postpon|cancel/i.test(g.status)) return "Not played";
+  if (g.final) return "Final";
+  const start = g.start_time ? Date.parse(g.start_time) : NaN;
+  if (!Number.isFinite(start)) return "Awaiting final";
+  if (nowMs < start) return "Upcoming";
+  return nowMs - start < 4 * 3600_000 ? "Live" : "Awaiting final";
+}
+
+export const num = n;
