@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync, existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -26,7 +26,8 @@ describe("public pages and assets carry no sportsbook-level data", () => {
   });
 
   it("no static asset in public/ names a sportsbook", () => {
-    const pub = files("public").filter((f) => /\.(json|txt|csv|html|svg|js)$/.test(f));
+    // No public/ directory at all is the cleanest pass there is (a fresh checkout has none).
+    const pub = (existsSync("public") ? files("public") : []).filter((f) => /\.(json|txt|csv|html|svg|js)$/.test(f));
     expect(pub.filter((f) => BOOKS.test(readFileSync(f, "utf8")))).toEqual([]);
   });
 });
