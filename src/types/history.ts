@@ -53,6 +53,49 @@ export interface HistoryDay {
   date: string;
   games: HistoryGame[];
   props: HistoryProp[];
+  /** Picks frozen before each game and graded on the selected side (python -m modelroom history). */
+  picks?: PickRow[];
+}
+
+export type PickResult = "hit" | "miss" | "push" | "void" | "cancelled" | "pending";
+
+/** One stored pick and how it settled. The selection, line and team/player are as written before the game. */
+export interface PickRow {
+  id: string;
+  game_id: string;
+  market: "moneyline" | "spread" | "total" | "prop";
+  selection: "home" | "away" | "over" | "under" | "at_least" | "below";
+  team: string | null;
+  /** Spread: the selected team's own line. Total: the market total. Prop: the threshold. Moneyline: null. */
+  line: number | null;
+  model_number: number | null;
+  model_prob: number | null;
+  model_version: string;
+  recorded_at: string;
+  /** True for picks reconstructed from pre-game records when the picks ledger was first created. */
+  backfilled: boolean;
+  result: PickResult;
+  line_source?: string | null;
+  line_books?: number | null;
+  player?: string;
+  player_id?: string;
+  stat?: string;
+  stat_label?: string;
+  line_kind?: string | null;
+  support?: string | null;
+  actual?: number | null;
+  played?: boolean | null;
+}
+
+export interface PickRecord { hit: number; miss: number; push: number; void: number; cancelled: number; pending: number; graded: number; hit_rate: number | null }
+
+export interface PicksSummary {
+  league: string;
+  generated_at: string;
+  note: string;
+  overall: Record<"games" | "props" | "moneyline" | "spread" | "total" | "prop", PickRecord>;
+  by_date: { date: string; games: PickRecord; props: PickRecord }[];
+  backfilled_picks: number;
 }
 
 export interface ProbBlock { n: number; brier: number; log_loss: number; avg_predicted: number; hit_rate: number }

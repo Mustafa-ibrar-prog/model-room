@@ -48,7 +48,7 @@ const rows = (page) => page.locator("li[data-fav-id]:visible");
 // ------------------------------------------------------------------ every page, both sizes
 for (const device of ["desktop", "phone"]) {
   const { ctx, page, errors } = await session(device);
-  for (const path of ["/", "/nfl", "/nba", "/nfl?view=games", "/nba?view=games", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
+  for (const path of ["/", "/nfl", "/nba", "/nba-props", "/nfl-props", "/performance?tab=nfl-props", "/nfl?view=games", "/nba?view=games", "/props?sport=nfl", "/props?sport=nba", "/performance?sport=nfl", "/performance?sport=nba", "/performance/stats?sport=nba", "/yesterday", "/yesterday?date=2026-11-02", "/model-vs-market", "/pricing", "/injuries", "/ratings", "/account", "/login"]) {
     errors.length = 0;
     const st = await go(page, path);
     check(st === 200, `${device} ${path}: loads (HTTP ${st})`);
@@ -235,8 +235,10 @@ for (const device of ["desktop", "phone"]) {
   const propsLink = page.locator('a[href*="/props?sport=nfl&game="]:visible').first();
   await nav(page, propsLink);
   check(qs(page).get("game") !== null && page.url().includes("/props"), "game row Props link opens that game's props");
-  await go(page, "/performance?sport=nba");
-  check((await page.locator("text=Settled market record").count()) > 0 && (await page.locator("text=Player props backtest").count()) > 0, "performance page sections");
+  await go(page, "/performance/stats?sport=nba");
+  check((await page.locator("text=Settled market record").count()) > 0 && (await page.locator("text=Player props backtest").count()) > 0, "stats for nerds keeps the performance sections");
+  await go(page, "/performance?tab=nba");
+  check((await page.locator("text=Stats for Nerds").count()) > 0 && (await page.locator("text=NBA game picks").count()) > 0, "performance opens on results, with the stats tab");
   await ctx.close();
 }
 

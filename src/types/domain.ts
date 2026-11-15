@@ -52,6 +52,9 @@ export interface GameView {
   ranges: Gate<{ margin: [number, number] | null; total: [number, number] | null }>;
   /** null = no market line for this game. */
   market: MarketView | null;
+  /** The model's own probabilities at the market's spread and total (null = no market line). Home line for the spread. */
+  atSpread: Gate<{ line: number; home: number; away: number; push: number } | null>;
+  atTotal: Gate<{ line: number; over: number; under: number; push: number } | null>;
   spreadEdge: Gate<number | null>;
   totalEdge: Gate<number | null>;
   probabilityEdge: Gate<{ homeMarket: number; homeDiff: number } | null>;

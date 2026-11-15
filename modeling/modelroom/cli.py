@@ -261,6 +261,13 @@ def _ledger(args) -> int:
     for league in ("nba", "nfl", "nfl_props", "nba_props"):
         for name, n in ledger.verify_series(ledger_path(league)).items():
             print(f"{name}: {n} predictions, chain intact")
+    from modelroom import picks as P
+    for league in ("nfl", "nba"):                                                        # picks and their grade log
+        for base in (P.picks_path(league), P.prop_picks_path(league)):
+            for name, n in ledger.verify_series(base).items():
+                print(f"{name}: {n} picks, chain intact")
+        for name, n in P.verify_grades(league).items():
+            print(f"{name}: {n} grade records, chain intact")
     for f in sorted(ledger_path("nba_props").parent.glob("nba_props_shadow_*.jsonl")):   # NBA shadow candidates
         print(f"{f.name}: {ledger.verify(f)} predictions, chain intact")
     return 0

@@ -79,14 +79,14 @@ describe("a player the injury report lists as out", () => {
 });
 
 describe("navigation", () => {
-  it("is four places", () => {
-    expect(NAV.map((n) => n.label)).toEqual(["Home", "NBA", "NFL", "Performance"]);
-    expect(NAV.map((n) => n.href)).toEqual(["/", "/nba", "/nfl", "/performance"]);
+  it("is home, the four sports sections and performance", () => {
+    expect(NAV.map((n) => n.label)).toEqual(["Home", "NBA Props", "NFL Props", "NBA", "NFL", "Performance"]);
+    expect(NAV.map((n) => n.href)).toEqual(["/", "/nba-props", "/nfl-props", "/nba", "/nfl", "/performance"]);
   });
 
   it("builds league links from only the parts that are set", () => {
-    expect(browseHref("nba", {})).toBe("/nba");
-    expect(browseHref("nfl", { game: "g1", cat: "passing_yards" })).toBe("/nfl?game=g1&cat=passing_yards");
-    expect(browseHref("nba", { game: "g1", player: "p9", q: undefined })).toBe("/nba?game=g1&player=p9");
+    expect(browseHref("nba", {})).toBe("/nba-props");
+    expect(browseHref("nfl", { game: "g1", cat: "passing_yards" })).toBe("/nfl-props?game=g1&cat=passing_yards");
+    expect(browseHref("nba", { game: "g1", player: "p9", q: undefined })).toBe("/nba-props?game=g1&player=p9");
   });
 });

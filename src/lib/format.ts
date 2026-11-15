@@ -38,14 +38,15 @@ export function favoredLine(spread: number, homeAbbr: string, awayAbbr: string):
     : { team: awayAbbr, text: `${awayAbbr} −${fmt(Math.abs(spread))}` };
 }
 
-const ET = "America/New_York";
+/** Every time on the site is shown in Pacific time (Los Angeles). */
+const PT = "America/Los_Angeles";
 
 export function formatKickoff(iso: string | null): string {
   if (!iso) return "Time TBD";
   const d = new Date(iso);
-  const day = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: ET });
-  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: ET });
-  return `${day}, ${time} ET`;
+  const day = d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: PT });
+  const time = d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: PT });
+  return `${day}, ${time} PT`;
 }
 
 export function formatDateShort(isoDate: string): string {
@@ -56,7 +57,7 @@ export function formatDateShort(isoDate: string): string {
 export function formatTimestamp(iso: string | null): string {
   if (!iso) return "never";
   const d = new Date(iso);
-  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: ET, timeZoneName: "short" });
+  return d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: PT, timeZoneName: "short" });
 }
 
 function fmt(n: number): string {

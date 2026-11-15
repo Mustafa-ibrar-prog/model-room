@@ -20,11 +20,14 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 
+from modelroom import picks as P
 from modelroom.common import ledger
 from modelroom.common.paths import data_root, ensure, ledger_path
 from modelroom.common.publish import write_board
 
 SEASONS_BACK = 1  # results-only dates: the current season and the one before
+PICK_FREEZE_WINDOW_H = 48  # after the first run, a missed pick is only written within this long of its game starting
+PICK_FREEZE_LEAD_MIN = 75  # picks are written at the last refresh before a game (the pre-game slot runs 30 minutes out)
 
 
 def _out(league: str):
@@ -171,9 +174,15 @@ def build(league: str) -> dict:
     for r in prop_recs.values():
         props_by_game.setdefault(str(r[gid_key]), []).append(r)
 
-    today = datetime.now(timezone.utc).date().isoformat()
+    now = datetime.now(timezone.utc)
+    today = now.date().isoformat()
     out = _out(league)
     index, grades_games, grades_props = [], [], []
+    first_run = not P.picks_path(league).exists()
+    fresh_after = (now - pd.Timedelta(hours=PICK_FREEZE_WINDOW_H)).isoformat()
+    candidates, day_ctx = [], {}
+    stat_games = {k[0] for k in stats}
+    days_out: dict = {}
     for day, g in games.groupby("game_date"):
         if day > today:
             continue
@@ -193,13 +202,35 @@ def build(league: str) -> dict:
                 grades_games.append({"date": day, "p": pre["home_win_prob"], "y": float(margin > 0), "margin_err": abs(err["margin_error"]),
                                      "total_err": abs(err["total_error"]), "correct": err["winner_correct"]})
             fin = {"home": int(x["home_score"]), "away": int(x["away_score"])} if final else None
+            # Picks are frozen once a game has started, from its last pre-game record. After the first run a pick
+            # is only ever created close to its game's start, never for an old game.
+            start_iso = None if pd.isna(x["start_time"]) else pd.Timestamp(x["start_time"]).isoformat()
+            gctx = {"game_id": x["game_id"], "date": day, "home": x["home"], "away": x["away"]}
+            if rec:
+                starts = pd.Timestamp(rec["game_start"])
+                before = now < starts
+                soon = before and starts - now <= pd.Timedelta(minutes=PICK_FREEZE_LEAD_MIN)
+                recent = (not before) and (first_run or rec["game_start"] >= fresh_after)
+                if soon or recent:
+                    # A spread or total pick needs a side AND a line, and the line is not in the model's own record,
+                    # so it only exists if it is written here before the game starts. The winner (the recorded win
+                    # probability) and player thresholds (recorded with their probabilities) are in the prediction
+                    # ledger already, so those can still be written from it after the start.
+                    cands = P.game_picks(league, gctx, rec, markets.get(x["game_id"]) if before else None)
+                    for r in props_by_game.get(x["game_id"], []):
+                        cands += P.prop_picks(league, gctx, r, label_of)
+                    for c in cands:
+                        c["frozen_before_start"] = bool(before)
+                    candidates += cands
+            day_ctx.setdefault(day, []).append({"game_id": x["game_id"], "status": x["status"], "final": fin, "start_time": start_iso,
+                                                "home": x["home"], "away": x["away"]})
             picks = market_picks(pre, markets.get(x["game_id"]), fin, sig)
             day_games.append({"game_id": x["game_id"], "start_time": None if pd.isna(x["start_time"]) else pd.Timestamp(x["start_time"]).isoformat(),
                               "home": x["home"], "away": x["away"], "status": x["status"],
                               "final": fin, "pregame": pre, "result": err, "market": picks})
             for r in props_by_game.get(x["game_id"], []):
                 actual = stats.get((x["game_id"], str(r["player_id"]))) if final else None
-                markets = {}
+                pm = {}  # NOT `markets`: that name is the pre-game market table used for every later game
                 for mkey, probs in r["probabilities"].items():
                     stat = stat_of.get(mkey)
                     a = _f(actual.get(stat)) if actual and stat in actual else None
@@ -212,21 +243,83 @@ def build(league: str) -> dict:
                         if hit is not None:
                             grades_props.append({"date": day, "market": mkey, "player": r["player"], "player_id": str(r["player_id"]),
                                                  "p": p, "y": float(hit)})
-                    markets[mkey] = {"label": label_of.get(mkey, mkey), "mean": probs.get("mean"), "sd": probs.get("sd"),
+                    pm[mkey] = {"label": label_of.get(mkey, mkey), "mean": probs.get("mean"), "sd": probs.get("sd"),
                                      "support": probs.get("support") or r.get("support"), "actual": a,
                                      "thresholds": sorted(th, key=lambda t: t["k"])}
                 day_props.append({"game_id": x["game_id"], "player_id": str(r["player_id"]), "player": r["player"], "team": r["team"],
                                   "generated_at": r["generated_at"], "model_version": r["model_version"],
-                                  "played": actual is not None if final else None, "markets": markets})
-        write_board(out / f"{day}.json", {"league": league, "kind": "history", "date": day, "games": day_games, "props": day_props})
+                                  "played": actual is not None if final else None, "markets": pm})
+        days_out[day] = {"league": league, "kind": "history", "date": day, "games": day_games, "props": day_props}
         index.append({"date": day, "games": len(day_games), "with_projection": sum(1 for x in day_games if x["pregame"]),
                       "props": len(day_props)})
+    pick_info = _settle_picks(league, candidates, day_ctx, days_out, stats, stat_of, stat_games, now, first_run, label_of)
+    for day, body in days_out.items():
+        write_board(out / f"{day}.json", body)
     first = min((r["generated_at"][:10] for r in game_recs.values()), default=None)
     write_board(out / "index.json", {"league": league, "kind": "history_index", "first_recorded": first,
                                      "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"), "dates": index})
     perf = performance(league, grades_games, grades_props)
     write_board(data_root() / "published" / f"performance_{league}.json", perf)
-    return {"dates": len(index), "graded_games": len(grades_games), "graded_thresholds": len(grades_props)}
+    return {"dates": len(index), "graded_games": len(grades_games), "graded_thresholds": len(grades_props), "picks": pick_info}
+
+
+def _settle_picks(league: str, candidates: list[dict], day_ctx: dict, days_out: dict, stats: dict, stat_of: dict,
+                  stat_games: set, now: datetime, first_run: bool, labels: dict) -> dict:
+    """Freeze new picks, grade every stored pick against the verified result, log settlements and corrections, and
+    attach the graded picks to each day's file. Reads picks back from the ledger: what is graded is what was stored."""
+    froze = P.freeze(league, candidates, now, backfilled_before=now.isoformat() if first_run else None)
+    by_game: dict = {}
+    for pk in P.read_picks(league).values():
+        by_game.setdefault(pk["league_game_id"], []).append(pk)
+    order = {"moneyline": 0, "spread": 1, "total": 2, "prop": 3}
+    graded, by_date, all_results = [], [], {"moneyline": [], "spread": [], "total": [], "prop": []}
+    for day in sorted(day_ctx):
+        rows = []
+        for g in day_ctx[day]:
+            fin = g["final"]
+            for pk in sorted(by_game.get(g["game_id"], []), key=lambda r: (order[r["market"]], r.get("player") or "", r.get("stat") or "")):
+                actual = played = None
+                if pk["market"] == "prop":
+                    if fin and g["game_id"] in stat_games:  # a final game with no box score at all is pending, not void
+                        st = stats.get((g["game_id"], pk["player_id"]))
+                        played = st is not None
+                        col = stat_of.get(pk["stat"])
+                        actual = _f(st.get(col)) if st and col in st else None
+                    evidence = {"actual": actual, "played": played}
+                else:
+                    evidence = {"home_score": fin["home"], "away_score": fin["away"]} if fin else None
+                res = P.grade(pk, g["status"], fin, actual, played)
+                if res == "cancelled":
+                    evidence = {"status": g["status"]}
+                graded.append({"pick_id": pk["game_id"], "result": res, "evidence": evidence})
+                all_results[pk["market"]].append(res)
+                row = {"id": pk["game_id"], "game_id": g["game_id"], "market": pk["market"], "selection": pk["selection"], "team": pk.get("team"),
+                       "line": pk.get("line"), "model_number": pk.get("model_number"), "model_prob": pk.get("model_prob"),
+                       "model_version": pk["model_version"], "recorded_at": pk["generated_at"], "backfilled": pk.get("backfilled", False),
+                       "frozen_before_start": pk.get("frozen_before_start", False),
+                       "result": res}
+                if pk["market"] == "prop":
+                    row.update(player=pk["player"], player_id=pk["player_id"], stat=pk["stat"], stat_label=labels.get(pk["stat"], pk["stat"]),
+                               line_kind=pk.get("line_kind"), support=pk.get("support"), actual=actual, played=played)
+                else:
+                    row.update(line_source=pk.get("line_source"), line_books=pk.get("line_books"))
+                rows.append(row)
+        if day in days_out:
+            days_out[day]["picks"] = rows
+        if rows:
+            by_date.append({"date": day, "games": P.record_of([r["result"] for r in rows if r["market"] != "prop"]),
+                            "props": P.record_of([r["result"] for r in rows if r["market"] == "prop"])})
+    log = P.record_grades(league, graded, now)
+    game_results = all_results["moneyline"] + all_results["spread"] + all_results["total"]
+    summary = {"league": league, "kind": "picks_summary", "generated_at": now.isoformat(timespec="seconds"),
+               "note": "Picks are frozen from the last projection recorded before each game and graded on the selected side. "
+                       "Only hits, misses and pushes count as graded; the hit rate is hits / (hits + misses).",
+               "overall": {"games": P.record_of(game_results), "props": P.record_of(all_results["prop"]),
+                           **{k: P.record_of(v) for k, v in all_results.items()}},
+               "by_date": by_date,
+               "backfilled_picks": sum(1 for v in by_game.values() for pk in v if pk.get("backfilled"))}
+    write_board(_out(league) / "picks_summary.json", summary)
+    return {**froze, **log, "graded": summary["overall"]["games"]["graded"] + summary["overall"]["props"]["graded"]}
 
 
 def _prob_block(d: pd.DataFrame) -> dict:

@@ -69,6 +69,8 @@ export function toGameView(g: EngineGame, league: League, tier: TierId, edgeAllo
           sources: g.market.sources,
         }
       : null,
+    atSpread: gate(tier, edgeFeature, e?.at_spread ? { line: e.at_spread.line, home: e.at_spread.home.model_prob, away: e.at_spread.away.model_prob, push: e.at_spread.home.push_prob } : null),
+    atTotal: gate(tier, edgeFeature, e?.at_total ? { line: e.at_total.line, over: e.at_total.over.model_prob, under: e.at_total.under.model_prob, push: e.at_total.over.push_prob } : null),
     spreadEdge: gate(tier, edgeFeature, e?.spread ?? null),
     totalEdge: gate(tier, edgeFeature, e?.total ?? null),
     probabilityEdge: gate(
@@ -222,7 +224,7 @@ export async function getInjuries(
     return {
       ok: true,
       connected: true,
-      note: `${ok.map((k) => ({ nba_official: "official NBA injury report", espn: "ESPN injury reports", nflverse: "NFL injury report via nflverse" })[k] ?? k).join(" + ")}, as of ${new Date(live.generated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/New_York", timeZoneName: "short" })}${failed.length ? `. Unavailable this refresh: ${failed.join(", ")}` : ""}${live.conflicts ? `. ${live.conflicts} conflicting reports (official designation used)` : ""}.`,
+      note: `${ok.map((k) => ({ nba_official: "official NBA injury report", espn: "ESPN injury reports", nflverse: "NFL injury report via nflverse" })[k] ?? k).join(" + ")}, as of ${new Date(live.generated_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles", timeZoneName: "short" })}${failed.length ? `. Unavailable this refresh: ${failed.join(", ")}` : ""}${live.conflicts ? `. ${live.conflicts} conflicting reports (official designation used)` : ""}.`,
       rows: live.players
         .filter((p) => p.current && p.status in order)
         .sort((x, y) => order[x.status] - order[y.status] || x.team.localeCompare(y.team))

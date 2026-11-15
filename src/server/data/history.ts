@@ -2,7 +2,7 @@ import "server-only";
 import { canAccess, gate } from "@/lib/entitlements";
 import { loadHistoryFile, loadPerformanceFile } from "@/server/engine/board";
 import type { Gate, League, TierId } from "@/types/domain";
-import type { HistoryDay, HistoryGame, HistoryIndex, HistoryProp, Performance } from "@/types/history";
+import type { HistoryDay, HistoryGame, HistoryIndex, HistoryProp, Performance, PicksSummary } from "@/types/history";
 
 /**
  * Past dates. Final scores are on every plan. The projections recorded before each game (and the
@@ -45,4 +45,16 @@ export async function getHistoryDay(league: League, date: string, tier: TierId):
 
 export async function getPerformance(league: League): Promise<Performance | null> {
   return loadPerformanceFile<Performance>(league);
+}
+
+/**
+ * Past picks and how they settled. These are results, shown on every plan: what the model picked before a game
+ * and whether it hit. (The projections behind them, and the technical record, keep their own plan rules.)
+ */
+export async function getPicksSummary(league: League): Promise<PicksSummary | null> {
+  return loadHistoryFile<PicksSummary>(league, "picks_summary");
+}
+
+export async function getPicksDay(league: League, date: string): Promise<HistoryDay | null> {
+  return loadHistoryFile<HistoryDay>(league, date);
 }
