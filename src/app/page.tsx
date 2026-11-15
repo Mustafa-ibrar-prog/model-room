@@ -49,9 +49,23 @@ async function Today({ searchParams }: { searchParams: SP }) {
       <div>
         <h1 className="font-display text-4xl font-600 leading-none text-ink sm:text-5xl">Today&apos;s games</h1>
         <p className="mt-3 max-w-xl text-[1.05rem] leading-relaxed text-mute">
-          Pick a game. You get every player we have enough history to project, the number we expect, and how likely it is.
+          Pick a game for the model&apos;s prediction, or go straight to player props.
         </p>
       </div>
+
+      <nav aria-label="Sections" className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+        {[
+          { href: "/nba-props", title: "NBA Props", sub: "Points, rebounds, assists, threes" },
+          { href: "/nfl-props", title: "NFL Props", sub: "Passing, rushing, receiving, TDs" },
+          { href: "/nba", title: "NBA", sub: "Winner, score, total, spread" },
+          { href: "/nfl", title: "NFL", sub: "Winner, score, total, spread" },
+        ].map((x) => (
+          <Link key={x.href} href={x.href} className="rounded-xl bg-navy-900 p-4 hover:bg-navy-850">
+            <span className="block font-display text-xl font-700 text-ink">{x.title}</span>
+            <span className="mt-0.5 block text-xs text-mute">{x.sub}</span>
+          </Link>
+        ))}
+      </nav>
 
       <div className="flex flex-wrap items-center gap-2.5">
         {(["nba", "nfl"] as const).map((l) => {
@@ -67,7 +81,7 @@ async function Today({ searchParams }: { searchParams: SP }) {
             </Link>
           );
         })}
-        <form action={`/${league}`} className="ml-auto flex items-center gap-2">
+        <form action={`/${league}-props`} className="ml-auto flex items-center gap-2">
           <label htmlFor="home-search" className="sr-only">Search players</label>
           <input
             id="home-search"
@@ -81,7 +95,7 @@ async function Today({ searchParams }: { searchParams: SP }) {
       </div>
 
       {board.ok ? (
-        <GameList league={league} games={board.games} />
+        <GameList league={league} games={board.games} to="games" />
       ) : (
         <p className="text-mute">{board.reason}</p>
       )}

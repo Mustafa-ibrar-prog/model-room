@@ -20,7 +20,7 @@ function dayLabel(iso: string): string {
 }
 
 /** The day's games as one plain list. One tap gets you the players. */
-export function GameList({ league, games, counts }: { league: League; games: ExplorerGame[]; counts?: Record<string, number> }) {
+export function GameList({ league, games, to = "props" }: { league: League; games: ExplorerGame[]; to?: "props" | "games" }) {
   if (!games.length) return <p className="text-mute">No {LEAGUE_NAME[league]} games are on the board right now.</p>;
   const days = new Map<string, ExplorerGame[]>();
   for (const g of games) days.set(g.gameDate, [...(days.get(g.gameDate) ?? []), g]);
@@ -32,7 +32,7 @@ export function GameList({ league, games, counts }: { league: League; games: Exp
           <ul className="border-t border-navy-700">
             {gs.map((g) => (
               <li key={g.id} className="border-b border-navy-700">
-                <Link href={browseHref(league, { game: g.id })} className="flex min-h-14 items-center gap-4 rounded-lg px-2 py-3 hover:bg-navy-850 sm:gap-6">
+                <Link href={to === "games" ? `/${league}#g-${g.id}` : browseHref(league, { game: g.id })} className="flex min-h-14 items-center gap-4 rounded-lg px-2 py-3 hover:bg-navy-850 sm:gap-6">
                   <span className="w-24 shrink-0 whitespace-nowrap font-mono text-sm text-mute">{timeOf(g)}</span>
                   <span className="flex shrink-0 items-center gap-2">
                     <TeamBadge league={league} abbr={g.away.abbr} size="sm" />
@@ -42,7 +42,6 @@ export function GameList({ league, games, counts }: { league: League; games: Exp
                   <span className="min-w-0 flex-1 truncate text-[0.95rem] text-mute">
                     {g.away.name} at {g.home.name}
                   </span>
-                  {counts?.[g.id] ? <span className="shrink-0 text-sm text-model">{counts[g.id]} players</span> : null}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" className="shrink-0 text-faint"><path d="M9 6l6 6-6 6" /></svg>
                 </Link>
               </li>
@@ -103,7 +102,7 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
     return (
       <div className="space-y-6">
         <GameList league={league} games={x.games} />
-        <p className="text-sm text-faint">Pick a game to see every player we can project in it.</p>
+        <p className="text-sm text-faint">Pick a game to see every player we can project in it. Game predictions are on the {LEAGUE_NAME[league]} page.</p>
       </div>
     );
   }
@@ -116,7 +115,7 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
     <div className="space-y-5">
       <Link href={browseHref(league, {})} scroll={false} className="inline-flex min-h-11 items-center gap-1.5 text-sm text-mute hover:text-ink">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
-        All {LEAGUE_NAME[league]} games
+        All {LEAGUE_NAME[league]} props games
       </Link>
 
       {game ? (
@@ -169,7 +168,7 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
             );
           })}
         </nav>
-        <form action={`/${league}`} className="ml-auto flex items-center gap-2">
+        <form action={`/${league}-props`} className="ml-auto flex items-center gap-2">
           {q.game ? <input type="hidden" name="game" value={q.game} /> : null}
           {q.cat ? <input type="hidden" name="cat" value={q.cat} /> : null}
           <label htmlFor="player-search" className="sr-only">Search players</label>
