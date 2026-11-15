@@ -1,27 +1,27 @@
 {
  "league": "nba",
- "generated_at": "2026-11-15T17:33:36+00:00",
+ "generated_at": "2026-11-15T22:14:23+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
-  "snapshot_rows": 2021,
-  "fetches": 10,
+  "snapshot_rows": 2219,
+  "fetches": 11,
   "first_collected_at": "2026-11-10T22:53:37+00:00",
-  "last_collected_at": "2026-11-15T15:01:42+00:00",
-  "days_of_history": 4.67,
+  "last_collected_at": "2026-11-15T22:12:16+00:00",
+  "days_of_history": 4.97,
   "calendar_days_with_fetches": 6,
   "books": 9,
   "games": 47,
   "games_matched_to_schedule": 47,
   "series_game_book_market": 1172,
   "rows_by_market": {
-   "moneyline": 666,
-   "spread": 678,
-   "total": 677
+   "moneyline": 732,
+   "spread": 744,
+   "total": 743
   },
   "comparisons": {
-   "matched": 1949,
+   "matched": 2084,
    "not_matched": {
-    "post_start": 0,
+    "post_start": 63,
     "not_matched_to_schedule": 0,
     "no_prediction_before_line": 72,
     "no_model_probability": 0
@@ -52,13 +52,13 @@
    }
   },
   "odds_api": {
-   "calls_logged": 10,
-   "calls_this_month": 10,
-   "credits_used_this_month_logged": 30,
-   "credits_remaining_last_reported": "443",
-   "as_of": "2026-11-15T15:01:42+00:00"
+   "calls_logged": 11,
+   "calls_this_month": 11,
+   "credits_used_this_month_logged": 33,
+   "credits_remaining_last_reported": "437",
+   "as_of": "2026-11-15T22:12:16+00:00"
   },
-  "stored_comparisons": 1949
+  "stored_comparisons": 2084
  },
  "coverage": {
   "fetches": [
@@ -181,63 +181,75 @@
     "stale_rows": 0,
     "unmatched_to_schedule_rows": 0,
     "unchanged_since_previous_fetch_rows": 0
+   },
+   {
+    "collected_at": "2026-11-15T22:12:16+00:00",
+    "rows": 198,
+    "games": 8,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 6,
+    "missing_market_slots": 0,
+    "scheduled_games_next_72h_without_lines": 0,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 9
    }
   ],
-  "rows_total": 2021,
+  "rows_total": 2219,
   "stale_rows_total": 0,
   "stale_rule": "book's own update time older than 6 h when collected",
-  "unchanged_rows_total": 181,
+  "unchanged_rows_total": 190,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
-  "post_start_rows_excluded": 0,
+  "post_start_rows_excluded": 63,
   "markets_seen": [
    "moneyline",
    "spread",
    "total"
   ],
   "rows_by_market": {
-   "moneyline": 666,
-   "spread": 678,
-   "total": 677
+   "moneyline": 732,
+   "spread": 744,
+   "total": 743
   }
  },
  "movement": {
   "overall": {
    "series": 1172,
-   "series_with_2plus_observations": 766,
-   "moved": 586,
-   "mean_abs_line_change": 0.731,
-   "mean_abs_novig_change_pp": 1.02
+   "series_with_2plus_observations": 901,
+   "moved": 702,
+   "mean_abs_line_change": 0.732,
+   "mean_abs_novig_change_pp": 1.0
   },
   "by_market": {
    "moneyline": {
     "series": 391,
-    "series_with_2plus_observations": 254,
-    "moved": 194,
+    "series_with_2plus_observations": 299,
+    "moved": 226,
     "mean_abs_line_change": null,
-    "mean_abs_novig_change_pp": 1.9
+    "mean_abs_novig_change_pp": 1.8
    },
    "spread": {
     "series": 391,
-    "series_with_2plus_observations": 256,
-    "moved": 206,
-    "mean_abs_line_change": 0.707,
-    "mean_abs_novig_change_pp": 0.74
+    "series_with_2plus_observations": 301,
+    "moved": 246,
+    "mean_abs_line_change": 0.693,
+    "mean_abs_novig_change_pp": 0.77
    },
    "total": {
     "series": 390,
-    "series_with_2plus_observations": 256,
-    "moved": 186,
-    "mean_abs_line_change": 0.756,
+    "series_with_2plus_observations": 301,
+    "moved": 230,
+    "mean_abs_line_change": 0.771,
     "mean_abs_novig_change_pp": 0.42
    }
   },
   "by_team": {
    "Atlanta Hawks": {
-    "moved_toward": 17,
+    "moved_toward": 30,
     "moved_against": 0
    },
    "Boston Celtics": {
-    "moved_toward": 0,
+    "moved_toward": 18,
     "moved_against": 18
    },
    "Brooklyn Nets": {
@@ -258,7 +270,7 @@
    },
    "Dallas Mavericks": {
     "moved_toward": 18,
-    "moved_against": 5
+    "moved_against": 23
    },
    "Denver Nuggets": {
     "moved_toward": 10,
@@ -273,8 +285,8 @@
     "moved_against": 23
    },
    "Houston Rockets": {
-    "moved_toward": 14,
-    "moved_against": 17
+    "moved_toward": 17,
+    "moved_against": 28
    },
    "Indiana Pacers": {
     "moved_toward": 10,
@@ -298,7 +310,7 @@
    },
    "Milwaukee Bucks": {
     "moved_toward": 1,
-    "moved_against": 32
+    "moved_against": 45
    },
    "Minnesota Timberwolves": {
     "moved_toward": 21,
@@ -310,10 +322,10 @@
    },
    "New York Knicks": {
     "moved_toward": 12,
-    "moved_against": 17
+    "moved_against": 34
    },
    "Oklahoma City Thunder": {
-    "moved_toward": 7,
+    "moved_toward": 17,
     "moved_against": 20
    },
    "Orlando Magic": {
@@ -334,14 +346,14 @@
    },
    "Sacramento Kings": {
     "moved_toward": 4,
-    "moved_against": 7
+    "moved_against": 17
    },
    "San Antonio Spurs": {
     "moved_toward": 21,
     "moved_against": 5
    },
    "Toronto Raptors": {
-    "moved_toward": 36,
+    "moved_toward": 53,
     "moved_against": 0
    },
    "Utah Jazz": {
@@ -349,20 +361,20 @@
     "moved_against": 13
    },
    "Washington Wizards": {
-    "moved_toward": 17,
-    "moved_against": 9
+    "moved_toward": 28,
+    "moved_against": 12
    }
   },
-  "games_with_any_movement": 28,
-  "games_with_repeat_observations": 32
+  "games_with_any_movement": 33,
+  "games_with_repeat_observations": 37
  },
  "upcoming": {
   "status": "unvalidated comparisons (games not settled)",
   "games": 9,
-  "comparisons": 242,
+  "comparisons": 377,
   "abs_model_minus_book_novig_pp": {
-   "median": 3.6,
-   "p90": 10.95
+   "median": 3.59,
+   "p90": 8.08
   },
   "note": "A difference is a disagreement between the model and the book, not a verified edge."
  },
@@ -399,15 +411,15 @@
   "snapshots_chain_ok": true,
   "after_reconnect": {
    "snapshots": {
-    "rows": 2021,
+    "rows": 2219,
     "ok": true
    },
    "comparisons": {
-    "rows": 1949,
+    "rows": 2084,
     "ok": true
    },
    "reports": {
-    "rows": 37,
+    "rows": 38,
     "ok": true
    }
   },
