@@ -1,80 +1,94 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { Hero } from "@/components/marketing/Hero";
 import { HowItWorks } from "@/components/marketing/HowItWorks";
 import { DataSources } from "@/components/marketing/DataSources";
-import { TopGaps } from "@/components/marketing/TopGaps";
-import { GameRows } from "@/components/games/GameRows";
-import { ModelPerformance } from "@/components/tables/ModelPerformance";
+import { GameList } from "@/components/league/Browse";
 import { TableSkeleton } from "@/components/ui/primitives";
+import { getExplorer } from "@/server/data/explorer";
+import { getViewer } from "@/server/viewer";
+import type { League } from "@/types/domain";
 
-const more = (href: string, label: string) => (
-  <Link href={href} className="text-sm font-600 text-model hover:underline">{label}</Link>
-);
+type SP = Promise<Record<string, string | string[] | undefined>>;
 
-function Block({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <section className="min-w-0">
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-xl font-700 text-ink">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-export default function HomePage() {
+/**
+ * The home page is the day's games and nothing else. Pick one and you are in the players; everything
+ * deeper is behind that. The explainers stay underneath for a first-time visitor.
+ */
+export default function HomePage({ searchParams }: { searchParams: SP }) {
   return (
     <>
-      <Hero />
-      {/* Phones: gaps first (the point of the site), then the next games, then the rest. Wide screens: two columns. */}
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 pb-10 sm:px-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-        <div className="contents lg:block lg:space-y-8">
-          <div className="order-2">
-            <Block title="Next NFL games" action={more("/nfl", "All NFL")}>
-              <Suspense fallback={<TableSkeleton rows={4} />}><GameRows league="nfl" limit={4} upcomingOnly note={false} /></Suspense>
-            </Block>
-          </div>
-          <div className="order-3">
-            <Block title="Next NBA games" action={more("/nba", "All NBA")}>
-              <Suspense fallback={<TableSkeleton rows={4} />}><GameRows league="nba" limit={4} upcomingOnly note={false} /></Suspense>
-            </Block>
-          </div>
-        </div>
-        <div className="contents lg:block lg:space-y-8">
-          <div className="order-1">
-            <Block title="Largest model vs sportsbook differences">
-              <Suspense fallback={<TableSkeleton rows={5} />}><TopGaps /></Suspense>
-              <p className="mt-2 text-xs text-faint">Points between the model projection (blue) and the sportsbook line (white). These are disagreements, not verified edges: in 2023–25 NFL tests the sportsbook line was more accurate, and spread differences of 3+ points picked the side that covered only 44.5% of the time.</p>
-            </Block>
-          </div>
-          <div className="order-4">
-            <Block title="Player props" action={more("/props", "Open props")}>
-              <div className="grid grid-cols-2 gap-2">
-                <Link href="/props?sport=nfl" className="rounded-lg border border-navy-700 bg-navy-900 p-3 hover:border-model">
-                  <div className="font-display text-lg font-700 text-ink">NFL props</div>
-                  <div className="text-xs text-mute">Passing, rushing, receiving, TDs, fantasy</div>
-                </Link>
-                <Link href="/props?sport=nba" className="rounded-lg border border-navy-700 bg-navy-900 p-3 hover:border-model">
-                  <div className="font-display text-lg font-700 text-ink">NBA props</div>
-                  <div className="text-xs text-mute">Points, rebounds, assists, PRA, steals, blocks</div>
-                </Link>
-              </div>
-            </Block>
-          </div>
-          <div className="order-5">
-            <Block title="How the models are doing" action={more("/performance", "Performance")}>
-              <div className="space-y-4">
-                <Suspense fallback={<TableSkeleton rows={3} />}><ModelPerformance league="nfl" compact /></Suspense>
-                <Suspense fallback={<TableSkeleton rows={3} />}><ModelPerformance league="nba" compact /></Suspense>
-              </div>
-            </Block>
-          </div>
-        </div>
+      <div className="mx-auto w-full max-w-5xl px-4 pb-12 pt-8 sm:px-6">
+        <Suspense fallback={<TableSkeleton rows={6} />}>
+          <Today searchParams={searchParams} />
+        </Suspense>
       </div>
       <HowItWorks />
       <DataSources />
     </>
+  );
+}
+
+async function Today({ searchParams }: { searchParams: SP }) {
+  const sp = await searchParams;
+  const asked = typeof sp.sport === "string" && (sp.sport === "nba" || sp.sport === "nfl") ? (sp.sport as League) : null;
+  const viewer = await getViewer();
+  const [nba, nfl] = await Promise.all([getExplorer("nba", viewer.tier, {}), getExplorer("nfl", viewer.tier, {})]);
+  const boards = { nba, nfl } as const;
+  const count = (l: League) => (boards[l].ok ? boards[l].games.length : 0);
+  const soonest = (l: League) => {
+    const b = boards[l];
+    if (!b.ok) return Infinity;
+    const times = b.games.map((g) => (g.startTime ? Date.parse(g.startTime) : Infinity)).filter((t) => Number.isFinite(t));
+    return times.length ? Math.min(...times) : Infinity;
+  };
+  const league: League = asked ?? (soonest("nba") <= soonest("nfl") ? "nba" : "nfl");
+  const board = boards[league];
+
+  return (
+    <div className="space-y-7">
+      <div>
+        <h1 className="font-display text-4xl font-600 leading-none text-ink sm:text-5xl">Today&apos;s games</h1>
+        <p className="mt-3 max-w-xl text-[1.05rem] leading-relaxed text-mute">
+          Pick a game. You get every player we have enough history to project, the number we expect, and how likely it is.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        {(["nba", "nfl"] as const).map((l) => {
+          const on = l === league;
+          return (
+            <Link
+              key={l}
+              href={`/?sport=${l}`}
+              aria-current={on ? "page" : undefined}
+              className={`rounded-full px-5 py-2.5 text-[0.95rem] ${on ? "bg-ink font-600 text-navy-950" : "border border-navy-700 font-500 text-mute hover:border-navy-600"}`}
+            >
+              {l.toUpperCase()} <span className={on ? "font-400 opacity-60" : "text-faint"}>{count(l)} games</span>
+            </Link>
+          );
+        })}
+        <form action={`/${league}`} className="ml-auto flex items-center gap-2">
+          <label htmlFor="home-search" className="sr-only">Search players</label>
+          <input
+            id="home-search"
+            name="q"
+            type="search"
+            placeholder="Search any player"
+            className="min-h-11 w-52 rounded-lg border border-navy-700 bg-navy-900 px-3.5 text-[0.95rem] text-ink placeholder:text-faint focus:border-model focus:outline-none"
+          />
+          <button type="submit" className="min-h-11 rounded-lg border border-navy-700 px-4 text-sm font-500 text-mute hover:border-model hover:text-ink">Search</button>
+        </form>
+      </div>
+
+      {board.ok ? (
+        <GameList league={league} games={board.games} />
+      ) : (
+        <p className="text-mute">{board.reason}</p>
+      )}
+
+      <p className="text-sm text-faint">
+        Model Room projects players and games. It does not tell you what to bet, and it does not claim to beat the market.
+      </p>
+    </div>
   );
 }
