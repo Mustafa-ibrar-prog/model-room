@@ -36,7 +36,7 @@ async function Games({ league, searchParams }: { league: League; searchParams: S
   const dates = (index?.dates ?? []).filter((d) => d.games > 0).map((d) => d.date);
   return (
     <div className="space-y-4">
-      <DateNav base={`/${league}`} date={date} dates={dates} upcoming={upcoming} today={today} />
+      <DateNav base={`/${league}`} params={{ view: "games" }} date={date} dates={dates} upcoming={upcoming} today={today} />
       {date && date < today ? (
         <HistoryGames league={league} date={date} />
       ) : (

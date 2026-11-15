@@ -271,7 +271,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
   const hrefFor = (l: PropLineView) => propsHref(league, { ...x.query, game: x.query.game ?? r.gameId }, { line: lineKey(r.id, l) });
   const inj = r.injury?.status && r.injury.status !== "available" ? r.injury : null;
   return (
-    <div key={d.key} className={explicit ? "fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-navy-950 lg:static lg:z-auto lg:overflow-visible lg:bg-transparent" : "hidden lg:block"}>
+    <div key={d.key} data-detail={r.name} className={explicit ? "fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-navy-950 lg:static lg:z-auto lg:overflow-visible lg:bg-transparent" : "hidden lg:block"}>
       {explicit ? (
         <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-navy-700 bg-navy-950 px-3 py-1.5 lg:hidden">
           <Link href={closeHref} scroll={false} className="flex min-h-11 items-center gap-1 pr-2 text-sm font-500 text-model">
