@@ -1,0 +1,121 @@
+{
+  "calibration": {
+    "assists": [
+      0.2133,
+      1.2566
+    ],
+    "blocks": [
+      0.0867,
+      1.0774
+    ],
+    "points": [
+      0.1003,
+      1.2449
+    ],
+    "pra": [
+      0.0979,
+      1.3058
+    ],
+    "rebounds": [
+      0.1425,
+      1.2592
+    ],
+    "steals": [
+      0.1209,
+      1.109
+    ],
+    "threes": [
+      0.0606,
+      1.0753
+    ]
+  },
+  "model_id": "nba-props",
+  "model_version": "0.2.3b",
+  "provenance": {
+    "based_on": "0.2.3a (same settings, injury feed and calibration)",
+    "calibration": "unchanged from 0.2.3a",
+    "change_from_0.2.3a": "Minutes fix: usual minutes come from the role he is expected in (P(starts) x minutes in starts + (1-P) x minutes off the bench, each shrunk to his overall minutes), and only part of the team-fill minutes is kept (starters 0.34, bench 0.72, mixed by P). P(starts) uses only pre-game facts: start rate, his last game's role, rank among active teammates, usual starters ruled out by the official report. No lineups are used unless the live feed confirms them (it never did before the -30 min refresh, Nov 8-20).",
+    "fit": "2023-24 only (hoopR season 2024), historical official injury reports at tip-30; test seasons 2024-25 and 2025-26 not used",
+    "fitted_at": "2026-11-18T00:00:00+00:00",
+    "start_model_terms": [
+      "const",
+      "logit start rate",
+      "started last game",
+      "rank in group",
+      "rank in team",
+      "usual starters out (team)",
+      "usual starters out (group)",
+      "group starters out x (1 - start rate)"
+    ],
+    "status": "experimental 0.2.3b: SHADOW ONLY (recorded in its own shadow ledger when listed in MODELROOM_NBA_PROPS_SHADOW, never published)"
+  },
+  "settings": {
+    "assist_sd": 0.35,
+    "blowout_strength": 0.02,
+    "def_half_life": 20.0,
+    "def_prior_minutes": 1500.0,
+    "doubtful_weight": 1.0,
+    "fill_keep": [
+      0.3433,
+      0.7229
+    ],
+    "injury_feed": true,
+    "lineup_scenarios": 0,
+    "matchup_strength": 0.5,
+    "minutes_fill": "headroom",
+    "minutes_gap_fill": 0.5,
+    "minutes_half_life": 3.0,
+    "minutes_sd": 11.0,
+    "missed_games_out": 2,
+    "pace_strength": 1.0,
+    "play_bands": [
+      8,
+      16,
+      24
+    ],
+    "play_prob_available": [
+      0.364,
+      0.64,
+      0.918,
+      0.993
+    ],
+    "play_prob_questionable": [
+      0.18,
+      0.31,
+      0.45,
+      0.49
+    ],
+    "rate_half_life": 20.0,
+    "rate_prior_kind": "role",
+    "rate_prior_minutes": 150.0,
+    "rebound_sd": 0.25,
+    "return_minutes": [
+      0.743,
+      0.878,
+      0.949
+    ],
+    "return_sd_factor": [
+      1.307,
+      1.211,
+      1.179
+    ],
+    "role_minutes_k": 1.0424,
+    "scoring_sd": 0.25,
+    "season_carry": 0.5,
+    "sims": 10000,
+    "start_model": [
+      2.2433,
+      0.41573,
+      2.18813,
+      -0.28038,
+      -0.539,
+      0.23439,
+      -0.62315,
+      1.66638
+    ],
+    "stock_sd": 0.4,
+    "unlisted_clears": false,
+    "usage_boost": 0.0,
+    "usage_decay": 1.0
+  }
+}
