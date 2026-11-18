@@ -1,36 +1,36 @@
 {
  "league": "nfl",
- "generated_at": "2026-11-18T03:34:32+00:00",
+ "generated_at": "2026-11-18T15:06:08+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
-  "snapshot_rows": 7208,
-  "fetches": 15,
+  "snapshot_rows": 7799,
+  "fetches": 16,
   "first_collected_at": "2026-11-10T22:53:38+00:00",
-  "last_collected_at": "2026-11-17T20:02:01+00:00",
-  "days_of_history": 6.88,
-  "calendar_days_with_fetches": 8,
+  "last_collected_at": "2026-11-18T15:03:10+00:00",
+  "days_of_history": 7.67,
+  "calendar_days_with_fetches": 9,
   "books": 9,
-  "games": 27,
-  "games_matched_to_schedule": 27,
-  "series_game_book_market": 729,
+  "games": 43,
+  "games_matched_to_schedule": 43,
+  "series_game_book_market": 969,
   "rows_by_market": {
-   "moneyline": 2167,
-   "spread": 2519,
-   "total": 2522
+   "moneyline": 2332,
+   "spread": 2732,
+   "total": 2735
   },
   "comparisons": {
-   "matched": 6176,
+   "matched": 6602,
    "not_matched": {
     "post_start": 72,
     "not_matched_to_schedule": 0,
-    "no_prediction_before_line": 960,
+    "no_prediction_before_line": 1125,
     "no_model_probability": 0
    },
    "rule": "each line is paired only with the latest game prediction recorded before that line was collected"
   },
   "games_with_comparisons": {
    "settled": 14,
-   "upcoming_or_unsettled": 13
+   "upcoming_or_unsettled": 18
   },
   "settled_events_by_market": {
    "spread": 14,
@@ -52,13 +52,13 @@
    }
   },
   "odds_api": {
-   "calls_logged": 15,
-   "calls_this_month": 15,
-   "credits_used_this_month_logged": 45,
-   "credits_remaining_last_reported": "410",
-   "as_of": "2026-11-17T20:02:01+00:00"
+   "calls_logged": 16,
+   "calls_this_month": 16,
+   "credits_used_this_month_logged": 48,
+   "credits_remaining_last_reported": "404",
+   "as_of": "2026-11-18T15:03:10+00:00"
   },
-  "stored_comparisons": 6176
+  "stored_comparisons": 6602
  },
  "coverage": {
   "fetches": [
@@ -241,12 +241,24 @@
     "stale_rows": 0,
     "unmatched_to_schedule_rows": 0,
     "unchanged_since_previous_fetch_rows": 224
+   },
+   {
+    "collected_at": "2026-11-18T15:03:10+00:00",
+    "rows": 591,
+    "games": 29,
+    "books": 9,
+    "game_book_pairs_missing_a_book": 48,
+    "missing_market_slots": 48,
+    "scheduled_games_next_72h_without_lines": 0,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 185
    }
   ],
-  "rows_total": 7208,
+  "rows_total": 7799,
   "stale_rows_total": 0,
   "stale_rule": "book's own update time older than 6 h when collected",
-  "unchanged_rows_total": 4384,
+  "unchanged_rows_total": 4569,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
   "post_start_rows_excluded": 72,
   "markets_seen": [
@@ -255,40 +267,40 @@
    "total"
   ],
   "rows_by_market": {
-   "moneyline": 2167,
-   "spread": 2519,
-   "total": 2522
+   "moneyline": 2332,
+   "spread": 2732,
+   "total": 2735
   }
  },
  "movement": {
   "overall": {
-   "series": 729,
-   "series_with_2plus_observations": 728,
-   "moved": 550,
-   "mean_abs_line_change": 0.815,
-   "mean_abs_novig_change_pp": 1.07
+   "series": 969,
+   "series_with_2plus_observations": 729,
+   "moved": 558,
+   "mean_abs_line_change": 0.877,
+   "mean_abs_novig_change_pp": 1.14
   },
   "by_market": {
    "moneyline": {
-    "series": 243,
-    "series_with_2plus_observations": 242,
-    "moved": 173,
+    "series": 291,
+    "series_with_2plus_observations": 243,
+    "moved": 175,
     "mean_abs_line_change": null,
-    "mean_abs_novig_change_pp": 1.83
+    "mean_abs_novig_change_pp": 2.0
    },
    "spread": {
-    "series": 243,
+    "series": 339,
     "series_with_2plus_observations": 243,
-    "moved": 183,
-    "mean_abs_line_change": 0.776,
-    "mean_abs_novig_change_pp": 0.84
+    "moved": 186,
+    "mean_abs_line_change": 0.8,
+    "mean_abs_novig_change_pp": 0.83
    },
    "total": {
-    "series": 243,
+    "series": 339,
     "series_with_2plus_observations": 243,
-    "moved": 194,
-    "mean_abs_line_change": 0.854,
-    "mean_abs_novig_change_pp": 0.56
+    "moved": 197,
+    "mean_abs_line_change": 0.953,
+    "mean_abs_novig_change_pp": 0.58
    }
   },
   "by_team": {
@@ -305,8 +317,8 @@
     "moved_against": 12
    },
    "Buffalo Bills": {
-    "moved_toward": 6,
-    "moved_against": 11
+    "moved_toward": 7,
+    "moved_against": 13
    },
    "Carolina Panthers": {
     "moved_toward": 30,
@@ -317,7 +329,7 @@
     "moved_against": 0
    },
    "Cincinnati Bengals": {
-    "moved_toward": 18,
+    "moved_toward": 19,
     "moved_against": 5
    },
    "Cleveland Browns": {
@@ -325,12 +337,12 @@
     "moved_against": 0
    },
    "Dallas Cowboys": {
-    "moved_toward": 14,
-    "moved_against": 9
+    "moved_toward": 13,
+    "moved_against": 13
    },
    "Denver Broncos": {
     "moved_toward": 13,
-    "moved_against": 2
+    "moved_against": 1
    },
    "Detroit Lions": {
     "moved_toward": 18,
@@ -349,19 +361,19 @@
     "moved_against": 18
    },
    "Jacksonville Jaguars": {
-    "moved_toward": 16,
-    "moved_against": 9
+    "moved_toward": 20,
+    "moved_against": 3
    },
    "Kansas City Chiefs": {
     "moved_toward": 15,
     "moved_against": 10
    },
    "Las Vegas Raiders": {
-    "moved_toward": 7,
+    "moved_toward": 6,
     "moved_against": 17
    },
    "Los Angeles Chargers": {
-    "moved_toward": 13,
+    "moved_toward": 14,
     "moved_against": 10
    },
    "Los Angeles Rams": {
@@ -369,8 +381,8 @@
     "moved_against": 0
    },
    "Miami Dolphins": {
-    "moved_toward": 3,
-    "moved_against": 19
+    "moved_toward": 5,
+    "moved_against": 20
    },
    "Minnesota Vikings": {
     "moved_toward": 29,
@@ -385,12 +397,12 @@
     "moved_against": 36
    },
    "New York Giants": {
-    "moved_toward": 10,
-    "moved_against": 13
+    "moved_toward": 4,
+    "moved_against": 17
    },
    "New York Jets": {
     "moved_toward": 8,
-    "moved_against": 17
+    "moved_against": 18
    },
    "Philadelphia Eagles": {
     "moved_toward": 0,
@@ -413,12 +425,12 @@
     "moved_against": 18
    },
    "Tennessee Titans": {
-    "moved_toward": 2,
-    "moved_against": 20
+    "moved_toward": 6,
+    "moved_against": 19
    },
    "Washington Commanders": {
     "moved_toward": 11,
-    "moved_against": 15
+    "moved_against": 16
    }
   },
   "games_with_any_movement": 27,
@@ -426,11 +438,11 @@
  },
  "upcoming": {
   "status": "unvalidated comparisons (games not settled)",
-  "games": 13,
-  "comparisons": 2497,
+  "games": 18,
+  "comparisons": 2923,
   "abs_model_minus_book_novig_pp": {
-   "median": 6.91,
-   "p90": 15.57
+   "median": 7.12,
+   "p90": 15.64
   },
   "note": "A difference is a disagreement between the model and the book, not a verified edge."
  },
@@ -467,15 +479,15 @@
   "snapshots_chain_ok": true,
   "after_reconnect": {
    "snapshots": {
-    "rows": 7208,
+    "rows": 7799,
     "ok": true
    },
    "comparisons": {
-    "rows": 6176,
+    "rows": 6602,
     "ok": true
    },
    "reports": {
-    "rows": 60,
+    "rows": 61,
     "ok": true
    }
   },
