@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "picks_summary",
-  "generated_at": "2026-11-18T15:05:17+00:00",
+  "generated_at": "2026-11-18T19:44:34+00:00",
   "note": "Picks are frozen from the last projection recorded before each game and graded on the selected side. Only hits, misses and pushes count as graded; the hit rate is hits / (hits + misses).",
   "overall": {
     "games": {
@@ -456,6 +456,22 @@
       "pre_game": 1203,
       "reconstructed": 2292
     }
+  },
+  "excluded": {
+    "total": 0,
+    "rule": "Player picks whose prediction came from a model version that was not the published one when it was made (shadow versions read by mistake before 2026-11-18). Kept in the ledger with their grade; not counted.",
+    "record": {
+      "hit": 0,
+      "miss": 0,
+      "push": 0,
+      "void": 0,
+      "cancelled": 0,
+      "pending": 0,
+      "graded": 0,
+      "hit_rate": null
+    },
+    "by_version": {},
+    "picks": []
   },
   "backfilled_picks": 1888
 }
