@@ -77,12 +77,13 @@ class PropSettings:
     role_minutes_k: float = 0.0        # usual minutes = P x (his minutes in starts) + (1-P) x (off the bench), each shrunk to
                                        # his overall minutes with this many games' weight
     fill_keep: tuple = ()              # (starter, bench): share of the team-fill minutes kept, mixed by P(he starts)
+    role_minutes_half_life: float = 6.0  # recency half-life (games) of the minutes-in-starts / off-the-bench figures (as fitted)
     sims: int = 4000
 
 
 ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor",
                   "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios", "minutes_gap_fill",
-                  "start_model", "role_minutes_k", "fill_keep")
+                  "start_model", "role_minutes_k", "fill_keep", "role_minutes_half_life")
 
 
 @dataclass(frozen=True)

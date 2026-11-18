@@ -132,10 +132,11 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
     if s.start_model:
         # 0.2.3b: his minutes in starts and off the bench (same recency weights as his usual minutes), his last game's role
         stf = P["starter"].astype(float).to_numpy()
+        wrm = _recency(P, "player_id", s.role_minutes_half_life, 0.25, season)
         for col, f in (("start", stf), ("bench", 1.0 - stf)):
-            ww = pd.Series(wm * f, index=P.index).groupby(P["player_id"]).sum()
+            ww = pd.Series(wrm * f, index=P.index).groupby(P["player_id"]).sum()
             out[f"w_{col}"] = ww.reindex(out.index).fillna(0.0)
-            out[f"m_{col}"] = (pd.Series(P["minutes"].to_numpy() * wm * f, index=P.index).groupby(P["player_id"]).sum() / ww.replace(0, np.nan)).reindex(out.index)
+            out[f"m_{col}"] = (pd.Series(P["minutes"].to_numpy() * wrm * f, index=P.index).groupby(P["player_id"]).sum() / ww.replace(0, np.nan)).reindex(out.index)
         out["last_start"] = last["starter"].astype(float).reindex(out.index)
     if s.rate_prior_kind == "role":
         # Prior = per-minute rate of players at the same position in the same minutes band (as of the cutoff).
