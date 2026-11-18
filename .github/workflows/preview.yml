@@ -190,7 +190,7 @@ jobs:
           # incomplete data. The other league still refreshes. Both failing = the whole refresh fails, as before.
           NBA_OK=1; NFL_OK=1
           for lg in nba nfl; do
-            if python -m modelroom $lg ingest && python -m modelroom sources validate --league $lg > /tmp/validate_$lg.txt 2>&1; then :
+            if python -m modelroom $lg ingest && python -m modelroom sources validate $lg > /tmp/validate_$lg.txt 2>&1; then :
             else [ $lg = nba ] && NBA_OK=0 || NFL_OK=0; fi
             cat /tmp/validate_$lg.txt 2>/dev/null || true
           done
