@@ -113,7 +113,10 @@ jobs:
       # NFL shadow test (approved 2026-11-09): 0.1.3 = 0.1.1 + RB-carry / TE-target concentration within each team's
       # position group (team totals unchanged). Recorded in the ledger next to 0.1.1 on the same games and inputs, never
       # published; 0.1.3 can't be made the active version (pipeline refuses). Rollback: remove ",0.1.3".
-      MODELROOM_NFL_PROPS_SHADOW: "0.1.0,0.1.3"
+      # Shadow test (approved 2026-11-17): 0.1.4 = 0.1.1 without FTN charting or participation data (licensing-clean);
+      # 0.1.5 = 0.1.4 + touchdown rates scaled by projected team points (fitted 2021-23). Both are shadow-only: recorded
+      # on 0.1.1's player-games, never published. Rollback: remove ",0.1.4,0.1.5".
+      MODELROOM_NFL_PROPS_SHADOW: "0.1.0,0.1.3,0.1.4,0.1.5"
       MODELROOM_NBA_INJURY_FEED: "on"
       # NFL coming games: the projected starter (injury report + live depth chart) instead of the schedule field,
       # which only repeats last week's starter. Finished games keep the actual starter. Rollback: "listed".

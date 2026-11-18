@@ -13,6 +13,8 @@ For each team in a game
 """
 from __future__ import annotations
 
+import dataclasses
+
 import zlib
 from dataclasses import dataclass, replace
 
@@ -285,11 +287,32 @@ def concentrate(share: pd.Series, group: pd.Series, grp: str, gamma: float) -> p
     return out
 
 
+TD_COLS = {"rush": "rush_td_rate", "rec": "rec_td_rate", "pass": "pass_td_rate"}
+
+
+def _td_scaled(ctx: Context, team: str, margin: float, total: float, s) -> Context:
+    """Experimental (0.1.5, shadow only): touchdown rates follow the team's projected points. The model's TD rates come
+    from each player's history and barely move with the game, so it under-projected touchdowns in high-scoring games and
+    over-projected them in low-scoring ones (2021-23). Fitted per kind on 2021-23: rate x exp(a + b * log(points / avg)).
+    Applied to a copy of every player's row (rosters, not the history team, decide who plays for this team); the shared
+    context itself is never changed."""
+    pts = max((float(total) + float(margin)) / 2.0, 3.0) if pd.notna(total) and pd.notna(margin) else s.td_scale_points
+    lp = np.log(pts / s.td_scale_points)
+    P = ctx.players.copy()
+    for kind, a, b in s.td_scale:
+        col = TD_COLS[kind]
+        if col in P.columns:
+            P[col] = P[col] * float(np.exp(a + b * lp))
+    return dataclasses.replace(ctx, players=P)
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, total: float, qb_id: str | None,
                  roster: pd.DataFrame | None, injuries: pd.DataFrame | None, p: PropParams, rng,
                  depth: dict | None = None) -> list[PlayerProjection]:
     s = p.settings
     n = s.sims
+    if s.td_scale:
+        ctx = _td_scaled(ctx, team, margin, total, s)
     c = candidates(ctx, team, roster, injuries, gameday=s.gameday_inactives)
     active = c[~c["out"]]
     if active.empty:

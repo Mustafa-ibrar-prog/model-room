@@ -1,0 +1,107 @@
+{
+    "calibration": {
+        "anytime_td": [
+            0.1295,
+            1.0764
+        ],
+        "fantasy_points": [
+            0.1479,
+            1.1746
+        ],
+        "interceptions": [
+            -0.0903,
+            0.8514
+        ],
+        "longest_reception": [
+            0.3382,
+            1.2105
+        ],
+        "passing_attempts": [
+            -0.1479,
+            0.9761
+        ],
+        "passing_completions": [
+            -0.164,
+            1.0466
+        ],
+        "passing_tds": [
+            -0.102,
+            1.153
+        ],
+        "passing_yards": [
+            0.1268,
+            1.5314
+        ],
+        "receiving_yards": [
+            0.3533,
+            1.3153
+        ],
+        "receptions": [
+            0.2667,
+            1.3076
+        ],
+        "rush_rec_yards": [
+            0.4145,
+            1.3725
+        ],
+        "rushing_attempts": [
+            0.6168,
+            1.6241
+        ],
+        "rushing_yards": [
+            0.6455,
+            1.3739
+        ]
+    },
+    "model_id": "nfl-props",
+    "model_version": "0.1.4",
+    "provenance": {
+        "based_on": "0.1.1 (same settings, volume model and calibration)",
+        "calibration": "0.1.1's per-market calibration kept unchanged.",
+        "change_from_0.1.1": "Licensing-clean: the model reads no FTN charting data (CC BY-SA 4.0: QB blitz splits, defense blitz rate) and no nflverse participation data (man/zone coverage splits and rates; pressure, play-action, screen and box counts were already unused). charting_data=false blanks those play columns before any feature is built, and the blitz and coverage strengths are 0, so both factors are exactly 1.",
+        "evidence": "Research Phase 2 ablation, test seasons 2023-25 (855 games, 11,060 player-games, 414,707 predictions), calibration fitted on 2021-22: log loss change vs 0.1.1 -0.00003 (95% interval -0.00007 to +0.00001), no measurable change in any market, season or position group.",
+        "fitted_at": "2026-11-18T00:00:00+00:00",
+        "remaining_sources": "nflverse schedules, play-by-play, injuries, snap counts (from Pro Football Reference), weekly rosters, depth charts: listed as CC-BY 4.0 by nflverse (credit nflverse). See modelroom/sources/registry.py.",
+        "status": "experimental 0.1.4: SHADOW ONLY (recorded in the ledger when listed in MODELROOM_NFL_PROPS_SHADOW, never published)"
+    },
+    "settings": {
+        "blitz_strength": 0.0,
+        "carry_dispersion": 3.0,
+        "charting_data": false,
+        "coverage_strength": 0.0,
+        "def_half_life_games": 10.0,
+        "def_prior_games": 6.0,
+        "efficiency_sd": 0.3,
+        "half_life_games": 12.0,
+        "inexp_qb_attempts": 150,
+        "inexp_qb_yards": 0.931,
+        "injury_context": true,
+        "matchup_strength": 0.5,
+        "pressure_strength": 0.0,
+        "rate_prior": 40.0,
+        "season_carry": 0.5,
+        "share_prior_games": 1.0,
+        "sims": 4000,
+        "snap_trend_strength": 1.0,
+        "target_dispersion": 15.0,
+        "td_prior": 120.0
+    },
+    "volume": {
+        "pass_coef": [
+            -15.1317,
+            1.2506,
+            0.6066,
+            0.1008,
+            0.1392
+        ],
+        "pass_sd": 8.03,
+        "rush_coef": [
+            1.1246,
+            1.0664,
+            0.7896,
+            -0.0156,
+            -0.0593
+        ],
+        "rush_sd": 7.287
+    }
+}

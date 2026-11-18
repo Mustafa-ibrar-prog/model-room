@@ -61,8 +61,18 @@ def _shrink(num, den, prior_mean, prior_n):
     return (num + prior_mean * prior_n) / (den + prior_n)
 
 
+# Play columns that come from FTN charting (blitz, play action, screen) or nflverse participation (man/zone, pressure,
+# defenders in the box). Blanked when settings.charting_data is False.
+CHARTING_PASS_COLS = ("blitz", "man", "pressure", "is_play_action", "is_screen_pass")
+CHARTING_RUSH_COLS = ("defenders_in_box",)
+
+
 def build(pg: pd.DataFrame, passes: pd.DataFrame, rushes: pd.DataFrame, cutoff: pd.Timestamp, season: int,
           s: PropSettings, depth_now: dict | None = None, depth_hist: pd.DataFrame | None = None) -> Context:
+    if not s.charting_data:
+        # 0.1.4+: nothing from FTN charting or nflverse participation reaches the model (licensing-clean versions).
+        passes = passes.assign(**{c: np.nan for c in CHARTING_PASS_COLS if c in passes.columns})
+        rushes = rushes.assign(**{c: np.nan for c in CHARTING_RUSH_COLS if c in rushes.columns})
     H = history(pg, cutoff, season).sort_values(["game_date", "game_id"])
     H = H.assign(group=H["position"].map(GROUPS))
     played = H[(H["offense_snaps"].fillna(0) > 0) | (H[["pass_att", "targets", "carries"]].sum(axis=1) > 0)]
