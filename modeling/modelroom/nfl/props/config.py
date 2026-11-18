@@ -21,6 +21,10 @@ CLEAN_VERSION = "0.1.4"
 CLEAN_FILE = Path(__file__).with_name("params_0.1.4.json")  # 0.1.1 without FTN charting or participation data: SHADOW ONLY
 TDS_VERSION = "0.1.5"
 TDS_FILE = Path(__file__).with_name("params_0.1.5.json")    # 0.1.4 + touchdown scaling by projected team points: SHADOW ONLY
+RECAL_VERSION = "0.1.6a"
+RECAL_FILE = Path(__file__).with_name("params_0.1.6a.json")  # 0.1.5 with probability calibration refitted on 2021-23: SHADOW ONLY
+WIND_VERSION = "0.1.6"
+WIND_FILE = Path(__file__).with_name("params_0.1.6.json")    # 0.1.6a + pregame forecast wind (reduce-only): SHADOW ONLY
 
 HISTORY_SEASONS = 3      # prior seasons used alongside the current one
 TUNE_SEASONS = (2021, 2022)
@@ -103,6 +107,11 @@ class PropSettings:
                                         # That kind's TD rates x exp(a + b * log(team projected points / td_scale_points)),
                                         # team points = (total + margin) / 2 floored at 3. Empty = off.
     td_scale_points: float = 0.0        # league-average projected team points in the fit seasons (the centre of the scaling)
+    wind_adjust: tuple = ()             # experimental (0.1.6, shadow only): ((market, a, b, wbar), ...). For games at open-air
+                                        # stadiums with a usable pregame forecast (modelroom.nfl.weather), that stat's simulated
+                                        # outcomes x (a + b*wind) / (a + b*wbar), wind in mph (GFS MOS). Empty = off.
+    wind_reduce_only: bool = False      # cap the wind factor at 1: wind can only lower a projection
+    wind_max_mph: float = 30.0          # forecast wind above this is treated as this (the fit range)
     sims: int = 4000
 
 
@@ -128,7 +137,7 @@ ADDED_SETTINGS = ("share_half_life_games", "eff_sd_pass", "eff_sd_rec", "eff_sd_
                   "fill_in_weight", "role_share_weight", "play_model", "redist_targets", "redist_concentration",
                   "target_total_factor", "carry_total_factor", "share_model", "questionable_model", "share_normalize", "gameday_inactives", "target_total_rate",
                   "inexp_qb_attempts", "inexp_qb_yards", "injury_context", "rb_role_factors", "share_concentration",
-                  "charting_data", "td_scale", "td_scale_points")
+                  "charting_data", "td_scale", "td_scale_points", "wind_adjust", "wind_reduce_only", "wind_max_mph")
 
 
 @dataclass(frozen=True)
@@ -174,7 +183,7 @@ class PropParams:
         d = json.loads(path.read_text())
         known = {f.name for f in fields(PropSettings)}
         st = {k: v for k, v in d["settings"].items() if k in known}
-        for key in ("share_concentration", "td_scale"):  # JSON lists -> hashable tuples
+        for key in ("share_concentration", "td_scale", "wind_adjust"):  # JSON lists -> hashable tuples
             if isinstance(st.get(key), list):
                 st[key] = tuple(tuple(x) for x in st[key])
         s = PropSettings(**st)

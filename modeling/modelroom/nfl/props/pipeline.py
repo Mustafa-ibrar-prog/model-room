@@ -39,15 +39,17 @@ import os
 from modelroom.injuries import use as U
 
 from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, CLEAN_FILE, CLEAN_VERSION, CONC_FILE, CONC_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
-                     PARAMS_FILE, TDS_FILE, TDS_VERSION, PropParams)
+                     PARAMS_FILE, RECAL_FILE, RECAL_VERSION, TDS_FILE, TDS_VERSION, WIND_FILE, WIND_VERSION, PropParams)
+from .. import weather as WX
+from . import wind as WIND
 
 # Which NFL prop model the board and ledger use: 0.1.0 = params.json (the default everywhere); a candidate
 # version only when MODELROOM_NFL_PROPS_VERSION names it (the hosted test site's workflow). Rollback = unset
 # it. Every ledger record names the version that made it.
 VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE, INJURY_VERSION: INJURY_FILE,
-            CONC_VERSION: CONC_FILE, CLEAN_VERSION: CLEAN_FILE, TDS_VERSION: TDS_FILE}
+            CONC_VERSION: CONC_FILE, CLEAN_VERSION: CLEAN_FILE, TDS_VERSION: TDS_FILE, RECAL_VERSION: RECAL_FILE, WIND_VERSION: WIND_FILE}
 # Versions that may only ever run as shadows (recorded in the ledger, never published).
-SHADOW_ONLY = {CONC_VERSION, CLEAN_VERSION, TDS_VERSION}
+SHADOW_ONLY = {CONC_VERSION, CLEAN_VERSION, TDS_VERSION, RECAL_VERSION, WIND_VERSION}
 
 
 def shadow_versions(active: str) -> list[str]:
@@ -197,6 +199,15 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
     upcoming = B.upcoming_window(gp[gp["status"] == "scheduled"], now, days)
     week = int(upcoming["week"].mode().iloc[0]) if len(upcoming) else None
     today = pd.Timestamp(pd.Timestamp(now).tz_convert("America/New_York").date())
+    wind_sel: dict = {}          # 0.1.6 (shadow): the pregame forecast each game may use at THIS prediction time
+    wind_used: dict = {}
+
+    def wind_for_run() -> dict:
+        if not wind_sel and len(upcoming):
+            stad = games_all.drop_duplicates("game_id").set_index("game_id")["stadium_id"]
+            wg = upcoming[["game_id", "start_time"]].assign(stadium_id=upcoming["game_id"].map(stad))
+            wind_sel.update(WX.for_games(wg, now))
+        return wind_sel
 
     def project(v: str):
         pv = PropParams.load(VERSIONS[v])
@@ -213,6 +224,9 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
             need = pv.settings.opp_redistribution == "depth" or pv.settings.questionable_model == "split" or pv.settings.share_model == "role"
             dep = DEPTH.ranks(season, int(wk), now) if need else None
             out += M.project_games(ctx, g, ro, inj, pv, seed=sd[int(wk)], depth=dep)
+        if pv.settings.wind_adjust:
+            # After simulation, on this version's own projections only; no usable forecast = left exactly as simulated.
+            wind_used[v] = WIND.apply(out, wind_for_run(), pv.settings, seed=min(sd.values()) if sd else 0)
         return pv, [x for x in out if eligible(x)], sd, out
 
     p, projs, seeds, _ = project(version)
@@ -306,6 +320,13 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
         for x in projs:
             if p.settings.injury_context:
                 inputs_hash = hash_obj({"base": base_hash, "game_availability": game_avail.get(str(x.game_id), "")})
+            wx = None
+            if p.settings.wind_adjust:
+                sel = wind_sel.get(x.game_id) or {"usable": False, "reason": "no selection"}
+                wx = {k: sel.get(k) for k in ("usable", "reason", "wind_mph", "wind_dir", "station", "issued_at", "retrieved_at", "lead_hours")}
+                wx["factors"] = (wind_used.get(version) or {}).get(x.game_id)
+                # a new usable forecast (or one becoming unusable) is a new snapshot; earlier snapshots stay as recorded
+                rec_hash = hash_obj({"inputs": inputs_hash, "wind": {k: wx[k] for k in ("usable", "reason", "wind_mph", "issued_at", "station")}})
             probs = {}
             for mkey, m in MARKETS.items():
                 if x.group in m["positions"]:
@@ -326,8 +347,9 @@ def run(*, days: int = 10, now: datetime | None = None, write_ledger: bool = Tru
                              "injury_report_time": (x.inputs.get("availability") or {}).get("report_time"),
                              "teammates_out": x.inputs.get("teammates_out_detail"), "injury_feed_at": (feed_meta or {}).get("generated_at")}
                             if p.settings.injury_context else {}),
+                         **({"wind_forecast": wx} if p.settings.wind_adjust else {}),
                          "params_hash": params_hash,
-                         "inputs_hash": inputs_hash, "generated_at": generated_at, "sims": p.settings.sims,
+                         "inputs_hash": rec_hash if wx is not None else inputs_hash, "generated_at": generated_at, "sims": p.settings.sims,
                          "seed": seeds.get(int(upcoming.set_index("game_id").at[x.game_id, "week"]))})
         return recs
 

@@ -1,0 +1,146 @@
+{
+    "calibration": {
+        "anytime_td": [
+            0.1656,
+            1.0822
+        ],
+        "fantasy_points": [
+            0.1849,
+            1.1553
+        ],
+        "interceptions": [
+            -0.0674,
+            0.9135
+        ],
+        "longest_reception": [
+            0.3716,
+            1.1844
+        ],
+        "passing_attempts": [
+            -0.0581,
+            0.9397
+        ],
+        "passing_completions": [
+            -0.0407,
+            1.0061
+        ],
+        "passing_tds": [
+            -0.0078,
+            1.1278
+        ],
+        "passing_yards": [
+            0.2731,
+            1.4827
+        ],
+        "receiving_yards": [
+            0.3837,
+            1.2598
+        ],
+        "receptions": [
+            0.2996,
+            1.2686
+        ],
+        "rush_rec_yards": [
+            0.4126,
+            1.3053
+        ],
+        "rushing_attempts": [
+            0.5195,
+            1.517
+        ],
+        "rushing_yards": [
+            0.5519,
+            1.3205
+        ]
+    },
+    "model_id": "nfl-props",
+    "model_version": "0.1.6a",
+    "provenance": {
+        "based_on": "0.1.5, identical settings, inputs and volume model",
+        "calibration": "every market refitted on 2021-23 from 0.1.5's own walk-forward probabilities (research Phase 7; 0.1.5 keeps 0.1.1's 2021-22 calibration for most markets). Backtest vs 0.1.5 as deployed, 2024-25, identical rows: log loss -0.00057 [-0.00098,-0.00018].",
+        "previous": {
+            "based_on": "0.1.4 (licensing-clean: no FTN charting, no participation data), same settings and volume model",
+            "calibration": "anytime_td, passing_tds and fantasy_points refitted on 2021-23 from this version's own walk-forward probabilities (0.1.1 values were {\"anytime_td\": [0.1295, 1.0764], \"passing_tds\": [-0.102, 1.153], \"fantasy_points\": [0.1479, 1.1746]}); every other market keeps 0.1.1's calibration.",
+            "change_from_0.1.4": "Touchdown rates follow the team's projected points: rate x exp(a + b*log(points / 22.11)), per kind (rush, rec, pass). Slopes fitted on 2021-23 by Poisson regression on the clean model's expected touchdowns; a is set so the average multiplier over 2021-23 is 1 (redistribution only), because the touchdown level was not stable across 2021-23 (rush: positive every season but its interval included 0; rec: signs differed by season; pass: drifting toward 0).",
+            "evaluation": "Out of sample on 2024 and 2025 (never used to fit anything): see Research Phase 3.",
+            "fitted_at": "2026-11-18T00:00:00+00:00",
+            "status": "experimental 0.1.5: SHADOW ONLY (recorded in the ledger when listed in MODELROOM_NFL_PROPS_SHADOW, never published)",
+            "td_fit": {
+                "pass": {
+                    "a": -0.0137,
+                    "b": 0.7004,
+                    "form_chosen_by_cv_in_2021_23": "linear"
+                },
+                "rec": {
+                    "a": -0.0117,
+                    "b": 0.8019,
+                    "form_chosen_by_cv_in_2021_23": "linear"
+                },
+                "rush": {
+                    "a": -0.0063,
+                    "b": 0.6765,
+                    "form_chosen_by_cv_in_2021_23": "linear"
+                }
+            }
+        },
+        "purpose": "TEST shadow only: the control that separates recalibration from the wind adjustment in 0.1.6."
+    },
+    "settings": {
+        "blitz_strength": 0.0,
+        "carry_dispersion": 3.0,
+        "charting_data": false,
+        "coverage_strength": 0.0,
+        "def_half_life_games": 10.0,
+        "def_prior_games": 6.0,
+        "efficiency_sd": 0.3,
+        "half_life_games": 12.0,
+        "inexp_qb_attempts": 150,
+        "inexp_qb_yards": 0.931,
+        "injury_context": true,
+        "matchup_strength": 0.5,
+        "pressure_strength": 0.0,
+        "rate_prior": 40.0,
+        "season_carry": 0.5,
+        "share_prior_games": 1.0,
+        "sims": 4000,
+        "snap_trend_strength": 1.0,
+        "target_dispersion": 15.0,
+        "td_prior": 120.0,
+        "td_scale": [
+            [
+                "rush",
+                -0.0063,
+                0.6765
+            ],
+            [
+                "rec",
+                -0.0117,
+                0.8019
+            ],
+            [
+                "pass",
+                -0.0137,
+                0.7004
+            ]
+        ],
+        "td_scale_points": 22.108
+    },
+    "volume": {
+        "pass_coef": [
+            -15.1317,
+            1.2506,
+            0.6066,
+            0.1008,
+            0.1392
+        ],
+        "pass_sd": 8.03,
+        "rush_coef": [
+            1.1246,
+            1.0664,
+            0.7896,
+            -0.0156,
+            -0.0593
+        ],
+        "rush_sd": 7.287
+    }
+}

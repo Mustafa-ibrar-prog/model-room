@@ -18,6 +18,7 @@
   nfl props                       player-prop projections (+ stored market prices) -> ledger -> nfl_props.json
   injuries nba|nfl                fetch the injury sources, combine them -> injury_feed + injuries_live_<lg>.json
   nfl props-monitor               stored NFL prop predictions vs box scores, by version and depth rank -> props_monitor_nfl.json
+  nfl weather                     TEST: store pregame NWS GFS MOS wind forecasts for open-air games (0.1.6 shadow)
   nfl props-backtest              walk-forward prop backtest (tunes on 2021-22, tests 2023-25; ~40 min)
   markets status                  which market-data providers are on, and why
   markets fetch nfl [--provider]  store a snapshot from each enabled provider (Polymarket US, Kalshi)
@@ -173,6 +174,13 @@ def _nfl(args) -> int:
 
         _print(starters.summary(starters.build()))
         return 0
+    if args.cmd == "weather":
+        # TEST: store the current NWS GFS MOS forecast run for open-air games kicking off in the next 40 h (0.1.6 shadow).
+        from modelroom.nfl import weather
+
+        g = ingest.load_games()
+        _print(weather.fetch(g[g["status"] == "scheduled"]))
+        return 0
     if args.cmd in ("odds", "lines"):
         return _lines("nfl", args.cmd)
     if args.cmd == "props":
@@ -258,7 +266,7 @@ def _ledger(args) -> int:
     from modelroom.common import ledger
     from modelroom.common.paths import ledger_path
 
-    for league in ("nba", "nfl", "nfl_props", "nba_props"):
+    for league in ("nba", "nfl", "nfl_props", "nba_props", "nfl_weather"):
         for name, n in ledger.verify_series(ledger_path(league)).items():
             print(f"{name}: {n} predictions, chain intact")
     from modelroom import picks as P
@@ -306,7 +314,7 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--no-fetch", action="store_true", help="crosscheck: use saved snapshots only")
 
     f = sub.add_parser("nfl")
-    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest", "props-monitor", "starters"])
+    f.add_argument("cmd", choices=["ingest", "odds", "lines", "backtest", "project", "props", "props-backtest", "props-monitor", "starters", "weather"])
     f.add_argument("--days", type=int, default=10, help="project: how many days ahead")
     f.add_argument("--from", dest="from_dir", help="folder with play_by_play_<season>.parquet / injuries_<season>.parquet")
 
