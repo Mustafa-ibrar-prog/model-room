@@ -1,0 +1,163 @@
+{
+    "calibration": {
+        "anytime_td": [
+            0.1656,
+            1.0822
+        ],
+        "fantasy_points": [
+            0.1977,
+            1.1586
+        ],
+        "interceptions": [
+            -0.0674,
+            0.9135
+        ],
+        "longest_reception": [
+            0.3716,
+            1.1844
+        ],
+        "passing_attempts": [
+            -0.0391,
+            0.9372
+        ],
+        "passing_completions": [
+            -0.0154,
+            1.0047
+        ],
+        "passing_tds": [
+            0.02,
+            1.1294
+        ],
+        "passing_yards": [
+            0.3117,
+            1.4873
+        ],
+        "receiving_yards": [
+            0.3951,
+            1.2573
+        ],
+        "receptions": [
+            0.3059,
+            1.2678
+        ],
+        "rush_rec_yards": [
+            0.4226,
+            1.3032
+        ],
+        "rushing_attempts": [
+            0.5195,
+            1.517
+        ],
+        "rushing_yards": [
+            0.5519,
+            1.3205
+        ]
+    },
+    "model_id": "nfl-props",
+    "model_version": "0.1.6",
+    "provenance": {
+        "backtest": "2024-25, identical rows: vs 0.1.5 as deployed -0.00091 [-0.00137,-0.00049]; vs 0.1.6a (wind's own share) about -0.00033. Passing yards, completions, receiving yards, receptions each clear.",
+        "based_on": "0.1.6a (0.1.5 recalibrated), identical settings and inputs plus the pregame forecast-wind adjustment",
+        "calibration": "every market refitted on 2021-23 from this version's own walk-forward probabilities (forecast wind applied).",
+        "purpose": "TEST shadow only.",
+        "wind": "factor per stat = (a + b*wind)/(a + b*wbar), wind = NWS GFS MOS forecast at the stadium's airport station, latest run issued >= 5 h before kickoff, read at kickoff + 1.5 h; fitted on 2021-23 0.1.5 walk-forward projections (research Phase 7, wind7_fit_fc.json); capped at 1 (reduce-only); open-air stadiums only; no usable forecast = unchanged"
+    },
+    "settings": {
+        "blitz_strength": 0.0,
+        "carry_dispersion": 3.0,
+        "charting_data": false,
+        "coverage_strength": 0.0,
+        "def_half_life_games": 10.0,
+        "def_prior_games": 6.0,
+        "efficiency_sd": 0.3,
+        "half_life_games": 12.0,
+        "inexp_qb_attempts": 150,
+        "inexp_qb_yards": 0.931,
+        "injury_context": true,
+        "matchup_strength": 0.5,
+        "pressure_strength": 0.0,
+        "rate_prior": 40.0,
+        "season_carry": 0.5,
+        "share_prior_games": 1.0,
+        "sims": 4000,
+        "snap_trend_strength": 1.0,
+        "target_dispersion": 15.0,
+        "td_prior": 120.0,
+        "td_scale": [
+            [
+                "rush",
+                -0.0063,
+                0.6765
+            ],
+            [
+                "rec",
+                -0.0117,
+                0.8019
+            ],
+            [
+                "pass",
+                -0.0137,
+                0.7004
+            ]
+        ],
+        "td_scale_points": 22.108,
+        "wind_adjust": [
+            [
+                "passing_yards",
+                1.029043,
+                -0.005842,
+                9.5131
+            ],
+            [
+                "passing_completions",
+                1.015792,
+                -0.003489,
+                9.5131
+            ],
+            [
+                "passing_attempts",
+                1.01395,
+                -0.002478,
+                9.5131
+            ],
+            [
+                "passing_tds",
+                1.029726,
+                -0.010124,
+                9.5131
+            ],
+            [
+                "receiving_yards",
+                1.063134,
+                -0.005544,
+                9.552
+            ],
+            [
+                "receptions",
+                1.046283,
+                -0.002467,
+                9.552
+            ]
+        ],
+        "wind_max_mph": 30.0,
+        "wind_reduce_only": true
+    },
+    "volume": {
+        "pass_coef": [
+            -15.1317,
+            1.2506,
+            0.6066,
+            0.1008,
+            0.1392
+        ],
+        "pass_sd": 8.03,
+        "rush_coef": [
+            1.1246,
+            1.0664,
+            0.7896,
+            -0.0156,
+            -0.0593
+        ],
+        "rush_sd": 7.287
+    }
+}
