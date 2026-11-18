@@ -87,6 +87,10 @@ export interface PickRow {
   support?: string | null;
   actual?: number | null;
   played?: boolean | null;
+  /** Set when the pick is left out of the official record: its prediction came from a version that was not published then. */
+  excluded?: "unpublished_version" | null;
+  /** The version that was published when an excluded pick's prediction was made. */
+  published_version?: string | null;
 }
 
 export interface PickRecord { hit: number; miss: number; push: number; void: number; cancelled: number; pending: number; graded: number; hit_rate: number | null }
@@ -100,6 +104,15 @@ export interface PicksSummary {
   backfilled_picks: number;
   /** Per market: picks written before the game started, and picks written afterwards from the pre-game projection. */
   provenance?: Record<"moneyline" | "spread" | "total" | "prop", { pre_game: number; reconstructed: number }>;
+  /** Picks kept for audit but left out of every official total. */
+  excluded?: {
+    total: number;
+    rule: string;
+    record: PickRecord;
+    by_version: Record<string, number>;
+    picks: { date: string; id: string; game_id: string; player: string | null; stat: string | null; stat_label: string | null; selection: string;
+      line: number | null; model_version: string; published_version: string; recorded_at: string; frozen_before_start: boolean; result: PickResult }[];
+  };
 }
 
 export interface ProbBlock { n: number; brier: number; log_loss: number; avg_predicted: number; hit_rate: number }

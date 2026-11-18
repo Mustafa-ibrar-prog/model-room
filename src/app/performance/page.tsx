@@ -50,7 +50,8 @@ async function Results({ searchParams }: { searchParams: SP }) {
   const earlier = idx > 0 ? days[idx - 1].date : null;
   const later = idx >= 0 && idx < days.length - 1 ? days[idx + 1].date : null;
   const day = date ? await getPicksDay(league, date) : null;
-  const picks = (day?.picks ?? []).filter((p) => (p.market === "prop") === isProps);
+  // Official picks only: a pick whose prediction came from an unpublished model version is listed in Stats for Nerds instead.
+  const picks = (day?.picks ?? []).filter((p) => (p.market === "prop") === isProps && !p.excluded);
   const href = (d: string | null) => `/performance?tab=${tab}${d ? `&date=${d}` : ""}`;
   const name = `${league.toUpperCase()}${isProps ? " player" : " game"}`;
   const o = summary?.overall;
@@ -92,6 +93,12 @@ async function Results({ searchParams }: { searchParams: SP }) {
                     ? " Each player pick is the model\u2019s own threshold nearest its projection, on the side it gave the better chance. No sportsbook line was published for these, so none is shown."
                     : " Winner, spread and total are separate records and are not added together."}
                 </p>
+                {isProps && summary.excluded?.total ? (
+                  <p>
+                    {summary.excluded.total.toLocaleString()} earlier picks made by unpublished model versions are left out of this record.{" "}
+                    <Link href={`/performance/stats?sport=${league}#excluded-picks`} className="text-model hover:underline">See them in Stats for Nerds</Link>.
+                  </p>
+                ) : null}
                 <p className="flex items-start gap-1.5">
                   <span className="mt-1"><ProvDot kind="pre_game" /></span>
                   <span><span className="font-600 text-ink">Recorded pre-game.</span> The pick was written before the game started.</span>
