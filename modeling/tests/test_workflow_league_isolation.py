@@ -14,7 +14,7 @@ WORKFLOW = Path(__file__).resolve().parents[2] / ".github" / "workflows" / "prev
 STUB = """#!/bin/bash
 echo "$*" >> "$SIMLOG"
 if [ "$3" = sources ] && [ "$4" = validate ]; then
-  if echo ",$FAIL," | grep -q ",$6,"; then echo "     FAIL  every final game has play-by-play  1 missing"; exit 1; fi
+  if echo ",$FAIL," | grep -q ",$5,"; then echo "     FAIL  every final game has play-by-play  1 missing"; exit 1; fi
   exit 0
 fi
 [ "$3" = odds-store ] && exit 1
@@ -76,3 +76,45 @@ def test_both_failing_fails_the_refresh(tmp_path):
     code, calls, _, _ = _run(tmp_path, "nba,nfl")
     assert code != 0
     assert not any(_ran(calls, c) for c in ("nba project", "nfl project", "nba props", "nfl props", "history"))
+
+
+def test_every_modelroom_command_in_the_step_is_accepted_by_the_real_cli(monkeypatch):
+    """The stubs above accept anything; this checks each `python -m modelroom ...` line against the real parser."""
+    import re
+    import shlex
+    from modelroom import cli
+
+    steps = yaml.safe_load(WORKFLOW.read_text())["jobs"]["deploy"]["steps"]
+    script = next(s for s in steps if s.get("id") == "data")["run"]
+    seen = []
+    script = re.sub(r'"\$\(.*?paste -sd, -\)"', "nfl,nba", script)       # the history league list
+    for m in re.finditer(r"python -m modelroom ((?:[^|&;>\n]|\|\|)+?)(?=\s*(?:\|\||&&|[|;>]|$))", script, re.M):
+        argv = ["nba" if a.startswith("$") else a for a in shlex.split(m.group(1).replace("$lg", "nba"))]
+        seen.append(argv)
+        p = _parser(cli)
+        try:
+            parsed = p.parse_args(argv)
+        except SystemExit:
+            raise AssertionError(f"workflow command not accepted by the CLI: modelroom {' '.join(argv)}")
+        assert parsed.group
+    assert any(a[:3] == ["sources", "validate", "nba"] for a in seen)
+
+
+def _parser(cli):
+    """Build the CLI parser without running a command."""
+    import argparse
+    captured = {}
+    orig = argparse.ArgumentParser.parse_args
+
+    def grab(self, args=None, namespace=None):
+        captured["p"] = self
+        raise SystemExit(0)
+    argparse.ArgumentParser.parse_args = grab
+    try:
+        try:
+            cli.main([])
+        except SystemExit:
+            pass
+    finally:
+        argparse.ArgumentParser.parse_args = orig
+    return captured["p"]
