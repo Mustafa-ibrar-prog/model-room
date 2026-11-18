@@ -129,6 +129,14 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
     out["starter_rate"] = (pd.Series(P["starter"].astype(float).to_numpy() * wm, index=P.index).groupby(P["player_id"]).sum()
                            / pd.Series(wm, index=P.index).groupby(P["player_id"]).sum())
     out["minutes_high"] = (P.groupby("player_id").tail(10).groupby("player_id")["minutes"].quantile(0.9)).reindex(out.index)
+    if s.start_model:
+        # 0.2.3b: his minutes in starts and off the bench (same recency weights as his usual minutes), his last game's role
+        stf = P["starter"].astype(float).to_numpy()
+        for col, f in (("start", stf), ("bench", 1.0 - stf)):
+            ww = pd.Series(wm * f, index=P.index).groupby(P["player_id"]).sum()
+            out[f"w_{col}"] = ww.reindex(out.index).fillna(0.0)
+            out[f"m_{col}"] = (pd.Series(P["minutes"].to_numpy() * wm * f, index=P.index).groupby(P["player_id"]).sum() / ww.replace(0, np.nan)).reindex(out.index)
+        out["last_start"] = last["starter"].astype(float).reindex(out.index)
     if s.rate_prior_kind == "role":
         # Prior = per-minute rate of players at the same position in the same minutes band (as of the cutoff).
         band = pd.cut(out["minutes_when_playing"], [0, 15, 22, 28, 34, 60], labels=False).fillna(0).astype(int)
@@ -266,6 +274,48 @@ def availability(team_feed: pd.DataFrame | None, back: dict, submitted: bool, st
     return {"players": players, "back": back, "submitted": submitted, "starters": starters}
 
 
+def _role_minutes(ctx: Context, active: pd.DataFrame, out: pd.DataFrame, base: pd.Series, s) -> pd.Series:
+    """0.2.3b (shadow only): minutes from the role he is expected in, and only part of the team fill.
+
+    0.2.3a credits bench players with minutes from their spot starts and hands out team-fill minutes that players only
+    partly play (bench ~55%, starters ~32%, 2023-26). P(starts) comes from pre-game facts only (start rate, last game's
+    role, rank among active teammates, usual starters ruled out); confirmed starters, when the feed has them, enter
+    through the start rate (set to 1 or 0). Returning players keep 0.2.3a's return factor. Fitted on 2023-24."""
+    W = np.asarray(s.start_model, float)
+    K = float(s.role_minutes_k)
+    ks, kb = (float(s.fill_keep[0]), float(s.fill_keep[1])) if s.fill_keep else (1.0, 1.0)
+    ow = out["out_weight"] if "out_weight" in out else pd.Series(1.0, index=out.index)
+    ost = out[out["starter_rate"] >= 0.5]
+    res = base.copy()
+    for pid in base.index:
+        if pid not in ctx.players.index:
+            continue
+        mw = float(ctx.players.at[pid, "minutes_when_playing"])
+        if not np.isfinite(mw) or mw <= 0:
+            continue
+        sr = float(active.at[pid, "starter_rate"])
+        grp = active.at[pid, "group"]
+        rank_grp = 1 + int((active.loc[active["group"] == grp, "starter_rate"] > sr).sum())
+        rank_team = 1 + int((active["starter_rate"] > sr).sum())
+        n_out = float(ow[ost.index].sum()) if len(ost) else 0.0
+        n_out_g = float(ow[ost.index[ost["group"] == grp]].sum()) if len(ost) else 0.0
+        q = min(max(sr, 0.02), 0.98)
+        ls = ctx.players.at[pid, "last_start"] if "last_start" in ctx.players.columns else np.nan
+        ls = float(round(q)) if pd.isna(ls) else float(ls)
+        x = np.array([1.0, np.log(q / (1 - q)), ls, min(rank_grp, 4), min(rank_team, 8), min(n_out, 3), min(n_out_g, 2), min(n_out_g, 2) * (1 - q)])
+        p = float(1.0 / (1.0 + np.exp(-x @ W)))
+        P_ = ctx.players.loc[pid]
+        ms = mw if pd.isna(P_.get("m_start")) else float(P_["m_start"])
+        mb = mw if pd.isna(P_.get("m_bench")) else float(P_["m_bench"])
+        ws, wb = float(P_.get("w_start", 0.0) or 0.0), float(P_.get("w_bench", 0.0) or 0.0)
+        us, ub = (ws * ms + K * mw) / (ws + K), (wb * mb + K * mw) / (wb + K)
+        mir = active.at[pid, "missed_in_row"]
+        returning = (float(mir) if pd.notna(mir) else 0.0) >= 3 or float(active.at[pid, "minutes_when_playing"]) < mw - 1e-9
+        usual = mw if returning else p * us + (1 - p) * ub
+        res[pid] = max(1.0, usual + (p * ks + (1 - p) * kb) * (float(base[pid]) - mw))
+    return res
+
+
 def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float, pace: float | None, p: PropParams,
                  rng, avail: dict | None = None) -> list[PlayerProjection]:
     s = p.settings
@@ -354,6 +404,8 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
         return base, scale, freed
 
     base, scale, freed = fill(active["appear_rate"], [])
+    if s.start_model:
+        base = _role_minutes(ctx, active, out, base, s)
     usage_f = 1.0 + s.usage_boost * freed
     parts = None
     if _AUDIT_PARTS and feed_on:

@@ -33,7 +33,7 @@ from modelroom.common.paths import ledger_path
 from .config import MARKETS
 
 ACTIVE = "0.2.0"
-SHADOWS = ("0.2.3a", "0.2.3")
+SHADOWS = ("0.2.3a", "0.2.3", "0.2.3b")
 EPS = 1e-6
 
 

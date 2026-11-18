@@ -14,7 +14,8 @@ CANDIDATE_FILE = Path(__file__).with_name("params_0.2.0.json")  # candidate; not
 INJURY_VERSION = "0.2.1"
 INJURY_FILE = Path(__file__).with_name("params_0.2.1.json")      # 0.2.0 + the live injury feed (test site)
 # Experimental versions that may be recorded as shadows on the test site (never published unless approved).
-SHADOW_FILES = {"0.2.3a": Path(__file__).with_name("params_0.2.3a.json"), "0.2.3": Path(__file__).with_name("params_0.2.3.json")}
+SHADOW_FILES = {"0.2.3a": Path(__file__).with_name("params_0.2.3a.json"), "0.2.3": Path(__file__).with_name("params_0.2.3.json"),
+                "0.2.3b": Path(__file__).with_name("params_0.2.3b.json")}
 
 HISTORY_SEASONS = 2                  # earlier seasons used alongside the current one (hoopR season = end year)
 TUNE_SEASONS = (2021, 2022)          # 2020-21, 2021-22
@@ -68,11 +69,20 @@ class PropSettings:
                                        # the active players; 1 = all (0.2.0-0.2.2). Fitted on 2023-24 for 0.2.3
     lineup_scenarios: int = 0          # up to this many uncertain rotation players are simulated as playing / sitting
                                        # (2^k lineups); teammates' minutes and usage are filled per lineup. 0 = off
+    # 0.2.3b minutes fix (shadow only). Uses only what is known at the refresh: no lineups unless the feed confirms them.
+    start_model: tuple = ()            # logit coefficients for P(he starts): const, logit(start rate), started his last game,
+                                       # rank by start rate in his position group (cap 4) and team (cap 8), usual starters
+                                       # ruled out on his team (cap 3) and in his group (cap 2), group-out x (1 - start rate).
+                                       # Empty = off (0.2.3a unchanged)
+    role_minutes_k: float = 0.0        # usual minutes = P x (his minutes in starts) + (1-P) x (off the bench), each shrunk to
+                                       # his overall minutes with this many games' weight
+    fill_keep: tuple = ()              # (starter, bench): share of the team-fill minutes kept, mixed by P(he starts)
     sims: int = 4000
 
 
 ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor",
-                  "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios", "minutes_gap_fill")
+                  "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios", "minutes_gap_fill",
+                  "start_model", "role_minutes_k", "fill_keep")
 
 
 @dataclass(frozen=True)
