@@ -3,10 +3,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { formatPct } from "@/lib/format";
 import { CATEGORIES } from "@/server/data/explorer";
-import { getPerformance } from "@/server/data/history";
+import { getPerformance, getPicksSummary } from "@/server/data/history";
 import { loadPropsBoard } from "@/server/engine/board";
 import type { League } from "@/types/domain";
-import type { ProbBlock } from "@/types/history";
+import type { PicksSummary, ProbBlock } from "@/types/history";
 import { ModelPerformance } from "@/components/tables/ModelPerformance";
 import { PerformanceTabs } from "@/components/results/PerformanceTabs";
 import { ResultRow, StatusLegend } from "@/components/results/SettlementBits";
@@ -189,10 +189,11 @@ async function Body({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
   const league: League = sp.sport === "nba" ? "nba" : "nfl";
   const viewer = await getViewer();
-  const [props, live, settled] = await Promise.all([
+  const [props, live, settled, picks] = await Promise.all([
     loadPropsBoard(league),
     getPerformance(league),
     getMarketResults(league, viewer.tier, { from: one(sp.from), to: one(sp.to), provider: one(sp.provider), market: one(sp.market), status: one(sp.status) }),
+    getPicksSummary(league),
   ]);
   const bt = props.ok ? props.board.performance.backtest : null;
   return (
@@ -289,6 +290,50 @@ async function Body({ searchParams }: { searchParams: SP }) {
           </div>
         )}
       </Section>
+
+      <ExcludedPicks ex={picks?.excluded} />
     </>
+  );
+}
+
+/** Picks kept for audit but left out of the official Performance record (their prediction came from an unpublished version). */
+function ExcludedPicks({ ex }: { ex: PicksSummary["excluded"] }) {
+  if (!ex?.total) return null;
+  const r = ex.record;
+  return (
+    <Section id="excluded-picks" title="Excluded picks (audit)" intro="Player picks left out of the official Performance record because their prediction came from a model version that was not the published one at the time. They stay in the ledger with their grade.">
+      <Panel className="p-5">
+        <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <div><dt className="text-xs text-faint">Excluded picks</dt><dd className="font-mono text-lg text-ink">{ex.total.toLocaleString()}</dd></div>
+          <div><dt className="text-xs text-faint">Their record</dt><dd className="font-mono text-lg text-ink">{r.hit}–{r.miss}{r.push ? `–${r.push}` : ""}</dd></div>
+          <div><dt className="text-xs text-faint">Their hit rate</dt><dd className="font-mono text-lg text-ink">{r.hit_rate == null ? "–" : formatPct(r.hit_rate, 1)}</dd></div>
+          <div><dt className="text-xs text-faint">By version</dt><dd className="font-mono text-sm text-ink">{Object.entries(ex.by_version).map(([v, n]) => `${v}: ${n}`).join(" · ")}</dd></div>
+        </dl>
+        <details className="mt-4">
+          <summary className="cursor-pointer text-sm text-model">Show all {ex.total.toLocaleString()} picks</summary>
+          <div className="mt-3 max-h-[32rem] overflow-auto">
+            <table className="w-full min-w-[44rem] text-sm">
+              <thead className="sticky top-0 bg-navy-900 text-faint">
+                <tr><th className={th}>Date</th><th className={th}>Player</th><th className={th}>Pick</th><th className={th}>Made by</th><th className={th}>Published then</th><th className={th}>Recorded</th><th className={th}>Result</th></tr>
+              </thead>
+              <tbody>
+                {ex.picks.map((p) => (
+                  <tr key={p.id} className="border-t border-navy-700/70">
+                    <td className={td}>{p.date}</td>
+                    <td className={`${td} !font-sans`}>{p.player ?? "–"}</td>
+                    <td className={`${td} !font-sans`}>{p.selection === "at_least" ? `${p.line}+` : p.selection === "below" ? `Under ${p.line}` : `${p.selection === "over" ? "Over" : "Under"} ${p.line}`} {(p.stat_label ?? p.stat ?? "").toLowerCase()}</td>
+                    <td className={td}>{p.model_version}</td>
+                    <td className={td}>{p.published_version}</td>
+                    <td className={`${td} !font-sans`}>{p.frozen_before_start ? "Pre-game" : "Reconstructed"}</td>
+                    <td className={td}>{p.result.toUpperCase()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </details>
+        <p className="mt-3 text-xs text-faint">{ex.rule}</p>
+      </Panel>
+    </Section>
   );
 }
