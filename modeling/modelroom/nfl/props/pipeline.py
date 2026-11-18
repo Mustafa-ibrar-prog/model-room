@@ -38,16 +38,16 @@ import os
 
 from modelroom.injuries import use as U
 
-from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, CONC_FILE, CONC_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
-                     PARAMS_FILE, PropParams)
+from .config import (CANDIDATE_FILE, CANDIDATE_VERSION, CLEAN_FILE, CLEAN_VERSION, CONC_FILE, CONC_VERSION, INJURY_FILE, INJURY_VERSION, MARKETS, MODEL_ID, MODEL_VERSION, OPP_FILE, OPP_VERSION,
+                     PARAMS_FILE, TDS_FILE, TDS_VERSION, PropParams)
 
 # Which NFL prop model the board and ledger use: 0.1.0 = params.json (the default everywhere); a candidate
 # version only when MODELROOM_NFL_PROPS_VERSION names it (the hosted test site's workflow). Rollback = unset
 # it. Every ledger record names the version that made it.
 VERSIONS = {MODEL_VERSION: PARAMS_FILE, CANDIDATE_VERSION: CANDIDATE_FILE, OPP_VERSION: OPP_FILE, INJURY_VERSION: INJURY_FILE,
-            CONC_VERSION: CONC_FILE}
+            CONC_VERSION: CONC_FILE, CLEAN_VERSION: CLEAN_FILE, TDS_VERSION: TDS_FILE}
 # Versions that may only ever run as shadows (recorded in the ledger, never published).
-SHADOW_ONLY = {CONC_VERSION}
+SHADOW_ONLY = {CONC_VERSION, CLEAN_VERSION, TDS_VERSION}
 
 
 def shadow_versions(active: str) -> list[str]:
