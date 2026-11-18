@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-18T00:33:02+00:00",
+  "generated_at": "2026-11-18T01:35:04+00:00",
   "season": 2026,
   "week": 11,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "1124feb1323f8dfc",
+    "inputs_hash": "b91cb20136b6abdf",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,7 +20,7 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-18T00:31:59.397387+00:00",
+      "generated_at": "2026-11-18T01:34:07.688924+00:00",
       "sources": {
         "espn": {
           "ok": true,
@@ -37,11 +37,13 @@
     },
     "shadow_versions": [
       "0.1.0",
-      "0.1.3"
+      "0.1.3",
+      "0.1.4",
+      "0.1.5"
     ]
   },
   "data": {
-    "last_ingest": "2026-11-18T00:31:25+00:00",
+    "last_ingest": "2026-11-18T01:33:40+00:00",
     "results_through": "2026-11-16",
     "markets": [
       {
@@ -14364,8 +14366,8 @@
               "raw_status": "Questionable",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-17T00:24:00+00:00",
-              "comment": "Mallory (hamstring) did not participate in Monday's walkthrough practice. Mallory suffered a hamstring injury during Week 10 prep, and he was not cleared to play in the Colts' 24-22 win over the Dolphins on Sunday. Indianapolis is operating on a short week, so Mallory faces an uphill battle to play against the Texans on Thursday.",
+              "report_time": "2026-11-18T01:04:00+00:00",
+              "comment": "Mallory (hamstring) was estimated as a non-participant for Tuesday's practice walkthrough. Tuesday was the second straight day that the Colts held a walkthrough instead of a traditional practice, and Mallory was deemed a DNP in both cases. It's looking increasingly unlikely that the tight end will be able to play Thursday versus Houston, though he could give himself a chance to suit up if he's able to show improvement over the next day. Should Mallory be out Thursday, Drew Ogletree and Pharaoh Brown would be the healthy tight ends behind starter Tyler Warren.",
               "conflict": null,
               "notes": []
             },
@@ -14676,12 +14678,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-12T01:15:00+00:00",
-            "detail": "Not Specified Hamstring Strain",
+            "report_time": "2026-11-18T01:24:00+00:00",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 12 01:15 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 18 01:24 UTC)"
           },
           {
             "player": "Dylan Horton",
@@ -14916,7 +14918,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T21:53:00+00:00",
+            "report_time": "2026-11-18T01:10:00+00:00",
             "detail": "Not Specified Wrist Not Specified",
             "long_term": false,
             "late_scratch": false,
@@ -14946,12 +14948,12 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T12:19:00+00:00",
+            "report_time": "2026-11-18T01:20:00+00:00",
             "detail": "Not Specified Foot Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Questionable (Nov 17 12:19 UTC)"
+            "conflict": "espn: Questionable (Nov 18 01:20 UTC)"
           },
           {
             "player": "Wyatt Teller",
@@ -14976,12 +14978,12 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T12:19:00+00:00",
+            "report_time": "2026-11-18T01:15:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Questionable (Nov 17 12:19 UTC)"
+            "conflict": "espn: Questionable (Nov 18 01:15 UTC)"
           }
         ],
         "away": [
@@ -14994,7 +14996,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-18T00:24:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Neck Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -15188,7 +15190,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T00:24:00+00:00",
+            "report_time": "2026-11-18T01:04:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
             "long_term": false,
             "late_scratch": false,
@@ -16955,8 +16957,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-13T18:03:00+00:00",
-              "comment": "Knight (concussion) is cleared to play Sunday against the Rams, Josh Weinfuss of ESPN.com reports. Knight figures to split backfield work with Tyler Allgeier, who played 96 percent of snaps last week when Knight was inactive for a 17-3 loss at Seattle. Knight suffered the concussion in Week 8, shortly after Jeremiyah Love injured his ankle -- an issue that sent the rookie to injured reserve not long after. Love is out for at least three more games, leaving Allgeier and Knight to split backfield work again.",
+              "report_time": "2026-11-18T01:10:00+00:00",
+              "comment": "Knight turned five carries into 19 yards, failed to haul in either of his two targets and recorded a tackle during the Cardinals' 34-6 loss to the Rams on Sunday. Knight was cleared to return for Week 10 from a one-game absence while in the league's concussion protocol. His 19 snaps were actually ahead of fellow running back Tyler Allgeier (16), with the duo each logging five carries, although the Cardinals logged only 35 offensive snaps for the entire game and finished with a measly 17:37 time of possession. It was Arizona's first game with rookie third-rounder Carson Beck under center, and Knight and the offense will have its hands full in Week 11 against Kansas City, whose defense ranks eighth in the NFL in yards allowed per game (314.8).",
               "conflict": null,
               "notes": [
                 "starting QB Carson Beck has 18 career pass attempts: team passing yards x0.93"
@@ -29316,12 +29318,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T00:06:00+00:00",
+            "report_time": "2026-11-18T01:19:00+00:00",
             "detail": "Not Specified Wrist Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 17 00:06 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 18 01:19 UTC)"
           },
           {
             "player": "Jalen Brooks",
@@ -31701,7 +31703,7 @@
           "opp": "CAR",
           "position": "RB",
           "game_id": "2026_11_BAL_CAR",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -32426,9 +32428,18 @@
             "qb_note": null,
             "team_pass_attempts": 28.6,
             "team_carries": 29.2,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.473,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-18T00:33:00+00:00",
+              "comment": "Hill turned three carries into four yards and added five catches on seven targets for 34 yards during the Ravens' 23-20 loss to the Chargers on Monday. Hill also had a 14-yard carry midway through the first quarter, but the play was nullified by an offensive holding call. The veteran running back connected on a 17-yard catch with Jacoby Brissett late in the third, which set up a 36-yard field goal by Riley Patterson four plays later. Hill's five catches were a season high, and even with the Ravens' quarterback carousel over the last three weeks, the 2019 fourth-rounder has hauled in at least three passes in each of his last five outings. Losers of five straight games, the Ravens will look to turn their fortunes around in a Week 11 road tilt against the Panthers on Sunday.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Lamar Jackson",
@@ -69321,7 +69332,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-18T00:19:00+00:00",
-            "detail": null,
+            "detail": "Not Specified Biceps Surgery",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -69350,7 +69361,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-17T03:14:00+00:00",
+            "report_time": "2026-11-18T00:26:00+00:00",
             "detail": "Right Knee - Meniscus Surgery",
             "long_term": true,
             "late_scratch": false,
@@ -112722,8 +112733,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-11T00:29:00+00:00",
-              "comment": "Vidal rushed seven times for 30 yards in Sunday's 44-22 loss to the Texans. He added one catch for six yards on three targets. The Chargers continue to use a three-man backfield, an unfriendly fantasy situation and one to avoid when making lineup decisions each week. Vidal has been productive when he does get touches, rushing 36 times for 162 yards (4.5 YPC) and one touchdown across eight games. He's also caught 10 passes for 56 yards and an additional score.",
+              "report_time": "2026-11-18T00:13:00+00:00",
+              "comment": "Vidal turned two carries into zero yards, brought in both of his targets for 14 yards and returned one kickoff for 32 yards during the Chargers' 23-20 win over the Ravens on Monday. Vidal's 15 offensive snaps were just ahead of Keaton Mitchell's 13, but both running backs took a back seat to Omarion Hampton, who was on the field for 36 of the Chargers' 57 snaps on offense and led the backfield with 22 carries for 105 yards and one touchdown. Vidal's two carries were his fewest since Week 3 against the Bills (1), although his 15-yard catch early in the third quarter set the Chargers up just outside the red zone, with Cameron Dicker connecting on a 34-yard field goal four plays later. Vidal and Mitchell will continue to operate in rotational roles behind Hampton heading into Week 11 against the Jets on Sunday.",
               "conflict": null,
               "notes": []
             },
@@ -117320,8 +117331,8 @@
               "raw_status": "Active",
               "source": "espn",
               "confirmed": false,
-              "report_time": "2026-11-11T00:08:00+00:00",
-              "comment": "Kolar brought in all three of his targets for 31 yards in a 44-22 loss to the Texans on Sunday. Kolar has recorded three catches in four of his last five outings, although he's cracked 30-plus receiving yards in just two of those contests. The Chargers average a season-low 15.1 points per game, and their 201.9 receiving yards per game is ninth-fewest in the NFL, making pass catchers like Kolar hard to rely on for sustained production. The 0-8 Chargers will look to capture their first win of the season in Week 10 against the Ravens on Monday Night Football.",
+              "report_time": "2026-11-18T00:18:00+00:00",
+              "comment": "Kolar caught two of three passes for 16 yards during the Chargers' 23-20 win over the Ravens on Monday. Kolar's 41 offensive snaps were by far the most among Chargers tight ends, well ahead of a returning David Njoku (19) and Oronde Gadsden (12), although the latter briefly left Monday's game due to an eye injury. That said, Kolar was held to two catches or fewer for the second time in three games, and he has not seen a red zone target from Justin Herbert since Week 6 against the Chiefs. Kolar has amassed a 15-145-0 receiving line on 23 targets across seven regular-season games heading into Week 11 against the Jets on Sunday.",
               "conflict": null,
               "notes": []
             },
