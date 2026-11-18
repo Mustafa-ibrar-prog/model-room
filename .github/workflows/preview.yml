@@ -184,15 +184,31 @@ jobs:
           KINDS: ${{ needs.plan.outputs.kinds }}
         run: |
           pip install -e . "psycopg[binary]"
-          python -m modelroom nba ingest
-          python -m modelroom nfl ingest
-          python -m modelroom sources validate
+          # Each league is downloaded and validated on its own (2026-11-18). A league whose data fails (most often
+          # nflverse posting an NFL game's play-by-play a few hours after it ends) is skipped for this refresh: none of
+          # its predictions are rebuilt, so the site keeps its last good ones and never shows predictions built on
+          # incomplete data. The other league still refreshes. Both failing = the whole refresh fails, as before.
+          NBA_OK=1; NFL_OK=1
+          for lg in nba nfl; do
+            if python -m modelroom $lg ingest && python -m modelroom sources validate --league $lg > /tmp/validate_$lg.txt 2>&1; then :
+            else [ $lg = nba ] && NBA_OK=0 || NFL_OK=0; fi
+            cat /tmp/validate_$lg.txt 2>/dev/null || true
+          done
+          for lg in nba nfl; do
+            ok=$([ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)
+            why=""; [ "$ok" = 1 ] || why=$(grep -h "FAIL  " /tmp/validate_$lg.txt 2>/dev/null | head -2 | sed 's/^ *FAIL  //' | paste -sd';' - | cut -c1-200)
+            echo "${lg}_ok=$ok" >> "$GITHUB_OUTPUT"
+            [ "$ok" = 1 ] && echo "${lg}_why=" >> "$GITHUB_OUTPUT" || echo "${lg}_why=${why:-download or validation failed}" >> "$GITHUB_OUTPUT"
+            [ "$ok" = 1 ] || echo "::warning::${lg^^} data not ready (${why:-download or validation failed}); ${lg^^} predictions not rebuilt this refresh, the site keeps the last good ones"
+          done
+          if [ $NBA_OK = 0 ] && [ $NFL_OK = 0 ]; then echo "::error::NBA and NFL data both failed"; exit 1; fi
+          run() { lg=$1; shift; if [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ]; then "$@"; else echo "skipped ($lg data not ready): $*"; fi; }
           # Injury feed (test site): the official NBA injury report + ESPN's injury reports (+ nflverse's copy of the
           # NFL report). A failed source is logged on the site; the engines then fall back to their own
           # availability rules. Then the NFL starters are rebuilt with the live depth chart and designations.
-          python -m modelroom injuries nba || echo "::warning::NBA injury feed failed; NBA engines use the missed-games rule"
-          python -m modelroom injuries nfl || echo "::warning::NFL injury feed failed; NFL engines use nflverse injury reports"
-          python -m modelroom nfl starters > /dev/null
+          run nba python -m modelroom injuries nba || echo "::warning::NBA injury feed failed; NBA engines use the missed-games rule"
+          run nfl python -m modelroom injuries nfl || echo "::warning::NFL injury feed failed; NFL engines use nflverse injury reports"
+          run nfl python -m modelroom nfl starters > /dev/null
           # Sportsbook lines (DraftKings, FanDuel and other US books) from The Odds API, only when the
           # ODDS_API_KEY secret is set. Free tier = 500 credits a month; each league costs 3 credits a call, so
           # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
@@ -206,6 +222,7 @@ jobs:
           # Every call's remaining credits go to preview-ledger/odds_api_usage.jsonl (no key, no URL, no odds);
           # a call is skipped when fewer than 15 credits are left this month (forward-only: nothing is back-filled).
           for lg in nba nfl; do
+            [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || { echo "$lg lines skipped: $lg data not ready"; continue; }
             mkdir -p data/processed/$lg
             if [ "${ODDS_STORE:-off}" = on ] && python -m modelroom odds-store load --league $lg > /tmp/odds_load_$lg.json; then
               python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); print('$lg snapshots loaded from the store:', d['rows'])"
@@ -222,21 +239,23 @@ jobs:
               echo "::warning::sportsbook snapshot store not reachable: $lg lines not loaded or fetched this refresh"
             fi
           done
-          python -m modelroom nba project
-          python -m modelroom nfl project
-          python -m modelroom nfl props
-          python -m modelroom nba props
+          run nba python -m modelroom nba project
+          run nfl python -m modelroom nfl project
+          run nfl python -m modelroom nfl props
+          run nba python -m modelroom nba props
           python -m modelroom ledger verify
-          python -m modelroom history
-          python -m modelroom nba props-monitor
-          python -m modelroom nfl props-monitor
-          python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
+          # Results history for each league whose data passed (a delayed league keeps its last history until it does).
+          python -m modelroom history --league "$( { [ $NFL_OK = 1 ] && echo nfl; [ $NBA_OK = 1 ] && echo nba; } | paste -sd, -)"
+          run nba python -m modelroom nba props-monitor
+          run nfl python -m modelroom nfl props-monitor
+          run nba python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
           # Historical sportsbook analysis (read-only toward models, probabilities, grading and every existing record):
           # matches each stored line to the latest game prediction recorded BEFORE it, appends the comparisons and a
           # detailed report to the private append-only tables odds.comparisons / odds.reports, and writes aggregate
           # counts only to preview-ledger/reports/sportsbook_<lg>.json. No Odds API calls. A failure never fails the refresh.
           if [ "${ODDS_STORE:-off}" = on ]; then
             for lg in nba nfl; do
+              [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || continue
               python -m modelroom markets sportsbook $lg > /tmp/sb_$lg.json \
                 && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'])" \
                 || echo "::warning::$lg sportsbook analysis failed; nothing else is affected"
@@ -244,8 +263,8 @@ jobs:
           fi
           # Market-settled grading. Exchange providers are never switched on here (public repo, provider
           # terms), so this publishes an empty record with the reason; it fills in where prices are enabled.
-          python -m modelroom markets settle nfl
-          python -m modelroom markets settle nba
+          run nfl python -m modelroom markets settle nfl
+          run nba python -m modelroom markets settle nba
 
       - name: Keep the last good projections if anything failed
         if: steps.data.outcome == 'failure'
@@ -264,11 +283,31 @@ jobs:
         env:
           DATA: ${{ steps.data.outcome }}
           SLOTS: ${{ needs.plan.outputs.slots }}
+          NBA_OK: ${{ steps.data.outputs.nba_ok }}
+          NFL_OK: ${{ steps.data.outputs.nfl_ok }}
+          NFL_WHY: ${{ steps.data.outputs.nfl_why }}
+          NBA_WHY: ${{ steps.data.outputs.nba_why }}
         run: |
           # Every attempt is logged (append-only), success or failure, with the slots it covered.
           if [ "$DATA" = "success" ]; then ST=success; elif [ "$DATA" = "skipped" ]; then ST=skipped; else ST=failed; fi
-          [ "$ST" = "skipped" ] || (cd modeling && python3 modelroom/refresh_plan.py record --slots "${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}" --status $ST --note "${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}" \
-            && python3 modelroom/refresh_plan.py status > data/published/refresh_status.json)
+          NOTE="${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}"
+          ALL="${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}"
+          if [ "$ST" = "success" ] && { [ "$NBA_OK" = 0 ] || [ "$NFL_OK" = 0 ]; }; then
+            # One league's data wasn't ready: its own slots (and the shared ones) stay failed so the planner retries them
+            # as before; the other league's slots are done. The delay is logged separately in the note.
+            BAD=$([ "$NFL_OK" = 0 ] && echo nfl || echo nba); WHY=$([ "$BAD" = nfl ] && echo "$NFL_WHY" || echo "$NBA_WHY")
+            # league slots look like pregame:nba:<time> / inactives:nfl:<time>; morning, midday, afternoon and manual cover both
+            GOOD=$(python3 -c "import sys; print(','.join(x for x in sys.argv[1].split(',') if x.count(':') >= 2 and x.split(':')[1] in ('nba','nfl') and x.split(':')[1] != sys.argv[2]))" "$ALL" "$BAD")
+            REST=$(python3 -c "import sys; print(','.join(x for x in sys.argv[1].split(',') if x and not (x.count(':') >= 2 and x.split(':')[1] in ('nba','nfl') and x.split(':')[1] != sys.argv[2])))" "$ALL" "$BAD")
+            (cd modeling \
+              && { [ -z "$GOOD" ] || python3 modelroom/refresh_plan.py record --slots "$GOOD" --status success --note "$NOTE; ${BAD} data delayed, ${BAD} not rebuilt"; } \
+              && { [ -z "$REST" ] || python3 modelroom/refresh_plan.py record --slots "$REST" --status failed --note "$NOTE; ${BAD} data delayed: ${WHY}"; } \
+              && python3 modelroom/refresh_plan.py status > data/published/refresh_status.json)
+            ST=partial
+          else
+            [ "$ST" = "skipped" ] || (cd modeling && python3 modelroom/refresh_plan.py record --slots "$ALL" --status $( [ "$ST" = success ] && echo success || echo failed ) --note "$NOTE" \
+              && python3 modelroom/refresh_plan.py status > data/published/refresh_status.json)
+          fi
           [ "$ST" = "skipped" ] || git add -f modeling/preview-ledger/refresh_log.jsonl modeling/data/published/refresh_status.json
           if [ "$DATA" = "success" ]; then
             git add -f modeling/data/published/nba.json modeling/data/published/nfl.json \

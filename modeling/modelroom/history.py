@@ -391,5 +391,5 @@ def performance(league: str, games: list[dict], props: list[dict]) -> dict:
     return out
 
 
-def run() -> dict:
-    return {lg: build(lg) for lg in ("nfl", "nba")}
+def run(leagues: tuple = ("nfl", "nba")) -> dict:
+    return {lg: build(lg) for lg in leagues}

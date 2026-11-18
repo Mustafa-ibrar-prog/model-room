@@ -250,7 +250,7 @@ def _markets(args) -> int:
 def _history(args) -> int:
     from modelroom import history
 
-    _print(history.run())
+    _print(history.run(tuple(args.league.split(",")) if getattr(args, "league", None) else ("nfl", "nba")))
     return 0
 
 
@@ -323,7 +323,8 @@ def main(argv: list[str] | None = None) -> int:
     os_.add_argument("--league", required=True, choices=["nba", "nfl"])
     os_.add_argument("--path", default=None)
     os_.add_argument("--batch", default=None)
-    sub.add_parser("history", help="results history + performance files for the website")
+    h = sub.add_parser("history", help="results history + performance files for the website")
+    h.add_argument("--league", help="comma-separated leagues to build (default: nfl,nba)")
     ij = sub.add_parser("injuries", help="fetch + combine injury sources (official NBA report, ESPN, nflverse)")
     ij.add_argument("league", choices=["nba", "nfl"])
 
