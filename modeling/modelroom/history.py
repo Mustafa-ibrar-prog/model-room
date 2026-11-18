@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 from modelroom import picks as P
+from modelroom import published as PUB
 from modelroom.common import ledger
 from modelroom.common.paths import data_root, ensure, ledger_path
 from modelroom.common.publish import write_board
@@ -166,7 +167,13 @@ def build(league: str) -> dict:
     season_now = int(games.loc[games["status"].isin(["final", "scheduled"]), "season"].max())
     games = games[games["season"] >= season_now - SEASONS_BACK]
     game_recs = _pregame(ledger.read(ledger_path(league)))
-    prop_recs = _pregame(ledger.read_series(ledger_path(f"{league}_props")))
+    # Only the version that was published when each record was made: shadow versions share these ledgers and must
+    # never become a pick or a shown result (see modelroom/published.py).
+    prop_recs = _pregame([r for r in ledger.read_series(ledger_path(f"{league}_props")) if PUB.is_published(league, r)])
+    env_v = PUB.current_env_version(league)
+    if env_v and env_v != PUB.published_version(league, datetime.now(timezone.utc)):
+        print(f"WARNING: MODELROOM_{league.upper()}_PROPS_VERSION={env_v} but modelroom/published.py says "
+              f"{PUB.published_version(league, datetime.now(timezone.utc))}: add the switch to the timeline")
     stats, stat_of, label_of = _player_stats(league)
     markets, sig = _market(league), _sigmas(league)
     gid_key = "nfl_game_id" if league == "nfl" else "nba_game_id"

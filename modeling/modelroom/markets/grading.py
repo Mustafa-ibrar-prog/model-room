@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 import numpy as np
 import pandas as pd
 
+from modelroom import published as PUB
 from modelroom.common import ledger
 from modelroom.common.paths import data_root, ensure, ledger_path
 
@@ -59,7 +60,7 @@ def _context(league: str) -> dict:
     try:
         gid = "nfl_game_id" if league == "nfl" else "nba_game_id"
         for r in ledger.read_series(ledger_path(f"{league}_props")):
-            if r["generated_at"] >= r["game_start"]:
+            if r["generated_at"] >= r["game_start"] or not PUB.is_published(league, r):   # never a shadow's number
                 continue
             k = (str(r[gid]), str(r["player_id"]))
             if k not in out["props"] or r["generated_at"] > out["props"][k]["generated_at"]:
