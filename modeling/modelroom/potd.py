@@ -324,9 +324,20 @@ def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
             r["explanation"] = explain(p)     # wording from the stored numbers; the ledger record itself is never edited
         r["result"] = (grades.get(p["pick_key"]) or {}).get("result") or ("pending" if p.get("status") == "pick" else "none")
         rows.append(r)
-    rec = {lg: summary([r["result"] for r in rows if r["league"] == lg and r["status"] == "pick"]) for lg in ("nba", "nfl")}
+    for r in rows:
+        if r["status"] == "pick" and r.get("market") != "prop":
+            r["format"] = "game_line_before_props_only"     # recorded before the props-only change; kept as recorded
+    props = [r for r in rows if r.get("format") != "game_line_before_props_only"]
+    rec = {lg: summary([r["result"] for r in props if r["league"] == lg and r["status"] == "pick"]) for lg in ("nba", "nfl")}
+
+    def card(lg):
+        r = next((x for x in rows if x["league"] == lg and x["date"] == today), None)
+        if r is not None and r.get("format") == "game_line_before_props_only":
+            return {"pick_key": r["pick_key"], "date": today, "league": lg, "status": "no_pick", "format": "player_prop",
+                    "reason": "no approved player-prop line source", "selected_at": r["selected_at"], "result": "none"}
+        return r
     return {"generated_at": now.isoformat(timespec="seconds"), "date": today,
-            "today": {lg: next((r for r in rows if r["league"] == lg and r["date"] == today), None) for lg in ("nba", "nfl")},
+            "today": {lg: card(lg) for lg in ("nba", "nfl")},
             "history": rows, "record": rec, "rule": {"min_prob": MIN_PROB, "min_edge": MIN_EDGE, "unvalidated_until": UNVALIDATED_UNTIL},
             "notice": ("Unvalidated. Model Room has not shown an edge against the market yet: these are the model's strongest "
                        "disagreements with the consensus line, not guaranteed results and not betting advice."),

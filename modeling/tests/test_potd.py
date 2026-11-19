@@ -109,3 +109,15 @@ def test_run_freezes_once_per_day_and_grades_separately(tmp_path, monkeypatch):
 
 def test_real_run_has_no_line_source_configured():
     assert potd.PROP_LINE_SOURCES == {}                # nothing is fetched or estimated until a source is approved
+
+
+def test_game_line_recorded_before_props_only_is_kept_but_not_shown_or_counted():
+    now = datetime(2026, 11, 19, 19, 0, tzinfo=timezone.utc)
+    old = {"pick_key": "potd:nfl:2026-11-19", "date": "2026-11-19", "league": "nfl", "status": "pick", "market": "spread",
+           "selection": "away", "team": "IND", "line": 12.5, "selected_at": "2026-11-19T08:02:00+00:00",
+           "home": "HOU", "away": "IND", "model_prob": 0.7179, "projection": -5.0, "difference": 7.5}
+    pub = potd.publish([old], {"potd:nfl:2026-11-19": {"result": "hit"}}, now)
+    card = pub["today"]["nfl"]
+    assert card["status"] == "no_pick" and card["reason"] == "no approved player-prop line source"
+    assert pub["history"][0]["format"] == "game_line_before_props_only" and pub["history"][0]["line"] == 12.5   # kept as recorded
+    assert pub["record"]["nfl"]["hit"] == 0 and pub["record"]["nfl"]["graded"] == 0                         # not counted
