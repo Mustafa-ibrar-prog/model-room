@@ -14,6 +14,8 @@ export interface EngineQuoteView {
   ask_size: number | null;
   fee_yes: number | null;
   fee_no: number | null;
+  /** Polymarket US fee coefficient θ (fee = θ·p·(1−p) per contract) when the live listing gives one; absent elsewhere. */
+  fee_coef?: number | null;
   ev_yes: number | null;
   ev_no: number | null;
   captured_at: string;
