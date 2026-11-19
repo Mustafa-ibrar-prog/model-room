@@ -80,8 +80,8 @@ describe("a player the injury report lists as out", () => {
 
 describe("navigation", () => {
   it("is home, the four sports sections and performance", () => {
-    expect(NAV.map((n) => n.label)).toEqual(["Home", "NBA Props", "NFL Props", "NBA", "NFL", "Performance"]);
-    expect(NAV.map((n) => n.href)).toEqual(["/", "/nba-props", "/nfl-props", "/nba", "/nfl", "/performance"]);
+    expect(NAV.map((n) => n.label)).toEqual(["Home", "NBA Props", "NFL Props", "NBA", "NFL", "Pick of the Day", "Performance"]);
+    expect(NAV.map((n) => n.href)).toEqual(["/", "/nba-props", "/nfl-props", "/nba", "/nfl", "/pick-of-the-day", "/performance"]);
   });
 
   it("builds league links from only the parts that are set", () => {

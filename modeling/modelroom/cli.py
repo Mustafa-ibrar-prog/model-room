@@ -266,7 +266,7 @@ def _ledger(args) -> int:
     from modelroom.common import ledger
     from modelroom.common.paths import ledger_path
 
-    for league in ("nba", "nfl", "nfl_props", "nba_props", "nfl_weather"):
+    for league in ("nba", "nfl", "nfl_props", "nba_props", "nfl_weather", "potd", "potd_grades"):
         for name, n in ledger.verify_series(ledger_path(league)).items():
             print(f"{name}: {n} predictions, chain intact")
     from modelroom import picks as P
@@ -333,12 +333,21 @@ def main(argv: list[str] | None = None) -> int:
     os_.add_argument("--batch", default=None)
     h = sub.add_parser("history", help="results history + performance files for the website")
     h.add_argument("--league", help="comma-separated leagues to build (default: nfl,nba)")
+    pd_ = sub.add_parser("potd", help="TEST: Pick of the Day (one NBA, one NFL; frozen once a day; graded)")
+    pd_.add_argument("--league", help="comma-separated leagues (default: nba,nfl)")
     ij = sub.add_parser("injuries", help="fetch + combine injury sources (official NBA report, ESPN, nflverse)")
     ij.add_argument("league", choices=["nba", "nfl"])
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "injuries": _injuries, "odds-store": _odds_store}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "potd": _potd, "injuries": _injuries, "odds-store": _odds_store}[args.group]
     return handler(args)
+
+
+def _potd(args) -> int:
+    from modelroom import potd
+
+    _print(potd.run(tuple((args.league or "nba,nfl").split(","))))
+    return 0
 
 
 if __name__ == "__main__":

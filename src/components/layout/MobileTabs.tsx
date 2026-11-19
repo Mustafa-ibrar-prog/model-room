@@ -31,6 +31,7 @@ const ICON: Record<string, React.ReactNode> = {
   "/nfl-props": PERSON,
   "/nba": BALL,
   "/nfl": FOOTBALL,
+  "/pick-of-the-day": <path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6.1L12 16.6 6.6 19.6l1.2-6.1L3.3 9.3l6.1-.7z" />,
   "/performance": <path d="M4 19V9M10 19V5M16 19v-7M22 19H2" />,
 };
 /** Phones: the four sports sections and Performance. The logo is the way home. */
@@ -58,7 +59,7 @@ export function MobileTabs() {
                 <svg viewBox="0 0 24 24" className="h-[22px] w-[22px]" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   {ICON[item.href]}
                 </svg>
-                {item.label}
+                {item.href === "/pick-of-the-day" ? "Pick" : item.label}
               </Link>
             </li>
           );
