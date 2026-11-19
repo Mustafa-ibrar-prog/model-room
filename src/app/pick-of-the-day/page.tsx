@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
 import { publishedDir } from "@/server/engine/board";
-import { ownerLivePropPick, ownerLiveStatus, type OwnerLive } from "@/server/markets/potdLive";
+import { ownerLivePropPick, potdLiveStatus, type OwnerLive } from "@/server/markets/potdLive";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -80,7 +80,8 @@ export default function PickOfTheDayPage() {
 async function Body() {
   // Owner login: each league's card is the live Polymarket comparison (never stored); everyone else: the recorded pick.
   const f = await load();                                  // load() awaits connection(): request time before any clock read
-  const [nbaLive, nflLive, status] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl"), ownerLiveStatus()]);
+  const [nbaLive, nflLive] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  const status = potdLiveStatus();
   const live = { nba: nbaLive, nfl: nflLive };
   if (!f) return <div className="mx-auto max-w-5xl px-4 sm:px-6"><Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." /></div>;
   return (
@@ -111,7 +112,7 @@ function PickCard({ league, p, liveOff }: { league: "nba" | "nfl"; p: Pick | nul
             : `${p.candidates_considered ?? 0} prop lines checked; none cleared the bar.`}
         </p>
         {liveOff && liveOff !== "off in production" ? (
-          <p className="mt-2 text-xs leading-relaxed text-faint">Live Polymarket comparison (owner only) is off for this login: {liveOff}.</p>
+          <p className="mt-2 text-xs leading-relaxed text-faint">Live Polymarket comparison is off: {liveOff}.</p>
         ) : null}
       </Panel>
     );
@@ -183,7 +184,7 @@ function History({ f }: { f: File }) {
 
 function LiveCard({ league, r }: { league: "nba" | "nfl"; r: OwnerLive }) {
   const title = league.toUpperCase();
-  const tag = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">Owner only · live Polymarket · not recorded</span>;
+  const tag = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">TEST · live Polymarket · not recorded</span>;
   const p = r.pick;
   if (!p) {
     return (
