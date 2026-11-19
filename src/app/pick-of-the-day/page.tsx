@@ -79,7 +79,8 @@ export default function PickOfTheDayPage() {
 
 async function Body() {
   // Owner login: each league's card is the live Polymarket comparison (never stored); everyone else: the recorded pick.
-  const [f, nbaLive, nflLive] = await Promise.all([load(), ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  const f = await load();                                  // load() awaits connection(): request time before any clock read
+  const [nbaLive, nflLive] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
   const live = { nba: nbaLive, nfl: nflLive };
   if (!f) return <div className="mx-auto max-w-5xl px-4 sm:px-6"><Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." /></div>;
   return (
