@@ -74,6 +74,9 @@ export interface PmEvent { slug?: string; startTime?: string; teams?: { id?: num
 const hits = new Map<string, { at: number; ev: PmEvent }>();
 const misses = new Map<string, number>();
 
+/** Slugs whose last request failed (HTTP status, or 0 for a timeout / network error); 404 is "not listed", not a failure. */
+const failed = new Map<string, number>();
+
 async function getSlug(slug: string): Promise<PmEvent | null> {
   const fx = devFixture();
   if (fx) {
@@ -92,14 +95,20 @@ async function getSlug(slug: string): Promise<PmEvent | null> {
     const r = await fetch(`${BASE}/v1/events/slug/${encodeURIComponent(slug)}`, { cache: "no-store", signal: AbortSignal.timeout(TIMEOUT_MS), headers: { accept: "application/json" } });
     if (r.status === 404) {
       misses.set(slug, now);
+      failed.delete(slug);
       return null;
     }
-    if (!r.ok) return h?.ev ?? null;
+    if (!r.ok) {
+      failed.set(slug, r.status);
+      return h?.ev ?? null;
+    }
+    failed.delete(slug);
     const d = (await r.json()) as { event?: PmEvent } & PmEvent;
     const ev = d.event ?? d;
     hits.set(slug, { at: now, ev });
     return ev;
   } catch {
+    failed.set(slug, 0);
     return h?.ev ?? null; // keep the last copy on a timeout rather than blanking the page
   }
 }
@@ -300,7 +309,7 @@ export function bestOf(views: EngineQuoteView[]): EngineThreshold["best"] {
   return { yes, no, edge };
 }
 
-export interface LiveInfo { provider: string; fetchedAt: string; games: number; found: number; matched: number }
+export interface LiveInfo { provider: string; fetchedAt: string; games: number; found: number; matched: number; errors: number; errorCodes: number[] }
 
 /**
  * A copy of the board with live Polymarket US quotes merged into the listed games. Lines the board
@@ -356,8 +365,18 @@ export async function withLivePolymarket(league: League, board: EnginePropsBoard
   });
   return {
     board: { ...board, games },
-    info: { provider: PROVIDER, fetchedAt: capturedAt, games: targets.length, found: events.size, matched },
+    info: { provider: PROVIDER, fetchedAt: capturedAt, games: targets.length, found: events.size, matched, ...failures(league, targets, events) },
   };
+}
+
+function failures(league: League, targets: { game_id: string; away: { abbr: string }; home: { abbr: string }; game_date: string }[], events: Map<string, PmEvent>) {
+  const codes: number[] = [];
+  for (const g of targets) {
+    if (events.has(g.game_id)) continue;
+    const c = candidateSlugs(league, g.away.abbr, g.home.abbr, g.game_date).map((x) => failed.get(x)).find((x) => x !== undefined);
+    if (c !== undefined) codes.push(c);
+  }
+  return { errors: codes.length, errorCodes: [...new Set(codes)] };
 }
 
 /** Main live game lines for a set of games (owner view only; the caller checks ownerLiveMarkets()). */
