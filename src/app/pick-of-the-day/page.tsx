@@ -202,7 +202,7 @@ function LiveCard({ league, r }: { league: string; r: { pick: LivePropPick | nul
       <div className="text-xs text-faint">{league} · {p.player} · {p.matchup} · {pt(p.start)}</div>
       <div className="mt-1 font-display text-xl font-700 text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}</div>
       <div className="mt-1 text-xs text-mute">
-        <span className="text-market">Polymarket {p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.marketProb * 100).toFixed(0)}¢</span>
+        <span className="text-market">Polymarket {p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢ + {(p.fee * 100).toFixed(1)}¢ fee</span>
         {" · "}<span className="text-model">Model {p.projection} · {(p.modelProb * 100).toFixed(0)}%</span> · model {p.modelVersion} · fetched {pt(r.fetchedAt)}
       </div>
     </div>

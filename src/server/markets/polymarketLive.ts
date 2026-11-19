@@ -275,6 +275,7 @@ export function quoteView(q: LiveQuote, p: number, capturedAt: string, started: 
     ask_size: null,
     fee_yes: q.ask !== null ? r4(fy) : null,
     fee_no: noAsk !== null ? r4(fn) : null,
+    fee_coef: q.fee,
     ev_yes: q.ask !== null ? r4(p - q.ask - fy) : null,
     ev_no: noAsk !== null ? r4(1 - p - noAsk - fn) : null,
     captured_at: capturedAt,
