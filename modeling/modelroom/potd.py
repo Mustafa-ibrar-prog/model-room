@@ -44,8 +44,8 @@ TZ = "America/Los_Angeles"
 SOURCE = "potd"
 LIMITS = ("Player props only. No approved source supplies a storable player-prop line yet: Polymarket prices may not be "
           "stored or shown publicly without documented permission (participant agreement I.22), the free sportsbook feed "
-          "carries no props, Sportsgameodds needs a payment-page signup and forbids keeping its data, and daily-fantasy pick "
-          "as PrizePicks have no documented data permission. Until one does, each day shows no qualifying pick; no line "
+          "carries no props, the free odds-API tiers checked need a payment-page signup or forbid keeping their data, and "
+          "daily-fantasy pick boards have no documented data permission. Until one does, each day shows no qualifying pick; no line "
           "is ever estimated.")
 
 
