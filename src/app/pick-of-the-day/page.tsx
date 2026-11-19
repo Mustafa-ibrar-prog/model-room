@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
 import { publishedDir } from "@/server/engine/board";
+import { ownerLivePropPick } from "@/server/markets/potdLive";
+import type { LivePropPick } from "@/server/markets/potdPick";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -16,7 +18,8 @@ export const metadata: Metadata = { title: "Pick of the Day" };
  * Everything shown comes from data/published/pick_of_the_day.json (built by `python -m modelroom potd`).
  */
 type Pick = {
-  pick_key: string; date: string; league: "nba" | "nfl"; status: "pick" | "no_pick"; market?: "spread" | "total" | "moneyline";
+  pick_key: string; date: string; league: "nba" | "nfl"; status: "pick" | "no_pick"; market?: "prop" | "spread" | "total" | "moneyline";
+  format?: string; reason?: string; stat?: string; player?: string;
   selection?: string; team?: string | null; home?: string; away?: string; line?: number | null; price?: number | null;
   model_prob?: number; market_prob?: number | null; reference_prob?: number; edge?: number; projection?: number | null;
   difference?: number | null; explanation?: string; model_version?: string; selected_at: string; game_start?: string;
@@ -40,15 +43,18 @@ const pt = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " PT" : "—";
 const pct = (p?: number | null) => (p == null ? null : `${(p * 100).toFixed(0)}%`);
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
-const MARKET: Record<string, string> = { spread: "Spread", total: "Total points", moneyline: "Moneyline" };
+const MARKET: Record<string, string> = { prop: "Player prop", spread: "Spread", total: "Total points", moneyline: "Moneyline" };
+const STAT = (s?: string) => (s ?? "").replace(/_/g, " ").replace("anytime td", "touchdowns").replace("passing tds", "passing TDs");
 
 function sideText(p: Pick): string {
+  if (p.market === "prop") return `${p.selection === "over" ? "Over" : "Under"} ${p.line} ${STAT(p.stat)}`;
   if (p.market === "total") return `${p.selection === "over" ? "Over" : "Under"} ${p.line}`;
   if (p.market === "spread") return `${p.team} ${signed(p.line as number)}`;
   return `${p.team} to win`;
 }
 
 function lineText(p: Pick): string {
+  if (p.market === "prop") return `${p.line}`;
   if (p.market === "moneyline") return p.price == null ? "—" : signed(p.price);
   if (p.market === "spread") return `${p.team} ${signed(p.line as number)}`;
   return `${p.line}`;
@@ -56,6 +62,7 @@ function lineText(p: Pick): string {
 
 function projText(p: Pick): string {
   if (p.projection == null) return "—";
+  if (p.market === "prop") return `${p.projection} ${STAT(p.stat)}`;
   if (p.market === "total") return `${p.projection} pts`;
   return `${p.team} by ${p.projection > 0 ? p.projection : `${p.projection} (loses by ${-p.projection})`}`;
 }
@@ -63,7 +70,7 @@ function projText(p: Pick): string {
 export default function PickOfTheDayPage() {
   return (
     <>
-      <PageHeader title="Pick of the Day" intro="Model Room's single biggest disagreement with the market in each league, picked once a day and graded after the game." />
+      <PageHeader title="Pick of the Day" intro="One player prop per league: Model Room's biggest disagreement with the market line, picked once a day and graded after the game." />
       <Suspense fallback={<div className="mx-auto max-w-5xl px-4 sm:px-6"><TableSkeleton rows={6} /></div>}>
         <Body />
       </Suspense>
@@ -80,11 +87,11 @@ async function Body() {
       <div className="grid gap-4 md:grid-cols-2">
         {(["nba", "nfl"] as const).map((lg) => <PickCard key={lg} league={lg} p={f.today[lg]} />)}
       </div>
+      <Suspense fallback={null}><OwnerPreview /></Suspense>
       <History f={f} />
       <p className="text-xs leading-relaxed text-faint">
         Qualifies only when the model gives the side at least {pct(f.rule.min_prob)} and at least {(f.rule.min_edge * 100).toFixed(0)} points more
-        than the market reference. Spreads and totals are compared against an even 50% reference because consensus prices for them aren&apos;t stored;
-        moneylines use the de-vigged consensus price. {f.limits} Updated {pt(f.generated_at)}.
+        than the market&apos;s probability (or an even 50% when the line comes without a price). {f.limits} Updated {pt(f.generated_at)}.
       </p>
     </div>
   );
@@ -98,7 +105,9 @@ function PickCard({ league, p }: { league: "nba" | "nfl"; p: Pick | null }) {
         <span className="text-xs font-600 tracking-wide text-faint">{title}</span>
         <h2 className="mt-auto font-display text-2xl font-700 text-ink">No qualifying pick today</h2>
         <p className="mt-2 text-sm text-mute">
-          {p ? `${p.candidates_considered ?? 0} lines checked across ${p.games_with_lines ?? 0} games; none cleared the bar.` : "Waiting for today's market lines."}
+          {!p ? "No games left today." : p.reason === "no approved player-prop line source"
+            ? "No approved source supplies player-prop lines yet, so there is nothing to compare against. No line is ever estimated."
+            : `${p.candidates_considered ?? 0} prop lines checked; none cleared the bar.`}
         </p>
       </Panel>
     );
@@ -110,14 +119,14 @@ function PickCard({ league, p }: { league: "nba" | "nfl"; p: Pick | null }) {
         {p.result !== "none" && p.result !== "pending" ? <Badge result={p.result as PickResult} small /> : <span className="text-xs text-faint">Starts {pt(p.game_start)}</span>}
       </div>
       <div>
-        <div className="text-sm text-mute">{p.away} @ {p.home}</div>
+        <div className="text-sm text-mute">{p.market === "prop" ? `${p.player} · ${p.team ?? ""} · ` : ""}{p.away} @ {p.home}</div>
         <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{sideText(p)}</div>
       </div>
       <dl className="grid grid-cols-2 gap-3">
         <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
           <dt className="text-xs text-market">Market line</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{lineText(p)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{p.market === "moneyline" ? `Market ${pct(p.market_prob)}` : "Consensus, 2+ books"}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p.market_prob != null ? `Market ${pct(p.market_prob)}` : p.market === "prop" ? (p.line_source ?? "") : "Consensus, 2+ books"}</dd>
         </div>
         <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
           <dt className="text-xs text-model">Model Room</dt>
@@ -165,5 +174,37 @@ function History({ f }: { f: File }) {
         </ul>
       ) : <p className="mt-4 text-sm text-faint">No picks yet.</p>}
     </Panel>
+  );
+}
+
+async function OwnerPreview() {
+  const [nba, nfl] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  if (!nba && !nfl) return null;
+  return (
+    <Panel className="border border-dashed border-market/50 p-5">
+      <h2 className="font-display text-lg font-700 text-ink">Owner preview: live Polymarket</h2>
+      <p className="mt-1 text-xs leading-relaxed text-faint">
+        Only you see this. Fetched live, not stored, not recorded and not graded: Polymarket data can&apos;t be kept or shown publicly until written permission covers it.
+      </p>
+      <div className="mt-3 grid gap-3 md:grid-cols-2">
+        {([["NBA", nba], ["NFL", nfl]] as const).map(([lg, r]) => <LiveCard key={lg} league={lg} r={r} />)}
+      </div>
+    </Panel>
+  );
+}
+
+function LiveCard({ league, r }: { league: string; r: { pick: LivePropPick | null; checked: number; fetchedAt: string } | null }) {
+  if (!r) return null;
+  const p = r.pick;
+  if (!p) return <div className="rounded-lg bg-navy-900 p-3 text-sm text-mute">{league}: no live prop cleared the bar ({r.checked} Polymarket lines checked).</div>;
+  return (
+    <div className="rounded-lg bg-navy-900 p-3 text-sm">
+      <div className="text-xs text-faint">{league} · {p.player} · {p.matchup} · {pt(p.start)}</div>
+      <div className="mt-1 font-display text-xl font-700 text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}</div>
+      <div className="mt-1 text-xs text-mute">
+        <span className="text-market">Polymarket {p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.marketProb * 100).toFixed(0)}¢</span>
+        {" · "}<span className="text-model">Model {p.projection} · {(p.modelProb * 100).toFixed(0)}%</span> · model {p.modelVersion} · fetched {pt(r.fetchedAt)}
+      </div>
+    </div>
   );
 }

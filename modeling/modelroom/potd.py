@@ -4,26 +4,25 @@
                                            preview-ledger/potd_grades_week_*.jsonl
                                            data/published/pick_of_the_day.json (what the site reads)
 
-Candidates (published active game models only; prop and game shadows are never read):
-  spread, total   the pre-kickoff CONSENSUS line (at least two books, the same line the picks ledger already stores)
-                  and the model's probability of the side it favours AT that line (its own normal distribution)
-  moneyline       the consensus (median) prices, de-vigged to a market probability, against the model's win probability
-Player props are NOT candidates: no approved source allows storing a prop market line (see LIMITS).
+PLAYER PROPS ONLY (since 2026-11-19; the game-market picks made before that stay in the ledger, graded as recorded).
+Candidates: a STORED market line from an approved source (PROP_LINE_SOURCES; none approved yet) for an eligible stat,
+against the player's last pre-game record of the PUBLISHED active prop version (shadows never read). The model's chance
+of the over at line L is its own ladder P(stat >= next whole number above L). With no approved line source, every day is
+"no qualifying pick" and nothing is estimated. Live Polymarket lines appear only in the site's owner view, never here.
 
-Rule (one decision per league per Pacific date, at the first refresh where today's games have a market line):
-  edge = model probability of the side - market probability of that side
-         (moneyline: the de-vigged consensus; spread/total: 0.5, the balanced line, because consensus PRICES for
-         spreads and totals are not stored; this reference is stated on the card, never shown as a market price)
+Rule (one decision per league per Pacific date, at the first refresh with games left today):
+  edge = model probability of the side - market probability of that side (the source's own price when it has one,
+         else 0.5, stated on the card and never shown as a market price)
   qualifies when model probability >= MIN_PROB and edge >= MIN_EDGE; the highest edge wins (ties: higher probability,
-  then earlier start). Nothing qualifies -> a "no qualifying pick" record for the day. Never re-selected later.
+  then earlier start). Nothing qualifies -> a "no qualifying pick" record for the day, with the reason.
 
 Thresholds come from existing validation, not from a claimed edge:
-  MIN_PROB 0.565  break-even at a standard -110 price (52.4%) + 4 points, the largest calibration gap the NFL game
-                  model showed in its 0.5-0.6 probability band in backtest (predicted 0.550, actual 0.511)
-  MIN_EDGE 0.04   the same 4-point calibration gap: smaller disagreements are inside the model's own error
-These are filters, not evidence of an edge: the NFL game model's backtest side record against market spreads was
-48.0% (836 games) and 44.5% where it disagreed by 3+ points; NBA has no market backtest. Results are labelled
-unvalidated until UNVALIDATED_UNTIL settled picks per league exist.
+  MIN_PROB 0.565  break-even at a standard -110 price (52.4%) + 4 points of margin, larger than the live calibration error
+                  of the active prop models (NBA 0.2.0 ladder 0.012, NFL 0.1.1 0.008) and equal to the largest gap the
+                  game models showed in backtest
+  MIN_EDGE 0.04   the same 4 points: smaller disagreements are inside the models' measured error
+These are filters, not evidence of an edge: prop prices have never been collected, so no prop edge against a market has
+been measured. Results are labelled unvalidated until UNVALIDATED_UNTIL settled picks per league exist.
 
 Grades (separate append-only series, the pick record is never touched): hit | miss | push | void | pending.
 """
@@ -43,9 +42,11 @@ MIN_EDGE = 0.04
 UNVALIDATED_UNTIL = 100
 TZ = "America/Los_Angeles"
 SOURCE = "potd"
-LIMITS = ("Player props are not candidates yet: Polymarket prices may not be stored or shown publicly without documented "
-          "permission (Polymarket US participant agreement I.22), the free sportsbook feed carries no props, and "
-          "Sportsgameodds' free tier needs a paid-plan signup and forbids keeping its data after access ends.")
+LIMITS = ("Player props only. No approved source supplies a storable player-prop line yet: Polymarket prices may not be "
+          "stored or shown publicly without documented permission (participant agreement I.22), the free sportsbook feed "
+          "carries no props, the free odds-API tiers checked need a payment-page signup or forbid keeping their data, and "
+          "daily-fantasy pick boards have no documented data permission. Until one does, each day shows no qualifying pick; no line "
+          "is ever estimated.")
 
 
 def _f(x):
@@ -106,8 +107,13 @@ def choose(cands: list[dict]) -> dict | None:
 
 
 def explain(p: dict) -> str:
-    who = p["team"] or f"{p['away']} @ {p['home']}"
+    who = p.get("team") or f"{p['away']} @ {p['home']}"
     pct = f"{p['model_prob'] * 100:.0f}%"
+    if p["market"] == "prop":
+        lab = p["stat"].replace("_", " ")
+        mk = "" if p.get("market_prob") is None else f"; the market implies {p['market_prob'] * 100:.0f}%"
+        return (f"Model Room projects {p['player']} for {p['projection']:g} {lab} against a line of {p['line']:g}: "
+                f"a {pct} chance of the {p['selection']}{mk}.")
     if p["market"] == "spread":
         proj = p["projection"]
         fate = f"to win by {proj:g}" if proj > 0 else (f"to lose by {-proj:g}" if proj < 0 else "to tie")
@@ -134,33 +140,87 @@ def read_grades() -> dict:
     return out
 
 
-def select_day(league: str, now: datetime, games: pd.DataFrame, recs: dict, markets: dict, sig: tuple) -> dict | None:
-    """Today's (Pacific) decision for one league, or None while no game today has a market line yet."""
+ELIGIBLE = {"nba": ("points", "rebounds", "assists", "threes"),
+            "nfl": ("passing_yards", "rushing_yards", "receiving_yards", "receptions", "anytime_td", "passing_tds")}
+# Approved sources of STORABLE player-prop lines: none yet (see LIMITS). Each entry would be a callable
+# (league, now) -> [{"player_id", "league_game_id", "market", "line", "over_prob"?, "under_prob"?, "source", "captured_at"}].
+PROP_LINE_SOURCES: dict = {}
+
+
+def prop_candidates(league: str, game: dict, rec: dict, q: dict) -> list[dict]:
+    """The model's side of one stored market line for one player, from his last pre-game record (active version).
+    Over at line L wins when the stat is above L; the model's chance is read from its own ladder P(stat >= k)."""
+    pr = (rec.get("probabilities") or {}).get(q["market"])
+    if not pr or q.get("line") is None:
+        return []
+    lad = {float(k): float(v) for k, v in pr.items() if k not in ("mean", "sd", "support")}
+    L = float(q["line"])
+    k_over = float(int(L) + 1) if L == int(L) else float(int(L) + 1)      # smallest whole number above L
+    if k_over not in lad:
+        return []
+    p_over = lad[k_over]
+    p_push = (lad.get(L, p_over) - p_over) if L == int(L) else 0.0
+    p_under = max(0.0, 1.0 - p_over - p_push)
+    side = "over" if p_over >= p_under else "under"
+    mp = q.get("over_prob") if side == "over" else q.get("under_prob")
+    p = p_over if side == "over" else p_under
+    c = {"league": league, "league_game_id": str(game["game_id"]), "home": game["home"], "away": game["away"], "market": "prop",
+         "stat": q["market"], "player": rec.get("player"), "player_id": str(rec["player_id"]), "team": rec.get("team"),
+         "selection": side, "line": L, "price": q.get("price"), "model_prob": round(p, 4), "push_prob": round(p_push, 4),
+         "market_prob": None if mp is None else round(float(mp), 4), "reference_prob": 0.5 if mp is None else round(float(mp), 4),
+         "projection": None if pr.get("mean") is None else round(float(pr["mean"]), 1), "game_start": rec["game_start"],
+         "model_version": rec["model_version"], "source_record": {"seq": rec.get("seq"), "hash": rec.get("hash"), "generated_at": rec["generated_at"]},
+         "line_source": q.get("source"), "line_captured_at": q.get("captured_at"), "line_books": None}
+    c["difference"] = None if c["projection"] is None else round(c["projection"] - L, 1)
+    c["edge"] = round(c["model_prob"] - c["reference_prob"], 4)
+    c["qualifies"] = c["model_prob"] >= MIN_PROB and c["edge"] >= MIN_EDGE
+    return [c]
+
+
+def select_day(league: str, now: datetime, games: pd.DataFrame, prop_recs: dict, lines: list[dict]) -> dict | None:
+    """Today's (Pacific) player-prop decision for one league. None while there are no games left today.
+    `lines`: stored market lines from approved sources only; none -> a "no qualifying pick" record saying why."""
     today = _pt_date(pd.Timestamp(now))
     g = games[(games["status"] == "scheduled") & games["start_time"].notna()]
     g = g[(pd.to_datetime(g["start_time"], utc=True) > pd.Timestamp(now)) &
           (pd.to_datetime(g["start_time"], utc=True).dt.tz_convert(TZ).dt.date.astype(str) == today)]
-    cands, priced = [], 0
-    for x in g.itertuples():
-        m = markets.get(x.game_id)
-        if m:
-            priced += 1
-        cands += candidates(league, {"game_id": x.game_id, "home": x.home, "away": x.away}, recs.get(x.game_id), m, sig)
-    if not priced:
+    if not len(g):
         return None
+    by_game = {str(x.game_id): {"game_id": x.game_id, "home": x.home, "away": x.away} for x in g.itertuples()}
+    cands = []
+    for q in lines:
+        gm, rec = by_game.get(str(q.get("league_game_id"))), prop_recs.get((str(q.get("league_game_id")), str(q.get("player_id"))))
+        if gm and rec and q.get("market") in ELIGIBLE[league]:
+            cands += prop_candidates(league, gm, rec, q)
     pick = choose(cands)
     key = f"potd:{league}:{today}"
-    common = {"game_id": key, "pick_key": key, "date": today, "league": league, "kind": "pick_of_the_day",
+    common = {"game_id": key, "pick_key": key, "date": today, "league": league, "kind": "pick_of_the_day", "format": "player_prop",
               "selected_at": pd.Timestamp(now).isoformat(timespec="seconds"), "generated_at": pd.Timestamp(now).isoformat(timespec="seconds"),
               "rule": {"min_prob": MIN_PROB, "min_edge": MIN_EDGE}, "candidates_considered": len(cands),
-              "games_with_lines": priced, "params_hash": None}
+              "games_with_lines": len({c["league_game_id"] for c in cands}), "params_hash": None}
     if pick is None:
         end = pd.Timestamp(f"{today} 23:59:59", tz=TZ).tz_convert("UTC").isoformat()
-        return {**common, "status": "no_pick", "model_version": "-", "game_start": end, "inputs_hash": f"none:{len(cands)}"}
+        why = "no approved player-prop line source" if not lines else "no prop cleared the bar"
+        return {**common, "status": "no_pick", "reason": why, "model_version": "-", "game_start": end, "inputs_hash": f"none:{len(cands)}"}
     rec = {**common, **pick, "status": "pick", "explanation": explain(pick)}
     rec["game_id"], rec["pick_key"] = key, key
     rec["inputs_hash"] = (pick["source_record"]["hash"] or "")[:16]
     return rec
+
+
+def grade_prop(p: dict, game: dict | None, actual: float | None) -> str:
+    if not game:
+        return "pending"
+    st = str(game.get("status") or "")
+    if st in ("canceled", "cancelled", "postponed"):
+        return "void"
+    if st != "final":
+        return "pending"
+    if actual is None:
+        return "void"                                    # the player did not play
+    if actual == p["line"]:
+        return "push"
+    return "hit" if (actual > p["line"]) == (p["selection"] == "over") else "miss"
 
 
 def grade(p: dict, game: dict | None) -> str:
@@ -202,8 +262,12 @@ def run(leagues=("nba", "nfl"), now: datetime | None = None, write: bool = True)
         try:
             games = H._games_table(lg)
             games_by[lg] = games.set_index("game_id").to_dict("index")
-            recs = H._pregame(ledger.read(ledger_path(lg)))          # game-model ledger: one published version
-            rec = select_day(lg, now, games, recs, H._market(lg), H._sigmas(lg))
+            from modelroom import published as PUB
+            gk = "nfl_game_id" if lg == "nfl" else "nba_game_id"
+            pr = H._pregame([r for r in ledger.read_series(ledger_path(f"{lg}_props")) if PUB.is_published(lg, r)])  # active only
+            prop_recs = {(str(r[gk]), str(r["player_id"])): r for r in pr.values()}
+            lines = [q for src in PROP_LINE_SOURCES.values() for q in src(lg, now)]
+            rec = select_day(lg, now, games, prop_recs, lines)
         except Exception as e:  # noqa: BLE001 - a league failing never blocks the other
             print(f"potd {lg}: {e}")
             continue
@@ -213,11 +277,23 @@ def run(leagues=("nba", "nfl"), now: datetime | None = None, write: bool = True)
         ledger.append_weekly(ledger_path("potd"), now, new)
     picks = read() if write else list(existing.values()) + new
     grades, gnew = read_grades(), []
+    stats = {}
     for p in picks:
         if p.get("status") != "pick":
             continue
         gm = games_by.get(p["league"], {}).get(p["league_game_id"])
-        r = grade(p, gm)
+        if p.get("market") == "prop":
+            if p["league"] not in stats:
+                try:
+                    stats[p["league"]] = H._player_stats(p["league"])[:2]
+                except Exception:  # noqa: BLE001
+                    stats[p["league"]] = ({}, {})
+            st, stat_of = stats[p["league"]]
+            row = st.get((p["league_game_id"], p["player_id"]))
+            v = None if row is None else _f(row.get(stat_of.get(p["stat"])))
+            r = grade_prop(p, gm, v)
+        else:
+            r = grade(p, gm)                                         # game-market picks made before the props-only change
         if r != "pending" and (grades.get(p["pick_key"]) or {}).get("result") != r:
             gnew.append({"game_id": f"{p['pick_key']}|grade", "pick_key": p["pick_key"], "model_version": SOURCE, "result": r,
                          "final": None if not gm else {"home": _f(gm.get("home_score")), "away": _f(gm.get("away_score"))},
@@ -234,7 +310,7 @@ def run(leagues=("nba", "nfl"), now: datetime | None = None, write: bool = True)
     return {"new": len(new), "graded": len(gnew), "today": {lg: (out["today"].get(lg) or {}).get("status") for lg in leagues}}
 
 
-PUBLIC = ("pick_key", "date", "league", "status", "market", "selection", "team", "home", "away", "line", "price", "model_prob",
+PUBLIC = ("pick_key", "date", "league", "status", "format", "reason", "stat", "player", "player_id", "market", "selection", "team", "home", "away", "line", "price", "model_prob",
           "push_prob", "market_prob", "reference_prob", "edge", "projection", "difference", "explanation", "model_version",
           "selected_at", "game_start", "line_source", "line_captured_at", "candidates_considered", "games_with_lines", "seq", "hash")
 
