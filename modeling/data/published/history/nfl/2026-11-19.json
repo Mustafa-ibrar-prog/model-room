@@ -1,0 +1,7125 @@
+{
+  "schema_version": 1,
+  "league": "nfl",
+  "kind": "history",
+  "date": "2026-11-19",
+  "games": [
+    {
+      "game_id": "2026_11_IND_HOU",
+      "start_time": "2026-11-20T01:15:00+00:00",
+      "home": "HOU",
+      "away": "IND",
+      "status": "scheduled",
+      "final": null,
+      "pregame": {
+        "generated_at": "2026-11-18T23:54:32+00:00",
+        "model_version": "1.0.1",
+        "pred_home_score": 25.63,
+        "pred_away_score": 20.59,
+        "pred_margin": 5.04,
+        "pred_total": 46.22,
+        "home_win_prob": 0.6516
+      },
+      "result": null,
+      "market": {
+        "source": "the_odds_api",
+        "captured_at": "2026-11-18T20:02:58+00:00",
+        "spread": {
+          "line": -12.5,
+          "pick": "away",
+          "model_prob": 0.7179,
+          "push_prob": 0.0,
+          "result": null
+        },
+        "total": {
+          "line": 44.0,
+          "pick": "over",
+          "model_prob": 0.5513,
+          "push_prob": 0.0295,
+          "result": null
+        },
+        "implied_scores": {
+          "home": 28.2,
+          "away": 15.8
+        }
+      }
+    }
+  ],
+  "props": [
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0039163",
+      "player": "C.J. Stroud",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.16,
+          "sd": 0.45,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1337,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0215,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 17.92,
+          "sd": 8.79,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9814,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.9325,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.8692,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.7871,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.6362,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.473,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3714,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1798,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0768,
+              "hit": null
+            }
+          ]
+        },
+        "interceptions": {
+          "label": "Interceptions",
+          "mean": 0.64,
+          "sd": 0.82,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.4511,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.1602,
+              "hit": null
+            }
+          ]
+        },
+        "passing_attempts": {
+          "label": "Pass attempts",
+          "mean": 33.18,
+          "sd": 7.91,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.8397,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.6437,
+              "hit": null
+            },
+            {
+              "k": 35.0,
+              "p": 0.4035,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1931,
+              "hit": null
+            },
+            {
+              "k": 45.0,
+              "p": 0.0708,
+              "hit": null
+            }
+          ]
+        },
+        "passing_completions": {
+          "label": "Completions",
+          "mean": 20.75,
+          "sd": 5.65,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 14.0,
+              "p": 0.8957,
+              "hit": null
+            },
+            {
+              "k": 16.0,
+              "p": 0.8091,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.6891,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.5358,
+              "hit": null
+            },
+            {
+              "k": 22.0,
+              "p": 0.3973,
+              "hit": null
+            },
+            {
+              "k": 24.0,
+              "p": 0.2714,
+              "hit": null
+            },
+            {
+              "k": 26.0,
+              "p": 0.1683,
+              "hit": null
+            },
+            {
+              "k": 28.0,
+              "p": 0.0952,
+              "hit": null
+            }
+          ]
+        },
+        "passing_tds": {
+          "label": "Passing TDs",
+          "mean": 1.66,
+          "sd": 1.3,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.8246,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.4589,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.1865,
+              "hit": null
+            }
+          ]
+        },
+        "passing_yards": {
+          "label": "Passing yards",
+          "mean": 244.38,
+          "sd": 113.67,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 150.0,
+              "p": 0.9067,
+              "hit": null
+            },
+            {
+              "k": 175.0,
+              "p": 0.8078,
+              "hit": null
+            },
+            {
+              "k": 200.0,
+              "p": 0.6784,
+              "hit": null
+            },
+            {
+              "k": 225.0,
+              "p": 0.5344,
+              "hit": null
+            },
+            {
+              "k": 250.0,
+              "p": 0.3902,
+              "hit": null
+            },
+            {
+              "k": 275.0,
+              "p": 0.2757,
+              "hit": null
+            },
+            {
+              "k": 300.0,
+              "p": 0.1913,
+              "hit": null
+            },
+            {
+              "k": 325.0,
+              "p": 0.1237,
+              "hit": null
+            },
+            {
+              "k": 350.0,
+              "p": 0.0786,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 3.97,
+          "sd": 5.42,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.3328,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.085,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0216,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0048,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0007,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 18.25,
+          "sd": 29.59,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.5439,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3726,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.2423,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1605,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1042,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.069,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0449,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.031,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0201,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0144,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0054,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0040583",
+      "player": "Woody Marks",
+      "team": "HOU",
+      "generated_at": "2026-11-15T22:32:41+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.5,
+          "sd": 0.73,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.4104,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0882,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 13.31,
+          "sd": 8.43,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.8955,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.7577,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.6445,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.5329,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.3687,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.2357,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1751,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.077,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0311,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 8.8,
+          "sd": 10.65,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.386,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1964,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1064,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0604,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0336,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0132,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 15.69,
+          "sd": 21.4,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.5292,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2908,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1603,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.087,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0494,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0279,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0166,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0084,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0051,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0029,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0006,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0002,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 2.2,
+          "sd": 2.34,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.8319,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.5721,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.3598,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.2063,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.1131,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0616,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0335,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0179,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.01,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0049,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 81.03,
+          "sd": 51.13,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.9701,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.8225,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.5656,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.3092,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.1526,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0666,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 16.8,
+          "sd": 8.47,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9926,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.9372,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.7608,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.437,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1512,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 65.34,
+          "sd": 46.57,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9887,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.9601,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.9077,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.827,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.7239,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.6099,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.4926,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.3756,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.2822,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.2105,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0905,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038608",
+      "player": "Kayshon Boutte",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.19,
+          "sd": 0.46,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1662,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0179,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 6.48,
+          "sd": 7.3,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.4809,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.3167,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.2295,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1651,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1002,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0584,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0415,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.018,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0072,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 16.71,
+          "sd": 17.97,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.6648,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5134,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3746,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.2636,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1765,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0848,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 31.53,
+          "sd": 39.89,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7284,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.5597,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.4187,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.3086,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2171,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.1554,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1069,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0753,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0539,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0393,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0179,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0083,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 2.18,
+          "sd": 2.23,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.8442,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.5898,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.3555,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.201,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.1107,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0553,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0278,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0134,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0078,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0042,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 31.54,
+          "sd": 39.9,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.4964,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2156,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.0838,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.036,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0158,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0071,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.01,
+          "sd": 0.61,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0001,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0036554",
+      "player": "Nico Collins",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.51,
+          "sd": 0.75,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.4086,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.097,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 16.3,
+          "sd": 11.45,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9013,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.7976,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.7175,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.6307,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.496,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.382,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3198,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1859,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1009,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 26.9,
+          "sd": 18.66,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9285,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.8216,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.6722,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.5129,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.3836,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1946,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 75.12,
+          "sd": 61.24,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9738,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.9322,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.863,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.7827,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.6885,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.5926,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.4956,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.4066,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.3346,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.2729,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.1565,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0863,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 5.56,
+          "sd": 3.46,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.992,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.9608,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.8934,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.7824,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.6452,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.5057,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.3611,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.2468,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.1574,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0978,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 76.58,
+          "sd": 62.13,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.9166,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.7184,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.4721,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.2835,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.1599,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0863,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 1.46,
+          "sd": 9.58,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0206,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0106,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0063,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0042,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0024,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0015,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.001,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0007,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0005,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0003,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0001,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0034383",
+      "player": "Dalton Schultz",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.21,
+          "sd": 0.48,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.183,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.021,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 8.7,
+          "sd": 7.82,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.6545,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.4651,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.3541,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.2638,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1625,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0977,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0689,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0293,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0119,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 16.03,
+          "sd": 13.13,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7396,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5258,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3288,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1956,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1116,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0388,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 38.18,
+          "sd": 38.06,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.8654,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.716,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.5514,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.4086,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2932,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.2092,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1432,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0961,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0675,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0453,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0179,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0072,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 3.63,
+          "sd": 2.95,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9534,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.8325,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.6617,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.4829,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.323,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.2074,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.1241,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0713,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0405,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0238,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 38.18,
+          "sd": 38.06,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.6493,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2948,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1126,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0417,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0158,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0061,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038618",
+      "player": "Xavier Hutchinson",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.33,
+          "sd": 0.6,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.2767,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0472,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 10.1,
+          "sd": 8.7,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.7221,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.5366,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.4271,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.3342,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.2283,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1444,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1094,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0483,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0219,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 19.84,
+          "sd": 16.98,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.796,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.6223,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4589,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.316,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.2119,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0992,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 43.76,
+          "sd": 43.73,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.8826,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.7575,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.6158,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.4746,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3598,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.2675,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1912,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.1427,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.1037,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0744,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0352,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0153,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 3.5,
+          "sd": 2.74,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9576,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.8396,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.658,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.4619,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.2966,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.177,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.1009,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0558,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0298,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.016,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 46.34,
+          "sd": 45.47,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.7274,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3958,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1819,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0823,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0381,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0165,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 2.58,
+          "sd": 12.57,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.045,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0252,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0147,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0089,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0055,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0038,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0027,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.002,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0013,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.001,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0003,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0035685",
+      "player": "David Montgomery",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.55,
+          "sd": 0.81,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.4147,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.1183,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 10.78,
+          "sd": 8.3,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.7683,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.5991,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.4833,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.3765,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.2498,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1617,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1151,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0469,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0183,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 5.84,
+          "sd": 9.62,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.2333,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.115,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0608,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0324,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0183,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0071,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 9.56,
+          "sd": 17.87,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.3021,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1415,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0698,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0381,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0209,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0114,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0062,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0037,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0021,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0013,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0004,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0002,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 1.31,
+          "sd": 1.93,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.5923,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.3144,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.1555,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.0796,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.042,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0228,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0129,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0071,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0038,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0018,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 61.87,
+          "sd": 45.78,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.8983,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.6309,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.3343,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.1506,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0636,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0251,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 13.56,
+          "sd": 8.09,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9724,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.8329,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5339,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2091,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0515,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 52.31,
+          "sd": 41.91,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9689,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.9072,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.8141,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.6966,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.5639,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.4348,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.3235,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.234,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.1661,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.114,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0434,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038977",
+      "player": "Tank Dell",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.26,
+          "sd": 0.54,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.2166,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0331,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 8.55,
+          "sd": 8.46,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.6165,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.4378,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.3394,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.258,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1666,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1062,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0792,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0355,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0171,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 18.94,
+          "sd": 18.35,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7453,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5863,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4299,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.3048,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.2115,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0978,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 38.93,
+          "sd": 44.49,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.8194,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.6697,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.5239,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.4016,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2966,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.2192,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1601,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.1166,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0851,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0634,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0317,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0152,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 2.77,
+          "sd": 2.52,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9102,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.7177,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.4951,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.314,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.1867,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.1064,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0553,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.028,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0145,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0078,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 42.43,
+          "sd": 46.69,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.653,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3445,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1592,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0743,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0365,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0169,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 3.51,
+          "sd": 13.8,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0714,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0383,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0236,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0141,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0089,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0057,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0037,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0023,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0015,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.001,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0004,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0039849",
+      "player": "Marvin Harrison Jr.",
+      "team": "HOU",
+      "generated_at": "2026-11-18T19:43:16+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.16,
+          "sd": 0.43,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1422,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0169,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 5.12,
+          "sd": 6.28,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.3771,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.2252,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1572,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1082,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0602,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0345,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0243,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.009,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.003,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 13.42,
+          "sd": 15.82,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.5653,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.4048,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2733,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1788,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1218,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0518,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 23.49,
+          "sd": 31.81,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.633,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4339,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.2929,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1916,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1323,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0898,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0606,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0404,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0281,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0176,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0061,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0022,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 1.78,
+          "sd": 1.98,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.7877,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.4847,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.2584,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.1295,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.0653,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.032,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0154,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0077,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0039,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0015,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 23.5,
+          "sd": 31.81,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.363,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1284,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.0459,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0155,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0051,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0018,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.01,
+          "sd": 0.47,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0032951",
+      "player": "Laquon Treadwell",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.2,
+          "sd": 0.47,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1792,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0199,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 7.14,
+          "sd": 7.14,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.5525,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.3629,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.2625,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1865,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1118,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0647,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0461,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0181,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0065,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 16.93,
+          "sd": 16.64,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7018,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5293,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3674,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.2506,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1632,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0732,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 33.37,
+          "sd": 37.75,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7898,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.6212,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.4642,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.3354,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2361,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.1645,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1139,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0784,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0557,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0399,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0163,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0064,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 2.58,
+          "sd": 2.33,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.8983,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.7022,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.4635,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.2734,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.156,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0834,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0412,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0187,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0091,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0044,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 33.39,
+          "sd": 37.75,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.555,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2354,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.0898,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0365,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0143,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0054,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.01,
+          "sd": 0.58,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0030279",
+      "player": "Keenan Allen",
+      "team": "IND",
+      "generated_at": "2026-11-12T02:31:55+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.23,
+          "sd": 0.49,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.2067,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0221,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 9.62,
+          "sd": 7.87,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.7208,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.5356,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.4128,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.3155,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1985,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1186,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0849,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.034,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0128,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 18.56,
+          "sd": 15.04,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7898,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5982,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4138,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.2696,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1723,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0737,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 43.21,
+          "sd": 41.05,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9021,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.7736,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.6276,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.481,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3572,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.2587,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1842,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.1307,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0922,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0625,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0256,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0111,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 3.92,
+          "sd": 2.9,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9696,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.8776,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.7233,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.5496,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.3758,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.2421,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.1442,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0823,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0449,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0257,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 43.23,
+          "sd": 41.06,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.718,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.362,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1506,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0586,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.023,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0096,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.02,
+          "sd": 1.1,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038997",
+      "player": "Josh Downs",
+      "team": "IND",
+      "generated_at": "2026-11-12T02:31:55+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.25,
+          "sd": 0.52,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.2172,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0265,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 9.1,
+          "sd": 7.9,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.6792,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.4836,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.3822,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.2848,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.1806,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1114,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0771,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0325,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0138,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 18.42,
+          "sd": 15.59,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7787,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.589,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4046,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.2712,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1787,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0755,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 40.75,
+          "sd": 40.56,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.8772,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.7391,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.5805,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.4371,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3218,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.228,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.164,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.1181,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0837,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0595,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0248,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0107,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 3.48,
+          "sd": 2.73,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9575,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.8371,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.6513,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.4606,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.2946,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.1792,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.1048,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0545,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0286,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0156,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 41.41,
+          "sd": 41.06,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.6862,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.3323,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1396,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0587,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0238,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0099,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.65,
+          "sd": 6.62,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0067,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0035,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0019,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0013,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0009,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0006,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0004,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0003,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0002,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0001,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0001,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0035710",
+      "player": "Daniel Jones",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.15,
+          "sd": 0.44,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1263,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0186,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 12.7,
+          "sd": 7.46,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9113,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.7711,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.6443,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.515,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.3322,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.1918,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1355,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0484,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0171,
+              "hit": null
+            }
+          ]
+        },
+        "interceptions": {
+          "label": "Interceptions",
+          "mean": 0.91,
+          "sd": 0.97,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.5566,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.2493,
+              "hit": null
+            }
+          ]
+        },
+        "passing_attempts": {
+          "label": "Pass attempts",
+          "mean": 30.97,
+          "sd": 7.82,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.7643,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.5357,
+              "hit": null
+            },
+            {
+              "k": 35.0,
+              "p": 0.295,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1258,
+              "hit": null
+            },
+            {
+              "k": 45.0,
+              "p": 0.0392,
+              "hit": null
+            }
+          ]
+        },
+        "passing_completions": {
+          "label": "Completions",
+          "mean": 18.92,
+          "sd": 5.56,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 14.0,
+              "p": 0.8253,
+              "hit": null
+            },
+            {
+              "k": 16.0,
+              "p": 0.7024,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.5516,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.4027,
+              "hit": null
+            },
+            {
+              "k": 22.0,
+              "p": 0.2696,
+              "hit": null
+            },
+            {
+              "k": 24.0,
+              "p": 0.1651,
+              "hit": null
+            },
+            {
+              "k": 26.0,
+              "p": 0.0952,
+              "hit": null
+            },
+            {
+              "k": 28.0,
+              "p": 0.0524,
+              "hit": null
+            }
+          ]
+        },
+        "passing_tds": {
+          "label": "Passing TDs",
+          "mean": 1.14,
+          "sd": 1.09,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.6738,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.271,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.077,
+              "hit": null
+            }
+          ]
+        },
+        "passing_yards": {
+          "label": "Passing yards",
+          "mean": 195.13,
+          "sd": 95.05,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 150.0,
+              "p": 0.7373,
+              "hit": null
+            },
+            {
+              "k": 175.0,
+              "p": 0.5602,
+              "hit": null
+            },
+            {
+              "k": 200.0,
+              "p": 0.3893,
+              "hit": null
+            },
+            {
+              "k": 225.0,
+              "p": 0.2541,
+              "hit": null
+            },
+            {
+              "k": 250.0,
+              "p": 0.1546,
+              "hit": null
+            },
+            {
+              "k": 275.0,
+              "p": 0.0927,
+              "hit": null
+            },
+            {
+              "k": 300.0,
+              "p": 0.0568,
+              "hit": null
+            },
+            {
+              "k": 325.0,
+              "p": 0.0337,
+              "hit": null
+            },
+            {
+              "k": 350.0,
+              "p": 0.0192,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 3.27,
+          "sd": 4.92,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.2365,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0551,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0128,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0026,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0004,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 12.23,
+          "sd": 22.09,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.4126,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2329,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1299,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0767,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0453,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0273,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0171,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0106,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.006,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0042,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0015,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0040128",
+      "player": "Tyler Warren",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.41,
+          "sd": 0.67,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.3341,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0679,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 13.81,
+          "sd": 9.61,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.88,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.744,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.6356,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.5315,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.3918,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.2762,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2125,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1022,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.049,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 17.49,
+          "sd": 11.51,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.8289,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5928,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3655,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.2,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1093,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0357,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 53.08,
+          "sd": 42.74,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9627,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.8858,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.7697,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.634,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.4959,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.3707,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.2684,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.1888,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.1364,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0957,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0393,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0177,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 5.95,
+          "sd": 3.65,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9944,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.9704,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.9112,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.8161,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.6948,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.5535,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.4109,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.2945,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.1971,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1301,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 54.29,
+          "sd": 43.45,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.8563,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.5239,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.2388,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0981,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0388,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.017,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0036223",
+      "player": "Jonathan Taylor",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.68,
+          "sd": 0.87,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.5006,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.157,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 16.16,
+          "sd": 9.93,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9339,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.8386,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.7556,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.6597,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.5162,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.3779,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2999,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1542,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0768,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 12.72,
+          "sd": 12.75,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.5822,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.3503,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1981,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1148,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0696,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.028,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 25.68,
+          "sd": 28.96,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7492,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.5254,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.3429,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.2156,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1329,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0838,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0508,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0312,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0191,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0125,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0045,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0017,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 3.31,
+          "sd": 2.87,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.9368,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.7908,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.5973,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.4086,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.2661,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.166,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.1,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0592,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0334,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0198,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 87.78,
+          "sd": 55.75,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.971,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.8514,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.6324,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.3886,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.2007,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0964,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 14.6,
+          "sd": 8.36,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.9799,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.8722,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.6157,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2738,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0765,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 62.1,
+          "sd": 47.92,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.9786,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.9378,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.8743,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.79,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.683,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.5712,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.4555,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.348,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.2578,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.1853,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0837,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038394",
+      "player": "Will Mallory",
+      "team": "IND",
+      "generated_at": "2026-11-18T15:04:09+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.13,
+          "sd": 0.37,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1165,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0081,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 4.34,
+          "sd": 5.37,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.3221,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.1736,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1124,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.0725,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0371,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0195,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0129,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0041,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0012,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 9.89,
+          "sd": 11.46,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.4543,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.2706,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1545,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0814,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0451,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0141,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 17.89,
+          "sd": 24.59,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.5665,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3458,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1994,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1124,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0654,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0388,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0238,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0153,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.01,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.006,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0017,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0006,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 1.77,
+          "sd": 2.0,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.781,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.477,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.2573,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.1306,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.0641,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0309,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0158,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0078,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0037,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0021,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 17.89,
+          "sd": 24.59,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.2641,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0613,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.0169,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0051,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0014,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0005,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0036271",
+      "player": "Quez Watkins",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.16,
+          "sd": 0.43,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1445,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.014,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 5.64,
+          "sd": 6.37,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.435,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.2631,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1841,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1233,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0705,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0376,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0249,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0094,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0036,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 14.17,
+          "sd": 15.6,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.6081,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.4308,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2879,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1882,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.1247,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0545,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 25.96,
+          "sd": 33.22,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.6861,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.5007,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.3407,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.2312,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1528,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0991,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0651,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.044,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0292,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0206,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0083,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0029,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 2.05,
+          "sd": 2.11,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.8327,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.561,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.3354,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.1803,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.0893,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0432,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0217,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0112,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.006,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0024,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 25.98,
+          "sd": 33.23,
+          "support": "limited",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.4201,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.1494,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.049,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0183,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.007,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0023,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 0.02,
+          "sd": 0.79,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0001,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0038705",
+      "player": "Emari Demercado",
+      "team": "HOU",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.21,
+          "sd": 0.48,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1856,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0235,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 6.3,
+          "sd": 6.35,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.4923,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.3039,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.209,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1414,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0789,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0423,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0277,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0098,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0028,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 5.38,
+          "sd": 9.12,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.2028,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.101,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0505,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.028,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0174,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0064,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 8.27,
+          "sd": 15.3,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.2676,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.1169,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0538,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.025,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0125,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0069,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0041,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0021,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.001,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0005,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0001,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 1.16,
+          "sd": 1.69,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.5733,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.2735,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.1325,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.0596,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.03,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0158,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0068,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0027,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0014,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0007,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 38.53,
+          "sd": 40.8,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.6277,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.297,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1214,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.048,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0197,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.009,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 6.55,
+          "sd": 6.51,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.6638,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.2615,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0711,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0169,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0027,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 30.25,
+          "sd": 37.56,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7861,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.6172,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.4647,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.3325,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2343,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.165,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.113,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0789,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0539,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0369,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0156,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0041125",
+      "player": "Seth McGowan",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.24,
+          "sd": 0.54,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.2052,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0314,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 5.71,
+          "sd": 6.38,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.4252,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.2723,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1857,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.1272,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0713,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.037,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0252,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0084,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.004,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 3.78,
+          "sd": 7.8,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.1298,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0627,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0328,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0178,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0097,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0035,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 5.59,
+          "sd": 12.74,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.1642,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.065,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0299,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0144,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0066,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0035,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.002,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0012,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0006,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0003,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 0.81,
+          "sd": 1.47,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.4077,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.1652,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.0708,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.0304,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.014,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0069,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0035,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0017,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.001,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0006,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 34.42,
+          "sd": 39.42,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.5495,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2445,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.1028,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0409,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.016,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0071,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_attempts": {
+          "label": "Rush attempts",
+          "mean": 6.11,
+          "sd": 6.43,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.6023,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.225,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0638,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0153,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0021,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 28.83,
+          "sd": 37.19,
+          "support": "ok",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.7549,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.5874,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.4318,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.3049,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.2183,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.1591,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.1108,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0756,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0521,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0366,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0145,
+              "hit": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "game_id": "2026_11_IND_HOU",
+      "player_id": "00-0041132",
+      "player": "Deion Burks",
+      "team": "IND",
+      "generated_at": "2026-11-18T23:32:22+00:00",
+      "model_version": "0.1.1",
+      "played": null,
+      "markets": {
+        "anytime_td": {
+          "label": "Anytime TD",
+          "mean": 0.13,
+          "sd": 0.38,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.1108,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.0103,
+              "hit": null
+            }
+          ]
+        },
+        "fantasy_points": {
+          "label": "Fantasy points (PPR)",
+          "mean": 4.31,
+          "sd": 5.68,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 5.0,
+              "p": 0.3182,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.1759,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.1155,
+              "hit": null
+            },
+            {
+              "k": 12.0,
+              "p": 0.0743,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.0413,
+              "hit": null
+            },
+            {
+              "k": 18.0,
+              "p": 0.0226,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0151,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.0058,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0018,
+              "hit": null
+            }
+          ]
+        },
+        "longest_reception": {
+          "label": "Longest reception",
+          "mean": 11.06,
+          "sd": 14.45,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.4731,
+              "hit": null
+            },
+            {
+              "k": 15.0,
+              "p": 0.3188,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.2027,
+              "hit": null
+            },
+            {
+              "k": 25.0,
+              "p": 0.1323,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0852,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.036,
+              "hit": null
+            }
+          ]
+        },
+        "receiving_yards": {
+          "label": "Receiving yards",
+          "mean": 18.83,
+          "sd": 28.54,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.533,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.3454,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.2129,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.1306,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0843,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0561,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0369,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.023,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0165,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0112,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0041,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0017,
+              "hit": null
+            }
+          ]
+        },
+        "receptions": {
+          "label": "Receptions",
+          "mean": 1.49,
+          "sd": 1.82,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 1.0,
+              "p": 0.7106,
+              "hit": null
+            },
+            {
+              "k": 2.0,
+              "p": 0.3942,
+              "hit": null
+            },
+            {
+              "k": 3.0,
+              "p": 0.1963,
+              "hit": null
+            },
+            {
+              "k": 4.0,
+              "p": 0.0909,
+              "hit": null
+            },
+            {
+              "k": 5.0,
+              "p": 0.0426,
+              "hit": null
+            },
+            {
+              "k": 6.0,
+              "p": 0.0191,
+              "hit": null
+            },
+            {
+              "k": 7.0,
+              "p": 0.0103,
+              "hit": null
+            },
+            {
+              "k": 8.0,
+              "p": 0.0043,
+              "hit": null
+            },
+            {
+              "k": 9.0,
+              "p": 0.0021,
+              "hit": null
+            },
+            {
+              "k": 10.0,
+              "p": 0.0011,
+              "hit": null
+            }
+          ]
+        },
+        "rush_rec_yards": {
+          "label": "Rush + rec yards",
+          "mean": 20.58,
+          "sd": 30.35,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 25.0,
+              "p": 0.3038,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0961,
+              "hit": null
+            },
+            {
+              "k": 75.0,
+              "p": 0.0324,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0118,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0043,
+              "hit": null
+            },
+            {
+              "k": 150.0,
+              "p": 0.0017,
+              "hit": null
+            }
+          ]
+        },
+        "rushing_yards": {
+          "label": "Rushing yards",
+          "mean": 1.75,
+          "sd": 10.18,
+          "support": "insufficient",
+          "actual": null,
+          "thresholds": [
+            {
+              "k": 10.0,
+              "p": 0.0275,
+              "hit": null
+            },
+            {
+              "k": 20.0,
+              "p": 0.0151,
+              "hit": null
+            },
+            {
+              "k": 30.0,
+              "p": 0.0094,
+              "hit": null
+            },
+            {
+              "k": 40.0,
+              "p": 0.0054,
+              "hit": null
+            },
+            {
+              "k": 50.0,
+              "p": 0.0031,
+              "hit": null
+            },
+            {
+              "k": 60.0,
+              "p": 0.0019,
+              "hit": null
+            },
+            {
+              "k": 70.0,
+              "p": 0.0013,
+              "hit": null
+            },
+            {
+              "k": 80.0,
+              "p": 0.0009,
+              "hit": null
+            },
+            {
+              "k": 90.0,
+              "p": 0.0006,
+              "hit": null
+            },
+            {
+              "k": 100.0,
+              "p": 0.0003,
+              "hit": null
+            },
+            {
+              "k": 125.0,
+              "p": 0.0001,
+              "hit": null
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "picks": []
+}
