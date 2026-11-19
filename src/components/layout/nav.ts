@@ -8,5 +8,6 @@ export const NAV = [
   { href: "/nfl-props", label: "NFL Props" },
   { href: "/nba", label: "NBA" },
   { href: "/nfl", label: "NFL" },
+  { href: "/pick-of-the-day", label: "Pick of the Day" },
   { href: "/performance", label: "Performance" },
 ] as const;
