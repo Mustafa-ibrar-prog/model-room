@@ -109,8 +109,10 @@ def explain(p: dict) -> str:
     who = p["team"] or f"{p['away']} @ {p['home']}"
     pct = f"{p['model_prob'] * 100:.0f}%"
     if p["market"] == "spread":
-        return (f"Model Room projects {who} {'+' if p['projection'] > 0 else ''}{p['projection']} against a line of "
-                f"{p['line']:+g}: {abs(p['difference'])} points of cushion, a {pct} chance to cover.")
+        proj = p["projection"]
+        fate = f"to win by {proj:g}" if proj > 0 else (f"to lose by {-proj:g}" if proj < 0 else "to tie")
+        return (f"Model Room projects {who} {fate}; at {p['line']:+g} that is {abs(p['difference']):g} points of cushion, "
+                f"a {pct} chance to cover.")
     if p["market"] == "total":
         return (f"Model Room projects {p['projection']} total points against a line of {p['line']:g}, {abs(p['difference'])} "
                 f"{'over' if p['difference'] > 0 else 'under'}: a {pct} chance of the {p['selection']}.")
@@ -242,6 +244,8 @@ def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
     rows = []
     for p in sorted(picks, key=lambda r: (r["date"], r["league"]), reverse=True):
         r = {k: p.get(k) for k in PUBLIC}
+        if p.get("status") == "pick":
+            r["explanation"] = explain(p)     # wording from the stored numbers; the ledger record itself is never edited
         r["result"] = (grades.get(p["pick_key"]) or {}).get("result") or ("pending" if p.get("status") == "pick" else "none")
         rows.append(r)
     rec = {lg: summary([r["result"] for r in rows if r["league"] == lg and r["status"] == "pick"]) for lg in ("nba", "nfl")}
