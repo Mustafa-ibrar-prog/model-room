@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { inGrid, pmFee, strongestLiveProp, todaysGameIds } from "@/server/markets/potdPick";
+import { inGrid, liveReason, pmFee, strongestLiveProp, todaysGameIds } from "@/server/markets/potdPick";
 import type { EnginePropsBoard } from "@/types/props";
 
 const THETA = 0.0695;
@@ -72,5 +72,29 @@ describe("Pick of the Day live preview", () => {
     expect(run(board(TONIGHT, [th(25, 0.58, [q(0.56, 0.46)])])).pick).toBeNull();
     expect(todaysGameIds(board("2026-11-24T02:00:00Z", []), now).size).toBe(0);
     expect(todaysGameIds(board("2026-11-22T19:00:00Z", []), now).size).toBe(0);  // already started
+  });
+
+  it("diagnostics count why each matched line was dropped", () => {
+    const b = board(TONIGHT, [
+      th(25, 0.6, [q(0.555, 0.47)]),              // passes probability, fails edge after fees
+      th(20, 0.52, [q(0.5, 0.52)]),               // neither side reaches 56.5%
+      th(45, 0.9, [q(0.3, 0.72)]),                // outside a 41-point grid
+      th(30, 0.7, [q(0.4, 0.62, true, null)]),    // no fee
+    ]);
+    const { pick, diag } = run(b);
+    expect(pick).toBeNull();
+    expect(diag).toEqual({ quotes: 5, unusable: 1, outsideGrid: 1, noFee: 1, belowProb: 1, belowEdge: 1, checked: 2 });
+    const why = liveReason({ games: 1, found: 1, matched: 5 }, diag);
+    expect(why).toContain("5 Polymarket lines matched");
+    expect(why).toContain("1 under a 4-point edge after fees");
+    expect(why).toContain("1 outside the model's range");
+  });
+
+  it("reasons distinguish no listing, a failed fetch and no match", () => {
+    const d0 = { quotes: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0 };
+    expect(liveReason({ games: 4, found: 0, matched: 0 }, d0)).toBe("Polymarket has no market listed for any of today's 4 games yet.");
+    expect(liveReason({ games: 4, found: 0, matched: 0, errors: 4, errorCodes: [0, 503] }, d0)).toContain("didn't answer for 4 of 4 games (timeout, HTTP 503)");
+    expect(liveReason({ games: 4, found: 3, matched: 0 }, d0)).toContain("no player-prop line matched");
+    expect(liveReason({ games: 0, found: 0, matched: 0 }, d0)).toBe("No games left today.");
   });
 });

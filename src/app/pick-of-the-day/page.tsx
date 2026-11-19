@@ -6,8 +6,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
 import { publishedDir } from "@/server/engine/board";
-import { ownerLivePropPick } from "@/server/markets/potdLive";
-import type { LivePropPick } from "@/server/markets/potdPick";
+import { ownerLivePropPick, type OwnerLive } from "@/server/markets/potdLive";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -79,15 +78,16 @@ export default function PickOfTheDayPage() {
 }
 
 async function Body() {
-  const f = await load();
+  // Owner login: each league's card is the live Polymarket comparison (never stored); everyone else: the recorded pick.
+  const [f, nbaLive, nflLive] = await Promise.all([load(), ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  const live = { nba: nbaLive, nfl: nflLive };
   if (!f) return <div className="mx-auto max-w-5xl px-4 sm:px-6"><Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." /></div>;
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6">
       <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">{f.notice}</p>
       <div className="grid gap-4 md:grid-cols-2">
-        {(["nba", "nfl"] as const).map((lg) => <PickCard key={lg} league={lg} p={f.today[lg]} />)}
+        {(["nba", "nfl"] as const).map((lg) => (live[lg] ? <LiveCard key={lg} league={lg} r={live[lg]!} /> : <PickCard key={lg} league={lg} p={f.today[lg]} />))}
       </div>
-      <Suspense fallback={null}><OwnerPreview /></Suspense>
       <History f={f} />
       <p className="text-xs leading-relaxed text-faint">
         Qualifies only when the model gives the side at least {pct(f.rule.min_prob)} and at least {(f.rule.min_edge * 100).toFixed(0)} points more
@@ -177,34 +177,43 @@ function History({ f }: { f: File }) {
   );
 }
 
-async function OwnerPreview() {
-  const [nba, nfl] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
-  if (!nba && !nfl) return null;
-  return (
-    <Panel className="border border-dashed border-market/50 p-5">
-      <h2 className="font-display text-lg font-700 text-ink">Owner preview: live Polymarket</h2>
-      <p className="mt-1 text-xs leading-relaxed text-faint">
-        Only you see this. Fetched live, not stored, not recorded and not graded: Polymarket data can&apos;t be kept or shown publicly until written permission covers it.
-      </p>
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        {([["NBA", nba], ["NFL", nfl]] as const).map(([lg, r]) => <LiveCard key={lg} league={lg} r={r} />)}
-      </div>
-    </Panel>
-  );
-}
-
-function LiveCard({ league, r }: { league: string; r: { pick: LivePropPick | null; checked: number; fetchedAt: string } | null }) {
-  if (!r) return null;
+function LiveCard({ league, r }: { league: "nba" | "nfl"; r: OwnerLive }) {
+  const title = league.toUpperCase();
+  const tag = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">Owner only · live Polymarket · not recorded</span>;
   const p = r.pick;
-  if (!p) return <div className="rounded-lg bg-navy-900 p-3 text-sm text-mute">{league}: no live prop cleared the bar ({r.checked} Polymarket lines checked).</div>;
+  if (!p) {
+    return (
+      <Panel className="flex min-h-64 flex-col gap-2 p-5">
+        <div className="flex items-center justify-between gap-2"><span className="text-xs font-600 tracking-wide text-faint">{title}</span>{tag}</div>
+        <h2 className="mt-auto font-display text-2xl font-700 text-ink">No qualifying pick today</h2>
+        <p className="text-sm text-mute">{r.reason}</p>
+        <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.matched} lines matched · checked {pt(r.fetchedAt)}</p>
+      </Panel>
+    );
+  }
   return (
-    <div className="rounded-lg bg-navy-900 p-3 text-sm">
-      <div className="text-xs text-faint">{league} · {p.player} · {p.matchup} · {pt(p.start)}</div>
-      <div className="mt-1 font-display text-xl font-700 text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}</div>
-      <div className="mt-1 text-xs text-mute">
-        <span className="text-market">Polymarket {p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢ + {(p.fee * 100).toFixed(1)}¢ fee</span>
-        {" · "}<span className="text-model">Model {p.projection} · {(p.modelProb * 100).toFixed(0)}%</span> · model {p.modelVersion} · fetched {pt(r.fetchedAt)}
+    <Panel className="flex flex-col gap-4 p-5">
+      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">{title} · Player prop</span>{tag}</div>
+      <div>
+        <div className="text-sm text-mute">{p.player} · {p.team} · {p.matchup}</div>
+        <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}</div>
       </div>
-    </div>
+      <dl className="grid grid-cols-2 gap-3">
+        <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
+          <dt className="text-xs text-market">Polymarket</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢</dd>
+          <dd className="mt-0.5 text-xs text-faint">Market {(p.marketProb * 100).toFixed(0)}% · fee {(p.fee * 100).toFixed(1)}¢</dd>
+        </div>
+        <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
+          <dt className="text-xs text-model">Model Room</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{p.projection} {p.label.toLowerCase()}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{(p.modelProb * 100).toFixed(0)}% chance · {signed(p.difference)} vs line</dd>
+        </div>
+      </dl>
+      <p className="text-sm leading-relaxed text-mute">
+        Model Room gives the {p.side} a {(p.modelProb * 100).toFixed(0)}% chance; Polymarket costs {(p.cost * 100).toFixed(1)}¢ with fees, a {(p.edge * 100).toFixed(1)}-point edge after fees.
+      </p>
+      <p className="text-[0.7rem] leading-snug text-faint">Model {p.modelVersion} · fetched {pt(r.fetchedAt)} · game {pt(p.start)} · {r.checked} lines checked</p>
+    </Panel>
   );
 }
