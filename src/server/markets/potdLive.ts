@@ -2,7 +2,8 @@ import "server-only";
 import type { League } from "@/types/domain";
 import type { EnginePropsBoard } from "@/types/props";
 import { loadPropsBoard } from "@/server/engine/board";
-import { ownerLiveMarkets, withLivePolymarket } from "./polymarketLive";
+import { ownerLiveMarkets, ownerLiveStatus, withLivePolymarket } from "./polymarketLive";
+export { ownerLiveStatus };
 import { liveReason, strongestLiveProp, todaysGameIds, type LiveDiag, type LivePropPick } from "./potdPick";
 
 /**

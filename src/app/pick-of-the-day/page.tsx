@@ -6,7 +6,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
 import { publishedDir } from "@/server/engine/board";
-import { ownerLivePropPick, type OwnerLive } from "@/server/markets/potdLive";
+import { ownerLivePropPick, ownerLiveStatus, type OwnerLive } from "@/server/markets/potdLive";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -80,14 +80,14 @@ export default function PickOfTheDayPage() {
 async function Body() {
   // Owner login: each league's card is the live Polymarket comparison (never stored); everyone else: the recorded pick.
   const f = await load();                                  // load() awaits connection(): request time before any clock read
-  const [nbaLive, nflLive] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  const [nbaLive, nflLive, status] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl"), ownerLiveStatus()]);
   const live = { nba: nbaLive, nfl: nflLive };
   if (!f) return <div className="mx-auto max-w-5xl px-4 sm:px-6"><Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." /></div>;
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6">
       <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">{f.notice}</p>
       <div className="grid gap-4 md:grid-cols-2">
-        {(["nba", "nfl"] as const).map((lg) => (live[lg] ? <LiveCard key={lg} league={lg} r={live[lg]!} /> : <PickCard key={lg} league={lg} p={f.today[lg]} />))}
+        {(["nba", "nfl"] as const).map((lg) => (live[lg] ? <LiveCard key={lg} league={lg} r={live[lg]!} /> : <PickCard key={lg} league={lg} p={f.today[lg]} liveOff={status.on ? null : status.reason} />))}
       </div>
       <History f={f} />
       <p className="text-xs leading-relaxed text-faint">
@@ -98,7 +98,7 @@ async function Body() {
   );
 }
 
-function PickCard({ league, p }: { league: "nba" | "nfl"; p: Pick | null }) {
+function PickCard({ league, p, liveOff }: { league: "nba" | "nfl"; p: Pick | null; liveOff: string | null }) {
   const title = league.toUpperCase();
   if (!p || p.status !== "pick") {
     return (
@@ -110,6 +110,9 @@ function PickCard({ league, p }: { league: "nba" | "nfl"; p: Pick | null }) {
             ? "No approved source supplies player-prop lines yet, so there is nothing to compare against. No line is ever estimated."
             : `${p.candidates_considered ?? 0} prop lines checked; none cleared the bar.`}
         </p>
+        {liveOff && liveOff !== "off in production" ? (
+          <p className="mt-2 text-xs leading-relaxed text-faint">Live Polymarket comparison (owner only) is off for this login: {liveOff}.</p>
+        ) : null}
       </Panel>
     );
   }
@@ -166,7 +169,7 @@ function History({ f }: { f: File }) {
           {rows.map((r) => (
             <li key={r.pick_key} className="flex items-center justify-between gap-3 py-2.5 text-sm">
               <div className="min-w-0">
-                <div className="truncate text-ink">{r.league.toUpperCase()} · {sideText(r)}</div>
+                <div className="truncate text-ink">{r.league.toUpperCase()} · {sideText(r)}{r.format === "game_line_before_props_only" ? " · game line, before props only (not in the record)" : ""}</div>
                 <div className="text-xs text-faint">{r.date} · {r.away} @ {r.home} · {pct(r.model_prob)} · model {r.model_version}</div>
               </div>
               <Badge result={(r.result === "none" ? "pending" : r.result) as PickResult} small />

@@ -31,6 +31,18 @@ const MIN_EV = 0.02;
 const devFixture = (): string | null =>
   process.env.NODE_ENV === "development" && !process.env.VERCEL && process.env.MODELROOM_PM_FIXTURE ? process.env.MODELROOM_PM_FIXTURE : null;
 
+/** Why the owner-only live view is on or off for this request (TEST diagnostics; reveals no market data). */
+export async function ownerLiveStatus(): Promise<{ on: boolean; reason: string }> {
+  if (isProduction()) return { on: false, reason: "off in production" };
+  if (process.env.MODELROOM_OWNER_LIVE_MARKETS === "off") return { on: false, reason: "turned off on this site (MODELROOM_OWNER_LIVE_MARKETS=off)" };
+  if (devFixture()) return { on: true, reason: "" };
+  const email = (await getSessionUser())?.email?.toLowerCase();
+  if (!email) return { on: false, reason: "you're not signed in" };
+  const list = (process.env.OWNER_EMAILS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
+  if (!list.length) return isTestAccount(email) ? { on: true, reason: "" } : { on: false, reason: `OWNER_EMAILS isn't set on the TEST site, so only test accounts get it (you're signed in as ${email})` };
+  return list.includes(email) ? { on: true, reason: "" } : { on: false, reason: `you're signed in as ${email}, which isn't the address in OWNER_EMAILS on the TEST site` };
+}
+
 export async function ownerLiveMarkets(): Promise<boolean> {
   if (isProduction() || process.env.MODELROOM_OWNER_LIVE_MARKETS === "off") return false;
   if (devFixture()) return true;
