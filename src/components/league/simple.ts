@@ -1,4 +1,4 @@
-import { fmt, lineLabel } from "@/components/market/bits";
+import { lineLabel } from "@/components/market/bits";
 import { formatProjection } from "@/lib/format";
 import { marketMid, type ExplorerRow } from "@/server/data/explorer";
 import type { PropLineView } from "@/types/props";
