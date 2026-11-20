@@ -2,19 +2,19 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "performance",
-  "generated_at": "2026-11-20T00:49:49+00:00",
+  "generated_at": "2026-11-20T15:05:34+00:00",
   "note": "Graded from projections recorded before each game (prediction ledger). Small samples are noisy; see n.",
   "games": {
-    "n": 30,
-    "margin_mae": 11.23,
-    "total_mae": 9.91,
-    "winner_correct": 0.667,
+    "n": 31,
+    "margin_mae": 11.45,
+    "total_mae": 10.15,
+    "winner_correct": 0.677,
     "win_prob": {
-      "n": 30,
-      "brier": 0.2048,
-      "log_loss": 0.5977,
-      "avg_predicted": 0.509,
-      "hit_rate": 0.3
+      "n": 31,
+      "brier": 0.2021,
+      "log_loss": 0.5922,
+      "avg_predicted": 0.513,
+      "hit_rate": 0.323
     },
     "by_date": [
       {
@@ -79,170 +79,179 @@
         "avg_predicted": 0.641,
         "hit_rate": 0.0,
         "margin_mae": 7.7
+      },
+      {
+        "date": "2026-11-19",
+        "n": 1,
+        "brier": 0.1214,
+        "log_loss": 0.4283,
+        "avg_predicted": 0.652,
+        "hit_rate": 1.0,
+        "margin_mae": 18.0
       }
     ]
   },
   "props": {
     "overall": {
-      "n": 22285,
-      "brier": 0.1097,
-      "log_loss": 0.3441,
+      "n": 23119,
+      "brier": 0.1092,
+      "log_loss": 0.3425,
       "avg_predicted": 0.263,
-      "hit_rate": 0.256
+      "hit_rate": 0.253
     },
     "calibration": [
       {
         "bin": "-0.0-0.1",
-        "n": 9816,
+        "n": 10204,
         "predicted": 0.028,
-        "actual": 0.028
+        "actual": 0.027
       },
       {
         "bin": "0.1-0.2",
-        "n": 2914,
+        "n": 3026,
         "predicted": 0.146,
-        "actual": 0.136
+        "actual": 0.134
       },
       {
         "bin": "0.2-0.3",
-        "n": 1922,
+        "n": 1992,
         "predicted": 0.247,
-        "actual": 0.242
+        "actual": 0.236
       },
       {
         "bin": "0.3-0.4",
-        "n": 1488,
+        "n": 1542,
         "predicted": 0.347,
-        "actual": 0.323
+        "actual": 0.32
       },
       {
         "bin": "0.4-0.5",
-        "n": 1297,
+        "n": 1340,
         "predicted": 0.449,
-        "actual": 0.442
+        "actual": 0.439
       },
       {
         "bin": "0.5-0.6",
-        "n": 1071,
-        "predicted": 0.55,
-        "actual": 0.532
+        "n": 1113,
+        "predicted": 0.549,
+        "actual": 0.526
       },
       {
         "bin": "0.6-0.7",
-        "n": 996,
+        "n": 1032,
         "predicted": 0.65,
-        "actual": 0.62
+        "actual": 0.614
       },
       {
         "bin": "0.7-0.8",
-        "n": 942,
+        "n": 974,
         "predicted": 0.751,
-        "actual": 0.736
+        "actual": 0.726
       },
       {
         "bin": "0.8-0.9",
-        "n": 943,
+        "n": 973,
         "predicted": 0.849,
-        "actual": 0.841
+        "actual": 0.837
       },
       {
         "bin": "0.9-1.0",
-        "n": 896,
+        "n": 923,
         "predicted": 0.951,
-        "actual": 0.944
+        "actual": 0.943
       }
     ],
     "by_market": {
       "anytime_td": {
-        "n": 814,
-        "brier": 0.1007,
-        "log_loss": 0.3275,
+        "n": 844,
+        "brier": 0.0995,
+        "log_loss": 0.3242,
         "avg_predicted": 0.147,
-        "hit_rate": 0.141
+        "hit_rate": 0.139
       },
       "fantasy_points": {
-        "n": 3663,
-        "brier": 0.1276,
-        "log_loss": 0.3951,
+        "n": 3798,
+        "brier": 0.1274,
+        "log_loss": 0.3944,
         "avg_predicted": 0.309,
-        "hit_rate": 0.292
+        "hit_rate": 0.288
       },
       "interceptions": {
-        "n": 118,
-        "brier": 0.2015,
-        "log_loss": 0.5893,
-        "avg_predicted": 0.32,
-        "hit_rate": 0.364
+        "n": 122,
+        "brier": 0.1997,
+        "log_loss": 0.5851,
+        "avg_predicted": 0.321,
+        "hit_rate": 0.369
       },
       "longest_reception": {
-        "n": 2088,
-        "brier": 0.156,
-        "log_loss": 0.4767,
+        "n": 2166,
+        "brier": 0.1544,
+        "log_loss": 0.4721,
         "avg_predicted": 0.297,
-        "hit_rate": 0.318
+        "hit_rate": 0.316
       },
       "passing_attempts": {
-        "n": 295,
-        "brier": 0.1436,
-        "log_loss": 0.4513,
-        "avg_predicted": 0.362,
-        "hit_rate": 0.38
+        "n": 305,
+        "brier": 0.1425,
+        "log_loss": 0.4482,
+        "avg_predicted": 0.363,
+        "hit_rate": 0.374
       },
       "passing_completions": {
-        "n": 472,
-        "brier": 0.1606,
-        "log_loss": 0.4942,
+        "n": 488,
+        "brier": 0.1602,
+        "log_loss": 0.493,
         "avg_predicted": 0.446,
-        "hit_rate": 0.449
+        "hit_rate": 0.443
       },
       "passing_tds": {
-        "n": 177,
-        "brier": 0.1966,
-        "log_loss": 0.5737,
+        "n": 183,
+        "brier": 0.1984,
+        "log_loss": 0.5777,
         "avg_predicted": 0.427,
-        "hit_rate": 0.452
+        "hit_rate": 0.454
       },
       "passing_yards": {
-        "n": 531,
-        "brier": 0.1737,
-        "log_loss": 0.5286,
-        "avg_predicted": 0.364,
-        "hit_rate": 0.418
+        "n": 549,
+        "brier": 0.172,
+        "log_loss": 0.5236,
+        "avg_predicted": 0.363,
+        "hit_rate": 0.408
       },
       "receiving_yards": {
-        "n": 4176,
-        "brier": 0.1068,
-        "log_loss": 0.3374,
-        "avg_predicted": 0.242,
-        "hit_rate": 0.241
+        "n": 4332,
+        "brier": 0.1056,
+        "log_loss": 0.3339,
+        "avg_predicted": 0.241,
+        "hit_rate": 0.237
       },
       "receptions": {
-        "n": 3480,
-        "brier": 0.1,
-        "log_loss": 0.3192,
-        "avg_predicted": 0.309,
-        "hit_rate": 0.287
+        "n": 3610,
+        "brier": 0.1004,
+        "log_loss": 0.3199,
+        "avg_predicted": 0.308,
+        "hit_rate": 0.283
       },
       "rush_rec_yards": {
-        "n": 2088,
-        "brier": 0.1054,
-        "log_loss": 0.3322,
+        "n": 2166,
+        "brier": 0.1051,
+        "log_loss": 0.331,
         "avg_predicted": 0.251,
-        "hit_rate": 0.239
+        "hit_rate": 0.235
       },
       "rushing_attempts": {
-        "n": 775,
-        "brier": 0.0943,
-        "log_loss": 0.2967,
+        "n": 805,
+        "brier": 0.0949,
+        "log_loss": 0.2987,
         "avg_predicted": 0.288,
-        "hit_rate": 0.263
+        "hit_rate": 0.265
       },
       "rushing_yards": {
-        "n": 3608,
+        "n": 3751,
         "brier": 0.059,
-        "log_loss": 0.1933,
-        "avg_predicted": 0.15,
-        "hit_rate": 0.132
+        "log_loss": 0.193,
+        "avg_predicted": 0.149,
+        "hit_rate": 0.131
       }
     },
     "by_date": [
@@ -301,9 +310,25 @@
         "log_loss": 0.42,
         "avg_predicted": 0.194,
         "hit_rate": 0.219
+      },
+      {
+        "date": "2026-11-19",
+        "n": 834,
+        "brier": 0.096,
+        "log_loss": 0.3001,
+        "avg_predicted": 0.245,
+        "hit_rate": 0.161
       }
     ],
     "by_player": [
+      {
+        "player": "Jonathan Taylor",
+        "n": 183,
+        "brier": 0.1135,
+        "log_loss": 0.3547,
+        "avg_predicted": 0.393,
+        "hit_rate": 0.273
+      },
       {
         "player": "Zach Charbonnet",
         "n": 183,
@@ -311,6 +336,14 @@
         "log_loss": 0.3301,
         "avg_predicted": 0.166,
         "hit_rate": 0.23
+      },
+      {
+        "player": "Laquon Treadwell",
+        "n": 168,
+        "brier": 0.0791,
+        "log_loss": 0.2481,
+        "avg_predicted": 0.172,
+        "hit_rate": 0.054
       },
       {
         "player": "Cooper Kupp",
@@ -321,6 +354,14 @@
         "hit_rate": 0.155
       },
       {
+        "player": "Nico Collins",
+        "n": 168,
+        "brier": 0.1097,
+        "log_loss": 0.3414,
+        "avg_predicted": 0.373,
+        "hit_rate": 0.429
+      },
+      {
         "player": "Jaxon Smith-Njigba",
         "n": 168,
         "brier": 0.1182,
@@ -329,12 +370,60 @@
         "hit_rate": 0.571
       },
       {
+        "player": "Kayshon Boutte",
+        "n": 168,
+        "brier": 0.1994,
+        "log_loss": 0.662,
+        "avg_predicted": 0.146,
+        "hit_rate": 0.304
+      },
+      {
+        "player": "Xavier Hutchinson",
+        "n": 168,
+        "brier": 0.091,
+        "log_loss": 0.28,
+        "avg_predicted": 0.219,
+        "hit_rate": 0.22
+      },
+      {
+        "player": "Daniel Jones",
+        "n": 162,
+        "brier": 0.1104,
+        "log_loss": 0.3431,
+        "avg_predicted": 0.28,
+        "hit_rate": 0.13
+      },
+      {
+        "player": "C.J. Stroud",
+        "n": 162,
+        "brier": 0.1401,
+        "log_loss": 0.4319,
+        "avg_predicted": 0.334,
+        "hit_rate": 0.463
+      },
+      {
+        "player": "Dalton Schultz",
+        "n": 135,
+        "brier": 0.0992,
+        "log_loss": 0.3153,
+        "avg_predicted": 0.268,
+        "hit_rate": 0.156
+      },
+      {
         "player": "AJ Barner",
         "n": 135,
         "brier": 0.0862,
         "log_loss": 0.2866,
         "avg_predicted": 0.203,
         "hit_rate": 0.141
+      },
+      {
+        "player": "Tyler Warren",
+        "n": 135,
+        "brier": 0.1772,
+        "log_loss": 0.5445,
+        "avg_predicted": 0.409,
+        "hit_rate": 0.148
       },
       {
         "player": "Derrick Henry",
@@ -383,14 +472,6 @@
         "log_loss": 0.3122,
         "avg_predicted": 0.219,
         "hit_rate": 0.09
-      },
-      {
-        "player": "Jonathan Taylor",
-        "n": 122,
-        "brier": 0.0951,
-        "log_loss": 0.311,
-        "avg_predicted": 0.39,
-        "hit_rate": 0.328
       },
       {
         "player": "D'Andre Swift",
@@ -625,20 +706,20 @@
         "hit_rate": 0.246
       },
       {
-        "player": "Stefon Diggs",
+        "player": "DJ Moore",
         "n": 112,
-        "brier": 0.1325,
-        "log_loss": 0.3874,
-        "avg_predicted": 0.345,
-        "hit_rate": 0.429
+        "brier": 0.1566,
+        "log_loss": 0.4651,
+        "avg_predicted": 0.184,
+        "hit_rate": 0.348
       },
       {
-        "player": "Laquon Treadwell",
+        "player": "Olamide Zaccheaus",
         "n": 112,
-        "brier": 0.0737,
-        "log_loss": 0.2333,
-        "avg_predicted": 0.166,
-        "hit_rate": 0.08
+        "brier": 0.024,
+        "log_loss": 0.1009,
+        "avg_predicted": 0.093,
+        "hit_rate": 0.045
       },
       {
         "player": "Darnell Mooney",
@@ -655,14 +736,6 @@
         "log_loss": 0.2698,
         "avg_predicted": 0.41,
         "hit_rate": 0.357
-      },
-      {
-        "player": "Devin Duvernay",
-        "n": 112,
-        "brier": 0.0622,
-        "log_loss": 0.1992,
-        "avg_predicted": 0.112,
-        "hit_rate": 0.125
       },
       {
         "player": "Jerry Jeudy",
@@ -689,14 +762,6 @@
         "hit_rate": 0.116
       },
       {
-        "player": "Nico Collins",
-        "n": 112,
-        "brier": 0.1139,
-        "log_loss": 0.3513,
-        "avg_predicted": 0.349,
-        "hit_rate": 0.455
-      },
-      {
         "player": "Amon-Ra St. Brown",
         "n": 112,
         "brier": 0.1126,
@@ -705,36 +770,12 @@
         "hit_rate": 0.518
       },
       {
-        "player": "Khalil Shakir",
+        "player": "DeMario Douglas",
         "n": 112,
-        "brier": 0.0853,
-        "log_loss": 0.3709,
-        "avg_predicted": 0.28,
-        "hit_rate": 0.232
-      },
-      {
-        "player": "Parker Washington",
-        "n": 112,
-        "brier": 0.1744,
-        "log_loss": 0.5108,
-        "avg_predicted": 0.344,
-        "hit_rate": 0.545
-      },
-      {
-        "player": "Kayshon Boutte",
-        "n": 112,
-        "brier": 0.2505,
-        "log_loss": 0.8484,
-        "avg_predicted": 0.135,
-        "hit_rate": 0.321
-      },
-      {
-        "player": "Xavier Hutchinson",
-        "n": 112,
-        "brier": 0.0912,
-        "log_loss": 0.2775,
-        "avg_predicted": 0.2,
-        "hit_rate": 0.295
+        "brier": 0.1327,
+        "log_loss": 0.3905,
+        "avg_predicted": 0.305,
+        "hit_rate": 0.268
       },
       {
         "player": "Josh Downs",
@@ -753,36 +794,12 @@
         "hit_rate": 0.223
       },
       {
-        "player": "Devaughn Vele",
+        "player": "Malik Washington",
         "n": 112,
-        "brier": 0.1068,
-        "log_loss": 0.3215,
-        "avg_predicted": 0.265,
-        "hit_rate": 0.054
-      },
-      {
-        "player": "Adonai Mitchell",
-        "n": 112,
-        "brier": 0.1146,
-        "log_loss": 0.3493,
-        "avg_predicted": 0.237,
-        "hit_rate": 0.143
-      },
-      {
-        "player": "Keon Coleman",
-        "n": 112,
-        "brier": 0.0612,
-        "log_loss": 0.2089,
-        "avg_predicted": 0.199,
-        "hit_rate": 0.071
-      },
-      {
-        "player": "KC Concepcion",
-        "n": 112,
-        "brier": 0.134,
-        "log_loss": 0.3959,
-        "avg_predicted": 0.257,
-        "hit_rate": 0.339
+        "brier": 0.0988,
+        "log_loss": 0.3123,
+        "avg_predicted": 0.302,
+        "hit_rate": 0.214
       }
     ]
   }
