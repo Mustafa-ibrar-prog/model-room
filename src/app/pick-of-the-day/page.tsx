@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
+import { formatProjection } from "@/lib/format";
 import { publishedDir } from "@/server/engine/board";
 import { ownerLivePropPick, potdLiveStatus, type OwnerLive } from "@/server/markets/potdLive";
 import type { PickResult } from "@/types/history";
@@ -42,6 +43,7 @@ const pt = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) + " PT" : "—";
 const pct = (p?: number | null) => (p == null ? null : `${(p * 100).toFixed(0)}%`);
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+const signedWhole = (n: number) => signed(Number(formatProjection(n))); // player projection gaps: whole numbers
 const MARKET: Record<string, string> = { prop: "Player prop", spread: "Spread", total: "Total points", moneyline: "Moneyline" };
 const STAT = (s?: string) => (s ?? "").replace(/_/g, " ").replace("anytime td", "touchdowns").replace("passing tds", "passing TDs");
 
@@ -61,7 +63,7 @@ function lineText(p: Pick): string {
 
 function projText(p: Pick): string {
   if (p.projection == null) return "—";
-  if (p.market === "prop") return `${p.projection} ${STAT(p.stat)}`;
+  if (p.market === "prop") return `${formatProjection(p.projection)} ${STAT(p.stat)}`;
   if (p.market === "total") return `${p.projection} pts`;
   return `${p.team} by ${p.projection > 0 ? p.projection : `${p.projection} (loses by ${-p.projection})`}`;
 }
@@ -136,7 +138,7 @@ function PickCard({ league, p, liveOff }: { league: "nba" | "nfl"; p: Pick | nul
         <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
           <dt className="text-xs text-model">Model Room</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{projText(p)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{pct(p.model_prob)} chance{p.difference != null ? ` · ${signed(p.difference)} vs line` : ""}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{pct(p.model_prob)} chance{p.difference != null ? ` · ${p.market === "prop" ? signedWhole(p.difference) : signed(p.difference)} vs line` : ""}</dd>
         </div>
       </dl>
       <p className="text-sm leading-relaxed text-mute">{p.explanation}</p>
@@ -211,8 +213,8 @@ function LiveCard({ league, r }: { league: "nba" | "nfl"; r: OwnerLive }) {
         </div>
         <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
           <dt className="text-xs text-model">Model Room</dt>
-          <dd className="mt-1 font-display text-xl font-700 text-ink">{p.projection} {p.label.toLowerCase()}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{(p.modelProb * 100).toFixed(0)}% chance · {signed(p.difference)} vs line</dd>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{formatProjection(p.projection)} {p.label.toLowerCase()}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{(p.modelProb * 100).toFixed(0)}% chance · {signedWhole(p.difference)} vs line</dd>
         </div>
       </dl>
       <p className="text-sm leading-relaxed text-mute">

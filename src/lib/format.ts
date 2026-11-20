@@ -15,6 +15,12 @@ export function formatNumber(n: number, digits = 1): string {
   return n.toFixed(digits);
 }
 
+/** Player projections are shown as whole numbers (halves round up); the underlying value keeps full precision. */
+export function formatProjection(n: number): string {
+  const r = Math.round(n);
+  return String(r === 0 ? 0 : r);
+}
+
 export function formatPct(p: number, digits = 0): string {
   return `${(p * 100).toFixed(digits)}%`;
 }

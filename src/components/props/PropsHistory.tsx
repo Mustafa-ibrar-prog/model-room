@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatNumber, formatPct, formatTimestamp } from "@/lib/format";
+import { formatNumber, formatPct, formatTimestamp, formatProjection } from "@/lib/format";
 import { longDate } from "@/lib/dates";
 import { CATEGORIES } from "@/server/data/explorer";
 import { getHistoryDay } from "@/server/data/history";
@@ -88,7 +88,7 @@ function Rows({ rows, cat, final, settled }: { rows: import("@/types/history").H
                 <span className="font-600 text-ink">{r.player}</span>
                 <span className="font-mono text-xs text-faint">{r.team}</span>
                 <span className="ml-auto font-mono text-sm text-mute">
-                  Projected <span className="text-model">{formatNumber(m.mean)}</span> ± {formatNumber(m.sd)}
+                  Projected <span className="text-model">{formatProjection(m.mean)}</span> ± {formatProjection(m.sd)}
                   <span className="mx-2 text-faint">|</span>
                   Actual <span className="text-ink">{r.played === false ? "DNP" : m.actual == null ? "–" : formatNumber(m.actual)}</span>
                 </span>

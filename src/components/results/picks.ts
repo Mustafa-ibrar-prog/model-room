@@ -1,3 +1,4 @@
+import { formatProjection } from "@/lib/format";
 import type { PickRecord, PickRow } from "@/types/history";
 
 /** Plain-English text for a stored pick and for what happened. Nothing here decides a result: that is stored. */
@@ -42,7 +43,7 @@ export function modelText(p: PickRow): string | null {
     return m === 0 ? "projected a tie" : `projected ${m > 0 ? "to win" : "to lose"} by ${n(Math.abs(m))}`;
   }
   if (p.market === "total") return `projected ${n(p.model_number)}`;
-  return `projected ${n(p.model_number)}`;
+  return `projected ${formatProjection(p.model_number)}`; // player projections: whole numbers
 }
 
 export const RESULT_LABEL: Record<PickRow["result"], string> = { hit: "HIT", miss: "MISS", push: "PUSH", void: "VOID", cancelled: "CANCELLED", pending: "PENDING" };

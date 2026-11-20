@@ -1,4 +1,4 @@
-import { formatNumber, formatPct, formatTimestamp } from "@/lib/format";
+import { formatNumber, formatPct, formatTimestamp, formatProjection } from "@/lib/format";
 import { providerName } from "@/lib/providers";
 import type { MarketResult, SettleStatus } from "@/types/marketResults";
 
@@ -61,7 +61,7 @@ export function ResultRow({ r }: { r: MarketResult }) {
           <div className="sm:col-span-2 text-faint">{r.game_date} · market {r.market_id}</div>
           <div><dt className="inline text-model">Model Room: </dt><dd className="inline text-ink">
             {formatPct(r.model_prob, 1)} Yes ({r.model_call ? `called ${r.model_call === "yes" ? "Yes" : "No"}` : "no call"})
-            {r.projection?.mean != null ? `, projected ${formatNumber(r.projection.mean)}${r.projection.sd != null ? ` ± ${formatNumber(r.projection.sd)}` : ""}` : ""}
+            {r.projection?.mean != null ? `, projected ${formatProjection(r.projection.mean)}${r.projection.sd != null ? ` ± ${formatProjection(r.projection.sd)}` : ""}` : ""}
             {r.projection?.margin != null ? `, projected ${r.projection.home} by ${formatNumber(r.projection.margin)}, total ${formatNumber(r.projection.total ?? 0)}` : ""}
           </dd></div>
           <div><dt className="inline text-market">Market then: </dt><dd className="inline text-ink">

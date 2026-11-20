@@ -2,6 +2,7 @@ import Link from "next/link";
 import { TeamBadge } from "@/components/ui/TeamBadge";
 import { LockedCell } from "@/components/ui/primitives";
 import { fmt } from "@/components/market/bits";
+import { formatProjection } from "@/lib/format";
 import { Section, InjurySection, MatchupSection, type InjuryFeed } from "@/components/market/AnalysisSections";
 import { Contributions, DistributionChart } from "@/components/market/PropParts";
 import { HistoryTabs, type HistoryTabsData } from "@/components/market/HistoryTabs";
@@ -127,7 +128,7 @@ export function PlayerDetail({
                 <dt className="text-xs text-faint">We project</dt>
                 <dd className="font-display text-3xl font-600 leading-none text-model">{projText(r)}</dd>
                 <p className="mt-1.5 hidden max-w-[22ch] text-xs text-mute sm:block">
-                  In 8 games out of 10 he lands between {fmt(r.range80[0])} and {fmt(r.range80[1])}.
+                  In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
                 </p>
               </div>
               <div>
@@ -142,7 +143,7 @@ export function PlayerDetail({
         )}
         {h && !h.fromMarket ? (
           <p className="mt-4 text-xs text-mute sm:hidden">
-            No sportsbook line is published for this prop, so the threshold is our own and we call no side. In 8 games out of 10 he lands between {fmt(r.range80[0])} and {fmt(r.range80[1])}.
+            No sportsbook line is published for this prop, so the threshold is our own and we call no side. In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
           </p>
         ) : null}
         {caveat ? <p className="mt-5 text-sm text-edge">{caveat}</p> : null}

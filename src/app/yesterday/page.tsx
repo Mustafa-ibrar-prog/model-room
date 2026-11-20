@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { addDays, etDate, isDate, longDate } from "@/lib/dates";
-import { formatNumber, formatPct, formatTimestamp } from "@/lib/format";
+import { formatNumber, formatPct, formatTimestamp, formatProjection } from "@/lib/format";
 import { getHistoryDay, type HistoryView } from "@/server/data/history";
 import { getViewer } from "@/server/viewer";
 import { loadRefreshStatus } from "@/server/engine/board";
@@ -231,9 +231,9 @@ function PropsDay({ league, props, date }: { league: League; props: HistoryProp[
               return (
                 <tr key={`${p.game_id}-${p.player_id}`} className="border-t border-navy-700/70">
                   <td className="py-1.5"><span className="text-ink">{p.player}</span> <span className="text-xs text-faint">{p.team}</span></td>
-                  <td className="py-1.5 text-right font-mono text-model">{formatNumber(m.mean)}</td>
+                  <td className="py-1.5 text-right font-mono text-model">{formatProjection(m.mean)}</td>
                   <td className="py-1.5 text-right font-mono text-ink">{formatNumber(m.actual!, 0)}</td>
-                  <td className="py-1.5 text-right font-mono">{fmtLine(Number((m.mean - m.actual!).toFixed(1)))}</td>
+                  <td className="py-1.5 text-right font-mono">{fmtLine(Math.round(m.mean - m.actual!))}</td>
                 </tr>
               );
             })}
