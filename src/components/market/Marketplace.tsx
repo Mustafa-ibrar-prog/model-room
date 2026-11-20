@@ -10,6 +10,7 @@ import { TeamBadge } from "@/components/ui/TeamBadge";
 import { LockedCell, LockedPanel, Unavailable } from "@/components/ui/primitives";
 import { AutoSubmit } from "@/components/props/AutoSubmit";
 import { age, cents, EdgeTag, flagText, fmt, lineLabel, PROVIDERS, quoteBy } from "./bits";
+import { formatProjection } from "@/lib/format";
 import { Contributions, DistributionChart, lineProvider, MarketBox, ModelBox, OutcomeBar, PreferredBlock, type PreferredView } from "./PropParts";
 import { DataSection, InjurySection, MatchupSection, OpportunitySection, Section } from "./AnalysisSections";
 import { HistoryTabs, type HistoryTabsData } from "./HistoryTabs";
@@ -153,7 +154,7 @@ function PlayerRow({ r, league, q, activeKey }: { r: ExplorerRow; league: League
           <span className={`block truncate text-[0.68rem] ${stale ? "text-edge" : "text-faint"}`}>{main ? (stale ? "may have moved" : prov ?? "Market") : "none listed"}</span>
         </span>
         <span className="min-w-0">
-          <span className="block font-mono text-lg leading-tight text-model">{r.mean.toFixed(1)}</span>
+          <span className="block font-mono text-lg leading-tight text-model">{formatProjection(r.mean)}</span>
           <span className="block text-[0.68rem] text-faint">model avg</span>
         </span>
         <span className="min-w-0">
@@ -225,7 +226,7 @@ function whyLine(p: PreferredView, pr: LineProbs | null, mean: number, c: Contri
   if (p.kind === "close" && pr) return `Over ${formatPct(pr.over)} vs Under ${formatPct(pr.under)}: within 3 points of even, so no side is preferred.`;
   if (p.kind !== "side" || !pr) return NO_PREF[(p as { reason?: string }).reason ?? "no_market_line"] ?? NO_PREF.no_market_line;
   const side = p.side === "over" ? "above" : "below";
-  let t = `Model Room gives a ${formatPct(p.prob)} chance he finishes ${side} ${lineText(pr.line)}; its average is ${mean.toFixed(1)}.`;
+  let t = `Model Room gives a ${formatPct(p.prob)} chance he finishes ${side} ${lineText(pr.line)}; its average is ${formatProjection(mean)}.`;
   if (p.againstAverage) t += ` The average sits on the other side because a few outlying games pull it; the chance at the line decides.`;
   const big = c?.steps?.filter((s) => s.key !== "baseline" && s.key !== "simulation" && Math.abs(s.value) >= 0.3).sort((a, b) => Math.abs(b.value) - Math.abs(a.value))[0];
   if (big) t += ` Largest recorded adjustment: ${STEP[big.key] ?? big.key.replaceAll("_", " ")} (${big.value > 0 ? "+" : "−"}${Math.abs(big.value).toFixed(1)}).`;
@@ -340,7 +341,7 @@ function Detail({ d, league, x, explicit }: { d: ContractDetail; league: League;
               {r.grid ? <DistributionChart grid={r.grid} line={markLine} label={x.category.label.toLowerCase()} /> : null}
               {pr && market ? <OutcomeBar pr={pr} l={market} /> : null}
               {market ? <PreferredBlock p={pref} pr={pr} mean={r.mean} /> : null}
-              <p>Average {fmt(r.mean)} · middle outcome {fmt(r.median)} · typical range {fmt(r.range80[0])}–{fmt(r.range80[1])} (80% of simulated games).</p>
+              <p>Average {formatProjection(r.mean)} · middle outcome {formatProjection(r.median)} · typical range {formatProjection(r.range80[0])}–{formatProjection(r.range80[1])} (80% of simulated games).</p>
               {ms ? (
                 <p>
                   How this category tested: {ms.n.toLocaleString()} {x.category.label.toLowerCase()} thresholds in held-out seasons, log loss {ms.log_loss.toFixed(3)}

@@ -28,6 +28,8 @@ Grades (separate append-only series, the pick record is never touched): hit | mi
 """
 from __future__ import annotations
 
+import math
+
 import json
 from datetime import datetime, timezone
 
@@ -112,7 +114,8 @@ def explain(p: dict) -> str:
     if p["market"] == "prop":
         lab = p["stat"].replace("_", " ")
         mk = "" if p.get("market_prob") is None else f"; the market implies {p['market_prob'] * 100:.0f}%"
-        return (f"Model Room projects {p['player']} for {p['projection']:g} {lab} against a line of {p['line']:g}: "
+        shown = int(math.floor(float(p['projection']) + 0.5))   # player projections are shown as whole numbers
+        return (f"Model Room projects {p['player']} for {shown} {lab} against a line of {p['line']:g}: "
                 f"a {pct} chance of the {p['selection']}{mk}.")
     if p["market"] == "spread":
         proj = p["projection"]

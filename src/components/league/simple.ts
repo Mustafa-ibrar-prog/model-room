@@ -1,4 +1,5 @@
-import { fmt, lineLabel } from "@/components/market/bits";
+import { lineLabel } from "@/components/market/bits";
+import { formatProjection } from "@/lib/format";
 import { marketMid, type ExplorerRow } from "@/server/data/explorer";
 import type { PropLineView } from "@/types/props";
 
@@ -71,7 +72,7 @@ export function playerSub(r: ExplorerRow): string {
 }
 
 /** The projection, rounded the way the rest of the site rounds it. */
-export const projText = (r: ExplorerRow) => fmt(r.mean);
+export const projText = (r: ExplorerRow) => formatProjection(r.mean);
 
 /** "20+" / "Over 20.5" for a chip. */
 export const chipLabel = lineLabel;

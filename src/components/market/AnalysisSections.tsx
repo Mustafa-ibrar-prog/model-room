@@ -6,7 +6,7 @@
 import type { ReactNode } from "react";
 import { sourceLabel } from "@/components/injuries/InjuryFlags";
 import { LockedCell } from "@/components/ui/primitives";
-import { formatTimestamp } from "@/lib/format";
+import { formatTimestamp, formatProjection } from "@/lib/format";
 import type { ContributionView, ExplorerRow, HistoryView } from "@/server/data/explorer";
 import { isLocked, type League } from "@/types/domain";
 
@@ -147,13 +147,13 @@ export function OpportunitySection({ league, r, contributions }: { league: Leagu
   const seasonV = main ? h.season?.opportunity[main.key] ?? null : null;
   const projMin = league === "nba" ? num(inp?.projected_minutes) ?? contributions?.minutes?.projected ?? null : null;
   const usualMin = contributions?.minutes?.usual ?? null;
-  const summary = projMin != null ? `${projMin.toFixed(1)} projected min` : last5 != null && main ? (main.key === "snap_pct" ? `${Math.round(last5)}% of snaps, ${n5 === 1 ? "1 game" : `last ${n5}`}` : `${f1(last5)} ${main.label.toLowerCase()}, ${n5 === 1 ? "1 game" : `last ${n5}`}`) : "No recent games";
+  const summary = projMin != null ? `${formatProjection(projMin)} projected min` : last5 != null && main ? (main.key === "snap_pct" ? `${Math.round(last5)}% of snaps, ${n5 === 1 ? "1 game" : `last ${n5}`}` : `${f1(last5)} ${main.label.toLowerCase()}, ${n5 === 1 ? "1 game" : `last ${n5}`}`) : "No recent games";
   const roleShift = last5 != null && seasonV != null && h.season && h.season.games >= 3
     ? (league === "nba" ? Math.abs(last5 - seasonV) >= 4 : main?.key === "snap_pct" ? Math.abs(last5 - seasonV) >= 10 : false)
     : false;
   const rows: [string, string][] = [];
   if (league === "nba") {
-    if (projMin != null) rows.push(["Projected minutes", `${projMin.toFixed(1)}${usualMin != null ? ` (usual ${usualMin.toFixed(1)})` : ""}`]);
+    if (projMin != null) rows.push(["Projected minutes", `${formatProjection(projMin)}${usualMin != null ? ` (usual ${formatProjection(usualMin)})` : ""}`]);
     const sr = num(inp?.starter_rate);
     if (sr != null) rows.push(["Started", `${Math.round(sr * 10)} of his last 10`]);
     const ar = num(inp?.appear_rate_last10);
