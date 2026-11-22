@@ -252,9 +252,9 @@ jobs:
           python -m modelroom ledger verify
           # Results history for each league whose data passed (a delayed league keeps its last history until it does).
           python -m modelroom history --league "$( { [ $NFL_OK = 1 ] && echo nfl; [ $NBA_OK = 1 ] && echo nba; } | paste -sd, -)"
-          # Pick of the Day (TEST): one decision per league per Pacific date from the active game models and the stored
-          # consensus line; never fails the refresh.
-          python -m modelroom potd --league "$( { [ $NBA_OK = 1 ] && echo nba; [ $NFL_OK = 1 ] && echo nfl; } | paste -sd, -)" > /tmp/potd.json || echo "::warning::Pick of the Day not built"
+          # NBA Pick of the Day (TEST, NBA player props only): one decision per Pacific date from the active NBA props
+          # model; nothing is recorded without an approved line source; never fails the refresh.
+          if [ $NBA_OK = 1 ]; then python -m modelroom potd --league nba > /tmp/potd.json || echo "::warning::Pick of the Day not built"; fi
           run nba python -m modelroom nba props-monitor
           run nfl python -m modelroom nfl props-monitor
           run nba python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"

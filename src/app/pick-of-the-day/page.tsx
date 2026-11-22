@@ -2,20 +2,22 @@ import type { Metadata } from "next";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Badge } from "@/components/results/ResultCards";
 import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/primitives";
 import { formatProjection } from "@/lib/format";
 import { publishedDir } from "@/server/engine/board";
-import { ownerLivePropPick, potdLiveStatus, type OwnerLive } from "@/server/markets/potdLive";
+import { livePropPick, potdLiveStatus, type LiveResult } from "@/server/markets/potdLive";
+import { MIN_EDGE, MIN_PROB, RELIABILITY } from "@/server/markets/potdPick";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
 
 /**
- * Pick of the Day (TEST): the single strongest disagreement between an active Model Room game model and the
- * pre-kickoff consensus line, one per league per day, frozen once and graded on the stored side and line.
- * Everything shown comes from data/published/pick_of_the_day.json (built by `python -m modelroom potd`).
+ * NBA Pick of the Day (TEST). NBA player props only (Moose, 2026-11-22): NFL is not shown or selected.
+ * Live card: the most reliable qualifying prop from the active NBA model against live Polymarket US prices, fetched at
+ * request time, never stored, recorded or graded. Recorded picks and grades come from data/published/pick_of_the_day.json
+ * (`python -m modelroom potd --league nba`); the ledger is never edited.
  */
 type Pick = {
   pick_key: string; date: string; league: "nba" | "nfl"; status: "pick" | "no_pick"; market?: "prop" | "spread" | "total" | "moneyline";
@@ -44,7 +46,6 @@ const pt = (iso?: string | null) =>
 const pct = (p?: number | null) => (p == null ? null : `${(p * 100).toFixed(0)}%`);
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
 const signedWhole = (n: number) => signed(Number(formatProjection(n))); // player projection gaps: whole numbers
-const MARKET: Record<string, string> = { prop: "Player prop", spread: "Spread", total: "Total points", moneyline: "Moneyline" };
 const STAT = (s?: string) => (s ?? "").replace(/_/g, " ").replace("anytime td", "touchdowns").replace("passing tds", "passing TDs");
 
 function sideText(p: Pick): string {
@@ -71,7 +72,7 @@ function projText(p: Pick): string {
 export default function PickOfTheDayPage() {
   return (
     <>
-      <PageHeader title="Pick of the Day" intro="One player prop per league: Model Room's biggest disagreement with the market line, picked once a day and graded after the game." />
+      <PageHeader title="Pick of the Day" intro="One NBA player prop a day: the most reliable qualifying opportunity from Model Room's NBA model, checked against live Polymarket prices." />
       <Suspense fallback={<div className="mx-auto max-w-5xl px-4 sm:px-6"><TableSkeleton rows={6} /></div>}>
         <Body />
       </Suspense>
@@ -80,147 +81,180 @@ export default function PickOfTheDayPage() {
 }
 
 async function Body() {
-  // Owner login: each league's card is the live Polymarket comparison (never stored); everyone else: the recorded pick.
   const f = await load();                                  // load() awaits connection(): request time before any clock read
-  const [nbaLive, nflLive] = await Promise.all([ownerLivePropPick("nba"), ownerLivePropPick("nfl")]);
+  const live = await livePropPick();
   const status = potdLiveStatus();
-  const live = { nba: nbaLive, nfl: nflLive };
-  if (!f) return <div className="mx-auto max-w-5xl px-4 sm:px-6"><Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." /></div>;
+  const today = f?.today?.nba ?? null;
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6">
-      <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">{f.notice}</p>
-      <div className="grid gap-4 md:grid-cols-2">
-        {(["nba", "nfl"] as const).map((lg) => (live[lg] ? <LiveCard key={lg} league={lg} r={live[lg]!} /> : <PickCard key={lg} league={lg} p={f.today[lg]} liveOff={status.on ? null : status.reason} />))}
-      </div>
-      <History f={f} />
-      <p className="text-xs leading-relaxed text-faint">
-        Qualifies only when the model gives the side at least {pct(f.rule.min_prob)} and at least {(f.rule.min_edge * 100).toFixed(0)} points more
-        than the market&apos;s probability (or an even 50% when the line comes without a price). {f.limits} Updated {pt(f.generated_at)}.
+      <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">
+        Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. This is the model&apos;s most reliable qualifying NBA prop, not a guaranteed result and not betting advice.
       </p>
+      {live ? <LiveCard r={live} /> : f ? <PickCard p={today} liveOff={status.on ? null : status.reason} /> : <Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." />}
+      {f ? <History f={f} /> : null}
+      <Rules />
     </div>
   );
 }
 
-function PickCard({ league, p, liveOff }: { league: "nba" | "nfl"; p: Pick | null; liveOff: string | null }) {
-  const title = league.toUpperCase();
+function Rules() {
+  return (
+    <p className="text-xs leading-relaxed text-faint">
+      How a pick qualifies: the model&apos;s probability for the side is first adjusted for reliability. That adjustment was fitted on 2023–24 and tested on the
+      next two seasons, and it marks a pick down when more of its projection comes from blowout, matchup or usage adjustments than from the player&apos;s own
+      baseline. The adjusted probability must reach {(MIN_PROB * 100).toFixed(1)}% and beat the Polymarket price plus fees by at least {(MIN_EDGE * 100).toFixed(0)} points.
+      Among those, the highest adjusted probability is the pick, not the biggest gap. Lines and prices come from Polymarket US at the moment the page loads; none
+      are estimated, stored or graded. Model {RELIABILITY.model} is the active NBA model; shadow versions are never used for picks until approved.
+    </p>
+  );
+}
+
+function NoPick({ reason, children, tag }: { reason: string; children?: ReactNode; tag?: ReactNode }) {
+  return (
+    <Panel className="flex min-h-56 flex-col gap-2 p-5">
+      <div className="flex items-center justify-between gap-2"><span className="text-xs font-600 tracking-wide text-faint">NBA · Player prop</span>{tag}</div>
+      <h2 className="mt-auto font-display text-2xl font-700 text-ink">No qualifying NBA pick today</h2>
+      <p className="text-sm text-mute">{reason}</p>
+      {children}
+    </Panel>
+  );
+}
+
+function PickCard({ p, liveOff }: { p: Pick | null; liveOff: string | null }) {
   if (!p || p.status !== "pick") {
     return (
-      <Panel className="flex min-h-64 flex-col p-5">
-        <span className="text-xs font-600 tracking-wide text-faint">{title}</span>
-        <h2 className="mt-auto font-display text-2xl font-700 text-ink">No qualifying pick today</h2>
-        <p className="mt-2 text-sm text-mute">
-          {!p ? "No games left today." : p.reason === "no approved player-prop line source"
-            ? "No approved source supplies player-prop lines yet, so there is nothing to compare against. No line is ever estimated."
-            : `${p.candidates_considered ?? 0} prop lines checked; none cleared the bar.`}
-        </p>
-        {liveOff && liveOff !== "off in production" ? (
-          <p className="mt-2 text-xs leading-relaxed text-faint">Live Polymarket comparison is off: {liveOff}.</p>
-        ) : null}
-      </Panel>
+      <NoPick reason={!p ? "No NBA games left today." : p.reason === "no approved player-prop line source"
+        ? "No approved source supplies player-prop lines for recorded picks, so nothing is recorded. No line is ever estimated."
+        : `${p.candidates_considered ?? 0} prop lines checked; none cleared the bar.`}>
+        {liveOff && liveOff !== "off in production" ? <p className="text-xs leading-relaxed text-faint">Live Polymarket comparison is off: {liveOff}.</p> : null}
+      </NoPick>
     );
   }
   return (
     <Panel className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-xs font-600 tracking-wide text-faint">{title} · {MARKET[p.market as string]}</span>
+        <span className="text-xs font-600 tracking-wide text-faint">NBA · Recorded pick</span>
         {p.result !== "none" && p.result !== "pending" ? <Badge result={p.result as PickResult} small /> : <span className="text-xs text-faint">Starts {pt(p.game_start)}</span>}
       </div>
       <div>
-        <div className="text-sm text-mute">{p.market === "prop" ? `${p.player} · ${p.team ?? ""} · ` : ""}{p.away} @ {p.home}</div>
+        <div className="text-sm text-mute">{p.player} · {p.team ?? ""} · {p.away} @ {p.home}</div>
         <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{sideText(p)}</div>
       </div>
       <dl className="grid grid-cols-2 gap-3">
         <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
           <dt className="text-xs text-market">Market line</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{lineText(p)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{p.market_prob != null ? `Market ${pct(p.market_prob)}` : p.market === "prop" ? (p.line_source ?? "") : "Consensus, 2+ books"}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p.market_prob != null ? `Market ${pct(p.market_prob)}` : (p.line_source ?? "")}</dd>
         </div>
         <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
           <dt className="text-xs text-model">Model Room</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{projText(p)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{pct(p.model_prob)} chance{p.difference != null ? ` · ${p.market === "prop" ? signedWhole(p.difference) : signed(p.difference)} vs line` : ""}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{pct(p.model_prob)} chance{p.difference != null ? ` · ${signedWhole(p.difference)} vs line` : ""}</dd>
         </div>
       </dl>
       <p className="text-sm leading-relaxed text-mute">{p.explanation}</p>
-      <p className="text-[0.7rem] leading-snug text-faint">
-        Model {p.model_version} · picked {pt(p.selected_at)} · line captured {pt(p.line_captured_at)} · game {pt(p.game_start)}
-      </p>
+      <p className="text-[0.7rem] leading-snug text-faint">Model {p.model_version} · picked {pt(p.selected_at)} · line captured {pt(p.line_captured_at)} · game {pt(p.game_start)}</p>
     </Panel>
   );
 }
 
 function History({ f }: { f: File }) {
-  const rows = f.history.filter((r) => r.status === "pick");
+  const rows = f.history.filter((r) => r.status === "pick" && r.league === "nba");
+  const r = f.record.nba;
   return (
     <Panel className="p-5">
-      <h2 className="font-display text-xl font-700 text-ink">Pick of the Day record</h2>
-      <p className="mt-1 text-sm text-mute">Tracked separately from Performance. Unvalidated until {f.rule.unvalidated_until} settled picks per league.</p>
-      <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-        {(["nba", "nfl"] as const).map((lg) => {
-          const r = f.record[lg];
-          return (
-            <div key={lg} className="rounded-lg bg-navy-900 p-3">
-              <div className="text-xs text-faint">{lg.toUpperCase()}</div>
-              <div className="mt-1 font-display text-lg font-700 text-ink">{r.hit}–{r.miss}{r.push ? `–${r.push}` : ""}</div>
-              <div className="text-xs text-faint">{r.hit_rate == null ? "No graded picks yet" : `${(r.hit_rate * 100).toFixed(0)}% of ${r.graded} graded`} · {r.pending} pending</div>
-            </div>
-          );
-        })}
+      <h2 className="font-display text-xl font-700 text-ink">Recorded NBA picks</h2>
+      <p className="mt-1 text-sm text-mute">
+        Only picks frozen before tip-off and graded after the game count here. Live Polymarket previews are never recorded, so they never appear in this record.
+      </p>
+      <div className="mt-3 rounded-lg bg-navy-900 p-3 text-sm">
+        <div className="font-display text-lg font-700 text-ink">{r ? `${r.hit}–${r.miss}${r.push ? `–${r.push}` : ""}` : "0–0"}</div>
+        <div className="text-xs text-faint">{!r || r.hit_rate == null ? "No graded picks yet" : `${(r.hit_rate * 100).toFixed(0)}% of ${r.graded} graded`}{r ? ` · ${r.pending} pending` : ""} · unvalidated until {f.rule.unvalidated_until} settled picks</div>
       </div>
       {rows.length ? (
         <ul className="mt-4 divide-y divide-navy-800">
-          {rows.map((r) => (
-            <li key={r.pick_key} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+          {rows.map((x) => (
+            <li key={x.pick_key} className="flex items-center justify-between gap-3 py-2.5 text-sm">
               <div className="min-w-0">
-                <div className="truncate text-ink">{r.league.toUpperCase()} · {sideText(r)}{r.format === "game_line_before_props_only" ? " · game line, before props only (not in the record)" : ""}</div>
-                <div className="text-xs text-faint">{r.date} · {r.away} @ {r.home} · {pct(r.model_prob)} · model {r.model_version}</div>
+                <div className="truncate text-ink">{x.player ? `${x.player} · ` : ""}{sideText(x)}</div>
+                <div className="text-xs text-faint">{x.date} · {x.away} @ {x.home} · {pct(x.model_prob)} · model {x.model_version}</div>
               </div>
-              <Badge result={(r.result === "none" ? "pending" : r.result) as PickResult} small />
+              <Badge result={(x.result === "none" ? "pending" : x.result) as PickResult} small />
             </li>
           ))}
         </ul>
-      ) : <p className="mt-4 text-sm text-faint">No picks yet.</p>}
+      ) : <p className="mt-4 text-sm text-faint">No recorded NBA picks yet.</p>}
     </Panel>
   );
 }
 
-function LiveCard({ league, r }: { league: "nba" | "nfl"; r: OwnerLive }) {
-  const title = league.toUpperCase();
-  const tag = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">TEST · live Polymarket · not recorded</span>;
+const TAG = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">TEST · live preview · not recorded</span>;
+const p1 = (x: number) => `${(x * 100).toFixed(1)}%`;
+
+function LiveCard({ r }: { r: LiveResult }) {
   const p = r.pick;
   if (!p) {
     return (
-      <Panel className="flex min-h-64 flex-col gap-2 p-5">
-        <div className="flex items-center justify-between gap-2"><span className="text-xs font-600 tracking-wide text-faint">{title}</span>{tag}</div>
-        <h2 className="mt-auto font-display text-2xl font-700 text-ink">No qualifying pick today</h2>
-        <p className="text-sm text-mute">{r.reason}</p>
-        <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.matched} lines matched · checked {pt(r.fetchedAt)}</p>
-      </Panel>
+      <NoPick reason={r.reason} tag={TAG}>
+        {r.rejected.length ? (
+          <div className="mt-1 text-xs text-faint">
+            <div className="font-600 text-mute">Closest candidates, and why they didn&apos;t qualify</div>
+            <ul className="mt-1 space-y-1">
+              {r.rejected.map((x, i) => (
+                <li key={i}>{x.player} ({x.team}) {x.side === "over" ? "Over" : "Under"} {x.line} {x.label.toLowerCase()}: {x.why}.</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.matched} lines matched · {r.checked} checked · model {r.modelVersion ?? "—"} · updated {pt(r.fetchedAt)}</p>
+      </NoPick>
     );
   }
+  const lbl = p.label.toLowerCase();
   return (
     <Panel className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">{title} · Player prop</span>{tag}</div>
+      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">NBA · Player prop</span>{TAG}</div>
       <div>
-        <div className="text-sm text-mute">{p.player} · {p.team} · {p.matchup}</div>
-        <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}</div>
+        <div className="text-sm text-mute">{p.player} · {p.team} vs {p.opp} · {p.matchup} · {pt(p.start)}</div>
+        <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {lbl}</div>
       </div>
-      <dl className="grid grid-cols-2 gap-3">
-        <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
-          <dt className="text-xs text-market">Polymarket</dt>
-          <dd className="mt-1 font-display text-xl font-700 text-ink">{p.contract}+ · {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢</dd>
-          <dd className="mt-0.5 text-xs text-faint">Market {(p.marketProb * 100).toFixed(0)}% · fee {(p.fee * 100).toFixed(1)}¢</dd>
+      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
+          <dt className="text-xs text-model">Projection</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{formatProjection(p.projection)} {lbl}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{signedWhole(p.difference)} vs line</dd>
         </div>
         <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
-          <dt className="text-xs text-model">Model Room</dt>
-          <dd className="mt-1 font-display text-xl font-700 text-ink">{formatProjection(p.projection)} {p.label.toLowerCase()}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{(p.modelProb * 100).toFixed(0)}% chance · {signedWhole(p.difference)} vs line</dd>
+          <dt className="text-xs text-model">Model probability</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{p1(p.adjProb)}</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p1(p.modelProb)} before the reliability adjustment</dd>
+        </div>
+        <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
+          <dt className="text-xs text-market">Market probability</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{p1(p.marketProb)}</dd>
+          <dd className="mt-0.5 text-xs text-faint">Polymarket {p.contract}+ {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢ + {(p.fee * 100).toFixed(1)}¢ fee</dd>
+        </div>
+        <div className="rounded-lg border border-edge/40 bg-navy-900 p-3">
+          <dt className="text-xs text-edge">Edge after fees</dt>
+          <dd className="mt-1 font-display text-xl font-700 text-ink">{(p.edge * 100).toFixed(1)} pts</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p1(p.adjProb)} vs {(p.cost * 100).toFixed(1)}¢ cost</dd>
         </div>
       </dl>
-      <p className="text-sm leading-relaxed text-mute">
-        Model Room gives the {p.side} a {(p.modelProb * 100).toFixed(0)}% chance; Polymarket costs {(p.cost * 100).toFixed(1)}¢ with fees, a {(p.edge * 100).toFixed(1)}-point edge after fees.
+      <div>
+        <h3 className="text-sm font-600 text-ink">Why this pick</h3>
+        <ul className="mt-1.5 space-y-1 text-sm leading-relaxed text-mute">
+          {p.factors.map((x) => (
+            <li key={x.key}>
+              <span className={x.favors === "pick" ? "text-edge" : x.favors === "against" ? "text-market" : "text-faint"}>{x.favors === "pick" ? "▲ " : x.favors === "against" ? "▼ " : "• "}</span>{x.text}
+            </li>
+          ))}
+          <li><span className="text-faint">• </span>Form: {p.form.seasonAvg != null ? `${formatProjection(p.form.seasonAvg)} a game this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${formatProjection(p.form.last5)} over his last 5` : ""}. History: {p.support}.</li>
+          <li><span className="text-faint">• </span>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments in the pick's direction, so the probability is marked down to ${p1(p.adjProb)}.` : `the projection rests on his own baseline, not on adjustments; adjusted to ${p1(p.adjProb)}.`}</li>
+        </ul>
+      </div>
+      <p className="text-[0.7rem] leading-snug text-faint">
+        Model {p.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(p.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} lines checked
       </p>
-      <p className="text-[0.7rem] leading-snug text-faint">Model {p.modelVersion} · fetched {pt(r.fetchedAt)} · game {pt(p.start)} · {r.checked} lines checked</p>
     </Panel>
   );
 }

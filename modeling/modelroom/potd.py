@@ -143,8 +143,10 @@ def read_grades() -> dict:
     return out
 
 
-ELIGIBLE = {"nba": ("points", "rebounds", "assists", "threes"),
-            "nfl": ("passing_yards", "rushing_yards", "receiving_yards", "receptions", "anytime_td", "passing_tds")}
+# NBA player props only (Moose, 2026-11-22). The NFL record made before that stays in the ledger untouched; it is no longer
+# selected, graded again, or published.
+LEAGUES = ("nba",)
+ELIGIBLE = {"nba": ("points", "rebounds", "assists", "threes")}
 # Approved sources of STORABLE player-prop lines: none yet (see LIMITS). Each entry would be a callable
 # (league, now) -> [{"player_id", "league_game_id", "market", "line", "over_prob"?, "under_prob"?, "source", "captured_at"}].
 PROP_LINE_SOURCES: dict = {}
@@ -255,8 +257,10 @@ def summary(results: list[str]) -> dict:
             "validated": False, "note": f"Unvalidated until {UNVALIDATED_UNTIL} settled picks; {g} so far."}
 
 
-def run(leagues=("nba", "nfl"), now: datetime | None = None, write: bool = True) -> dict:
+def run(leagues=LEAGUES, now: datetime | None = None, write: bool = True) -> dict:
     from modelroom import history as H
+
+    leagues = tuple(lg for lg in leagues if lg in LEAGUES)
 
     now = now or datetime.now(timezone.utc)
     existing = {r["pick_key"]: r for r in read()}
@@ -282,7 +286,7 @@ def run(leagues=("nba", "nfl"), now: datetime | None = None, write: bool = True)
     grades, gnew = read_grades(), []
     stats = {}
     for p in picks:
-        if p.get("status") != "pick":
+        if p.get("status") != "pick" or p.get("league") not in LEAGUES:
             continue
         gm = games_by.get(p["league"], {}).get(p["league_game_id"])
         if p.get("market") == "prop":
@@ -321,7 +325,7 @@ PUBLIC = ("pick_key", "date", "league", "status", "format", "reason", "stat", "p
 def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
     today = _pt_date(pd.Timestamp(now))
     rows = []
-    for p in sorted(picks, key=lambda r: (r["date"], r["league"]), reverse=True):
+    for p in sorted((x for x in picks if x.get("league") in LEAGUES), key=lambda r: (r["date"], r["league"]), reverse=True):
         r = {k: p.get(k) for k in PUBLIC}
         if p.get("status") == "pick":
             r["explanation"] = explain(p)     # wording from the stored numbers; the ledger record itself is never edited
@@ -331,7 +335,7 @@ def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
         if r["status"] == "pick" and r.get("market") != "prop":
             r["format"] = "game_line_before_props_only"     # recorded before the props-only change; kept as recorded
     props = [r for r in rows if r.get("format") != "game_line_before_props_only"]
-    rec = {lg: summary([r["result"] for r in props if r["league"] == lg and r["status"] == "pick"]) for lg in ("nba", "nfl")}
+    rec = {lg: summary([r["result"] for r in props if r["league"] == lg and r["status"] == "pick"]) for lg in LEAGUES}
 
     def card(lg):
         r = next((x for x in rows if x["league"] == lg and x["date"] == today), None)
@@ -340,8 +344,8 @@ def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
                     "reason": "no approved player-prop line source", "selected_at": r["selected_at"], "result": "none"}
         return r
     return {"generated_at": now.isoformat(timespec="seconds"), "date": today,
-            "today": {lg: card(lg) for lg in ("nba", "nfl")},
+            "today": {lg: card(lg) for lg in LEAGUES},
             "history": rows, "record": rec, "rule": {"min_prob": MIN_PROB, "min_edge": MIN_EDGE, "unvalidated_until": UNVALIDATED_UNTIL},
-            "notice": ("Unvalidated. Model Room has not shown an edge against the market yet: these are the model's strongest "
-                       "disagreements with the consensus line, not guaranteed results and not betting advice."),
+            "notice": ("Unvalidated. Model Room has not shown an edge against the market yet: this is the model's most reliable "
+                       "qualifying NBA player prop, not a guaranteed result and not betting advice."),
             "limits": LIMITS}

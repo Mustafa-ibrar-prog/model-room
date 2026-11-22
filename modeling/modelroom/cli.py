@@ -333,8 +333,8 @@ def main(argv: list[str] | None = None) -> int:
     os_.add_argument("--batch", default=None)
     h = sub.add_parser("history", help="results history + performance files for the website")
     h.add_argument("--league", help="comma-separated leagues to build (default: nfl,nba)")
-    pd_ = sub.add_parser("potd", help="TEST: Pick of the Day (one NBA, one NFL; frozen once a day; graded)")
-    pd_.add_argument("--league", help="comma-separated leagues (default: nba,nfl)")
+    pd_ = sub.add_parser("potd", help="TEST: NBA Pick of the Day (one NBA player prop; frozen once a day; graded)")
+    pd_.add_argument("--league", help="nba (NBA only; anything else is ignored)")
     ij = sub.add_parser("injuries", help="fetch + combine injury sources (official NBA report, ESPN, nflverse)")
     ij.add_argument("league", choices=["nba", "nfl"])
 
@@ -346,7 +346,7 @@ def main(argv: list[str] | None = None) -> int:
 def _potd(args) -> int:
     from modelroom import potd
 
-    _print(potd.run(tuple((args.league or "nba,nfl").split(","))))
+    _print(potd.run(tuple((args.league or "nba").split(","))))
     return 0
 
 
