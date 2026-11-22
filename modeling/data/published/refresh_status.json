@@ -1,9 +1,9 @@
 {
  "last_success": {
-  "slot": "manual:2026-11-22T20:50Z",
+  "slot": "pregame:nba:2026-11-22T23:00:00+00:00",
   "status": "success",
-  "at": "2026-11-22T20:50:53+00:00",
-  "note": "push run 45067930407"
+  "at": "2026-11-22T22:36:04+00:00",
+  "note": "supabase run 45078044927"
  },
  "last_success_by_kind": {
   "manual": {
@@ -31,10 +31,10 @@
    "note": "supabase run 44964455676"
   },
   "pregame": {
-   "slot": "pregame:nfl:2026-11-22T21:05:00+00:00",
+   "slot": "pregame:nba:2026-11-22T23:00:00+00:00",
    "status": "success",
-   "at": "2026-11-22T20:42:44+00:00",
-   "note": "supabase run 45067247727"
+   "at": "2026-11-22T22:36:04+00:00",
+   "note": "supabase run 45078044927"
   },
   "inactives": {
    "slot": "inactives:nfl:2026-11-22T21:25:00+00:00",
@@ -105,8 +105,10 @@
    "note": "supabase run 45071030431; nfl data delayed: every final game in those seasons has play-by-play  6 missing, e.g. ['2026_11_ARI_KC', '2026_11_MIA_BUF', '2026_11_NO_CHI']"
   }
  ],
- "missed": [],
+ "missed": [
+  "pregame:nfl:2026-11-22T21:25:00+00:00"
+ ],
  "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff \u2212 90 min, every game \u2212 30 min",
- "next_check": "2026-11-22T21:31:45+00:00",
+ "next_check": "2026-11-22T23:30:00+00:00",
  "triggers": "Supabase wakes a run only when a slot is due (pg_cron checks every 5 min inside Postgres); GitHub's own schedule every 6 hours is the backup"
 }
