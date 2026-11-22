@@ -42,6 +42,7 @@ class Context:
     defense: pd.DataFrame
     team_pace: pd.Series
     league: dict
+    mx: dict | None = None     # 0.2.4 matchup defense (roles, team-wide and by-role tables, coefficients); None = off
 
 
 @dataclass
@@ -165,7 +166,42 @@ def build(pg: pd.DataFrame, pace: pd.DataFrame, cutoff: pd.Timestamp, season: in
     out["missed_in_row"] = played_k.min().reindex(out.index)  # team games since his last appearance
     on_team_now = recent[recent["k"] == 0].set_index("team")["game_id"]
     out["listed_last_game"] = out.index.isin(set(H[H["game_id"].isin(set(on_team_now))]["player_id"]))
-    return Context(cutoff, season, out, D, team_pace, {"rates": league, "pace": float(np.nanmean(team_pace)) if len(team_pace) else 99.0})
+    mx = _matchup_tables(P, out, w, s, season) if s.matchup_model else None
+    return Context(cutoff, season, out, D, team_pace, {"rates": league, "pace": float(np.nanmean(team_pace)) if len(team_pace) else 99.0}, mx)
+
+
+def _matchup_tables(P: pd.DataFrame, out: pd.DataFrame, w: np.ndarray, s: PropSettings, season: int) -> dict:
+    """0.2.4 (shadow only): opponent defense adjusted for who each team has faced, split into a team-wide part and a
+    by-role remainder, with roles from what players do (per-minute rebounds, blocks, assists, shots...) instead of listed
+    positions. Expected counts use each player's own current rates, so a defense that faced strong players is not marked
+    weak for it. Fitted on 2023-24 only (research Phase 8, p8/feat8.py; acceptance 2026-11-22)."""
+    feats, mu, sd, centers = s.role_model
+    feats = list(feats)
+    mu_s, sd_s = pd.Series(dict(mu)), pd.Series(dict(sd))
+    wr = _recency(P, "player_id", s.rate_half_life, s.season_carry, season)
+    A = P[feats].multiply(wr, axis=0).groupby(P["player_id"]).sum()
+    mw = pd.Series(P["minutes"].to_numpy() * wr, index=P.index).groupby(P["player_id"]).sum()
+    F = A.div(mw.replace(0, np.nan), axis=0).fillna(mu_s)
+    Z = ((F - mu_s) / sd_s)[feats].to_numpy()
+    C = np.array(centers, float)
+    role = pd.Series(np.argmin(((Z[:, None, :] - C[None]) ** 2).sum(-1), axis=1), index=F.index)
+    prole = P["player_id"].map(role).fillna(-1).astype(int).to_numpy()
+    E = np.column_stack([out[f"{r}_pm"].reindex(P["player_id"]).to_numpy() * P["minutes"].to_numpy() for r in RATES])
+    Y = P[RATES].to_numpy(float)
+    ok = np.isfinite(E).all(axis=1)
+    opp = P["opp"].to_numpy()[ok]
+    E, Y, wk, prole = E[ok], Y[ok], w[ok], prole[ok]
+    lg_rate = Y.sum(0) / P["minutes"].to_numpy()[ok].sum()
+    K1, K2 = s.def_prior_minutes * 3 * lg_rate, s.def_prior_minutes * lg_rate
+    dfY = pd.DataFrame(Y * wk[:, None], columns=RATES).assign(opp=opp, role=prole)
+    dfE = pd.DataFrame(E * wk[:, None], columns=RATES).assign(opp=opp, role=prole)
+    T = (dfY.groupby("opp")[RATES].sum() + K1) / (dfE.groupby("opp")[RATES].sum() + K1)
+    T = T / T.mean()
+    rY, rE = dfY.groupby(["opp", "role"])[RATES].sum(), dfE.groupby(["opp", "role"])[RATES].sum()
+    rE = rE * T.reindex(rE.index.get_level_values("opp")).to_numpy()
+    R = (rY + K2) / (rE + K2)
+    R = R / R.groupby(level="role").transform("mean")
+    return {"role": role, "T": T, "R": R, "coef": {r: (float(a), float(b)) for r, a, b in s.matchup_model}}
 
 
 _AUDIT_PARTS = os.environ.get("MODELROOM_AUDIT_USAGE_PARTS") == "1"
@@ -442,8 +478,15 @@ def project_team(ctx: Context, game_id: str, team: str, opp: str, margin: float,
     for pid, x in active.iterrows():
         grp = x["group"]
         dfn = ctx.defense.loc[(opp, grp)] if (opp, grp) in ctx.defense.index else None
+        mx = ctx.mx
+        role = int(mx["role"].get(pid, -1)) if mx is not None else -1
 
         def opp_f(r):
+            if mx is not None and r in mx["coef"]:          # 0.2.4: adjusted team-wide + by-role defense
+                bt, bp = mx["coef"][r]
+                lt = float(np.log(mx["T"].at[opp, r])) if opp in mx["T"].index else 0.0
+                lp = float(np.log(mx["R"].at[(opp, role), r])) if (opp, role) in mx["R"].index else 0.0
+                return float(np.exp(bt * lt + bp * lp))
             return float(dfn[r]) ** s.matchup_strength if dfn is not None else 1.0
 
         if U:

@@ -60,3 +60,26 @@ def test_023c_is_023b_plus_the_measured_blowout_cut_only(monkeypatch):
     assert {k for k in db if db[k] != dc[k]} == {"blowout_strength"} and dc["blowout_strength"] == 0.007
     monkeypatch.setenv("MODELROOM_NBA_PROPS_SHADOW", "0.2.3b,0.2.3c")
     assert P.shadow_versions("0.2.0") == ["0.2.3b", "0.2.3c"]
+
+
+def test_024_is_023c_plus_matchup_defense_only_and_never_publishes(monkeypatch):
+    from dataclasses import asdict
+    from modelroom.nba.props.config import PropParams, SHADOW_FILES
+    c, d = PropParams.load(SHADOW_FILES["0.2.3c"]), PropParams.load(SHADOW_FILES["0.2.4"])
+    dc, dd = asdict(c.settings), asdict(d.settings)
+    assert {k for k in dc if dc[k] != dd[k]} == {"matchup_model", "role_model"}
+    rates = {r for r, _, _ in d.settings.matchup_model}
+    assert rates == {"blk", "fg2m", "fg3m", "ftm", "stl"}            # assists and rebounds keep the listed-position factor
+    assert len(d.settings.role_model[3]) == 5                          # five roles
+    monkeypatch.setenv("MODELROOM_NBA_PROPS_VERSION", "0.2.4")
+    with pytest.raises(ValueError):
+        P.active_version()
+    monkeypatch.setenv("MODELROOM_NBA_PROPS_SHADOW", "0.2.3c,0.2.4")
+    assert P.shadow_versions("0.2.0") == ["0.2.3c", "0.2.4"]
+
+
+def test_matchup_model_off_leaves_earlier_params_hashes_unchanged():
+    from modelroom.nba.props.config import PropParams, SHADOW_FILES, PARAMS_FILE
+    for f in (PARAMS_FILE, SHADOW_FILES["0.2.3b"], SHADOW_FILES["0.2.3c"]):
+        j = PropParams.load(f).to_json()["settings"]
+        assert "matchup_model" not in j and "role_model" not in j
