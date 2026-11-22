@@ -11,7 +11,7 @@ def test_shadow_candidates_accepted(monkeypatch):
 
 
 def test_shadow_only_versions_cannot_publish(monkeypatch):
-    for v in ("0.2.3a", "0.2.3"):
+    for v in ("0.2.3a", "0.2.3", "0.2.3b", "0.2.3c"):
         monkeypatch.setenv("MODELROOM_NBA_PROPS_VERSION", v)
         with pytest.raises(ValueError):
             P.active_version()
@@ -50,3 +50,13 @@ def test_disagreement_groups_and_no_grading_of_unprojected():
     assert d["groups"]["only 0.2.3a + 0.2.3"]["did_not_play"] == 1
     assert d["availability_by_version"]["0.2.3a"] == {"projected_and_played": 1, "projected_but_did_not_play": 1, "excluded_but_played": 1, "excluded_and_sat": 0}
     assert d["availability_by_version"]["0.2.0"] == {"projected_and_played": 2, "projected_but_did_not_play": 0, "excluded_but_played": 0, "excluded_and_sat": 1}
+
+
+def test_023c_is_023b_plus_the_measured_blowout_cut_only(monkeypatch):
+    from dataclasses import asdict
+    from modelroom.nba.props.config import PropParams, SHADOW_FILES
+    b, c = PropParams.load(SHADOW_FILES["0.2.3b"]), PropParams.load(SHADOW_FILES["0.2.3c"])
+    db, dc = asdict(b.settings), asdict(c.settings)
+    assert {k for k in db if db[k] != dc[k]} == {"blowout_strength"} and dc["blowout_strength"] == 0.007
+    monkeypatch.setenv("MODELROOM_NBA_PROPS_SHADOW", "0.2.3b,0.2.3c")
+    assert P.shadow_versions("0.2.0") == ["0.2.3b", "0.2.3c"]
