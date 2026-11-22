@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-22T00:02:56+00:00",
+  "generated_at": "2026-11-22T00:32:36+00:00",
   "season": 2026,
   "week": 12,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "1e0e125e3e24619e",
+    "inputs_hash": "c0cfba403807fbfc",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,11 +20,11 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-22T00:02:10.893252+00:00",
+      "generated_at": "2026-11-22T00:31:56.997470+00:00",
       "sources": {
         "espn": {
           "ok": true,
-          "rows": 1095,
+          "rows": 1096,
           "errors": []
         },
         "nflverse": {
@@ -45,7 +45,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-22T00:01:44+00:00",
+    "last_ingest": "2026-11-22T00:31:36+00:00",
     "results_through": "2026-11-19",
     "markets": [
       {
@@ -26230,7 +26230,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T21:39:00+00:00",
+            "report_time": "2026-11-22T00:19:00+00:00",
             "detail": "Not Specified Groin Surgery",
             "long_term": false,
             "late_scratch": false,
@@ -67485,7 +67485,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-05T04:55:00+00:00",
-            "detail": "Left Knee Not Specified",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -93768,12 +93768,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-20T22:39:00+00:00",
+            "report_time": "2026-11-22T00:05:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 20 22:39 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 22 00:05 UTC)"
           },
           {
             "player": "Tyler Booker",
@@ -93858,7 +93858,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T19:12:00+00:00",
+            "report_time": "2026-11-22T00:03:00+00:00",
             "detail": "Not Specified Ankle Sprain",
             "long_term": true,
             "late_scratch": false,
@@ -117189,7 +117189,7 @@
           "opp": "DEN",
           "position": "RB",
           "game_id": "2026_11_LV_DEN",
-          "injury_status": "Available",
+          "injury_status": null,
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -117964,16 +117964,10 @@
             "qb_note": "starting QB Fernando Mendoza has 37 career pass attempts: team passing yards x0.93",
             "team_pass_attempts": 33.2,
             "team_carries": 24.9,
-            "injury_status": "Available",
+            "injury_status": null,
             "snap_share_recent": 0.635,
             "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-11-16T02:10:00+00:00",
-              "comment": "Jeanty turned his nine carries into just 18 yards and caught all four of his targets for 46 yards during Sunday's 21-13 loss to the Seahawks. After reaching the 10-carry threshold in each of the first six games of the season, Jeanty has failed to do so in four straight contests, and he also has fallen shy of 30 rushing yards in six consecutive outings. Rookie RB Mike Washington continued to split the backfield with Jeanty in Week 10, turning his nine touches into 27 yards from scrimmage. Considering recent trends, Jeanty is difficult to trust for consistent production without a boost in work.",
-              "conflict": null,
+              "status": null,
               "notes": [
                 "starting QB Fernando Mendoza has 37 career pass attempts: team passing yards x0.93"
               ]
@@ -136086,7 +136080,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T00:16:00+00:00",
+            "report_time": "2026-11-22T00:14:00+00:00",
             "detail": "Not Specified Back Not Specified",
             "long_term": true,
             "late_scratch": false,
@@ -149235,12 +149229,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T00:54:00+00:00",
-            "detail": "Not Specified Groin Not Specified",
+            "report_time": "2026-11-22T00:25:00+00:00",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 21 00:54 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 22 00:25 UTC)"
           },
           {
             "player": "Andrew Farmer II",
@@ -162730,8 +162724,8 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T22:10:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
+            "report_time": "2026-11-22T00:26:00+00:00",
+            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -162957,7 +162951,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-20T00:55:00+00:00",
+            "report_time": "2026-11-22T00:17:00+00:00",
             "detail": "Illness",
             "long_term": false,
             "late_scratch": false,
@@ -176491,7 +176485,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-10-21T23:27:00+00:00",
+            "report_time": "2026-11-22T00:22:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -176611,7 +176605,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-08-31T23:42:00+00:00",
+            "report_time": "2026-11-22T00:23:00+00:00",
             "detail": null,
             "long_term": true,
             "late_scratch": false,
@@ -190549,7 +190543,7 @@
             "source": "espn",
             "confirmed": false,
             "report_time": "2026-11-05T04:55:00+00:00",
-            "detail": "Left Knee Not Specified",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
@@ -204118,12 +204112,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-20T22:39:00+00:00",
+            "report_time": "2026-11-22T00:05:00+00:00",
             "detail": "Not Specified Hamstring Not Specified",
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 20 22:39 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 22 00:05 UTC)"
           },
           {
             "player": "Tyler Booker",
@@ -204208,7 +204202,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T19:12:00+00:00",
+            "report_time": "2026-11-22T00:03:00+00:00",
             "detail": "Not Specified Ankle Sprain",
             "long_term": true,
             "late_scratch": false,
@@ -204345,7 +204339,7 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T00:16:00+00:00",
+            "report_time": "2026-11-22T00:14:00+00:00",
             "detail": "Not Specified Back Not Specified",
             "long_term": true,
             "late_scratch": false,
@@ -276028,7 +276022,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-20T00:55:00+00:00",
+            "report_time": "2026-11-22T00:17:00+00:00",
             "detail": "Illness",
             "long_term": false,
             "late_scratch": false,
@@ -344125,12 +344119,12 @@
             "raw_status": "Injured Reserve",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T00:54:00+00:00",
-            "detail": "Not Specified Groin Not Specified",
+            "report_time": "2026-11-22T00:25:00+00:00",
+            "detail": null,
             "long_term": true,
             "late_scratch": false,
             "restriction": false,
-            "conflict": "espn: Injured Reserve (Nov 21 00:54 UTC)"
+            "conflict": "espn: Injured Reserve (Nov 22 00:25 UTC)"
           },
           {
             "player": "Andrew Farmer II",
@@ -358603,8 +358597,8 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T22:10:00+00:00",
-            "detail": "Not Specified Ankle Not Specified",
+            "report_time": "2026-11-22T00:26:00+00:00",
+            "detail": null,
             "long_term": false,
             "late_scratch": false,
             "restriction": false,
@@ -367183,13 +367177,7 @@
             "injury_status": null,
             "snap_share_recent": 0.635,
             "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-11-16T02:10:00+00:00",
-              "comment": "Jeanty turned his nine carries into just 18 yards and caught all four of his targets for 46 yards during Sunday's 21-13 loss to the Seahawks. After reaching the 10-carry threshold in each of the first six games of the season, Jeanty has failed to do so in four straight contests, and he also has fallen shy of 30 rushing yards in six consecutive outings. Rookie RB Mike Washington continued to split the backfield with Jeanty in Week 10, turning his nine touches into 27 yards from scrimmage. Considering recent trends, Jeanty is difficult to trust for consistent production without a boost in work.",
-              "conflict": null,
+              "status": null,
               "notes": [
                 "starting QB Fernando Mendoza has 37 career pass attempts: team passing yards x0.93"
               ]
@@ -384831,7 +384819,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-21T21:39:00+00:00",
+            "report_time": "2026-11-22T00:19:00+00:00",
             "detail": "Not Specified Groin Surgery",
             "long_term": false,
             "late_scratch": false,
