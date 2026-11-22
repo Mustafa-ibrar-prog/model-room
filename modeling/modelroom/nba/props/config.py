@@ -16,7 +16,8 @@ INJURY_FILE = Path(__file__).with_name("params_0.2.1.json")      # 0.2.0 + the l
 # Experimental versions that may be recorded as shadows on the test site (never published unless approved).
 SHADOW_FILES = {"0.2.3a": Path(__file__).with_name("params_0.2.3a.json"), "0.2.3": Path(__file__).with_name("params_0.2.3.json"),
                 "0.2.3b": Path(__file__).with_name("params_0.2.3b.json"),
-                "0.2.3c": Path(__file__).with_name("params_0.2.3c.json")}  # 0.2.3c: 0.2.3b + measured blowout cut (Phase 8)
+                "0.2.3c": Path(__file__).with_name("params_0.2.3c.json"),  # 0.2.3c: 0.2.3b + measured blowout cut (Phase 8)
+                "0.2.4": Path(__file__).with_name("params_0.2.4.json")}   # 0.2.4: 0.2.3c + matchup defense (Phase 8b)
 
 HISTORY_SEASONS = 2                  # earlier seasons used alongside the current one (hoopR season = end year)
 TUNE_SEASONS = (2021, 2022)          # 2020-21, 2021-22
@@ -79,12 +80,17 @@ class PropSettings:
                                        # his overall minutes with this many games' weight
     fill_keep: tuple = ()              # (starter, bench): share of the team-fill minutes kept, mixed by P(he starts)
     role_minutes_half_life: float = 6.0  # recency half-life (games) of the minutes-in-starts / off-the-bench figures (as fitted)
+    # 0.2.4 matchup defense (shadow only). Empty = off: every earlier version is unchanged.
+    matchup_model: tuple = ()          # ((rate, team coef, role coef), ...): factor = exp(team coef x log team-wide defense +
+                                       # role coef x log opponent-by-role remainder), both adjusted for who each defense faced.
+                                       # Rates not listed keep the defense-vs-listed-position factor (0.2.4: ast, reb)
+    role_model: tuple = ()             # (features, mu, sd, centers): data-driven roles from per-minute profiles (fixed, 2022-23)
     sims: int = 4000
 
 
 ADDED_SETTINGS = ("injury_feed", "doubtful_weight", "return_minutes", "return_sd_factor",
                   "play_bands", "play_prob_available", "play_prob_questionable", "unlisted_clears", "lineup_scenarios", "minutes_gap_fill",
-                  "start_model", "role_minutes_k", "fill_keep", "role_minutes_half_life")
+                  "start_model", "role_minutes_k", "fill_keep", "role_minutes_half_life", "matchup_model", "role_model")
 
 
 @dataclass(frozen=True)
@@ -110,7 +116,9 @@ class PropParams:
             return cls()
         d = json.loads(path.read_text())
         known = {f.name for f in fields(PropSettings)}
-        st = {k: (tuple(v) if isinstance(v, list) else v) for k, v in d["settings"].items() if k in known}
+        def tup(v):
+            return tuple(tup(x) for x in v) if isinstance(v, list) else v
+        st = {k: tup(v) for k, v in d["settings"].items() if k in known}
         return cls(PropSettings(**st), d.get("calibration", {}), d.get("provenance", {}))
 
     def calibrate(self, market: str, p: float) -> float:

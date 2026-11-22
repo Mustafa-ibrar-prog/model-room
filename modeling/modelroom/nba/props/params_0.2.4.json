@@ -1,0 +1,271 @@
+{
+  "calibration": {
+    "assists": [
+      0.234,
+      1.2959
+    ],
+    "blocks": [
+      0.0906,
+      1.0786
+    ],
+    "points": [
+      0.0973,
+      1.3062
+    ],
+    "pra": [
+      0.0821,
+      1.3656
+    ],
+    "rebounds": [
+      0.0799,
+      1.2804
+    ],
+    "steals": [
+      0.1099,
+      1.1072
+    ],
+    "threes": [
+      0.0942,
+      1.1065
+    ]
+  },
+  "model_id": "nba-props",
+  "model_version": "0.2.4",
+  "provenance": {
+    "acceptance": "Phase 8b (2026-11-22): passed every agreed test vs 0.2.0 and 0.2.3b on both held-out seasons (log loss -0.00056 vs 0.2.3b, -0.00829 vs 0.2.0; no market significantly worse; ECE within 0.001 in every market; fitted effects stable across halves of 2023-24)",
+    "based_on": "0.2.3c (0.2.3b + blowout cut 0.007)",
+    "change_from_0.2.3c": "Matchup defense: opponent defense adjusted for who each team faced, split into team-wide and by-role parts, roles from per-minute profiles (5 clusters fitted on 2022-23). Applied to 2-pointers, 3-pointers, free throws, steals and blocks; assists and rebounds keep the defense-vs-listed-position factor (rule set on 2023-24 data only: first half fit, second half scored). Coefficients and calibration fitted on 2023-24 only.",
+    "fit": "2023-24 only (hoopR season 2024); held-out test 2024-25 and 2025-26",
+    "fitted_at": "2026-11-22T00:00:00+00:00",
+    "research": "model-room-research/p8: devrule.py, feat8.py, run8c.py (TAG _c4)",
+    "status": "experimental 0.2.4: SHADOW ONLY on the test site (own shadow ledger, never published, never used by Pick of the Day); monitored at least 4 weeks; activation needs Moose's approval"
+  },
+  "settings": {
+    "assist_sd": 0.35,
+    "blowout_strength": 0.007,
+    "def_half_life": 20.0,
+    "def_prior_minutes": 1500.0,
+    "doubtful_weight": 1.0,
+    "fill_keep": [
+      0.3433,
+      0.7229
+    ],
+    "injury_feed": true,
+    "lineup_scenarios": 0,
+    "matchup_model": [
+      [
+        "blk",
+        1.3773,
+        0.3015
+      ],
+      [
+        "fg2m",
+        1.0261,
+        0.7281
+      ],
+      [
+        "fg3m",
+        1.1808,
+        0.5458
+      ],
+      [
+        "ftm",
+        1.2081,
+        0.4596
+      ],
+      [
+        "stl",
+        1.2696,
+        0.1971
+      ]
+    ],
+    "matchup_strength": 0.5,
+    "minutes_fill": "headroom",
+    "minutes_gap_fill": 0.5,
+    "minutes_half_life": 3.0,
+    "minutes_sd": 11.0,
+    "missed_games_out": 2,
+    "pace_strength": 1.0,
+    "play_bands": [
+      8,
+      16,
+      24
+    ],
+    "play_prob_available": [
+      0.364,
+      0.64,
+      0.918,
+      0.993
+    ],
+    "play_prob_questionable": [
+      0.18,
+      0.31,
+      0.45,
+      0.49
+    ],
+    "rate_half_life": 20.0,
+    "rate_prior_kind": "role",
+    "rate_prior_minutes": 150.0,
+    "rebound_sd": 0.25,
+    "return_minutes": [
+      0.743,
+      0.878,
+      0.949
+    ],
+    "return_sd_factor": [
+      1.307,
+      1.211,
+      1.179
+    ],
+    "role_minutes_k": 1.0424,
+    "role_model": [
+      [
+        "reb",
+        "oreb",
+        "blk",
+        "ast",
+        "fg3a",
+        "fta",
+        "fga",
+        "stl"
+      ],
+      [
+        [
+          "reb",
+          0.18007083425006257
+        ],
+        [
+          "oreb",
+          0.04488174743287947
+        ],
+        [
+          "blk",
+          0.019765845069845328
+        ],
+        [
+          "ast",
+          0.0984655780638396
+        ],
+        [
+          "fg3a",
+          0.13792928219042877
+        ],
+        [
+          "fta",
+          0.08973547379253564
+        ],
+        [
+          "fga",
+          0.34914724174333917
+        ],
+        [
+          "stl",
+          0.03012991466810978
+        ]
+      ],
+      [
+        [
+          "reb",
+          0.08039006314824014
+        ],
+        [
+          "oreb",
+          0.034207892587912396
+        ],
+        [
+          "blk",
+          0.016910796824495828
+        ],
+        [
+          "ast",
+          0.05611347305226419
+        ],
+        [
+          "fg3a",
+          0.07293573141725138
+        ],
+        [
+          "fta",
+          0.054193127705593556
+        ],
+        [
+          "fga",
+          0.10158902063087812
+        ],
+        [
+          "stl",
+          0.010666251325697245
+        ]
+      ],
+      [
+        [
+          -0.2941129462505566,
+          -0.5115975678268042,
+          -0.4183650571934585,
+          0.9465684005911237,
+          0.5724764895423311,
+          1.1774626420353413,
+          1.4160963328351472,
+          -0.03131661871516323
+        ],
+        [
+          -0.47422927044751795,
+          -0.36017111933078405,
+          -0.2749778670578516,
+          0.674043640409181,
+          -0.24980606738865394,
+          -0.48972321778079053,
+          -0.4262630562398133,
+          1.629964212517746
+        ],
+        [
+          1.869399721256104,
+          2.1874131576254667,
+          2.0997051579177506,
+          -0.7707291577524474,
+          -1.7043865303620025,
+          0.15542169628762167,
+          -0.9313051339318057,
+          -0.21841339160562312
+        ],
+        [
+          -0.586926652858258,
+          -0.5203589705002909,
+          -0.4250380728212916,
+          -0.39661510815794093,
+          0.4539534852435285,
+          -0.6386731799354637,
+          -0.3579115812071616,
+          -0.3622652210307049
+        ],
+        [
+          0.9322093545003735,
+          0.8113668554454083,
+          0.49240059201614494,
+          -0.44638039328312984,
+          -0.5351851206196112,
+          0.17228550531619674,
+          -0.17008606973431034,
+          -0.3572203704037585
+        ]
+      ]
+    ],
+    "scoring_sd": 0.25,
+    "season_carry": 0.5,
+    "sims": 10000,
+    "start_model": [
+      2.2433,
+      0.41573,
+      2.18813,
+      -0.28038,
+      -0.539,
+      0.23439,
+      -0.62315,
+      1.66638
+    ],
+    "stock_sd": 0.4,
+    "unlisted_clears": false,
+    "usage_boost": 0.0,
+    "usage_decay": 1.0
+  }
+}
