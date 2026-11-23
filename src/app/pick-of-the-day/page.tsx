@@ -72,7 +72,7 @@ function projText(p: Pick): string {
 export default function PickOfTheDayPage() {
   return (
     <>
-      <PageHeader title="Pick of the Day" intro="One NBA player prop a day: the most reliable qualifying opportunity from Model Room's NBA model, checked against live Polymarket prices." />
+      <PageHeader title="Pick of the Day" intro="Every NBA player prop that qualifies today under Model Room's NBA model, checked against live Polymarket prices and listed from most to least reliable." />
       <Suspense fallback={<div className="mx-auto max-w-5xl px-4 sm:px-6"><TableSkeleton rows={6} /></div>}>
         <Body />
       </Suspense>
@@ -88,7 +88,7 @@ async function Body() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6">
       <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">
-        Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. This is the model&apos;s most reliable qualifying NBA prop, not a guaranteed result and not betting advice.
+        Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. These are the NBA props that qualify under the model&apos;s rules, not guaranteed results and not betting advice.
       </p>
       {live ? <LiveCard r={live} /> : f ? <PickCard p={today} liveOff={status.on ? null : status.reason} /> : <Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." />}
       {f ? <History f={f} /> : null}
@@ -104,7 +104,8 @@ function Rules() {
       ladder rungs never compete. The model&apos;s probability for the side is then adjusted for reliability. That adjustment was fitted on 2023–24 and tested on the
       next two seasons, and it marks a pick down when more of its projection comes from blowout, matchup or usage adjustments than from the player&apos;s own
       baseline. The adjusted probability must reach {(MIN_PROB * 100).toFixed(1)}% and beat the Polymarket price plus fees by at least {(MIN_EDGE * 100).toFixed(0)} points.
-      Among those, the highest adjusted probability is the pick, not the biggest gap. Lines and prices come from Polymarket US at the moment the page loads; none
+      Every prop that clears both bars is listed, from the highest adjusted probability down; there is no fixed number, and
+      the size of the gap with the market is never the ranking. Lines and prices come from Polymarket US at the moment the page loads; none
       are estimated, stored or graded. Model {RELIABILITY.model} is the active NBA model; shadow versions are never used for picks until approved.
     </p>
   );
@@ -196,9 +197,23 @@ function listed(xs: { name: string; status: string }[]): string {
 function histText(p: LivePropPick): string {
   const h = p.history, n = p.contract, lbl = p.label.toLowerCase();
   const parts: string[] = [];
-  if (h.thisSeason) parts.push(`${n}+ ${lbl} in ${h.thisSeason.hits} of ${h.thisSeason.games} games this season`);
-  if (h.lastSeason) parts.push(`${Math.round((h.lastSeason.hits / h.lastSeason.games) * 100)}% of ${h.lastSeason.games} games last season`);
-  return parts.length ? `He reached it ${parts.join(", ")}.` : "Not enough games this season or last to show how often he reaches it.";
+  if (h.thisSeason) parts.push(`in ${h.thisSeason.hits} of ${h.thisSeason.games} games this season (${Math.round((h.thisSeason.hits / h.thisSeason.games) * 100)}%)`);
+  if (h.lastSeason) parts.push(`in ${h.lastSeason.hits} of ${h.lastSeason.games} games last season (${Math.round((h.lastSeason.hits / h.lastSeason.games) * 100)}%)`);
+  return parts.length ? `He has reached ${n}+ ${lbl} ${parts.join(" and ")}.` : `Too few games this season or last to show how often he reaches ${n}+ ${lbl}.`;
+}
+
+/** Projection against the line, signed, one decimal: "0.2 below the line". */
+function vsLine(d: number): string {
+  if (Math.abs(d) < 0.05) return "on the line";
+  return `${Math.abs(d).toFixed(1)} ${d > 0 ? "above" : "below"} the line`;
+}
+const avg = (x: number) => x.toFixed(1);
+
+/** His own entry in the live injury report (official first, ESPN otherwise), never inferred. */
+function ownStatus(p: LivePropPick): string {
+  if (!p.injuries) return "unavailable";
+  const e = p.injuries.team.find((x) => x.name === p.player);
+  return e ? `listed ${e.status.toLowerCase()}` : "he is not listed as out, doubtful or questionable";
 }
 
 const TAG = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">TEST · live preview · not recorded</span>;
@@ -222,82 +237,122 @@ function LiveCard({ r }: { r: LiveResult }) {
       </NoPick>
     );
   }
+  const rank = new Map(r.picks.map((p, i) => [p, i + 1]));
+  const games: { id: string; picks: LivePropPick[] }[] = [];
+  for (const p of r.picks) {
+    const g = games.find((x) => x.id === p.gameId);
+    if (g) g.picks.push(p);
+    else games.push({ id: p.gameId, picks: [p] });
+  }
+  const byPlayer = new Map<string, number[]>();
+  for (const p of r.picks) byPlayer.set(p.player, [...(byPlayer.get(p.player) ?? []), rank.get(p)!]);
+  const repeats = [...byPlayer].filter(([, v]) => v.length > 1);
   return (
-    <div className="space-y-4">
-      <p className="text-sm text-mute">
-        {r.picks.length === 1 ? "1 NBA prop qualifies today." : `${r.picks.length} NBA props qualify today, most reliable first.`} Each is judged at its main line; nothing is forced to fill a slot.
+    <div className="space-y-5">
+      <div className="text-sm text-mute">
+        <p>
+          {r.picks.length === 1 ? "1 NBA prop qualifies today" : `${r.picks.length} NBA props qualify today`} across {games.length === 1 ? "1 game" : `${games.length} games`}, numbered from most to least reliable.
+          Each is judged at its main line; nothing is forced to fill a slot.
+        </p>
+        {games.length === 1 && r.picks.length > 1 ? <p className="mt-1 text-xs text-faint">All of today&apos;s qualifying props come from the same game, so their results are linked.</p> : null}
+        {repeats.length ? <p className="mt-1 text-xs text-faint">More than one prop for the same player: {repeats.map(([n, v]) => `${n} (#${v.join(", #")})`).join("; ")}.</p> : null}
+      </div>
+      {games.map((g) => <GameGroup key={g.id} picks={g.picks} rank={rank} byPlayer={byPlayer} />)}
+      <p className="text-[0.7rem] leading-snug text-faint">
+        Model {r.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(r.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked
       </p>
-      {r.picks.map((p, i) => <LiveOpportunity key={`${p.gameId}-${p.player}-${p.stat}`} p={p} r={r} rank={i + 1} />)}
     </div>
   );
 }
 
-function LiveOpportunity({ p, r, rank }: { p: LivePropPick; r: LiveResult; rank: number }) {
+function GameGroup({ picks, rank, byPlayer }: { picks: LivePropPick[]; rank: Map<LivePropPick, number>; byPlayer: Map<string, number[]> }) {
+  const f = picks[0];
+  const gm = f.game;
+  const home = gm?.home, away = gm?.away;
+  const inj = f.injuries;
+  const injFor = (abbr?: string) => (!inj || !abbr ? null : abbr === f.team ? inj.team : abbr === f.opp ? inj.opp : null);
+  return (
+    <section className="space-y-3">
+      <Panel className="p-4 text-sm">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-xl font-700 text-ink">{f.matchup}</h2>
+          <span className="text-xs text-faint">{pt(f.start)} · {picks.length === 1 ? "1 qualifying prop" : `${picks.length} qualifying props`} in this game</span>
+        </div>
+        {gm ? (
+          <p className="mt-2 text-mute">
+            Game model {gm.model}: {gm.away} {Math.round(gm.awayScore)}, {gm.home} {Math.round(gm.homeScore)} ({gm.favored} by {Math.abs(gm.margin).toFixed(1)}), total {Math.round(gm.total)}{gm.pace ? `, pace ${Math.round(gm.pace)}` : ""}.
+            Chance either team wins by 10+: {Math.round(gm.p10 * 100)}%, by 15+: {Math.round(gm.p15 * 100)}%, by 20+: {Math.round(gm.p20 * 100)}%.
+          </p>
+        ) : <p className="mt-2 text-faint">Game projection unavailable for this game.</p>}
+        {gm ? <p className="mt-1 text-xs text-faint">From the game model&apos;s projected margin and its measured error ({gm.sigma.toFixed(1)} points), not the betting spread. In model {f.modelVersion}, the margin affects props only through the blowout minutes step shown on a card.</p> : null}
+        <h3 className="mt-3 text-sm font-600 text-ink">Context the model does not use</h3>
+        <ul className="mt-1 space-y-1 leading-relaxed text-mute">
+          <li>
+            {inj ? <>Injury report ({inj.source}{inj.reportTime ? `, ${pt(inj.reportTime)}` : ""}): {away ?? f.team} {listed(injFor(away) ?? [])}; {home ?? f.opp} {listed(injFor(home) ?? [])}. Model {f.modelVersion} does not read the report, so players listed out may still be in its projections.</> : "Injury report unavailable."}
+          </li>
+          <li>Individual defenders: unavailable (no free, licensed source of defensive assignments; never guessed). Starting lineups: projected from recent starts only.</li>
+        </ul>
+      </Panel>
+      {picks.map((p) => <LiveOpportunity key={`${p.gameId}-${p.player}-${p.stat}`} p={p} rank={rank.get(p)!} others={(byPlayer.get(p.player) ?? []).filter((x) => x !== rank.get(p))} />)}
+    </section>
+  );
+}
+
+function LiveOpportunity({ p, rank, others }: { p: LivePropPick; rank: number; others: number[] }) {
   const lbl = p.label.toLowerCase();
   return (
-    <Panel className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">NBA · Player prop · #{rank}</span>{TAG}</div>
+    <Panel className="flex flex-col gap-3 p-4 sm:p-5">
+      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">#{rank} · NBA player prop</span>{TAG}</div>
       <div>
-        <div className="text-sm text-mute">{p.player} · {p.team} vs {p.opp} · {p.matchup} · {pt(p.start)}</div>
-        <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {lbl}</div>
+        <div className="text-sm text-mute">{p.player} ({p.team}) vs {p.opp}{others.length ? ` · also #${others.join(", #")}` : ""}</div>
+        <div className="mt-1 font-display text-2xl font-700 leading-tight text-edge sm:text-3xl">{p.side === "over" ? "Over" : "Under"} {p.line} {lbl}</div>
       </div>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
+      <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+        <div className="rounded-lg border border-model/40 bg-navy-900 p-2.5 sm:p-3">
           <dt className="text-xs text-model">Projection</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{formatProjection(p.projection)} {lbl}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{signedWhole(p.difference)} vs line</dd>
+          <dd className="mt-0.5 text-xs text-faint">{vsLine(p.difference)}</dd>
         </div>
-        <div className="rounded-lg border border-model/40 bg-navy-900 p-3">
+        <div className="rounded-lg border border-model/40 bg-navy-900 p-2.5 sm:p-3">
           <dt className="text-xs text-model">Model probability</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{p1(p.adjProb)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">{p1(p.modelProb)} before the reliability adjustment</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p1(p.modelProb)} before reliability</dd>
         </div>
-        <div className="rounded-lg border border-market/40 bg-navy-900 p-3">
+        <div className="rounded-lg border border-market/40 bg-navy-900 p-2.5 sm:p-3">
           <dt className="text-xs text-market">Market probability</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{p1(p.marketProb)}</dd>
-          <dd className="mt-0.5 text-xs text-faint">Polymarket {p.contract}+ {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢ + {(p.fee * 100).toFixed(1)}¢ fee</dd>
+          <dd className="mt-0.5 text-xs text-faint">{p.contract}+ {p.side === "over" ? "Yes" : "No"} {(p.price * 100).toFixed(0)}¢ + {(p.fee * 100).toFixed(1)}¢ fee</dd>
         </div>
-        <div className="rounded-lg border border-edge/40 bg-navy-900 p-3">
+        <div className="rounded-lg border border-edge/40 bg-navy-900 p-2.5 sm:p-3">
           <dt className="text-xs text-edge">Edge after fees</dt>
           <dd className="mt-1 font-display text-xl font-700 text-ink">{(p.edge * 100).toFixed(1)} pts</dd>
-          <dd className="mt-0.5 text-xs text-faint">{p1(p.adjProb)} vs {(p.cost * 100).toFixed(1)}¢ cost</dd>
+          <dd className="mt-0.5 text-xs text-faint">vs {(p.cost * 100).toFixed(1)}¢ cost</dd>
         </div>
       </dl>
-      {p.game ? (
-        <div className="rounded-lg bg-navy-900 p-3 text-sm">
-          <h3 className="text-sm font-600 text-ink">Game script (game model {p.game.model})</h3>
-          <p className="mt-1 text-mute">
-            Projected {p.game.away} {Math.round(p.game.awayScore)}, {p.game.home} {Math.round(p.game.homeScore)}: {p.game.favored} by {Math.round(Math.abs(p.game.margin))}, total {Math.round(p.game.total)}{p.game.pace ? `, pace ${Math.round(p.game.pace)}` : ""}.
-            Chance the final margin is 10+: {Math.round(p.game.p10 * 100)}%, 15+: {Math.round(p.game.p15 * 100)}%, 20+: {Math.round(p.game.p20 * 100)}%.
-          </p>
-          <p className="mt-1 text-xs text-faint">From the game model&apos;s projected margin and its measured error ({p.game.sigma.toFixed(1)} points), not the betting spread. In model {p.modelVersion} the projected margin reaches this prop only through the blowout minutes cut listed below.</p>
-        </div>
-      ) : <p className="text-xs text-faint">Game projection unavailable for this game.</p>}
       <div>
         <h3 className="text-sm font-600 text-ink">What moved the projection (model {p.modelVersion})</h3>
-        <ul className="mt-1.5 space-y-1 text-sm leading-relaxed text-mute">
-          {p.factors.map((x) => (
-            <li key={x.key}>
-              <span className={x.favors === "pick" ? "text-edge" : x.favors === "against" ? "text-market" : "text-faint"}>{x.favors === "pick" ? "▲ " : x.favors === "against" ? "▼ " : "• "}</span>{x.text}
-            </li>
-          ))}
-          <li><span className="text-faint">• </span>Main line: {p.line} is the Polymarket {lbl} contract priced closest to 50¢ for him ({p.contract}+). {histText(p)}</li>
-          <li><span className="text-faint">• </span>Form: {p.form.seasonAvg != null ? `${formatProjection(p.form.seasonAvg)} a game this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${formatProjection(p.form.last5)} over his last 5` : ""}. History: {p.support}.</li>
-          <li><span className="text-faint">• </span>Minutes: {p.minutes.projected != null ? `${Math.round(p.minutes.projected)} projected` : "projection unavailable"}{p.minutes.usual != null ? `, ${Math.round(p.minutes.usual)} usual` : ""}. Fourth-quarter minutes: not modeled yet (Stage 1 research).</li>
-          <li><span className="text-faint">• </span>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments in the pick's direction, so the probability is marked down to ${p1(p.adjProb)}.` : `the projection rests on his own baseline, not on adjustments; adjusted to ${p1(p.adjProb)}.`}</li>
-        </ul>
+        {p.factors.length ? (
+          <ul className="mt-1 space-y-1 text-sm leading-relaxed text-mute">
+            {p.factors.map((x) => (
+              <li key={x.key}>
+                {x.text} <span className={x.favors === "pick" ? "text-edge" : "text-market"}>({x.favors === "pick" ? "toward" : "against"} the {p.side === "over" ? "Over" : "Under"})</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="mt-1 text-sm text-mute">Nothing beyond his own rates and usual minutes: no adjustment moved it by 0.05 or more.</p>}
       </div>
       <div className="text-sm">
-        <h3 className="text-sm font-600 text-ink">Context the model does not use</h3>
-        <ul className="mt-1.5 space-y-1 leading-relaxed text-mute">
-          <li><span className="text-faint">• </span>{p.injuries ? <>Injury report ({p.injuries.source}{p.injuries.reportTime ? `, ${pt(p.injuries.reportTime)}` : ""}): {p.team} {listed(p.injuries.team)}; {p.opp} {listed(p.injuries.opp)}. Model {p.modelVersion} does not read the report.</> : "Injury report unavailable."}</li>
-          <li><span className="text-faint">• </span>Individual defender: unavailable. No free, licensed source of defensive assignments; never guessed.</li>
-          <li><span className="text-faint">• </span>Starting lineups: projected only (from recent starts); confirmed lineups are not available before tip-off.</li>
+        <h3 className="text-sm font-600 text-ink">About this line</h3>
+        <ul className="mt-1 space-y-1 leading-relaxed text-mute">
+          <li>Main line: {p.line} is the {lbl} contract priced closest to 50¢ for him. {histText(p)}</li>
+          <li>
+            Averages: {p.form.seasonAvg != null ? `${avg(p.form.seasonAvg)} ${lbl} this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${avg(p.form.last5)} over his last 5` : ""}.
+            Minutes: {p.minutes.projected != null ? `${p.minutes.projected.toFixed(1)} projected` : "projection unavailable"}{p.minutes.usual != null ? `, ${p.minutes.usual.toFixed(1)} usual` : ""}; fourth-quarter minutes are not modeled.
+          </li>
+          <li>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments toward this side, so its probability is marked down from ${p1(p.modelProb)} to ${p1(p.adjProb)}.` : `the projection rests on his own baseline; the standard reliability adjustment takes it from ${p1(p.modelProb)} to ${p1(p.adjProb)}.`} Model history: {p.support}.</li>
+          <li>Injury report: {ownStatus(p)} (context only; model {p.modelVersion} does not read the report).</li>
         </ul>
       </div>
-      <p className="text-[0.7rem] leading-snug text-faint">
-        Model {p.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(p.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked
-      </p>
     </Panel>
   );
 }

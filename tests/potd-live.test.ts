@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatProjection } from "@/lib/format";
-import { adjustedProb, ELIGIBLE, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, RELIABILITY, strongestLiveProp, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
+import { adjustedProb, delta, ELIGIBLE, factorsFor, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, RELIABILITY, strongestLiveProp, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
 import type { EnginePropsBoard } from "@/types/props";
 
 const THETA = 0.0695;
@@ -96,6 +96,20 @@ describe("NBA Pick of the Day live preview", () => {
     expect(g.favored).toBe("NY");
     expect(g.p10).toBeGreaterThan(g.p15);
     expect(g.p15).toBeGreaterThan(g.p20);
+  });
+
+  it("'what moved the projection' lists only adjustments that moved it, with signed one-decimal sizes", () => {
+    const pts = { baseline: 24.4, minutes: -0.02, blowout: -2.9, usage: 0, pace: 0.3, matchup: -0.36, simulation: 0.1, final: 21.5 };
+    const pl = player("9", "W", [th(25, 0.35, [q(0.49, 0.52)])], { mean: 21.5, pts });
+    (pl.inputs as Record<string, unknown>).contributions = { stats: { pts }, minutes: { usual: 30, after_fill: 29.9, projected: 26.4 } };
+    const f = factorsFor(pl as never, pl.markets.points as never, "points", "under");
+    expect(f.map((x) => x.key)).toEqual(["blowout", "pace", "matchup"]);     // minutes -0.02 and usage 0 did not move it
+    expect(f[0].text).toBe("Blowout risk: minutes cut to 26.4 from 29.9: −2.9 points.");
+    expect(f[0].favors).toBe("pick");
+    expect(f[1].favors).toBe("against");
+    expect(f[2].text).toContain("BOS allows 3% more points to centers than average");
+    expect(f.some((x) => /injury|listed|form|main line|reliab/i.test(x.text))).toBe(false);
+    expect(delta(-0.36, "points")).toBe("−0.4 points");
   });
 
   it("keeps full precision internally; the projection displays as a whole number", () => {

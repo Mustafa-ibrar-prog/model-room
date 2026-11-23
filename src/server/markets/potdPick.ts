@@ -41,6 +41,8 @@ export interface LivePropPick {
   minutes: { projected: number | null; usual: number | null };
   form: { seasonAvg: number | null; seasonGames: number | null; last5: number | null };
   support: string;
+  /** his own entry on the board's injury field (the active model does not read the report) */
+  status: string | null;
   /** how often he reached the contract (N+) in box scores: this season and last, null when too few games to say */
   history: { thisSeason: { hits: number; games: number } | null; lastSeason: { hits: number; games: number } | null };
   /** filled by potdLive from the game board and the injury report; null when unavailable */
@@ -143,27 +145,41 @@ const r3 = (x: number) => Math.round(x * 1000) / 1000;
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : null);
 
 /** The model's own reasons, from the board's contribution breakdown (what actually moved the number). */
+/** Signed change with one decimal and the stat's name, e.g. "+0.3 points". */
+export function delta(d: number, label: string): string {
+  return `${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(1)} ${label}`;
+}
+
+const POS: Record<string, string> = { C: "centers", F: "forwards", G: "guards" };
+const MOVED = 0.05;   // a step smaller than this did not move the projection in any visible way
+
+/**
+ * Only the adjustments that actually moved the active model's projection (from the board's own contribution
+ * breakdown), each with its signed size. Nothing else belongs here: injury status, form, main-line history and the
+ * reliability adjustment are context, shown separately.
+ */
 export function factorsFor(p: EnginePropPlayer, m: EnginePropMarket, stat: string, side: "over" | "under"): Factor[] {
   const c = contribs(p, stat);
+  if (!c) return [];
   const out: Factor[] = [];
-  const fav = (d: number): Factor["favors"] => (Math.abs(d) < 0.5 ? "neutral" : (d > 0) === (side === "over") ? "pick" : "against");
-  const w = (d: number) => (Math.abs(d) < 0.5 ? "barely moves it" : `${d > 0 ? "+" : "−"}${Math.round(Math.abs(d))}`);
+  const fav = (d: number): Factor["favors"] => ((d > 0) === (side === "over") ? "pick" : "against");
   const lbl = m.label.toLowerCase();
   const inp = p.inputs ?? {};
-  if (c) {
-    const oppF = stat === "threes" ? null : num(inp[`opp_${stat}_factor`]);   // the board publishes points/rebounds/assists factors
-    out.push({ key: "matchup", delta: c.matchup ?? 0, favors: fav(c.matchup ?? 0),
-      text: `Matchup: ${p.opp} ${oppF == null ? "defense" : oppF > 1.005 ? "allows more" : oppF < 0.995 ? "allows less" : "is about average"} ${oppF == null ? "" : `to ${p.position === "C" ? "centers" : p.position === "F" ? "forwards" : "guards"} `}(${w(c.matchup ?? 0)} ${lbl}).` });
-    const mn = (inp.contributions as { minutes?: { usual?: number; projected?: number } } | undefined)?.minutes;
-    out.push({ key: "minutes", delta: c.minutes ?? 0, favors: fav(c.minutes ?? 0),
-      text: `Minutes: ${mn?.projected != null ? `${Math.round(mn.projected)} projected` : "projected"}${mn?.usual != null ? ` vs ${Math.round(mn.usual)} usual` : ""} (${w(c.minutes ?? 0)}).` });
-    if (Math.abs(c.blowout ?? 0) >= 0.05) out.push({ key: "blowout", delta: c.blowout, favors: fav(c.blowout), text: `Blowout risk trims his minutes (${w(c.blowout)} ${lbl}).` });
-    const tm = typeof inp.teammates_out === "string" && inp.teammates_out ? inp.teammates_out : null;
-    if (tm || Math.abs(c.usage ?? 0) >= 0.05) out.push({ key: "usage", delta: c.usage ?? 0, favors: fav(c.usage ?? 0), text: `Teammates out${tm ? `: ${tm}` : ""} (${w(c.usage ?? 0)} ${lbl} from the extra usage).` });
-    if (Math.abs(c.pace ?? 0) >= 0.05) out.push({ key: "pace", delta: c.pace, favors: fav(c.pace), text: `Pace: ${c.pace > 0 ? "faster" : "slower"} game than usual (${w(c.pace)}).` });
-  }
-  out.push({ key: "injury", delta: null, favors: "neutral",
-    text: p.injury_status ? `Listed ${p.injury_status}.` : "Not listed as out. Model 0.2.0 has no injury feed: a player counts as out only after missing 2 straight games." });
+  const mn = (inp.contributions as { minutes?: { usual?: number; after_fill?: number; projected?: number } } | undefined)?.minutes;
+  const add = (key: string, d: number | undefined, text: string) => {
+    if (d != null && Math.abs(d) >= MOVED) out.push({ key, delta: d, favors: fav(d), text: `${text}: ${delta(d, lbl)}.` });
+  };
+  if (mn?.usual != null && mn?.after_fill != null) add("minutes", c.minutes, `Rotation minutes: ${mn.after_fill.toFixed(1)} after filling the team's 240, from his usual ${mn.usual.toFixed(1)}`);
+  else add("minutes", c.minutes, "Rotation minutes");
+  if (mn?.after_fill != null && mn?.projected != null) add("blowout", c.blowout, `Blowout risk: minutes cut to ${mn.projected.toFixed(1)} from ${mn.after_fill.toFixed(1)}`);
+  else add("blowout", c.blowout, "Blowout risk");
+  const tm = typeof inp.teammates_out === "string" && inp.teammates_out ? inp.teammates_out : null;
+  add("usage", c.usage, tm ? `Extra usage with ${tm} out (counted out after 2 straight missed games)` : "Extra usage from teammates out");
+  add("pace", c.pace, `Pace: a ${c.pace > 0 ? "faster" : "slower"} game than his team usually plays`);
+  const oppF = stat === "threes" ? null : num(inp[`opp_${stat}_factor`]);   // the board publishes points/rebounds/assists factors
+  const who = POS[p.position] ?? "players at his position";
+  add("matchup", c.matchup, oppF == null ? `Matchup: ${p.opp}'s defense against ${who}`
+    : `Matchup: ${p.opp} allows ${Math.abs((oppF - 1) * 100).toFixed(0)}% ${oppF >= 1 ? "more" : "fewer"} ${lbl} to ${who} than average`);
   return out;
 }
 
@@ -244,7 +260,7 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
             modelVersion: board.model.version, boardAt, factors: factorsFor(p, m, stat, side),
             minutes: { projected: num(mn?.projected) ?? num(p.inputs?.projected_minutes), usual: num(mn?.usual) },
             form: { seasonAvg: sea ? num(sea.avg?.[stat]) : null, seasonGames: sea ? sea.games : null, last5: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null },
-            support: m.support_note, history: hitHistory(logs, p.player_id, stat, t.threshold),
+            support: m.support_note, history: hitHistory(logs, p.player_id, stat, t.threshold), status: p.injury_status ?? null,
           });
         }
         if (!probOk) d.belowProb++;
