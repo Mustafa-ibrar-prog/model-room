@@ -4,6 +4,8 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { authEnabled, isProduction, isTestAccount, safeNext } from "@/lib/auth-config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { supabaseUrl } from "@/lib/supabase/keys";
+import { projectRef, signinErrorMessage, signinLogLine } from "@/lib/auth-diag";
 
 export type AuthState = { error?: string; message?: string } | undefined;
 
@@ -35,7 +37,12 @@ export async function signIn(_: AuthState, form: FormData): Promise<AuthState> {
   const supabase = await client();
   if (!supabase) return { error: "Sign-in isn't set up on this site yet." };
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message === "Email not confirmed" ? "Confirm your email first: check your inbox for the link." : "Email or password is incorrect." };
+  if (error) {
+    const production = isProduction();
+    const ref = projectRef(supabaseUrl());
+    if (!production) console.error(signinLogLine(error, ref));          // safe fields only; team-only Vercel logs
+    return { error: signinErrorMessage(error, { production, ref }) };
+  }
   redirect(next);
 }
 
