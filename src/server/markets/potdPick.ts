@@ -191,14 +191,14 @@ export interface LiveDiag {
 }
 
 /**
- * Every qualifying NBA prop at a MAIN LINE (2026-11-22; several a day allowed, Moose 2026-11-22), most reliable first. Each player and stat is judged only at its
+ * The top 10 qualifying NBA props at a MAIN LINE across the slate (several a day allowed, Moose 2026-11-22; display cap 10, 2026-11-23), most reliable first. Each player and stat is judged only at its
  * Polymarket contract priced closest to 50¢ (the market's own line); other ladder rungs never compete, because the
  * reliability adjustment and every backtest cover main lines only, and shopping deep-tail rungs turns small projection
  * errors into apparent edges. At that contract: usable quote, inside the model's grid, published fee, and the side whose
  * reliability-adjusted probability clears 56.5% with a 4-point edge after fees; ranked by adjusted probability (then
  * edge). Never estimates a line or a price. Also returns the closest rejected main lines and why.
  */
-export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, logs?: PlayerLogs | null): { pick: LivePropPick | null; picks: LivePropPick[]; checked: number; diag: LiveDiag; rejected: Rejected[] } {
+export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, logs?: PlayerLogs | null): { pick: LivePropPick | null; picks: LivePropPick[]; qualified: number; checked: number; diag: LiveDiag; rejected: Rejected[] } {
   const picks: LivePropPick[] = [];
   const rej: Rejected[] = [];
   const d: LiveDiag = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0 };
@@ -270,9 +270,23 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
     }
   }
   rej.sort((a, b) => b.adjProb - a.adjProb || b.edge - a.edge);
-  // Every qualifying main line (at most one side per player-stat), most reliable first; no fixed count, none forced.
-  picks.sort((a, b) => b.adjProb - a.adjProb || b.edge - a.edge);
-  return { pick: picks[0] ?? null, picks, checked: d.checked, diag: d, rejected: rej.slice(0, 3) };
+  // Every qualifying main line (at most one side per player-stat) ranked across the whole slate, most reliable first;
+  // only the top TOP_N are displayed (a display limit, Moose 2026-11-23), never padded, never a per-game or per-player cap.
+  picks.sort(rankOrder);
+  return { pick: picks[0] ?? null, picks: picks.slice(0, TOP_N), qualified: picks.length, checked: d.checked, diag: d, rejected: rej.slice(0, 3) };
+}
+
+/** Display limit for the live list (Moose 2026-11-23: "a maximum of 10 NBA player props across the entire slate"). */
+export const TOP_N = 10;
+
+const cmp = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+/**
+ * Global ranking: adjusted probability (highest first), then after-fee edge, then fixed keys so equal candidates always
+ * land in the same order on every load: game start, game id, player, team, stat, side. Model numbers are untouched.
+ */
+export function rankOrder(a: LivePropPick, b: LivePropPick): number {
+  return b.adjProb - a.adjProb || b.edge - a.edge || cmp(a.start ?? "", b.start ?? "") || cmp(String(a.gameId), String(b.gameId))
+    || cmp(a.player, b.player) || cmp(a.team, b.team) || cmp(a.stat, b.stat) || cmp(a.side, b.side);
 }
 
 /** Plain-language reason for "no qualifying pick", from the fetch counts and the filter counts. */

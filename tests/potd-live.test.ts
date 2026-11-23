@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatProjection } from "@/lib/format";
-import { adjustedProb, delta, ELIGIBLE, factorsFor, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, RELIABILITY, strongestLiveProp, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
+import { adjustedProb, delta, ELIGIBLE, factorsFor, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, rankOrder, RELIABILITY, strongestLiveProp, TOP_N, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
 import type { EnginePropsBoard } from "@/types/props";
 
 const THETA = 0.0695;
@@ -86,6 +86,78 @@ describe("NBA Pick of the Day live preview", () => {
     expect(out.picks.map((x) => x.player)).toEqual(["Steady", "Gap"]);    // Weak never forced in
     expect(out.pick?.player).toBe("Steady");
     expect(run(board(TONIGHT, [weak])).picks).toEqual([]);
+  });
+
+  describe("top 10 across the slate", () => {
+    // n candidates over `games` games; probabilities step down so the expected order is known. All clear both bars.
+    const slate = (n: number, games: number, prob = (i: number) => 0.80 - i * 0.005) => {
+      const gs = Array.from({ length: games }, (_, gi) => ({
+        game_id: `G${gi + 1}`, start_time: TONIGHT, game_date: "2026-11-22", week: 1, home: { abbr: `H${gi}`, name: "" }, away: { abbr: `A${gi}`, name: "" },
+        players: [] as ReturnType<typeof player>[],
+      }));
+      for (let i = 0; i < n; i++) {
+        const p = player(`p${i}`, `P${String(i).padStart(2, "0")}`, [th(20, prob(i), [q(0.5, 0.52)])], { mean: 24 });
+        gs[i % games].players.push({ ...p, game_id: gs[i % games].game_id });   // round-robin: best props spread over games
+      }
+      return { model: { version: "0.2.0" }, generated_at: "2026-11-22T17:00:00Z", games: gs } as unknown as EnginePropsBoard;
+    };
+
+    it("more than 10 qualify: exactly 10 shown, ranked by adjusted probability, with the true total", () => {
+      const out = run(slate(14, 3));
+      expect(TOP_N).toBe(10);
+      expect(out.qualified).toBe(14);
+      expect(out.picks).toHaveLength(10);
+      expect(out.picks.map((x) => x.player)).toEqual(Array.from({ length: 10 }, (_, i) => `P${String(i).padStart(2, "0")}`));
+      for (let i = 1; i < 10; i++) expect(out.picks[i - 1].adjProb).toBeGreaterThanOrEqual(out.picks[i].adjProb);
+      expect(out.pick?.player).toBe("P00");
+    });
+
+    it("fewer than 10 qualify: all are shown, none forced", () => {
+      const weak = player("w", "Weak", [th(25, 0.58, [q(0.56, 0.46)])], { mean: 26 });
+      const b = slate(6, 2);
+      (b.games[0].players as unknown[]).push(weak);
+      const out = run(b);
+      expect(out.qualified).toBe(6);
+      expect(out.picks).toHaveLength(6);
+      expect(out.picks.some((x) => x.player === "Weak")).toBe(false);
+    });
+
+    it("zero qualify: empty list and the no-pick state", () => {
+      const out = run(board(TONIGHT, [player("w", "Weak", [th(25, 0.58, [q(0.56, 0.46)])], { mean: 26 })]));
+      expect(out.qualified).toBe(0);
+      expect(out.picks).toEqual([]);
+      expect(out.pick).toBeNull();
+      expect(out.rejected.length).toBeGreaterThan(0);                       // closest misses still reported
+    });
+
+    it("ties in adjusted probability break deterministically (edge, then start, game, player)", () => {
+      const tied = slate(12, 3, () => 0.72);                                   // identical probability and price for all
+      const a = run(tied).picks.map((x) => `${x.gameId}:${x.player}`);
+      const rev = { ...tied, games: [...tied.games].reverse().map((g) => ({ ...g, players: [...g.players].reverse() })) } as EnginePropsBoard;
+      const b = run(rev).picks.map((x) => `${x.gameId}:${x.player}`);
+      expect(a).toEqual(b);                                                    // input order never changes the result
+      expect(a).toHaveLength(10);
+      expect(a.slice(0, 4)).toEqual(["G1:P00", "G1:P03", "G1:P06", "G1:P09"]); // same start: game id, then player name
+      expect(run(tied).qualified).toBe(12);
+    });
+
+    it("ranks globally across games, not a top 10 per game", () => {
+      // game 1 holds the 12 strongest props; game 2 holds 3 weaker ones that would make a per-game top 10
+      const b = slate(15, 1);
+      const g2 = { ...b.games[0], game_id: "G2", players: b.games[0].players.splice(12).map((p) => ({ ...p, game_id: "G2" })) };
+      (b.games as unknown[]).push(g2);
+      const out = run(b);
+      expect(out.qualified).toBe(15);
+      expect(out.picks).toHaveLength(10);
+      expect(out.picks.every((x) => x.gameId === "G1")).toBe(true);           // no per-game quota
+      expect(new Set(out.picks.map((x) => x.player)).size).toBe(10);
+    });
+
+    it("rankOrder sorts the same way regardless of input order", () => {
+      const out = run(slate(10, 2, () => 0.7)).picks;
+      const shuffled = [...out].reverse().sort(rankOrder);
+      expect(shuffled).toEqual(out);
+    });
   });
 
   it("margin chances come from the game model's margin and error, both directions", () => {
