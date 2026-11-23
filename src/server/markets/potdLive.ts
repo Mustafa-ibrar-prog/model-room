@@ -1,9 +1,20 @@
 import "server-only";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import type { EnginePropsBoard } from "@/types/props";
-import { loadPropsBoard } from "@/server/engine/board";
+import { loadPropsBoard, publishedDir } from "@/server/engine/board";
 import { isProduction } from "@/lib/auth-config";
 import { withLivePolymarket } from "./polymarketLive";
-import { liveReason, RELIABILITY, strongestLiveProp, todaysGameIds, type LiveDiag, type LivePropPick, type Rejected } from "./potdPick";
+import { liveReason, RELIABILITY, strongestLiveProp, todaysGameIds, type LiveDiag, type LivePropPick, type PlayerLogs, type Rejected } from "./potdPick";
+
+/** Box-score game logs for the hit-frequency context (missing file = no context shown, never estimated). */
+async function playerLogs(): Promise<PlayerLogs | null> {
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), "nba_player_logs.json"), "utf8")) as PlayerLogs;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * NBA Pick of the Day live preview: shown to EVERY visitor of the TEST site (Moose, 2026-11-19: "no log in"), never in
@@ -36,7 +47,7 @@ export async function livePropPick(now = new Date()): Promise<LiveResult | null>
   if (!ids.size) return { ...empty, modelVersion: version, boardAt, reason: "No NBA games left today." };
   try {
     const { board: priced, info } = await withLivePolymarket("nba", board, ids, now);
-    const r = strongestLiveProp(priced, ids);
+    const r = strongestLiveProp(priced, ids, await playerLogs());
     return { ...r, fetchedAt: info.fetchedAt, reason: r.pick ? "" : liveReason(info, r.diag), games: info.games, found: info.found, matched: info.matched, modelVersion: version, boardAt };
   } catch (e) {
     return { ...empty, games: ids.size, modelVersion: version, boardAt, reason: `Polymarket could not be reached (${(e as Error).message}).` };

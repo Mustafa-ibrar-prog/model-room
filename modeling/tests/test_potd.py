@@ -123,3 +123,42 @@ def test_nfl_records_stay_in_the_ledger_but_are_not_published_or_counted():
 
 def test_nba_only():
     assert potd.LEAGUES == ("nba",) and set(potd.ELIGIBLE) == {"nba"}
+
+
+BOARD = {"generated_at": "2026-11-22T23:34:01+00:00", "model": {"version": "0.2.0", "params_hash": "abc"},
+         "games": [{"game_id": "401", "game_date": "2026-11-22", "start_time": "2026-11-23T01:00:00+00:00", "players": [
+             {"player_id": "p1", "name": "J. Hart", "team": "NY", "opp": "IND",
+              "recent": {"season": {"games": 13, "avg": {"rebounds": 6.38, "points": 6.3, "assists": 3.5, "threes": 1.3}}},
+              "inputs": {"contributions": {"stats": {"reb": {"baseline": 6.404, "minutes": -0.076, "blowout": -0.427, "usage": 0.0,
+                                                             "pace": 0.101, "matchup": 0.081, "simulation": -0.028, "final": 6.054}}}},
+              "markets": {"rebounds": {"mean": 6.054, "grid": {"k0": 0, "step": 1, "p": [1, .99, .95, .89, .80, .67, .54, .41, .29, .2, .14, .09, .057]}},
+                          "blocks": {"mean": 0.2, "grid": {"k0": 0, "step": 1, "p": [1, .2]}}}}]}]}
+
+
+def test_audit_rows_hold_model_outputs_only():
+    rows = potd.audit_rows(BOARD, NOW)
+    assert len(rows) == 1                                                  # eligible stats only (blocks skipped)
+    r = rows[0]
+    assert r["stat"] == "rebounds" and r["projection"] == 6.054 and r["model_version"] == "0.2.0" and r["params_hash"] == "abc"
+    assert r["reference"] == "season_average" and r["reference_value"] == 6.38
+    assert r["model_side"] == "under" and r["model_prob"] == 0.59           # P(rebounds > 6.38) = P(>= 7) = 0.41
+    banned = {"price", "line", "market_prob", "edge", "contract", "yes_ask", "no_ask", "fee", "qualified", "rejected", "why"}
+    assert not banned & set(r) and "baseline 6.40" in r["explanation"]
+
+
+def test_audit_is_skipped_without_the_private_store(monkeypatch):
+    monkeypatch.delenv("MODELROOM_ODDS_DB_URL", raising=False)
+    monkeypatch.setenv("ODDS_STORE", "off")
+    assert potd.record_audit(potd.audit_rows(BOARD, NOW))["status"].startswith("skipped")
+
+
+def test_player_logs_this_and_last_season_for_board_players_only():
+    pg = pd.DataFrame([
+        {"player_id": "p1", "season": 2027, "game_date": "2026-11-01", "played": True, "pts": 6, "reb": 8, "ast": 3, "fg3m": 1},
+        {"player_id": "p1", "season": 2026, "game_date": "2026-03-01", "played": True, "pts": 10, "reb": 12, "ast": 4, "fg3m": 2},
+        {"player_id": "p1", "season": 2025, "game_date": "2025-03-01", "played": True, "pts": 9, "reb": 9, "ast": 4, "fg3m": 2},
+        {"player_id": "p1", "season": 2027, "game_date": "2026-11-03", "played": False, "pts": 0, "reb": 0, "ast": 0, "fg3m": 0},
+        {"player_id": "zz", "season": 2027, "game_date": "2026-11-01", "played": True, "pts": 1, "reb": 1, "ast": 1, "fg3m": 0}])
+    out = potd.player_logs(BOARD, pg)
+    assert out["seasons"] == [2026, 2027] and set(out["players"]) == {"p1"}
+    assert out["players"]["p1"]["2027"]["rebounds"] == [8] and out["players"]["p1"]["2026"]["rebounds"] == [12]
