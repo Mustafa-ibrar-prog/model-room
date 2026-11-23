@@ -254,7 +254,7 @@ jobs:
           python -m modelroom history --league "$( { [ $NFL_OK = 1 ] && echo nfl; [ $NBA_OK = 1 ] && echo nba; } | paste -sd, -)"
           # NBA Pick of the Day (TEST, NBA player props only): one decision per Pacific date from the active NBA props
           # model; nothing is recorded without an approved line source; never fails the refresh.
-          if [ $NBA_OK = 1 ]; then python -m modelroom potd --league nba > /tmp/potd.json || echo "::warning::Pick of the Day not built"; fi
+          if [ $NBA_OK = 1 ]; then python -m modelroom potd --league nba > /tmp/potd.json || echo "::warning::Pick of the Day not built"; python3 -c "import json; d=json.load(open('/tmp/potd.json')); print('potd:', json.dumps({k: d.get(k) for k in ('new', 'graded', 'today', 'context')}))" 2>/dev/null || true; fi
           run nba python -m modelroom nba props-monitor
           run nfl python -m modelroom nfl props-monitor
           run nba python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
