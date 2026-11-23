@@ -1,9 +1,9 @@
 {
  "last_success": {
-  "slot": "pregame:nba:2026-11-23T01:00:00+00:00",
+  "slot": "pregame:nba:2026-11-23T01:30:00+00:00",
   "status": "success",
-  "at": "2026-11-23T00:44:48+00:00",
-  "note": "supabase run 45090103295; nfl data delayed, nfl not rebuilt"
+  "at": "2026-11-23T01:20:29+00:00",
+  "note": "supabase run 45093479619; nfl data delayed, nfl not rebuilt"
  },
  "last_success_by_kind": {
   "manual": {
@@ -31,10 +31,10 @@
    "note": "supabase run 44964455676"
   },
   "pregame": {
-   "slot": "pregame:nba:2026-11-23T01:00:00+00:00",
+   "slot": "pregame:nba:2026-11-23T01:30:00+00:00",
    "status": "success",
-   "at": "2026-11-23T00:44:48+00:00",
-   "note": "supabase run 45090103295; nfl data delayed, nfl not rebuilt"
+   "at": "2026-11-23T01:20:29+00:00",
+   "note": "supabase run 45093479619; nfl data delayed, nfl not rebuilt"
   },
   "inactives": {
    "slot": "inactives:nfl:2026-11-22T21:25:00+00:00",
@@ -44,18 +44,6 @@
   }
  },
  "recent_failures": [
-  {
-   "slot": "pregame:nfl:2026-11-22T21:25:00+00:00",
-   "status": "failed",
-   "at": "2026-11-22T21:00:12+00:00",
-   "note": "supabase run 45069114986; nfl data delayed: every final game in those seasons has play-by-play  1 missing, e.g. ['2026_11_ARI_KC']"
-  },
-  {
-   "slot": "pregame:nfl:2026-11-22T21:25:00+00:00",
-   "status": "failed",
-   "at": "2026-11-22T21:21:45+00:00",
-   "note": "supabase run 45071030431; nfl data delayed: every final game in those seasons has play-by-play  6 missing, e.g. ['2026_11_ARI_KC', '2026_11_MIA_BUF', '2026_11_NO_CHI']"
-  },
   {
    "slot": "inactives:nfl:2026-11-23T01:20:00+00:00",
    "status": "failed",
@@ -103,12 +91,26 @@
    "status": "failed",
    "at": "2026-11-23T01:01:18+00:00",
    "note": "supabase run 45091540555; nfl data delayed: every final game in those seasons has play-by-play  2 missing, e.g. ['2026_11_LV_DEN', '2026_11_NYJ_LAC']"
+  },
+  {
+   "slot": "afternoon:2026-11-22",
+   "status": "failed",
+   "at": "2026-11-23T01:20:29+00:00",
+   "note": "supabase run 45093479619; nfl data delayed: every final game in those seasons has play-by-play  1 missing, e.g. ['2026_11_JAX_NYG']"
+  },
+  {
+   "slot": "pregame:nfl:2026-11-23T01:20:00+00:00",
+   "status": "failed",
+   "at": "2026-11-23T01:20:29+00:00",
+   "note": "supabase run 45093479619; nfl data delayed: every final game in those seasons has play-by-play  1 missing, e.g. ['2026_11_JAX_NYG']"
   }
  ],
  "missed": [
+  "inactives:nfl:2026-11-23T01:20:00+00:00",
+  "pregame:nfl:2026-11-23T01:20:00+00:00",
   "pregame:nfl:2026-11-22T21:25:00+00:00"
  ],
  "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff \u2212 90 min, every game \u2212 30 min",
- "next_check": "2026-11-23T01:11:18+00:00",
+ "next_check": "2026-11-23T01:30:30+00:00",
  "triggers": "Supabase wakes a run only when a slot is due (pg_cron checks every 5 min inside Postgres); GitHub's own schedule every 6 hours is the backup"
 }
