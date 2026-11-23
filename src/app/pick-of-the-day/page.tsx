@@ -189,6 +189,10 @@ function History({ f }: { f: File }) {
   );
 }
 
+function listed(xs: { name: string; status: string }[]): string {
+  return xs.length ? xs.map((x) => `${x.name} (${x.status.toLowerCase()})`).join(", ") : "nobody listed";
+}
+
 function histText(p: LivePropPick): string {
   const h = p.history, n = p.contract, lbl = p.label.toLowerCase();
   const parts: string[] = [];
@@ -201,8 +205,7 @@ const TAG = <span className="rounded border border-dashed border-market/60 px-1.
 const p1 = (x: number) => `${(x * 100).toFixed(1)}%`;
 
 function LiveCard({ r }: { r: LiveResult }) {
-  const p = r.pick;
-  if (!p) {
+  if (!r.picks.length) {
     return (
       <NoPick reason={r.reason} tag={TAG}>
         {r.rejected.length ? (
@@ -219,10 +222,21 @@ function LiveCard({ r }: { r: LiveResult }) {
       </NoPick>
     );
   }
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-mute">
+        {r.picks.length === 1 ? "1 NBA prop qualifies today." : `${r.picks.length} NBA props qualify today, most reliable first.`} Each is judged at its main line; nothing is forced to fill a slot.
+      </p>
+      {r.picks.map((p, i) => <LiveOpportunity key={`${p.gameId}-${p.player}-${p.stat}`} p={p} r={r} rank={i + 1} />)}
+    </div>
+  );
+}
+
+function LiveOpportunity({ p, r, rank }: { p: LivePropPick; r: LiveResult; rank: number }) {
   const lbl = p.label.toLowerCase();
   return (
     <Panel className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">NBA · Player prop</span>{TAG}</div>
+      <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">NBA · Player prop · #{rank}</span>{TAG}</div>
       <div>
         <div className="text-sm text-mute">{p.player} · {p.team} vs {p.opp} · {p.matchup} · {pt(p.start)}</div>
         <div className="mt-1 font-display text-3xl font-700 leading-tight text-edge">{p.side === "over" ? "Over" : "Under"} {p.line} {lbl}</div>
@@ -249,8 +263,18 @@ function LiveCard({ r }: { r: LiveResult }) {
           <dd className="mt-0.5 text-xs text-faint">{p1(p.adjProb)} vs {(p.cost * 100).toFixed(1)}¢ cost</dd>
         </div>
       </dl>
+      {p.game ? (
+        <div className="rounded-lg bg-navy-900 p-3 text-sm">
+          <h3 className="text-sm font-600 text-ink">Game script (game model {p.game.model})</h3>
+          <p className="mt-1 text-mute">
+            Projected {p.game.away} {Math.round(p.game.awayScore)}, {p.game.home} {Math.round(p.game.homeScore)}: {p.game.favored} by {Math.round(Math.abs(p.game.margin))}, total {Math.round(p.game.total)}{p.game.pace ? `, pace ${Math.round(p.game.pace)}` : ""}.
+            Chance the final margin is 10+: {Math.round(p.game.p10 * 100)}%, 15+: {Math.round(p.game.p15 * 100)}%, 20+: {Math.round(p.game.p20 * 100)}%.
+          </p>
+          <p className="mt-1 text-xs text-faint">From the game model&apos;s projected margin and its measured error ({p.game.sigma.toFixed(1)} points), not the betting spread. In model {p.modelVersion} the projected margin reaches this prop only through the blowout minutes cut listed below.</p>
+        </div>
+      ) : <p className="text-xs text-faint">Game projection unavailable for this game.</p>}
       <div>
-        <h3 className="text-sm font-600 text-ink">Why this pick</h3>
+        <h3 className="text-sm font-600 text-ink">What moved the projection (model {p.modelVersion})</h3>
         <ul className="mt-1.5 space-y-1 text-sm leading-relaxed text-mute">
           {p.factors.map((x) => (
             <li key={x.key}>
@@ -259,7 +283,16 @@ function LiveCard({ r }: { r: LiveResult }) {
           ))}
           <li><span className="text-faint">• </span>Main line: {p.line} is the Polymarket {lbl} contract priced closest to 50¢ for him ({p.contract}+). {histText(p)}</li>
           <li><span className="text-faint">• </span>Form: {p.form.seasonAvg != null ? `${formatProjection(p.form.seasonAvg)} a game this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${formatProjection(p.form.last5)} over his last 5` : ""}. History: {p.support}.</li>
+          <li><span className="text-faint">• </span>Minutes: {p.minutes.projected != null ? `${Math.round(p.minutes.projected)} projected` : "projection unavailable"}{p.minutes.usual != null ? `, ${Math.round(p.minutes.usual)} usual` : ""}. Fourth-quarter minutes: not modeled yet (Stage 1 research).</li>
           <li><span className="text-faint">• </span>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments in the pick's direction, so the probability is marked down to ${p1(p.adjProb)}.` : `the projection rests on his own baseline, not on adjustments; adjusted to ${p1(p.adjProb)}.`}</li>
+        </ul>
+      </div>
+      <div className="text-sm">
+        <h3 className="text-sm font-600 text-ink">Context the model does not use</h3>
+        <ul className="mt-1.5 space-y-1 leading-relaxed text-mute">
+          <li><span className="text-faint">• </span>{p.injuries ? <>Injury report ({p.injuries.source}{p.injuries.reportTime ? `, ${pt(p.injuries.reportTime)}` : ""}): {p.team} {listed(p.injuries.team)}; {p.opp} {listed(p.injuries.opp)}. Model {p.modelVersion} does not read the report.</> : "Injury report unavailable."}</li>
+          <li><span className="text-faint">• </span>Individual defender: unavailable. No free, licensed source of defensive assignments; never guessed.</li>
+          <li><span className="text-faint">• </span>Starting lineups: projected only (from recent starts); confirmed lineups are not available before tip-off.</li>
         </ul>
       </div>
       <p className="text-[0.7rem] leading-snug text-faint">

@@ -43,10 +43,39 @@ export interface LivePropPick {
   support: string;
   /** how often he reached the contract (N+) in box scores: this season and last, null when too few games to say */
   history: { thisSeason: { hits: number; games: number } | null; lastSeason: { hits: number; games: number } | null };
+  /** filled by potdLive from the game board and the injury report; null when unavailable */
+  game?: GameContext | null; injuries?: InjuryContext | null;
 }
 
 /** Box-score game logs published by `python -m modelroom potd` (nba_player_logs.json): player -> season -> stat -> values. */
 export interface PlayerLogs { seasons: number[]; players: Record<string, Record<string, Record<string, number[]>>> }
+/** Game model context (projected score and margin chances). Shown for context; in model 0.2.0 only the projected
+ *  margin feeds the player projection (through the blowout cut, listed among the factors). */
+export interface GameContext {
+  model: string; home: string; away: string; homeScore: number; awayScore: number; margin: number; total: number; pace: number | null;
+  sigma: number; favored: string; p10: number; p15: number; p20: number;
+}
+/** Official / ESPN injury report entries for both teams (context: model 0.2.0 does not read the report). */
+export interface InjuryContext { source: string; reportTime: string | null; team: { name: string; status: string }[]; opp: { name: string; status: string }[] }
+
+function erf(x: number): number {   // Abramowitz-Stegun 7.1.26
+  const t = 1 / (1 + 0.3275911 * Math.abs(x));
+  const y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x);
+  return x >= 0 ? y : -y;
+}
+const ncdf = (z: number) => 0.5 * (1 + erf(z / Math.SQRT2));
+/** P(|final margin| >= k) with margin ~ Normal(projected margin, the game model's out-of-sample error SD). */
+export function marginChance(margin: number, sigma: number, k: number): number {
+  return 1 - ncdf((k - margin) / sigma) + ncdf((-k - margin) / sigma);
+}
+export function gameContext(g: { home: { abbr: string }; away: { abbr: string }; projection: { home_score: number; away_score: number; margin: number; total: number; pace?: number | null } },
+  sigma: number, model: string): GameContext {
+  const pr = g.projection;
+  return { model, home: g.home.abbr, away: g.away.abbr, homeScore: pr.home_score, awayScore: pr.away_score, margin: pr.margin, total: pr.total,
+    pace: pr.pace ?? null, sigma, favored: pr.margin >= 0 ? g.home.abbr : g.away.abbr,
+    p10: marginChance(pr.margin, sigma, 10), p15: marginChance(pr.margin, sigma, 15), p20: marginChance(pr.margin, sigma, 20) };
+}
+
 export const MIN_GAMES_THIS_SEASON = 5;
 export const MIN_GAMES_LAST_SEASON = 20;
 
@@ -146,15 +175,15 @@ export interface LiveDiag {
 }
 
 /**
- * The most reliable qualifying NBA prop at a MAIN LINE (2026-11-22). Each player and stat is judged only at its
+ * Every qualifying NBA prop at a MAIN LINE (2026-11-22; several a day allowed, Moose 2026-11-22), most reliable first. Each player and stat is judged only at its
  * Polymarket contract priced closest to 50¢ (the market's own line); other ladder rungs never compete, because the
  * reliability adjustment and every backtest cover main lines only, and shopping deep-tail rungs turns small projection
  * errors into apparent edges. At that contract: usable quote, inside the model's grid, published fee, and the side whose
  * reliability-adjusted probability clears 56.5% with a 4-point edge after fees; ranked by adjusted probability (then
  * edge). Never estimates a line or a price. Also returns the closest rejected main lines and why.
  */
-export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, logs?: PlayerLogs | null): { pick: LivePropPick | null; checked: number; diag: LiveDiag; rejected: Rejected[] } {
-  let best: LivePropPick | null = null;
+export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, logs?: PlayerLogs | null): { pick: LivePropPick | null; picks: LivePropPick[]; checked: number; diag: LiveDiag; rejected: Rejected[] } {
+  const picks: LivePropPick[] = [];
   const rej: Rejected[] = [];
   const d: LiveDiag = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0 };
   const boardAt = (board as unknown as { generated_at?: string }).generated_at ?? null;
@@ -205,11 +234,10 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
             continue;
           }
           edgeOk = true;
-          if (best && (adj < best.adjProb || (adj === best.adjProb && edge <= best.edge))) continue;
           const sea = p.recent?.season ?? null;
           const vals = (p.recent?.values?.[stat] ?? []).slice(0, 5).filter((v): v is number => typeof v === "number");
           const mn = (p.inputs?.contributions as { minutes?: { usual?: number; projected?: number } } | undefined)?.minutes;
-          best = {
+          picks.push({
             gameId: g.game_id, player: p.name, team: p.team, opp: p.opp, position: p.position, matchup: `${g.away.abbr} @ ${g.home.abbr}`, start: g.start_time, stat, label: m.label,
             contract: t.threshold, side, line, price, fee: r3(fee), cost: r3(cost), modelProb: r3(prob), adjProb: r3(adj), marketProb: price,
             edge: r3(edge), rawEdge: r3(prob - cost), projection: m.mean, difference: m.mean - line, toward: r3(toward),
@@ -217,7 +245,7 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
             minutes: { projected: num(mn?.projected) ?? num(p.inputs?.projected_minutes), usual: num(mn?.usual) },
             form: { seasonAvg: sea ? num(sea.avg?.[stat]) : null, seasonGames: sea ? sea.games : null, last5: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null },
             support: m.support_note, history: hitHistory(logs, p.player_id, stat, t.threshold),
-          };
+          });
         }
         if (!probOk) d.belowProb++;
         else if (!edgeOk) d.belowEdge++;
@@ -226,7 +254,9 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
     }
   }
   rej.sort((a, b) => b.adjProb - a.adjProb || b.edge - a.edge);
-  return { pick: best, checked: d.checked, diag: d, rejected: rej.slice(0, 3) };
+  // Every qualifying main line (at most one side per player-stat), most reliable first; no fixed count, none forced.
+  picks.sort((a, b) => b.adjProb - a.adjProb || b.edge - a.edge);
+  return { pick: picks[0] ?? null, picks, checked: d.checked, diag: d, rejected: rej.slice(0, 3) };
 }
 
 /** Plain-language reason for "no qualifying pick", from the fetch counts and the filter counts. */
