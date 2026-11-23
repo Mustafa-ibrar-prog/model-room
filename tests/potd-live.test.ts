@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatProjection } from "@/lib/format";
-import { adjustedProb, ELIGIBLE, hitHistory, inGrid, liveReason, pmFee, priceCenter, RELIABILITY, strongestLiveProp, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
+import { adjustedProb, ELIGIBLE, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, RELIABILITY, strongestLiveProp, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
 import type { EnginePropsBoard } from "@/types/props";
 
 const THETA = 0.0695;
@@ -76,6 +76,26 @@ describe("NBA Pick of the Day live preview", () => {
     const { pick } = run(board(TONIGHT, [steady, gap]));
     expect(pick?.player).toBe("Steady");
     expect(adjustedProb(0.69, 0) - 0.45 - pmFee(THETA, 0.45)).toBeGreaterThan(adjustedProb(0.74, 0) - 0.6 - pmFee(THETA, 0.6));
+  });
+
+  it("shows every qualifying main line, most reliable first, and none when nothing qualifies", () => {
+    const steady = player("1", "Steady", [th(20, 0.74, [q(0.6, 0.42)])], { mean: 24 });
+    const gap = player("2", "Gap", [th(25, 0.69, [q(0.45, 0.57)])], { mean: 29 });
+    const weak = player("3", "Weak", [th(25, 0.58, [q(0.56, 0.46)])], { mean: 26 });
+    const out = run(board(TONIGHT, [gap, weak, steady]));
+    expect(out.picks.map((x) => x.player)).toEqual(["Steady", "Gap"]);    // Weak never forced in
+    expect(out.pick?.player).toBe("Steady");
+    expect(run(board(TONIGHT, [weak])).picks).toEqual([]);
+  });
+
+  it("margin chances come from the game model's margin and error, both directions", () => {
+    expect(marginChance(0, 13.3, 10)).toBeCloseTo(0.452, 2);              // pick'em: either team by 10+
+    expect(marginChance(12, 13.3, 10)).toBeGreaterThan(marginChance(0, 13.3, 10));
+    expect(marginChance(-12, 13.3, 15)).toBeCloseTo(marginChance(12, 13.3, 15), 9);
+    const g = gameContext({ home: { abbr: "NY" }, away: { abbr: "IND" }, projection: { home_score: 118, away_score: 106, margin: 12, total: 224, pace: 100 } }, 13.3, "1.1.0");
+    expect(g.favored).toBe("NY");
+    expect(g.p10).toBeGreaterThan(g.p15);
+    expect(g.p15).toBeGreaterThan(g.p20);
   });
 
   it("keeps full precision internally; the projection displays as a whole number", () => {
