@@ -65,14 +65,15 @@ export function potdLiveStatus(): { on: boolean; reason: string } {
 }
 
 export interface LiveResult {
-  pick: LivePropPick | null; picks: LivePropPick[]; checked: number; fetchedAt: string; reason: string; games: number; found: number; matched: number;
+  /** picks: the displayed top TOP_N; qualified: how many cleared both bars before the display limit */
+  pick: LivePropPick | null; picks: LivePropPick[]; qualified: number; checked: number; fetchedAt: string; reason: string; games: number; found: number; matched: number;
   diag: LiveDiag | null; rejected: Rejected[]; modelVersion: string | null; boardAt: string | null;
 }
 
 /** NBA only. Uses the published ACTIVE props board (never a shadow version); Polymarket data is never stored. */
 export async function livePropPick(now = new Date()): Promise<LiveResult | null> {
   if (!potdLiveStatus().on) return null;
-  const empty = { pick: null, picks: [] as LivePropPick[], checked: 0, fetchedAt: now.toISOString(), games: 0, found: 0, matched: 0, diag: null, rejected: [], modelVersion: null, boardAt: null };
+  const empty = { pick: null, picks: [] as LivePropPick[], qualified: 0, checked: 0, fetchedAt: now.toISOString(), games: 0, found: 0, matched: 0, diag: null, rejected: [], modelVersion: null, boardAt: null };
   const res = await loadPropsBoard("nba");
   if (!res.ok) return { ...empty, reason: `The NBA props board isn't available: ${res.reason}` };
   const board = res.board as EnginePropsBoard;

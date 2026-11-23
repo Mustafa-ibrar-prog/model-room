@@ -8,14 +8,14 @@ import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/p
 import { formatProjection } from "@/lib/format";
 import { publishedDir } from "@/server/engine/board";
 import { livePropPick, potdLiveStatus, type LiveResult } from "@/server/markets/potdLive";
-import { MIN_EDGE, MIN_PROB, RELIABILITY, type LivePropPick } from "@/server/markets/potdPick";
+import { MIN_EDGE, MIN_PROB, RELIABILITY, TOP_N, type LivePropPick } from "@/server/markets/potdPick";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
 
 /**
  * NBA Pick of the Day (TEST). NBA player props only (Moose, 2026-11-22): NFL is not shown or selected.
- * Live card: the most reliable qualifying prop from the active NBA model against live Polymarket US prices, fetched at
+ * Live card: the top 10 qualifying props across the slate (ranked by adjusted probability) from the active NBA model against live Polymarket US prices, fetched at
  * request time, never stored, recorded or graded. Recorded picks and grades come from data/published/pick_of_the_day.json
  * (`python -m modelroom potd --league nba`); the ledger is never edited.
  */
@@ -72,7 +72,7 @@ function projText(p: Pick): string {
 export default function PickOfTheDayPage() {
   return (
     <>
-      <PageHeader title="Pick of the Day" intro="Every NBA player prop that qualifies today under Model Room's NBA model, checked against live Polymarket prices and listed from most to least reliable." />
+      <PageHeader title="Pick of the Day" intro="Top 10 NBA props: the highest-ranked player props that qualify across today's whole slate under Model Room's NBA model, checked against live Polymarket prices." />
       <Suspense fallback={<div className="mx-auto max-w-5xl px-4 sm:px-6"><TableSkeleton rows={6} /></div>}>
         <Body />
       </Suspense>
@@ -88,7 +88,7 @@ async function Body() {
   return (
     <div className="mx-auto max-w-5xl space-y-6 px-4 pb-12 sm:px-6">
       <p className="rounded-lg border border-navy-700 bg-navy-900 px-4 py-3 text-sm leading-relaxed text-mute">
-        Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. These are the NBA props that qualify under the model&apos;s rules, not guaranteed results and not betting advice.
+        Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. These are the top-ranked NBA props that qualify under the model&apos;s rules, not guaranteed results and not betting advice.
       </p>
       {live ? <LiveCard r={live} /> : f ? <PickCard p={today} liveOff={status.on ? null : status.reason} /> : <Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." />}
       {f ? <History f={f} /> : null}
@@ -104,8 +104,8 @@ function Rules() {
       ladder rungs never compete. The model&apos;s probability for the side is then adjusted for reliability. That adjustment was fitted on 2023–24 and tested on the
       next two seasons, and it marks a pick down when more of its projection comes from blowout, matchup or usage adjustments than from the player&apos;s own
       baseline. The adjusted probability must reach {(MIN_PROB * 100).toFixed(1)}% and beat the Polymarket price plus fees by at least {(MIN_EDGE * 100).toFixed(0)} points.
-      Every prop that clears both bars is listed, from the highest adjusted probability down; there is no fixed number, and
-      the size of the gap with the market is never the ranking. Lines and prices come from Polymarket US at the moment the page loads; none
+      Every prop that clears both bars is ranked across the whole slate by adjusted probability, and the top {TOP_N} are shown. There is no per-game or
+      per-player limit, nothing is added to fill the list, and the size of the gap with the market is never the ranking. Lines and prices come from Polymarket US at the moment the page loads; none
       are estimated, stored or graded. Model {RELIABILITY.model} is the active NBA model; shadow versions are never used for picks until approved.
     </p>
   );
@@ -223,20 +223,13 @@ function LiveCard({ r }: { r: LiveResult }) {
   if (!r.picks.length) {
     return (
       <NoPick reason={r.reason} tag={TAG}>
-        {r.rejected.length ? (
-          <div className="mt-1 text-xs text-faint">
-            <div className="font-600 text-mute">Closest candidates, and why they didn&apos;t qualify</div>
-            <ul className="mt-1 space-y-1">
-              {r.rejected.map((x, i) => (
-                <li key={i}>{x.player} ({x.team}) {x.side === "over" ? "Over" : "Under"} {x.line} {x.label.toLowerCase()}: {x.why}.</li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+        {r.rejected.length ? <div className="mt-1 text-xs text-faint"><MissList r={r} /></div> : null}
         <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.diag?.lines ?? 0} main lines · {r.checked} checked · model {r.modelVersion ?? "—"} · updated {pt(r.fetchedAt)}</p>
       </NoPick>
     );
   }
+  const n = r.picks.length;
+  const extra = r.qualified - n;
   const rank = new Map(r.picks.map((p, i) => [p, i + 1]));
   const games: { id: string; picks: LivePropPick[] }[] = [];
   for (const p of r.picks) {
@@ -247,21 +240,46 @@ function LiveCard({ r }: { r: LiveResult }) {
   const byPlayer = new Map<string, number[]>();
   for (const p of r.picks) byPlayer.set(p.player, [...(byPlayer.get(p.player) ?? []), rank.get(p)!]);
   const repeats = [...byPlayer].filter(([, v]) => v.length > 1);
+  const stacked = games.filter((g) => g.picks.length > 1);
   return (
     <div className="space-y-5">
       <div className="text-sm text-mute">
-        <p>
-          {r.picks.length === 1 ? "1 NBA prop qualifies today" : `${r.picks.length} NBA props qualify today`} across {games.length === 1 ? "1 game" : `${games.length} games`}, numbered from most to least reliable.
-          Each is judged at its main line; nothing is forced to fill a slot.
+        <h2 className="font-display text-2xl font-700 text-ink">Top {TOP_N} NBA props</h2>
+        <p className="mt-1">
+          {extra > 0
+            ? `${r.qualified} NBA props qualify today. These are the ${n} highest-ranked across the slate (${games.length === 1 ? "1 game" : `${games.length} games`}), numbered by adjusted probability.`
+            : `${n === 1 ? "1 NBA prop qualifies" : `${n} NBA props qualify`} today across ${games.length === 1 ? "1 game" : `${games.length} games`}, and ${n === 1 ? "it is" : "all are"} shown, numbered by adjusted probability.`}
+          {" "}Each is judged at its main line; nothing is forced to fill the list.
         </p>
-        {games.length === 1 && r.picks.length > 1 ? <p className="mt-1 text-xs text-faint">All of today&apos;s qualifying props come from the same game, so their results are linked.</p> : null}
-        {repeats.length ? <p className="mt-1 text-xs text-faint">More than one prop for the same player: {repeats.map(([n, v]) => `${n} (#${v.join(", #")})`).join("; ")}.</p> : null}
+        {extra > 0 ? <p className="mt-1 text-xs text-faint">The other {extra} cleared both bars too. They are left off only because the page shows at most {TOP_N}, not because they failed the model&apos;s thresholds.</p> : null}
+        {games.length === 1 && n > 1 ? <p className="mt-1 text-xs text-faint">All of these props come from the same game, so their results are linked.</p> : null}
+        {games.length > 1 && stacked.length ? <p className="mt-1 text-xs text-faint">Props from the same game are linked: {stacked.map((g) => `${g.picks[0].matchup} (#${g.picks.map((p) => rank.get(p)).join(", #")})`).join("; ")}.</p> : null}
+        {repeats.length ? <p className="mt-1 text-xs text-faint">More than one prop for the same player: {repeats.map(([nm, v]) => `${nm} (#${v.join(", #")})`).join("; ")}.</p> : null}
       </div>
       {games.map((g) => <GameGroup key={g.id} picks={g.picks} rank={rank} byPlayer={byPlayer} />)}
+      {r.qualified < TOP_N && r.rejected.length ? (
+        <Panel className="border-dashed p-4 text-xs text-faint">
+          <MissList r={r} title={`Not in the top ${TOP_N}: closest props that didn't qualify`} />
+          <p className="mt-2">These failed a threshold and are not ranked picks. They appear only because fewer than {TOP_N} props qualified.</p>
+        </Panel>
+      ) : null}
       <p className="text-[0.7rem] leading-snug text-faint">
-        Model {r.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(r.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked
+        Model {r.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(r.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked · {r.qualified} qualified · {n} shown
       </p>
     </div>
+  );
+}
+
+function MissList({ r, title = "Closest candidates, and why they didn't qualify" }: { r: LiveResult; title?: string }) {
+  return (
+    <>
+      <div className="font-600 text-mute">{title}</div>
+      <ul className="mt-1 space-y-1">
+        {r.rejected.map((x, i) => (
+          <li key={i}>{x.player} ({x.team}) {x.side === "over" ? "Over" : "Under"} {x.line} {x.label.toLowerCase()}: {x.why}.</li>
+        ))}
+      </ul>
+    </>
   );
 }
 
@@ -276,7 +294,7 @@ function GameGroup({ picks, rank, byPlayer }: { picks: LivePropPick[]; rank: Map
       <Panel className="p-4 text-sm">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-xl font-700 text-ink">{f.matchup}</h2>
-          <span className="text-xs text-faint">{pt(f.start)} · {picks.length === 1 ? "1 qualifying prop" : `${picks.length} qualifying props`} in this game</span>
+          <span className="text-xs text-faint">{pt(f.start)} · {picks.length === 1 ? "1 of today's top props" : `${picks.length} of today's top props`} in this game</span>
         </div>
         {gm ? (
           <p className="mt-2 text-mute">
