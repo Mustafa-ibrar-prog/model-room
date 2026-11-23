@@ -8,7 +8,7 @@ import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/p
 import { formatProjection } from "@/lib/format";
 import { publishedDir } from "@/server/engine/board";
 import { livePropPick, potdLiveStatus, type LiveResult } from "@/server/markets/potdLive";
-import { MIN_EDGE, MIN_PROB, RELIABILITY } from "@/server/markets/potdPick";
+import { MIN_EDGE, MIN_PROB, RELIABILITY, type LivePropPick } from "@/server/markets/potdPick";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -100,7 +100,8 @@ async function Body() {
 function Rules() {
   return (
     <p className="text-xs leading-relaxed text-faint">
-      How a pick qualifies: the model&apos;s probability for the side is first adjusted for reliability. That adjustment was fitted on 2023–24 and tested on the
+      How a pick qualifies: each player and stat is judged only at its main line, the Polymarket contract priced closest to 50¢; other
+      ladder rungs never compete. The model&apos;s probability for the side is then adjusted for reliability. That adjustment was fitted on 2023–24 and tested on the
       next two seasons, and it marks a pick down when more of its projection comes from blowout, matchup or usage adjustments than from the player&apos;s own
       baseline. The adjusted probability must reach {(MIN_PROB * 100).toFixed(1)}% and beat the Polymarket price plus fees by at least {(MIN_EDGE * 100).toFixed(0)} points.
       Among those, the highest adjusted probability is the pick, not the biggest gap. Lines and prices come from Polymarket US at the moment the page loads; none
@@ -188,6 +189,14 @@ function History({ f }: { f: File }) {
   );
 }
 
+function histText(p: LivePropPick): string {
+  const h = p.history, n = p.contract, lbl = p.label.toLowerCase();
+  const parts: string[] = [];
+  if (h.thisSeason) parts.push(`${n}+ ${lbl} in ${h.thisSeason.hits} of ${h.thisSeason.games} games this season`);
+  if (h.lastSeason) parts.push(`${Math.round((h.lastSeason.hits / h.lastSeason.games) * 100)}% of ${h.lastSeason.games} games last season`);
+  return parts.length ? `He reached it ${parts.join(", ")}.` : "Not enough games this season or last to show how often he reaches it.";
+}
+
 const TAG = <span className="rounded border border-dashed border-market/60 px-1.5 py-0.5 text-[0.65rem] text-market">TEST · live preview · not recorded</span>;
 const p1 = (x: number) => `${(x * 100).toFixed(1)}%`;
 
@@ -206,7 +215,7 @@ function LiveCard({ r }: { r: LiveResult }) {
             </ul>
           </div>
         ) : null}
-        <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.matched} lines matched · {r.checked} checked · model {r.modelVersion ?? "—"} · updated {pt(r.fetchedAt)}</p>
+        <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.diag?.lines ?? 0} main lines · {r.checked} checked · model {r.modelVersion ?? "—"} · updated {pt(r.fetchedAt)}</p>
       </NoPick>
     );
   }
@@ -248,12 +257,13 @@ function LiveCard({ r }: { r: LiveResult }) {
               <span className={x.favors === "pick" ? "text-edge" : x.favors === "against" ? "text-market" : "text-faint"}>{x.favors === "pick" ? "▲ " : x.favors === "against" ? "▼ " : "• "}</span>{x.text}
             </li>
           ))}
+          <li><span className="text-faint">• </span>Main line: {p.line} is the Polymarket {lbl} contract priced closest to 50¢ for him ({p.contract}+). {histText(p)}</li>
           <li><span className="text-faint">• </span>Form: {p.form.seasonAvg != null ? `${formatProjection(p.form.seasonAvg)} a game this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${formatProjection(p.form.last5)} over his last 5` : ""}. History: {p.support}.</li>
           <li><span className="text-faint">• </span>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments in the pick's direction, so the probability is marked down to ${p1(p.adjProb)}.` : `the projection rests on his own baseline, not on adjustments; adjusted to ${p1(p.adjProb)}.`}</li>
         </ul>
       </div>
       <p className="text-[0.7rem] leading-snug text-faint">
-        Model {p.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(p.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} lines checked
+        Model {p.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(p.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked
       </p>
     </Panel>
   );

@@ -314,7 +314,125 @@ def run(leagues=LEAGUES, now: datetime | None = None, write: bool = True) -> dic
         f = data_root() / "published" / "pick_of_the_day.json"
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(json.dumps(out, indent=2, default=str))
-    return {"new": len(new), "graded": len(gnew), "today": {lg: (out["today"].get(lg) or {}).get("status") for lg in leagues}}
+    res = {"new": len(new), "graded": len(gnew), "today": {lg: (out["today"].get(lg) or {}).get("status") for lg in leagues}}
+    if write and "nba" in leagues:
+        res["context"] = _side_outputs(now)
+    return res
+
+
+# ------------------------------------------------------------------ main-line context and private audit (2026-11-22)
+STAT_COL = {"points": "pts", "rebounds": "reb", "assists": "ast", "threes": "fg3m"}
+CONTRIB_KEY = {"points": "pts", "rebounds": "reb", "assists": "ast", "threes": "fg3m"}
+
+
+def _side_outputs(now: datetime) -> dict:
+    """Both are best effort and never fail the refresh."""
+    out = {}
+    try:
+        board = json.loads((data_root() / "published" / "nba_props.json").read_text())
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"no published NBA props board ({type(e).__name__})"}
+    try:
+        from modelroom.nba.props import data as PD
+        logs = player_logs(board, PD.load())
+        f = data_root() / "published" / "nba_player_logs.json"
+        f.write_text(json.dumps(logs, separators=(",", ":")))
+        out["player_logs"] = len(logs["players"])
+    except Exception as e:  # noqa: BLE001
+        out["player_logs_error"] = type(e).__name__
+    try:
+        out["audit"] = record_audit(audit_rows(board, now))
+    except Exception as e:  # noqa: BLE001
+        out["audit_error"] = type(e).__name__
+    return out
+
+
+def player_logs(board: dict, pg: pd.DataFrame) -> dict:
+    """This season's and last season's game-by-game points, rebounds, assists and threes (box scores, games played only)
+    for every player on today's board, so the Pick of the Day card can show how often he cleared the main line."""
+    ids = {str(p["player_id"]) for g in board.get("games", []) for p in g.get("players", [])}
+    df = pg[pg["played"] & pg["player_id"].astype(str).isin(ids)].copy()
+    if df.empty:
+        return {"generated_at": board.get("generated_at"), "seasons": [], "players": {}}
+    cur = int(df["season"].max())
+    df = df[df["season"] >= cur - 1].sort_values("game_date")
+    players = {}
+    for pid, g in df.groupby(df["player_id"].astype(str)):
+        players[pid] = {str(int(s)): {stat: [int(v) for v in x[col].fillna(0)] for stat, col in STAT_COL.items()} for s, x in g.groupby("season")}
+    return {"generated_at": board.get("generated_at"), "seasons": [cur - 1, cur], "players": players}
+
+
+def _grid_ge(grid: dict | None, k: int) -> float | None:
+    if not grid or not grid.get("p"):
+        return None
+    x = (k - grid["k0"]) / grid["step"]
+    if x <= 0:
+        return float(grid["p"][0])
+    if x > len(grid["p"]) - 1 or abs(x - round(x)) > 1e-9:
+        return None
+    return float(grid["p"][int(round(x))])
+
+
+def _explain(c: dict | None, stat: str) -> str:
+    if not c:
+        return "No contribution breakdown published."
+    parts = [f"baseline {c.get('baseline', 0):.2f}"]
+    for k in ("minutes", "blowout", "usage", "pace", "matchup", "simulation"):
+        v = c.get(k)
+        if v is not None and abs(v) >= 0.005:
+            parts.append(f"{k} {v:+.2f}")
+    return f"{stat}: " + ", ".join(parts) + f" = {c.get('final', 0):.2f}"
+
+
+def audit_rows(board: dict, now: datetime) -> list[dict]:
+    """Model Room's own outputs only, one row per player and eligible stat on the published active board. The side and
+    probability are against a model-independent reference: his season average from box scores (this season after 5
+    games, otherwise last season), P(stat > reference). No market price, line or decision is read or stored."""
+    rows, at = [], board.get("generated_at")
+    mv, ph = (board.get("model") or {}).get("version"), (board.get("model") or {}).get("params_hash")
+    for g in board.get("games", []):
+        for p in g.get("players", []):
+            sea = (p.get("recent") or {}).get("season") or {}
+            for stat in ELIGIBLE["nba"]:
+                m = (p.get("markets") or {}).get(stat)
+                if not m:
+                    continue
+                avg = (sea.get("avg") or {}).get(stat) if (sea.get("games") or 0) >= 5 else None
+                ref, side, prob = "season_average", None, None
+                if avg is not None:
+                    q = _grid_ge(m.get("grid"), int(math.floor(avg)) + 1)   # P(stat > average)
+                    if q is not None:
+                        side, prob = ("over", q) if q >= 0.5 else ("under", 1 - q)
+                else:
+                    ref = "season_average_unavailable"
+                c = (((p.get("inputs") or {}).get("contributions") or {}).get("stats") or {}).get(CONTRIB_KEY[stat])
+                rows.append({"game_date": g.get("game_date"), "game_id": str(g.get("game_id")), "game_start": g.get("start_time"),
+                             "player_id": str(p.get("player_id")), "player": p.get("name"), "team": p.get("team"), "opp": p.get("opp"),
+                             "stat": stat, "model_version": mv, "params_hash": ph, "board_generated_at": at, "projection": float(m["mean"]),
+                             "reference": ref, "reference_value": avg, "model_side": side, "model_prob": None if prob is None else round(prob, 4),
+                             "explanation": _explain(c, stat), "contributions": json.dumps(c) if c else None})
+    return rows
+
+
+AUDIT_COLS = ("game_date", "game_id", "game_start", "player_id", "player", "team", "opp", "stat", "model_version", "params_hash",
+              "board_generated_at", "projection", "reference", "reference_value", "model_side", "model_prob", "explanation", "contributions", "run_id")
+
+
+def record_audit(rows: list[dict]) -> dict:
+    """Private TEST database (odds.potd_model_outputs; append-only, not reachable by API roles). Skipped when the store
+    is off. Re-running the same board inserts nothing."""
+    import os
+    if os.environ.get("ODDS_STORE", "off") != "on" or not os.environ.get("MODELROOM_ODDS_DB_URL"):
+        return {"status": "skipped (private store not connected)", "rows": len(rows)}
+    from modelroom.sources.odds_store import connect
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    sql = (f"insert into odds.potd_model_outputs ({', '.join(AUDIT_COLS)}) values ({', '.join(['%s'] * len(AUDIT_COLS))}) "
+           "on conflict (game_id, player_id, stat, model_version, board_generated_at) do nothing")
+    with connect() as conn, conn.transaction(), conn.cursor() as cur:
+        before = cur.execute("select count(*) from odds.potd_model_outputs").fetchone()[0]
+        cur.executemany(sql, [tuple({**r, "run_id": run_id}.get(k) for k in AUDIT_COLS) for r in rows])
+        after = cur.execute("select count(*) from odds.potd_model_outputs").fetchone()[0]
+    return {"status": "recorded", "rows": len(rows), "inserted": int(after - before)}
 
 
 PUBLIC = ("pick_key", "date", "league", "status", "format", "reason", "stat", "player", "player_id", "market", "selection", "team", "home", "away", "line", "price", "model_prob",
