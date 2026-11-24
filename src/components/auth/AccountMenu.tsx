@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { tierName } from "@/config/tiers";
-import { authEnabled, isProduction } from "@/lib/auth-config";
+import { authEnabled, isProduction, testOpenAccess } from "@/lib/auth-config";
 import { signOut } from "@/server/actions/auth";
 import { getTierForUser } from "@/server/membership";
 import { getSessionUser } from "@/server/session";
@@ -23,6 +23,13 @@ export function PlanBadge({ tier }: { tier: TierId }) {
  * logins aren't configured, so the sign-in page can explain what's missing; in production they don't.
  */
 export async function AccountMenu({ variant }: { variant: "desktop" | "mobile" }) {
+  if (testOpenAccess()) {
+    return (
+      <span data-open-access="true" className={`text-xs text-mute ${variant === "mobile" ? "block text-center" : ""}`}>
+        Test site: open access, no login
+      </span>
+    );
+  }
   if (!authEnabled() && isProduction()) return null;
   const user = authEnabled() ? await getSessionUser() : null;
 

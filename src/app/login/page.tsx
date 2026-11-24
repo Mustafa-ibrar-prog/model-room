@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { AuthShell } from "@/components/auth/AuthShell";
-import { safeNext } from "@/lib/auth-config";
+import { safeNext, testOpenAccess } from "@/lib/auth-config";
 import { signIn } from "@/server/actions/auth";
 
 export const metadata: Metadata = { title: "Log in" };
@@ -19,6 +20,13 @@ export default function LoginPage({ searchParams }: { searchParams: Promise<{ ne
 
 async function Login({ searchParams }: { searchParams: Promise<{ next?: string; requires?: string; error?: string }> }) {
   const sp = await searchParams;
+  if (testOpenAccess()) {
+    return (
+      <AuthShell title="No login needed" intro="Logins are switched off on the test site for now. Everything is open, including Plus and Pro features.">
+        <Link href="/" className="font-600 text-model">Go to the home page</Link>
+      </AuthShell>
+    );
+  }
   const next = safeNext(sp.next, "/account");
   const plan = sp.requires ? REQUIRES[sp.requires] : null;
   const intro = sp.error === "link"
