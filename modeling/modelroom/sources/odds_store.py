@@ -21,6 +21,9 @@ import hashlib
 import json
 import math
 import os
+import re
+import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -247,6 +250,8 @@ def _archived_payloads(league: str) -> list[str]:
     in order, each object checked against its manifest SHA-256. Any problem -> [] (the caller reads Supabase instead)."""
     if os.environ.get("MODELROOM_ARCHIVE_READ") != "on":
         return []
+    if not all(os.environ.get(k) for k in ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET")):
+        return []                                                       # R2 not configured: nothing to say, read Supabase
     try:
         from modelroom.archive import odds as AO
         from modelroom.archive.store import from_env
@@ -255,7 +260,7 @@ def _archived_payloads(league: str) -> list[str]:
             return []
         return list(df["payload"])
     except Exception as e:  # noqa: BLE001
-        print(f"archive not used for {league} snapshots ({type(e).__name__}); reading Supabase", flush=True)
+        print(f"archive not used for {league} snapshots ({type(e).__name__}); reading Supabase", file=sys.stderr, flush=True)
         return []
 
 
@@ -340,6 +345,7 @@ def server_check(conn, table: str, league: str, anchor: dict | None = None) -> d
     hash (so the history up to it can't have been rewritten, even consistently) and the table can't be shorter."""
     cur = conn.cursor()
     a_seq = int(anchor["seq"]) if anchor and anchor.get("seq") else 0
+    t0 = time.perf_counter()
     cur.execute(_chain_sql(_table(table)), {"league": league, "genesis": GENESIS, "anchor_seq": a_seq})
     n, max_seq, seq_bad, link_bad, hash_bad, typed_bad, first_bad, head, at_anchor = _fetchone(cur)
     problems = []
@@ -357,7 +363,7 @@ def server_check(conn, table: str, league: str, anchor: dict | None = None) -> d
         elif at_anchor != anchor.get("row_hash"):
             problems.append(f"the row at checkpoint seq {a_seq} no longer carries the verified hash: history was rewritten")
     return {"rows": int(n), "ok": not problems, "problems": problems[:20], "head": head if n else None,
-            "max_seq": int(max_seq), "mode": "server", "table": table, "league": league,
+            "max_seq": int(max_seq), "mode": "server", "table": table, "league": league, "elapsed_ms": round((time.perf_counter() - t0) * 1000),
             "anchor": {"seq": a_seq, "ok": not a_seq or (max_seq >= a_seq and at_anchor == anchor.get("row_hash"))}}
 
 
@@ -375,21 +381,52 @@ def checkpoint_path() -> Path:
     return Path(os.environ.get("MODELROOM_LEDGER_DIR", "preview-ledger")) / "reports" / "store_checkpoints.json"
 
 
+_HEX64 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def validate_checkpoints(cps) -> str | None:
+    """None when the file's structure is trustworthy, else what is wrong with it."""
+    if not isinstance(cps, dict):
+        return "not a JSON object"
+    for t in TABLES:
+        if t not in cps:
+            continue
+        if not isinstance(cps[t], dict):
+            return f"{t}: not an object"
+        for lg, a in cps[t].items():
+            if not isinstance(a, dict) or not isinstance(a.get("seq"), int) or isinstance(a.get("seq"), bool) or a["seq"] < 1:
+                return f"{t}/{lg}: seq missing or not a positive whole number"
+            if not isinstance(a.get("row_hash"), str) or not _HEX64.match(a["row_hash"]):
+                return f"{t}/{lg}: row_hash is not a 64-character hash"
+    return None
+
+
 def read_checkpoints() -> dict:
+    """{} when there is no checkpoint file yet (first run). A file that exists but can't be read or doesn't have the
+    expected shape is NOT trusted: {"_invalid": reason} is returned, every check then runs its full verification without
+    an anchor, reports the problem, and never overwrites the file (fail safe; restore it from the preview branch history)."""
     f = checkpoint_path()
-    try:
-        return json.loads(f.read_text())
-    except (OSError, ValueError):
+    if not f.exists():
         return {}
+    try:
+        cps = json.loads(f.read_text())
+    except (OSError, ValueError) as e:
+        return {"_invalid": f"unreadable ({type(e).__name__})"}
+    why = validate_checkpoints(cps)
+    return {"_invalid": why} if why else cps
 
 
 def anchor_for(cps: dict, table: str, league: str) -> dict | None:
+    if "_invalid" in cps:
+        return None
     return (cps.get(table) or {}).get(league)
 
 
 def advance_checkpoint(table: str, league: str, check: dict, by: str) -> dict:
     """Record the verified head. Refuses to move backwards or to record a failed check."""
     cps = read_checkpoints()
+    if "_invalid" in cps:
+        return {"advanced": False, "reason": f"checkpoint file not trusted ({cps['_invalid']}); left as it is"}
     old = anchor_for(cps, table, league)
     if not check.get("ok") or not check.get("rows"):
         return {"advanced": False, "reason": "check failed" if not check.get("ok") else "empty table"}
@@ -407,9 +444,38 @@ def advance_checkpoint(table: str, league: str, check: dict, by: str) -> dict:
 
 def check_and_advance(conn, table: str, league: str, by: str) -> dict:
     cps = read_checkpoints()
-    res = server_check(conn, table, league, anchor_for(cps, table, league))
+    res = server_check(conn, table, league, anchor_for(cps, table, league))   # always the full check of every row
+    if "_invalid" in cps:
+        res["ok"] = False
+        res["problems"].append(f"checkpoint file not trusted ({cps['_invalid']}): the full verification ran without an anchor and "
+                               "the checkpoint was not advanced; restore store_checkpoints.json from the preview branch history")
     res["checkpoint"] = advance_checkpoint(table, league, res, by)
     return res
+
+
+def verify_anchor_history(conn, files: list[Path]) -> dict:
+    """Every checkpoint ever committed (e.g. the last week of the preview branch's history) must still hold: the row at
+    each recorded seq carries exactly the recorded hash. Catches a history rewritten together with a replaced checkpoint
+    file. One single-row query per anchor."""
+    checked, problems = 0, []
+    cur = conn.cursor()
+    for f in files:
+        try:
+            cps = json.loads(Path(f).read_text())
+        except (OSError, ValueError):
+            problems.append(f"{Path(f).name}: unreadable")
+            continue
+        if validate_checkpoints(cps):
+            problems.append(f"{Path(f).name}: {validate_checkpoints(cps)}")
+            continue
+        for t in TABLES:
+            for lg, a in (cps.get(t) or {}).items():
+                cur.execute(f"select row_hash from odds.{t} where league = %s and seq = %s", (lg, a["seq"]))
+                r = _fetchone(cur)
+                checked += 1
+                if not r or r[0] != a["row_hash"]:
+                    problems.append(f"{Path(f).name}: {t}/{lg} seq {a['seq']} {'missing' if not r else 'carries a different hash'}")
+    return {"anchors_checked": checked, "files": len(files), "ok": not problems, "problems": problems[:20]}
 
 
 # ------------------------------------------------------------------ derived records (odds.comparisons, odds.reports)
@@ -531,7 +597,7 @@ def cmd(action: str, league: str, path: str | None = None, batch: str | None = N
             check = check_and_advance(conn, "snapshots", league, "refresh load")
             same = lambda d: (int(d["snapshot_seq"].iloc[-1]), str(d["snapshot_hash"].iloc[-1])) == (check["max_seq"], check["head"]) if len(d) else True
             if not same(df) and os.environ.get("MODELROOM_ARCHIVE_READ") == "on":
-                print(f"archived {league} snapshots don't reproduce the stored head; reading everything from Supabase", flush=True)
+                print(f"archived {league} snapshots don't reproduce the stored head; reading everything from Supabase", file=sys.stderr, flush=True)
                 df = load_with_hashes(conn, league, use_archive=False)
             # the hashes computed from the downloaded payloads must end exactly at the stored head
             if len(df) and (int(df["snapshot_seq"].iloc[-1]), str(df["snapshot_hash"].iloc[-1])) != (check["max_seq"], check["head"]):
@@ -580,13 +646,16 @@ def cmd(action: str, league: str, path: str | None = None, batch: str | None = N
             out["rows"] = out.get("snapshots", {}).get("rows", 0)
             out["bytes_read"] = bytes_read()
             return out
+        if action == "verify-anchors":
+            files = sorted(Path(os.environ.get("MODELROOM_ANCHOR_DIR", ".")).glob("*.json"))
+            return {"league": league, "mode": action, **verify_anchor_history(conn, files), "bytes_read": bytes_read()}
         raise StoreError(f"unknown action {action}")
     finally:
         conn.close()
 
 
 def _brief(c: dict) -> dict:
-    return {k: c.get(k) for k in ("rows", "ok", "problems", "head", "anchor", "checkpoint") if k in c}
+    return {k: c.get(k) for k in ("rows", "ok", "problems", "head", "anchor", "checkpoint", "elapsed_ms") if k in c}
 
 
 def _append_local(league: str, res: dict) -> None:

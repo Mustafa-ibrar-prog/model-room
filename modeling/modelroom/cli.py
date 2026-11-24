@@ -295,14 +295,14 @@ def _odds_store(args) -> int:
     print(_json.dumps(res, indent=1, default=str))
     if args.cmd == "load":
         return 0  # an integrity problem is reported (workflow warning) but never stops the refresh from using its lines
-    v = res.get("verify") if args.cmd not in ("verify", "verify-full") else res
+    v = res.get("verify") if args.cmd not in ("verify", "verify-full", "verify-anchors") else res
     return 0 if (v is None or v.get("ok", True)) else 1
 
 
 def _archive(args) -> int:
     import json as _json
     from modelroom.archive import run as AR
-    res = AR.main(args.cmd, args.local, args.ledgers, args.include_audit)
+    res = AR.main(args.cmd, args.local, args.ledgers, args.include_audit, use_supabase=not args.no_supabase)
     print(_json.dumps(res, indent=1, default=str))
     return 0 if res["ok"] else 1
 
@@ -337,12 +337,13 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
     ar = sub.add_parser("archive", help="private R2 archive of odds tables, closed ledgers and audit days (TEST; copies only)")
-    ar.add_argument("cmd", choices=["dryrun", "run", "verify"])
+    ar.add_argument("cmd", choices=["check", "dryrun", "run", "verify"])
+    ar.add_argument("--no-supabase", action="store_true", help="ledgers only: no Supabase reads at all")
     ar.add_argument("--local", help="write to this folder instead of R2 (no credentials needed)")
     ar.add_argument("--ledgers", help="ledger folder to copy closed weekly files from")
     ar.add_argument("--include-audit", action="store_true", help="also copy closed days of odds.potd_model_outputs")
     os_ = sub.add_parser("odds-store", help="sportsbook snapshots <-> append-only Supabase table (TEST)")
-    os_.add_argument("cmd", choices=["load", "sync", "verify", "verify-full", "import"])
+    os_.add_argument("cmd", choices=["load", "sync", "verify", "verify-full", "verify-anchors", "import"])
     os_.add_argument("--league", required=True, choices=["nba", "nfl"])
     os_.add_argument("--path", default=None)
     os_.add_argument("--batch", default=None)

@@ -44,6 +44,9 @@ class LocalStore:
     def exists(self, key: str) -> bool:
         return (self.root / key).exists()
 
+    def delete(self, key: str) -> None:
+        (self.root / key).unlink(missing_ok=True)
+
 
 class R2Store:
     """Private Cloudflare R2 bucket via the S3 API (boto3). Standard storage class only (the free tier's)."""
@@ -53,6 +56,7 @@ class R2Store:
         import boto3  # installed by the archive workflow only
         from botocore.config import Config
         self.bucket = bucket
+        self.endpoint = f"https://{account_id}.r2.cloudflarestorage.com"
         self.s3 = boto3.client("s3", endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com", aws_access_key_id=key_id,
                                aws_secret_access_key=secret, region_name="auto",
                                config=Config(retries={"max_attempts": 4, "mode": "standard"}, signature_version="s3v4"))
@@ -74,6 +78,19 @@ class R2Store:
             return True
         except Exception:  # noqa: BLE001  404 or no access: treat as absent, the caller re-checks
             return False
+
+    def delete(self, key: str) -> None:
+        self.s3.delete_object(Bucket=self.bucket, Key=key)
+
+    def anonymous_status(self, key: str) -> int:
+        """HTTP status of an UNSIGNED request for this object on the S3 endpoint: a private bucket answers 4xx."""
+        import urllib.error
+        import urllib.request
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f"{self.endpoint}/{self.bucket}/{key}", method="GET"), timeout=15) as r:
+                return r.status
+        except urllib.error.HTTPError as e:
+            return e.code
 
 
 def from_env(local_root: str | None = None):
