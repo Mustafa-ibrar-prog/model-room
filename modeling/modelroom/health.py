@@ -137,7 +137,9 @@ def growth(storage: dict) -> dict:
         sh = t.get("share_7d")
         if sh is None:
             continue
-        per.append({"name": t["name"], "bytes": int(t["bytes"]), "per_day": int(t["bytes"]) * float(sh) / 7})
+        age = t.get("age_days")
+        days = min(7.0, max(float(age), 0.5)) if age is not None else 7.0     # a table younger than 7 days: its real age
+        per.append({"name": t["name"], "bytes": int(t["bytes"]), "per_day": int(t["bytes"]) * float(sh) / days})
     per.sort(key=lambda x: -x["per_day"])
     total = sum(x["per_day"] for x in per)
     db = int(storage.get("db_bytes") or 0)
@@ -187,6 +189,7 @@ def storage_summary(storage: dict | None, egress: dict | None) -> str:
         lines.append(f"- Database: {g['db_bytes'] / MB:.1f} MB of {DB_LIMIT / MB:.0f} MB ({g['db_bytes'] / DB_LIMIT:.0%}), "
                      f"+{g['per_day'] / MB:.2f} MB a day, limit in {'n/a' if d is None else f'{d:.0f} days'}")
         lines.append("- Largest tables: " + ", ".join(f"{t['name']} {int(t['bytes']) / MB:.1f} MB" for t in (storage.get("tables") or [])[:6]))
+        lines.append("- Growth by table (last 7 days): " + (", ".join(f"{x['name']} +{x['per_day'] / MB:.2f} MB/day" for x in g["per_table"][:6]) or "none measured"))
         if g["audit_per_day"] is not None:
             lines.append(f"- Audit table {AUDIT_TABLE}: {g['audit_bytes'] / MB:.1f} MB, +{g['audit_per_day'] / MB:.2f} MB a day")
         lines.append(f"- Storage (files): {int(storage.get('storage_bytes') or 0) / MB:.1f} MB in {storage.get('storage_objects')} object(s)")

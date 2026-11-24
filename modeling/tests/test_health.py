@@ -126,4 +126,11 @@ def test_missing_inputs_are_not_incidents_but_show_in_summary():
     assert H.evaluate_storage(None, None) == [] and H.evaluate_storage({"ok": False, "error": "x"}, {}) == []
     assert "not read (x)" in H.storage_summary({"ok": False, "error": "x"}, None)
     s = H.storage_summary(_storage(130), {"bytes_24h": 40 * MB, "runs": 10, "runs_counted": 9})
-    assert "130.0 MB of 500 MB (26%)" in s and "odds.potd_model_outputs" in s and "40.0 MB over 9 of 10" in s
+    assert "130.0 MB of 500 MB (26%)" in s and "Growth by table" in s and "odds.potd_model_outputs" in s and "40.0 MB over 9 of 10" in s
+
+
+def test_young_table_growth_uses_its_real_age():
+    st = {"db_bytes": 100 * MB, "tables": [{"name": "odds.potd_model_outputs", "bytes": 15 * MB, "share_7d": 1.0, "age_days": 3.0}]}
+    assert round(H.growth(st)["per_day"] / MB, 2) == 5.0
+    st["tables"][0]["age_days"] = 30.0
+    assert round(H.growth(st)["per_day"] / MB, 3) == round(15 / 7, 3)

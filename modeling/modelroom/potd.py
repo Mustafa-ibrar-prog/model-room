@@ -250,6 +250,17 @@ def grade(p: dict, game: dict | None) -> str:
     return "push" if t == p["line"] else ("hit" if (t > p["line"]) == (p["selection"] == "over") else "miss")
 
 
+# A settled prop is graded only once its game is this far past tip-off (about 2.5 h of play, then time for late box-score
+# fixes). Until then it stays pending; nothing is estimated.
+GRADE_DELAY = pd.Timedelta(hours=5, minutes=30)
+RESULT_SOURCE = {"nba": "hoopR NBA player box scores (sportsdataverse, built from ESPN)"}
+
+
+def settle_ready(p: dict, now: datetime) -> bool:
+    gs = p.get("game_start")
+    return bool(gs) and pd.Timestamp(now) >= pd.Timestamp(gs) + GRADE_DELAY
+
+
 def summary(results: list[str]) -> dict:
     n = {k: results.count(k) for k in ("hit", "miss", "push", "void", "pending")}
     g = n["hit"] + n["miss"]
@@ -301,11 +312,20 @@ def run(leagues=LEAGUES, now: datetime | None = None, write: bool = True) -> dic
             r = grade_prop(p, gm, v)
         else:
             r = grade(p, gm)                                         # game-market picks made before the props-only change
-        if r != "pending" and (grades.get(p["pick_key"]) or {}).get("result") != r:
-            gnew.append({"game_id": f"{p['pick_key']}|grade", "pick_key": p["pick_key"], "model_version": SOURCE, "result": r,
-                         "final": None if not gm else {"home": _f(gm.get("home_score")), "away": _f(gm.get("away_score"))},
-                         "generated_at": now.isoformat(timespec="seconds"), "game_start": "9999-12-31T00:00:00+00:00",
-                         "inputs_hash": r, "params_hash": None})
+        if p.get("market") == "prop" and r in ("hit", "miss", "push") and not settle_ready(p, now):
+            r = "pending"                                            # box-score corrections land first (GRADE_DELAY)
+        prev = grades.get(p["pick_key"]) or {}
+        if r != "pending" and prev.get("result") != r:
+            g = {"game_id": f"{p['pick_key']}|grade", "pick_key": p["pick_key"], "model_version": SOURCE, "result": r,
+                 "final": None if not gm else {"home": _f(gm.get("home_score")), "away": _f(gm.get("away_score"))},
+                 "generated_at": now.isoformat(timespec="seconds"), "game_start": "9999-12-31T00:00:00+00:00",
+                 "inputs_hash": r, "params_hash": None, "graded_at": now.isoformat(timespec="seconds"),
+                 "game_status": None if not gm else str(gm.get("status") or "")}
+            if p.get("market") == "prop":
+                g.update(actual=v, played=v is not None, result_source=RESULT_SOURCE["nba"])
+            if prev:
+                g.update(supersedes=prev.get("seq"), reason=f"result changed from {prev.get('result')} to {r} after a later box-score read")
+            gnew.append(g)
     if write and gnew:
         ledger.append_weekly(ledger_path("potd_grades"), now, gnew)   # game_start far ahead: grades come after the game
     grades = read_grades() if write else {**grades, **{g["pick_key"]: g for g in gnew}}
@@ -314,6 +334,8 @@ def run(leagues=LEAGUES, now: datetime | None = None, write: bool = True) -> dic
         f = data_root() / "published" / "pick_of_the_day.json"
         f.parent.mkdir(parents=True, exist_ok=True)
         f.write_text(json.dumps(out, indent=2, default=str))
+        hist = history(picks, grades, now)
+        (f.parent / "potd_history.json").write_text(json.dumps(hist, separators=(",", ":"), default=str))
     res = {"new": len(new), "graded": len(gnew), "today": {lg: (out["today"].get(lg) or {}).get("status") for lg in leagues}}
     if write and "nba" in leagues:
         res["context"] = _side_outputs(now)
@@ -467,3 +489,46 @@ def publish(picks: list[dict], grades: dict, now: datetime) -> dict:
             "notice": ("Unvalidated. Model Room has not shown an edge against the market yet: this is the model's most reliable "
                        "qualifying NBA player prop, not a guaranteed result and not betting advice."),
             "limits": LIMITS}
+
+
+# ------------------------------------------------------------------ results dashboard (Moose 2026-11-24)
+RESULT_WORD = {"hit": "win", "miss": "loss", "push": "push", "void": "void", "pending": "pending"}
+HIST_FIELDS = ("pick_key", "date", "league", "rank", "player", "player_id", "team", "home", "away", "stat", "selection", "line",
+               "projection", "difference", "model_prob", "market_prob", "model_version", "selected_at", "game_start",
+               "line_source", "line_captured_at", "rule")
+GRADE_FIELDS = ("actual", "played", "game_status", "result_source", "graded_at", "supersedes", "reason")
+
+
+def history(picks: list[dict], grades: dict, now: datetime, league: str = "nba") -> dict:
+    """Every officially recorded NBA player-prop pick, joined to its latest grade, plus one entry per recorded day (no-pick
+    days keep their reason). Built only from the two append-only ledgers: nothing here is estimated, rebuilt from current
+    projections, or backfilled. Win rate = wins / (wins + losses); pushes, voids and pending picks are left out."""
+    rows, days = [], {}
+    for p in picks:
+        if p.get("league") != league:
+            continue
+        d = days.setdefault(p["date"], {"date": p["date"], "reasons": [], "picks": 0})
+        if p.get("status") != "pick":
+            d["reasons"].append(p.get("reason") or "no qualifying pick")
+            continue
+        if p.get("market") != "prop":
+            continue                                    # game-line picks from before props-only stay out of this record
+        g = grades.get(p["pick_key"]) or {}
+        r = {k: p.get(k) for k in HIST_FIELDS}
+        r["result"] = RESULT_WORD.get(g.get("result") or "pending", "pending")
+        r["grade"] = {k: g.get(k) for k in GRADE_FIELDS if g.get(k) is not None} or None
+        if g.get("result") and "graded_at" not in (r["grade"] or {}):
+            r["grade"] = {**(r["grade"] or {}), "graded_at": g.get("generated_at")}
+        r["frozen_before_start"] = bool(p.get("selected_at") and p.get("game_start") and p["selected_at"] < p["game_start"])
+        rows.append(r)
+        d["picks"] += 1
+    rows.sort(key=lambda r: (r["date"], r.get("rank") or 0, r["pick_key"]), reverse=True)
+    n = {w: sum(r["result"] == w for r in rows) for w in ("win", "loss", "push", "void", "pending")}
+    settled = n["win"] + n["loss"]
+    return {"generated_at": now.isoformat(timespec="seconds"), "league": league, "today": _pt_date(pd.Timestamp(now)),
+            "summary": {**n, "settled": settled, "win_rate": round(n["win"] / settled, 4) if settled else None,
+                        "validated": settled >= UNVALIDATED_UNTIL, "unvalidated_until": UNVALIDATED_UNTIL},
+            "days": [{"date": d["date"], "picks": d["picks"], "reason": None if d["picks"] else (d["reasons"][-1] if d["reasons"] else None)}
+                     for d in sorted(days.values(), key=lambda x: x["date"], reverse=True)],
+            "picks": rows, "rule": {"min_prob": MIN_PROB, "min_edge": MIN_EDGE, "top_n": 10},
+            "grading": {"delay_hours": GRADE_DELAY.total_seconds() / 3600, "source": RESULT_SOURCE.get(league)}}
