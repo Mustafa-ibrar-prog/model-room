@@ -137,7 +137,9 @@ def growth(storage: dict) -> dict:
         sh = t.get("share_7d")
         if sh is None:
             continue
-        per.append({"name": t["name"], "bytes": int(t["bytes"]), "per_day": int(t["bytes"]) * float(sh) / 7})
+        age = t.get("age_days")
+        days = min(7.0, max(float(age), 0.5)) if age is not None else 7.0     # a table younger than 7 days: its real age
+        per.append({"name": t["name"], "bytes": int(t["bytes"]), "per_day": int(t["bytes"]) * float(sh) / days})
     per.sort(key=lambda x: -x["per_day"])
     total = sum(x["per_day"] for x in per)
     db = int(storage.get("db_bytes") or 0)
