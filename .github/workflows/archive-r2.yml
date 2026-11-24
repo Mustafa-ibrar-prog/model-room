@@ -1,0 +1,88 @@
+name: Archive to R2 (test site)
+
+# Manual only. Copies CLOSED history into the private Cloudflare R2 bucket and verifies it (Moose, 2026-11-23):
+#   odds.reports / comparisons / snapshots (closed seq segments), closed weekly prediction ledgers from the preview
+#   branch, and (optional) closed days of the Pick of the Day audit table.
+# Copies only: nothing in Supabase or Git is changed or deleted. "dryrun" writes under dryrun/ in the bucket.
+# Prints counts, ranges, checksums and problems; never payloads, lines, prices or secrets.
+# Supabase egress: each archived row is read once, ever (the first full run reads ~0.5 GB, mostly odds.reports);
+# later runs read only new closed segments.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "dryrun (under dryrun/), run (v1/), or verify (re-check what is archived)"
+        default: dryrun
+        type: choice
+        options: [dryrun, run, verify]
+      include_audit:
+        description: "also copy closed days of odds.potd_model_outputs"
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archive-r2
+  cancel-in-progress: false
+
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: modeling
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: R2 settings present (names only)
+        run: |
+          miss=""; for k in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do [ -n "${!k}" ] || miss="$miss $k"; done
+          [ -z "$miss" ] || { echo "::error::missing repository secrets:$miss (Settings > Secrets and variables > Actions)"; exit 1; }
+          echo "R2 settings present"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . "psycopg[binary]" boto3 zstandard
+      - name: Connect to the store (nothing printed)
+        working-directory: .
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+      - name: Closed ledgers from the preview branch
+        run: |
+          git fetch -q origin preview
+          mkdir -p /tmp/ledgers && git archive origin/preview modeling/preview-ledger | tar -x -C /tmp/ledgers
+      - name: Archive and verify
+        run: |
+          [ "${ODDS_STORE:-off}" = on ] || { echo "::error::store not reachable"; exit 1; }
+          python -m modelroom archive ${{ github.event.inputs.mode }} --ledgers /tmp/ledgers/modeling/preview-ledger \
+            ${{ github.event.inputs.include_audit == 'true' && '--include-audit' || '' }} > /tmp/archive.json; rc=$?
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/archive.json"))
+          print("mode", d["mode"], "| store", d["store"], "| prefix", d["prefix"], "| ok", d["ok"])
+          for r in d["odds"]:
+              print(f"odds.{r['table']} {r['league']}: db rows {r['db_rows']} chain ok {r['db_chain_ok']} | archived {r.get('archived_rows')} "
+                    f"(new segments {r['new_segments']}, kept {r['skipped_existing']}) | tail in Supabase only {r.get('tail_rows_in_supabase_only')}")
+              for p in r["problems"]: print("::error::", p)
+          for v in d["odds_verify"]:
+              print(f"verify odds.{v['table']} {v['league']}: {v['segments']} segments, {v['rows']} rows, ok {v['ok']}")
+              for p in v["problems"]: print("::error::", p)
+          L = d.get("ledgers") or {}
+          if L: print(f"ledgers: {len(L['copied'])} copied, {L['already']} already archived, {len(L['skipped_open'])} open (not copied); "
+                      f"{L['files_in_archive']} files, {L['bytes_original']/1e6:.1f} MB -> {L['bytes_stored']/1e6:.1f} MB stored")
+          for p in L.get("problems", []): print("::error::", p)
+          if d.get("ledgers_verify"): print("verify ledgers:", d["ledgers_verify"]["files"], "files, ok", d["ledgers_verify"]["ok"])
+          if d.get("audit"): print("audit days:", d["audit"]["days_closed"], "closed,", len(d["audit"]["copied"]), "copied,", d["audit"]["rows_archived"], "rows archived")
+          print("Supabase bytes read:", d["supabase_bytes_read"]["bytes"])
+          PY
+          exit $rc

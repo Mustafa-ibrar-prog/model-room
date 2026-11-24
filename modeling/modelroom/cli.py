@@ -299,6 +299,14 @@ def _odds_store(args) -> int:
     return 0 if (v is None or v.get("ok", True)) else 1
 
 
+def _archive(args) -> int:
+    import json as _json
+    from modelroom.archive import run as AR
+    res = AR.main(args.cmd, args.local, args.ledgers, args.include_audit)
+    print(_json.dumps(res, indent=1, default=str))
+    return 0 if res["ok"] else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="modelroom", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="group", required=True)
@@ -328,6 +336,11 @@ def main(argv: list[str] | None = None) -> int:
     mk.add_argument("--dry-run", action="store_true", help="sportsbook: analyse but write nothing to the store")
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
+    ar = sub.add_parser("archive", help="private R2 archive of odds tables, closed ledgers and audit days (TEST; copies only)")
+    ar.add_argument("cmd", choices=["dryrun", "run", "verify"])
+    ar.add_argument("--local", help="write to this folder instead of R2 (no credentials needed)")
+    ar.add_argument("--ledgers", help="ledger folder to copy closed weekly files from")
+    ar.add_argument("--include-audit", action="store_true", help="also copy closed days of odds.potd_model_outputs")
     os_ = sub.add_parser("odds-store", help="sportsbook snapshots <-> append-only Supabase table (TEST)")
     os_.add_argument("cmd", choices=["load", "sync", "verify", "verify-full", "import"])
     os_.add_argument("--league", required=True, choices=["nba", "nfl"])
@@ -341,7 +354,7 @@ def main(argv: list[str] | None = None) -> int:
     ij.add_argument("league", choices=["nba", "nfl"])
 
     args = p.parse_args(argv)
-    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "potd": _potd, "injuries": _injuries, "odds-store": _odds_store}[args.group]
+    handler = {"sources": _sources, "nba": _nba, "nfl": _nfl, "markets": _markets, "ledger": _ledger, "history": _history, "potd": _potd, "injuries": _injuries, "odds-store": _odds_store, "archive": _archive}[args.group]
     return handler(args)
 
 

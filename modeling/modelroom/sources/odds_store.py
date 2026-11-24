@@ -242,13 +242,32 @@ def insert(conn, league: str, df: pd.DataFrame, batch: str, run_id: str | None =
             "start": {"seq": start[0], "row_hash": start[1]}, "head": {"seq": seq, "row_hash": prev}, "rows_added": added_rows}
 
 
-def load_with_hashes(conn, league: str) -> pd.DataFrame:
-    """All snapshots of a league, plus each row's seq and row_hash, from ONE read of the payloads.
-    The chain is recomputed here from genesis over the downloaded payloads; the hashes are not downloaded but
-    computed, and `server_check` (run on the same connection) proves they equal the stored ones (same head)."""
+def _archived_payloads(league: str) -> list[str]:
+    """Closed snapshot segments from the private R2 archive (MODELROOM_ARCHIVE_READ=on and R2 settings present), seq 1..k
+    in order, each object checked against its manifest SHA-256. Any problem -> [] (the caller reads Supabase instead)."""
+    if os.environ.get("MODELROOM_ARCHIVE_READ") != "on":
+        return []
+    try:
+        from modelroom.archive import odds as AO
+        from modelroom.archive.store import from_env
+        df = AO.load_archived(from_env(None), "v1", "snapshots", league)
+        if not len(df) or list(df["seq"]) != list(range(1, len(df) + 1)):
+            return []
+        return list(df["payload"])
+    except Exception as e:  # noqa: BLE001
+        print(f"archive not used for {league} snapshots ({type(e).__name__}); reading Supabase", flush=True)
+        return []
+
+
+def load_with_hashes(conn, league: str, use_archive: bool = True) -> pd.DataFrame:
+    """All snapshots of a league, plus each row's seq and row_hash, from ONE read of the payloads: closed segments from
+    the private archive when available, the rest (seq beyond them) from Supabase. The chain is recomputed here from
+    genesis over every payload; `server_check` on the same connection proves the result ends at the stored head (the
+    load command falls back to a full Supabase read if it doesn't)."""
+    arch = _archived_payloads(league) if use_archive else []
     cur = conn.cursor()
-    cur.execute("select payload from odds.snapshots where league = %s order by seq", (league,))
-    payloads = [r[0] for r in _fetchall(cur)]
+    cur.execute("select payload from odds.snapshots where league = %s and seq > %s order by seq", (league, len(arch)))
+    payloads = arch + [r[0] for r in _fetchall(cur)]
     hashes, prev = [], GENESIS
     for p in payloads:
         prev = chain(prev, p)
@@ -510,6 +529,10 @@ def cmd(action: str, league: str, path: str | None = None, batch: str | None = N
         if action == "load":
             df = load_with_hashes(conn, league)
             check = check_and_advance(conn, "snapshots", league, "refresh load")
+            same = lambda d: (int(d["snapshot_seq"].iloc[-1]), str(d["snapshot_hash"].iloc[-1])) == (check["max_seq"], check["head"]) if len(d) else True
+            if not same(df) and os.environ.get("MODELROOM_ARCHIVE_READ") == "on":
+                print(f"archived {league} snapshots don't reproduce the stored head; reading everything from Supabase", flush=True)
+                df = load_with_hashes(conn, league, use_archive=False)
             # the hashes computed from the downloaded payloads must end exactly at the stored head
             if len(df) and (int(df["snapshot_seq"].iloc[-1]), str(df["snapshot_hash"].iloc[-1])) != (check["max_seq"], check["head"]):
                 check["ok"] = False
