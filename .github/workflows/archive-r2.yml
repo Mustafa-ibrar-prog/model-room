@@ -11,10 +11,14 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "dryrun (under dryrun/), run (v1/), or verify (re-check what is archived)"
-        default: dryrun
+        description: "check (bucket access + privacy probe only), dryrun (under dryrun/), run (v1/), verify (re-check the archive)"
+        default: check
         type: choice
-        options: [dryrun, run, verify]
+        options: [check, dryrun, run, verify]
+      supabase:
+        description: "also read Supabase (odds tables). OFF = Git ledgers only, zero Supabase egress. Keep off while the project is egress-restricted."
+        default: false
+        type: boolean
       include_audit:
         description: "also copy closed days of odds.potd_model_outputs"
         default: false
@@ -52,19 +56,27 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e . "psycopg[binary]" boto3 zstandard
+      - name: Bucket access and privacy probe (no Supabase)
+        run: |
+          python -m modelroom archive check > /tmp/check.json
+          python3 -c "import json; d=json.load(open('/tmp/check.json')); print({k: d[k] for k in ('write','read_back','anonymous_status','private','deleted','ok')})"
+          python3 -c "import json,sys; sys.exit(0 if json.load(open('/tmp/check.json'))['ok'] else 1)" || { echo "::error::bucket access or privacy probe failed"; exit 1; }
       - name: Connect to the store (nothing printed)
+        if: github.event.inputs.mode != 'check' && github.event.inputs.supabase == 'true'
         working-directory: .
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: bash scripts/odds-store-connect.sh
       - name: Closed ledgers from the preview branch
+        if: github.event.inputs.mode != 'check'
         run: |
           git fetch -q origin preview
           mkdir -p /tmp/ledgers && git archive origin/preview modeling/preview-ledger | tar -x -C /tmp/ledgers
       - name: Archive and verify
+        if: github.event.inputs.mode != 'check'
         run: |
-          [ "${ODDS_STORE:-off}" = on ] || { echo "::error::store not reachable"; exit 1; }
-          python -m modelroom archive ${{ github.event.inputs.mode }} --ledgers /tmp/ledgers/modeling/preview-ledger \
+          if [ "${{ github.event.inputs.supabase }}" = true ]; then [ "${ODDS_STORE:-off}" = on ] || { echo "::error::store not reachable"; exit 1; }; nosb=""; else nosb="--no-supabase"; fi
+          python -m modelroom archive ${{ github.event.inputs.mode }} $nosb --ledgers /tmp/ledgers/modeling/preview-ledger \
             ${{ github.event.inputs.include_audit == 'true' && '--include-audit' || '' }} > /tmp/archive.json; rc=$?
           python3 - <<'PY'
           import json
@@ -83,6 +95,7 @@ jobs:
           for p in L.get("problems", []): print("::error::", p)
           if d.get("ledgers_verify"): print("verify ledgers:", d["ledgers_verify"]["files"], "files, ok", d["ledgers_verify"]["ok"])
           if d.get("audit"): print("audit days:", d["audit"]["days_closed"], "closed,", len(d["audit"]["copied"]), "copied,", d["audit"]["rows_archived"], "rows archived")
-          print("Supabase bytes read:", d["supabase_bytes_read"]["bytes"])
+          if d.get("index"): print("archive.objects:", d["index"])
+          print("Supabase:", d.get("supabase"), "| bytes read:", d["supabase_bytes_read"]["bytes"], "| rows:", d["supabase_bytes_read"]["rows"])
           PY
           exit $rc

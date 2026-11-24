@@ -97,13 +97,10 @@ jobs:
     timeout-minutes: 45
     env:
       MODELROOM_LEDGER_DIR: ${{ github.workspace }}/modeling/preview-ledger
-      # Private R2 archive (TEST, 2026-11-23): closed odds.snapshots segments are read from R2 and only newer rows from
-      # Supabase. Inactive until the R2_* secrets exist; any archive problem falls back to the full Supabase read.
-      MODELROOM_ARCHIVE_READ: "on"
-      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      # Private R2 archive (TEST): closed odds.snapshots segments read from R2, newer rows from Supabase; any archive
+      # problem falls back to the full Supabase read. OFF until Moose approves activation after the verified dry run
+      # (set to "on"). The R2 secrets are given to the data step only, never to the whole job.
+      MODELROOM_ARCHIVE_READ: "off"
       # NBA player props: the 0.2.0 model on the TEST SITE only (approved 2026-11-03). Every prediction it
       # makes is recorded in the ledger as 0.2.0; earlier 0.1.0 records stay exactly as they were.
       # Rollback: delete this line (or set "0.1.0") and push; the next refresh publishes 0.1.0 again.
@@ -191,6 +188,11 @@ jobs:
         working-directory: modeling
         env:
           KINDS: ${{ needs.plan.outputs.kinds }}
+          # R2 archive reads: a READ-ONLY token (Object Read only), separate from the archive workflow's write token.
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
         run: |
           pip install -e . "psycopg[binary]"
           [ -z "${R2_ACCOUNT_ID:-}" ] || pip install -q boto3
@@ -239,12 +241,12 @@ jobs:
             [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || { echo "$lg lines skipped: $lg data not ready"; continue; }
             mkdir -p data/processed/$lg
             if [ "${ODDS_STORE:-off}" = on ] && python -m modelroom odds-store load --league $lg > /tmp/odds_load_$lg.json; then
-              python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); v=d['verify']; print('$lg snapshots loaded from the store:', d['rows'], '| chain ok:', v['ok'], '| store bytes read:', d['bytes_read']['bytes'])"
+              python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); v=d['verify']; b=d['bytes_read']; print('$lg snapshots loaded from the store:', d['rows'], '| chain ok:', v['ok'], '| check', v.get('elapsed_ms'), 'ms | store bytes read:', b['bytes'], 'rows:', b['rows'], 'queries:', b['queries'])"
               python3 -c "import json; v=json.load(open('/tmp/odds_load_$lg.json'))['verify']; v['ok'] or print('::warning::$lg odds.snapshots integrity check failed:', '; '.join(v['problems']))"
               if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|midday|workflow_dispatch"; then
                 if python -m modelroom $lg odds; then
                   python -m modelroom odds-store sync --league $lg --batch "collection" > /tmp/odds_sync_$lg.json \
-                    && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'], '| store bytes read:', d['bytes_read']['bytes'])" \
+                    && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'], '| store bytes read:', d['bytes_read']['bytes'], 'rows:', d['bytes_read']['rows'], 'queries:', d['bytes_read']['queries'])" \
                     || echo "::warning::$lg new lines could not be written to the store"
                 else
                   echo "::warning::$lg lines not fetched; continuing without them"
@@ -275,7 +277,7 @@ jobs:
             for lg in nba nfl; do
               [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || continue
               python -m modelroom markets sportsbook $lg > /tmp/sb_$lg.json \
-                && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', ('SKIPPED (' + d['skipped'] + ')') if d.get('skipped') else '', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'], '| store bytes read:', d.get('bytes_read', {}).get('bytes'))" \
+                && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', ('SKIPPED (' + d['skipped'] + ')') if d.get('skipped') else '', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'], '| store bytes read:', d.get('bytes_read', {}).get('bytes'), 'rows:', d.get('bytes_read', {}).get('rows'), 'queries:', d.get('bytes_read', {}).get('queries'))" \
                 || echo "::warning::$lg sportsbook analysis failed; nothing else is affected"
             done
           fi

@@ -205,6 +205,8 @@ def test_refresh_load_uses_archive_plus_tail_and_falls_back_on_mismatch(db, tmp_
     import modelroom.archive.store as ST
     monkeypatch.setattr(ST, "from_env", lambda local_root=None: st)
     monkeypatch.setenv("MODELROOM_ARCHIVE_READ", "on")
+    for k in ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"):
+        monkeypatch.setenv(k, "test")                                     # "configured" (the store itself is the local stand-in)
     S._READ.update(bytes=0, rows=0, queries=0)
     mixed = S.load_with_hashes(conn, "nba")
     assert S.bytes_read()["rows"] == 6                                    # only the tail came from Supabase
@@ -217,3 +219,75 @@ def test_refresh_load_uses_archive_plus_tail_and_falls_back_on_mismatch(db, tmp_
     f.write_bytes(b"x" + f.read_bytes()[1:])
     S._READ.update(bytes=0, rows=0, queries=0)
     assert len(S.load_with_hashes(conn, "nba")) == 36 and S.bytes_read()["rows"] == 36
+
+
+def test_check_probe_writes_reads_and_removes_one_object(tmp_path):
+    from modelroom.archive import run as AR
+    st = LocalStore(tmp_path / "b")
+    r = AR.check(st)
+    assert r["ok"] and r["write"] and r["read_back"] and r["deleted"] and r["private"] is None   # local: no privacy probe
+    assert not any((tmp_path / "b").rglob("*.txt"))
+
+
+@pg
+def test_interrupted_archive_recovers_without_duplicates(db, tmp_path, monkeypatch):
+    conn = fill(db)
+    st = LocalStore(tmp_path / "b")
+    real_put = st.put
+    def put_no_manifest(key, body, meta=None):
+        if key.endswith("manifest.json"):
+            raise RuntimeError("runner lost before the manifest was written")
+        return real_put(key, body, meta)
+    monkeypatch.setattr(st, "put", put_no_manifest)
+    with pytest.raises(RuntimeError):
+        odds.archive_table(conn, st, "v1", "reports", "nba")
+    monkeypatch.setattr(st, "put", real_put)
+    r = odds.archive_table(conn, st, "v1", "reports", "nba")             # segments re-written (same keys), manifest saved
+    assert not r["problems"] and len(r["new_segments"]) == 2
+    assert odds.verify_archive(st, "v1", "reports", "nba", conn)["ok"]
+    assert len(list((tmp_path / "b").rglob("*.parquet"))) == 2
+
+
+@pg
+def test_index_rows_recorded_once_in_run_mode(db, tmp_path):
+    import psycopg
+    from modelroom.archive import run as AR
+    c = psycopg.connect(db, autocommit=True)
+    c.execute((MIG / "20261124000100_archive_index.sql").read_text())
+    c.close()
+    conn = fill(db)
+    r = odds.archive_table(conn, LocalStore(tmp_path / "b"), "v1", "reports", "nba")
+    assert AR.record_index(conn, r["index_rows"], "run-1") == {"inserted": 2}
+    assert AR.record_index(conn, r["index_rows"], "run-2") == {"inserted": 0}            # same objects: nothing duplicated
+    rows = conn.cursor().execute("select object_key, rows, sha256 from archive.objects order by seq_first").fetchall()
+    assert [x[1] for x in rows] == [25, 25] and all(len(x[2]) == 64 for x in rows)
+    with pytest.raises(Exception):
+        conn.cursor().execute("delete from archive.objects")                                # append-only
+
+
+@pg
+def test_index_skipped_cleanly_when_table_missing(db):
+    from modelroom.archive import run as AR
+    conn = S.connect(db)
+    assert AR.record_index(conn, [{"dataset": "x"}], None)["inserted"] == 0
+
+
+@pg
+def test_load_command_stdout_is_pure_json_whatever_the_archive_state(db, tmp_path, monkeypatch, capsys):
+    """Regression (2026-11-24 07:28 UTC refresh): with archive reads on but R2 not configured, a note went to stdout and
+    broke the workflow's JSON parsing. The CLI's stdout must be exactly one JSON document in every archive state."""
+    from modelroom import cli
+    fill(db).close()
+    monkeypatch.setenv("MODELROOM_ODDS_DB_URL", db)
+    monkeypatch.setenv("MODELROOM_DATA_DIR", str(tmp_path / "data"))
+    for env in ({"MODELROOM_ARCHIVE_READ": "on"}, {"MODELROOM_ARCHIVE_READ": "on", "R2_ACCOUNT_ID": "x", "R2_ACCESS_KEY_ID": "y",
+                                                  "R2_SECRET_ACCESS_KEY": "z", "R2_BUCKET": "b"}, {"MODELROOM_ARCHIVE_READ": "off"}):
+        for k in ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET"):
+            monkeypatch.delenv(k, raising=False)
+        for k, v in env.items():
+            monkeypatch.setenv(k, v)
+        import modelroom.archive.store as ST
+        monkeypatch.setattr(ST, "from_env", lambda local_root=None: (_ for _ in ()).throw(RuntimeError("unreachable")))
+        assert cli.main(["odds-store", "load", "--league", "nba"]) == 0
+        out = capsys.readouterr().out
+        assert json.loads(out)["action"] == "load"

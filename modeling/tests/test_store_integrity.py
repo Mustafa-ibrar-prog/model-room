@@ -250,3 +250,105 @@ def test_cli_load_sync_reuse_and_report_bytes(db, tmp_path, monkeypatch):
     local = S.local_snapshots(conn, "nba")
     assert len(local) == 36 and S.bytes_read()["bytes"] < 200          # head query only
     assert list(local["snapshot_hash"]) == list(S.load_with_hashes(conn, "nba")["snapshot_hash"])
+
+
+# ------------------------------------------------------------------ invalid checkpoints: never trusted, never overwritten
+@pytest.mark.parametrize("content", ["{not json", '{"reports": {"nba": {"seq": "6", "row_hash": "%s"}}}' % ("a" * 64),
+                                     '{"reports": {"nba": {"seq": 6, "row_hash": "xyz"}}}', '{"reports": {"nba": {"seq": 0, "row_hash": "%s"}}}' % ("a" * 64),
+                                     '{"reports": {"nba": {"seq": true, "row_hash": "%s"}}}' % ("a" * 64), '["a list"]'])
+def test_invalid_checkpoint_fails_safe_and_runs_full_verification(db, content):
+    conn = seed(db)
+    f = S.checkpoint_path(); f.parent.mkdir(parents=True, exist_ok=True); f.write_text(content)
+    res = S.check_and_advance(conn, "reports", "nba", "t")
+    assert res["rows"] == 6 and res["max_seq"] == 6                      # every row was still verified
+    assert not res["ok"] and any("not trusted" in p for p in res["problems"])
+    assert res["checkpoint"]["advanced"] is False and f.read_text() == content   # left exactly as it was
+
+
+def test_checkpoint_beyond_the_table_means_rows_were_removed(db):
+    conn = seed(db)
+    S.advance_checkpoint("reports", "nba", {"ok": True, "rows": 9, "max_seq": 9, "head": "b" * 64}, "t")
+    res = S.check_and_advance(conn, "reports", "nba", "t")
+    assert not res["ok"] and any("rows were removed" in p for p in res["problems"]) and not res["checkpoint"]["advanced"]
+
+
+def test_anchor_history_catches_a_rewrite_with_a_replaced_checkpoint(db, tmp_path):
+    """Rewrite report 2, re-chain everything after it, AND replace the checkpoint file with one matching the forged
+    chain: the current check passes, but a checkpoint committed earlier (git history) does not."""
+    conn = seed(db)
+    S.check_and_advance(conn, "reports", "nba", "t")
+    old = tmp_path / "anchors"; old.mkdir(); (old / "2026-11-23T0600.json").write_text(S.checkpoint_path().read_text())
+    import psycopg
+    c = psycopg.connect(db, autocommit=True); c.execute("set session_replication_role = replica")
+    cur = c.cursor(); cur.execute("select seq, payload from odds.reports where league = 'nba' order by seq")
+    prev = S.GENESIS
+    for seq, payload in cur.fetchall():
+        payload = payload.replace('"report":1', '"report":7') if seq == 2 else payload
+        h = S.chain(prev, payload)
+        c.execute("update odds.reports set payload = %s, prev_hash = %s, row_hash = %s where league = 'nba' and seq = %s", (payload, prev, h, seq))
+        prev = h
+    c.close()
+    S.checkpoint_path().unlink()                                          # the forger replaces the current checkpoint
+    S.check_and_advance(conn, "reports", "nba", "forger")
+    assert S.server_check(conn, "reports", "nba", S.anchor_for(S.read_checkpoints(), "reports", "nba"))["ok"]
+    hist = S.verify_anchor_history(conn, sorted(old.glob("*.json")))
+    assert not hist["ok"] and "carries a different hash" in hist["problems"][0]
+
+
+# ------------------------------------------------------------------ interrupted refreshes
+def test_interrupted_insert_rolls_back_and_the_next_refresh_recovers(db):
+    conn = seed(db)
+    S.check_and_advance(conn, "reports", "nba", "t")
+    before = S.anchor_for(S.read_checkpoints(), "reports", "nba")
+    real = S.canonical
+    calls = {"n": 0}
+    def boom(obj):
+        calls["n"] += 1
+        if calls["n"] == 2:
+            raise RuntimeError("runner lost mid-insert")
+        return real(obj)
+    S.canonical = boom
+    try:
+        with pytest.raises(RuntimeError):
+            S.insert_payloads(conn, "reports", "nba", [("a", {"x": 1}), ("b", {"x": 2})], "t")
+    finally:
+        S.canonical = real
+    after = S.check_and_advance(conn, "reports", "nba", "t")
+    assert after["ok"] and after["rows"] == 6                             # nothing half-written: the transaction rolled back
+    assert S.anchor_for(S.read_checkpoints(), "reports", "nba")["seq"] == before["seq"]
+    assert S.insert_payloads(conn, "reports", "nba", [("a", {"x": 1}), ("b", {"x": 2})], "t")["inserted"] == 2
+    assert S.check_and_advance(conn, "reports", "nba", "t")["checkpoint"]["seq"] == 8
+
+
+def test_rows_written_but_checkpoint_not_saved_is_fine_next_time(db):
+    """The refresh inserted rows, then died before committing the checkpoint (or its commit was reverted): the next
+    check uses the older anchor, verifies everything, and moves forward."""
+    conn = seed(db)
+    S.check_and_advance(conn, "reports", "nba", "t")
+    saved = S.checkpoint_path().read_text()
+    S.insert_payloads(conn, "reports", "nba", [("late", {"x": 1})], "t")
+    S.check_and_advance(conn, "reports", "nba", "t")
+    S.checkpoint_path().write_text(saved)                                 # the commit with the new checkpoint never landed
+    res = S.check_and_advance(conn, "reports", "nba", "t")
+    assert res["ok"] and res["anchor"]["seq"] == 6 and res["checkpoint"]["seq"] == 7
+
+
+# ------------------------------------------------------------------ the daily full verification
+def test_daily_full_verification_command(db, tmp_path, monkeypatch):
+    monkeypatch.setenv("MODELROOM_ODDS_DB_URL", db)
+    seed(db).close()
+    conn = S.connect(db)
+    for t in S.TABLES:
+        S.check_and_advance(conn, t, "nba", "refresh")
+    S._READ.update(bytes=0, rows=0, queries=0)
+    out = S.cmd("verify", "nba")
+    assert out["ok"] and all(out[t]["ok"] and out[t]["anchor"]["ok"] for t in S.TABLES)
+    assert out["bytes_read"]["bytes"] < 2000 and all("elapsed_ms" in out[t] for t in S.TABLES)
+    full = S.cmd("verify-full", "nba")                                     # manual: also recomputed locally
+    assert full["ok"] and all(full[t]["client"]["same_head"] for t in S.TABLES)
+    tamper(db, "update odds.comparisons set payload = payload || ' ' where league = 'nba' and seq = 3")
+    bad = S.cmd("verify", "nba")
+    assert not bad["ok"] and not bad["comparisons"]["ok"]
+    anc = tmp_path / "anc"; anc.mkdir(); (anc / "a.json").write_text(S.checkpoint_path().read_text())
+    monkeypatch.setenv("MODELROOM_ANCHOR_DIR", str(anc))
+    assert S.cmd("verify-anchors", "nba")["ok"]
