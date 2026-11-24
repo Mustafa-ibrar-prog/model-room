@@ -45,6 +45,11 @@ jobs:
       - name: Install
         if: steps.check.outputs.ready == 'yes'
         run: npm ci --ignore-scripts
+      - name: Refuse anything but the TEST Supabase project (fingerprints only)
+        if: steps.check.outputs.ready == 'yes'
+        env:
+          MODELROOM_TEST_PROJECT_FP: ${{ vars.MODELROOM_TEST_PROJECT_FP }}
+        run: node scripts/test-project-guard.mjs
       - name: Check keys, project URL and Auth (prints no secrets)
         if: steps.check.outputs.ready == 'yes'
         run: node scripts/verify-supabase.mjs preflight
@@ -105,6 +110,8 @@ jobs:
           psql "$DB_URL" -v ON_ERROR_STOP=1 -qtAc "select 'scheduler - enabled=' || enabled || ', token stored=' || (exists (select 1 from vault.secrets where name = 'model_room_github_dispatch'))::text || ', last accepted dispatch=' || coalesce(last_accepted::text, 'never') || ', failures 24h=' || failures_24h || ', no-token notes 24h=' || no_token_notes_24h from scheduler.health"
       - name: Create the test accounts
         if: steps.check.outputs.ready == 'yes'
+        env:
+          MODELROOM_TEST_PROJECT_FP: ${{ vars.MODELROOM_TEST_PROJECT_FP }}
         run: node scripts/seed-test-accounts.mjs
       - name: Check the test accounts sign in with the right plans
         if: steps.check.outputs.ready == 'yes'
@@ -114,3 +121,21 @@ jobs:
         # Read-only (rolled back). Fails if RLS is off anywhere, anon has any access to account tables,
         # signed-in users can write plans, or a signed-in user can see anyone else's membership.
         run: psql "$DB_URL" -v ON_ERROR_STOP=1 -qtA -f scripts/check-rls.sql
+
+  # The same password, through the real TEST SITE: proves the site's Vercel settings, this project and the
+  # TEST_ACCOUNT_PASSWORD secret all agree, so provisioning can't "pass" while the site's logins are broken.
+  site-login:
+    needs: setup
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PREVIEW_URL: https://model-room-git-preview-computer-citi.vercel.app
+      TEST_ACCOUNT_PASSWORD: ${{ secrets.TEST_ACCOUNT_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts && npx playwright install --with-deps chromium
+      - name: Each test account logs in on the TEST site with the right plan
+        run: node e2e/preview-accounts.mjs

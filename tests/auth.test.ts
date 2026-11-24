@@ -1,6 +1,6 @@
 /** Login rules that don't need a live Supabase project. */
 import { afterEach, describe, expect, it } from "vitest";
-import { authEnabled, isProduction, isTestAccount, safeNext } from "@/lib/auth-config";
+import { authEnabled, isProduction, isTestAccount, passwordChangeAllowed, safeNext } from "@/lib/auth-config";
 
 const ENV = { ...process.env };
 afterEach(() => {
@@ -49,5 +49,14 @@ describe("plan switcher", () => {
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     process.env.VERCEL_ENV = "production";
     expect(isTierPreviewEnabled()).toBe(false);
+  });
+});
+
+describe("test-account passwords stay in sync", () => {
+  it("the site never resets or changes a test account's password; customers can", () => {
+    expect(passwordChangeAllowed("pro-test@modelroom.test")).toBe(false);
+    expect(passwordChangeAllowed("Free-Test@ModelRoom.TEST")).toBe(false);
+    expect(passwordChangeAllowed("fan@example.com")).toBe(true);
+    expect(passwordChangeAllowed(null)).toBe(true);
   });
 });

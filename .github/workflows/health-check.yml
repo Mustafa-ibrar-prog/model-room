@@ -91,13 +91,36 @@ jobs:
             echo '{"ok": false, "error": "scheduler.health could not be read"}' > /tmp/supabase.json
           fi
 
+      - name: Supabase API (Auth) health, as logins see it (no secrets printed)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, re, urllib.request, urllib.error
+          url, key = os.environ.get("SUPABASE_URL", "").rstrip("/"), os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+          out = {"status": None, "reason": None}
+          if url and key:
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(url + "/auth/v1/health", headers={"apikey": key}), timeout=20) as r:
+                      out["status"] = r.status
+              except urllib.error.HTTPError as e:
+                  out["status"] = e.code
+                  if e.code == 402:
+                      m = re.search(r"\b(?:exceed_[a-z_]{1,40}_quota|overdue_payment)\b", e.read().decode("utf-8", "replace"))
+                      out["reason"] = m.group(0) if m else None
+              except Exception as e:
+                  out["error"] = type(e).__name__
+          json.dump(out, open("/tmp/auth.json", "w")); print("auth health:", out)
+          EOF
+
       - name: Evaluate and alert
         env:
           GITHUB_TOKEN: ${{ github.token }}
           DRY: ${{ github.event.inputs.dry_run || 'false' }}
           SIM: ${{ github.event.inputs.simulate || '' }}
         run: |
-          args="--status /tmp/status.json --runs /tmp/runs.json --supabase /tmp/supabase.json"
+          args="--status /tmp/status.json --runs /tmp/runs.json --supabase /tmp/supabase.json --auth /tmp/auth.json"
           [ "$DRY" = "true" ] || args="$args --apply"
           [ -z "$SIM" ] || args="$args --simulate $(echo "$SIM" | tr -cd 'a-z0-9-' | head -c 40)"
           python3 modeling/modelroom/health.py $args

@@ -4,6 +4,10 @@ name: Preview logins
 
 on:
   workflow_dispatch: {}
+  # Daily, so a broken login (changed secret, changed Vercel setting, Supabase restriction) shows up within a day
+  # even when nothing was pushed. 1:41 PM PT (21:41 UTC).
+  schedule:
+    - cron: "41 21 * * *"
   workflow_run:
     workflows: ["Preview"]
     types: [completed]
@@ -19,7 +23,7 @@ concurrency:
 jobs:
   e2e:
     # Scheduled / Supabase-dispatched Preview runs check every few minutes and usually deploy nothing: test after pushes.
-    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:

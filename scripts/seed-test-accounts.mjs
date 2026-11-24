@@ -7,6 +7,7 @@
 // Run by .github/workflows/supabase-preview.yml. Safe to re-run: existing accounts get their password and
 // plan reset to the starting state.
 import { createClient } from "@supabase/supabase-js";
+import { checkTestProject, DEFAULT_TEST_PROJECT_FP } from "./test-project-guard.mjs";
 
 const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, TEST_ACCOUNT_PASSWORD, MODELROOM_TARGET, VERCEL_ENV, MODELROOM_ENV } = process.env;
 if (MODELROOM_TARGET !== "preview" || VERCEL_ENV === "production" || MODELROOM_ENV === "production") {
@@ -18,6 +19,14 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !TEST_ACCOUNT_PASSWORD) {
   process.exit(1);
 }
 
+// Only the TEST project, ever: a production or customer project is refused before any account is touched.
+const projectProblems = checkTestProject({ url: SUPABASE_URL, expected: (process.env.MODELROOM_TEST_PROJECT_FP || DEFAULT_TEST_PROJECT_FP).trim() });
+if (projectProblems.length) {
+  console.error(`Refusing: ${projectProblems.join("; ")}.`);
+  process.exit(1);
+}
+
+const TEST_DOMAIN = "@modelroom.test";
 const ACCOUNTS = [
   { email: "free-test@modelroom.test", tier: null },
   { email: "plus-test@modelroom.test", tier: "plus" },
@@ -36,8 +45,12 @@ async function findUser(email) {
   return null;
 }
 
+// Only these three exact @modelroom.test addresses are ever created or reset; no other account is read or changed.
+if (!ACCOUNTS.every((a) => a.email.endsWith(TEST_DOMAIN))) { console.error("Refusing: a non-test address is in the list."); process.exit(1); }
+
 for (const a of ACCOUNTS) {
   let user = await findUser(a.email);
+  if (user && (user.email ?? "").toLowerCase() !== a.email) { console.error("Refusing: account lookup returned a different address."); process.exit(1); }
   if (user) {
     const { error } = await db.auth.admin.updateUserById(user.id, { password: TEST_ACCOUNT_PASSWORD, email_confirm: true });
     if (error) throw error;

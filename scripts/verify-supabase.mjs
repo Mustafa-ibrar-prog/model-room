@@ -46,7 +46,12 @@ const base = url.origin;
 
 if (mode === "preflight") {
   const h = await fetch(`${base}/auth/v1/health`, { headers: { apikey: KEY } });
-  h.ok ? ok("Auth service reachable with this key") : bad(`Auth health returned HTTP ${h.status}`);
+  if (h.ok) ok("Auth service reachable with this key");
+  else {
+    // 402 = Supabase service restriction (usage over the plan's quota, or an overdue bill): every sign-in fails.
+    const reason = h.status === 402 ? (/\b(?:exceed_[a-z_]{1,40}_quota|overdue_payment)\b/.exec(await h.text())?.[0] ?? "reason not given") : null;
+    bad(reason ? `Supabase has RESTRICTED this project (HTTP 402: ${reason}). Logins fail until usage is back under quota or the bill is paid; resetting passwords will not help` : `Auth health returned HTTP ${h.status}`);
+  }
   const s = await fetch(`${base}/auth/v1/settings`, { headers: { apikey: KEY } });
   if (s.ok) {
     const j = await s.json();
