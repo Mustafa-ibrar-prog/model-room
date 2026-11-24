@@ -70,3 +70,12 @@ def test_plan_opens_updates_closes_without_duplicates():
 def test_body_has_no_secret_fields():
     b = H.body_of({"key": "k", "title": "t", "detail": "d"}, NOW, H.summary_of(NOW, OK_STATUS, OK_RUNS, OK_SUPA))
     assert "token_stored" in b and "github_pat" not in b and "postgres" not in b.lower()
+
+
+def test_supabase_api_restriction_is_an_incident():
+    assert H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, {"status": 200, "reason": None}) == []
+    inc = H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, {"status": 402, "reason": "exceed_db_size_quota"})
+    assert keys(inc) == ["supabase-api"]
+    assert "HTTP 402: exceed_db_size_quota" in inc[0]["detail"] and "resetting passwords will not help" in inc[0]["detail"]
+    assert keys(H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, {"status": None})) == ["supabase-api"]
+    assert H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, None) == []          # no probe = old behaviour

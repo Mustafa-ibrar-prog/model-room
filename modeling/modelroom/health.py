@@ -3,6 +3,7 @@
 Inputs (all read-only, no secrets in any of them):
   status.json    refresh_plan.py status, recomputed now from the refresh log + game times (missed slots, last success)
   runs.json      GitHub Actions runs of the Preview workflow in the last 24 h (REST API)
+  auth.json      optional: {"status": <HTTP status of GET /auth/v1/health>, "reason": <402 restriction token or null>}
   supabase.json  one row of scheduler.health (last dispatch / last accepted, failures, token present yes/no), or
                  {"ok": false} if the database couldn't be reached
 
@@ -14,6 +15,8 @@ Incidents (one GitHub issue per incident type, label "health-alert"):
   supabase-dispatch   the scheduler is off, has no token, logged dispatch failures, or hasn't had a dispatch
                       accepted by GitHub in the last 20 minutes
   supabase-unreachable  the health view couldn't be read
+  supabase-api        Supabase's API (Auth) answered with an error, e.g. HTTP 402 = project restricted for going over
+                      its plan's quota or an overdue bill: every login fails while the database still looks fine
 
 No duplicate alerts: an incident that is already open only has its issue body refreshed (an edit, which sends no
 notification); a new issue is opened only for an incident type with no open issue; an open issue whose incident has
@@ -45,8 +48,17 @@ def _ts(s: str | None) -> datetime | None:
     return t if t.tzinfo else t.replace(tzinfo=UTC)
 
 
-def evaluate(now: datetime, status: dict, runs: list[dict], supa: dict) -> list[dict]:
+def evaluate(now: datetime, status: dict, runs: list[dict], supa: dict, auth: dict | None = None) -> list[dict]:
     out = []
+    if auth is not None and auth.get("status") != 200:
+        st = auth.get("status")
+        if st == 402:
+            detail = (f"Supabase has restricted the TEST project (HTTP 402: {auth.get('reason') or 'reason not given'}). Every login on the "
+                      "TEST site fails until usage is back under the plan's quota or the bill is paid; resetting passwords will not help. "
+                      "Check Supabase → Organization → Usage.")
+        else:
+            detail = f"Supabase's Auth API health check answered {st if st is not None else 'nothing (unreachable)'}; logins on the TEST site may fail."
+        out.append({"key": "supabase-api", "title": "Supabase API is restricted or failing (logins affected)", "detail": detail})
     last = _ts((status.get("last_success") or {}).get("at"))
     if last is None or now - last > STALE_AFTER:
         age = "never" if last is None else f"{(now - last).total_seconds() / 3600:.1f} h ago"
@@ -184,6 +196,7 @@ def main(argv=None) -> int:
     ap.add_argument("--status", required=True)
     ap.add_argument("--runs", required=True)
     ap.add_argument("--supabase", required=True)
+    ap.add_argument("--auth", default="", help="auth.json from the Auth API probe (optional)")
     ap.add_argument("--now")
     ap.add_argument("--apply", action="store_true", help="open / update / close issues (default: dry run, print only)")
     ap.add_argument("--simulate", default="", help="add a synthetic incident with this key (alert-path test)")
@@ -192,7 +205,8 @@ def main(argv=None) -> int:
     status = json.load(open(a.status))
     runs = json.load(open(a.runs))
     supa = json.load(open(a.supabase))
-    inc = evaluate(now, status, runs, supa)
+    auth = json.load(open(a.auth)) if a.auth and os.path.exists(a.auth) else None
+    inc = evaluate(now, status, runs, supa, auth)
     if a.simulate:
         inc.append({"key": f"test-{a.simulate}", "title": "TEST alert (simulated, not a real problem)",
                     "detail": f"Simulated incident '{a.simulate}' to test the alert path. It closes on the next normal run."})

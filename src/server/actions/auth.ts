@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { authEnabled, isProduction, isTestAccount, safeNext } from "@/lib/auth-config";
+import { authEnabled, isProduction, isTestAccount, passwordChangeAllowed, safeNext } from "@/lib/auth-config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { supabaseUrl } from "@/lib/supabase/keys";
 import { projectRef, signinErrorMessage, signinLogLine } from "@/lib/auth-diag";
@@ -78,7 +78,8 @@ export async function requestPasswordReset(_: AuthState, form: FormData): Promis
   const supabase = await client();
   if (!supabase) return { error: "Password reset isn't set up on this site yet." };
   const origin = await siteOrigin();
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/auth/callback?next=/reset-password` });
+  // Test-account passwords are managed by the setup workflow only; the answer below is the same either way.
+  if (passwordChangeAllowed(email)) await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/auth/callback?next=/reset-password` });
   // Same answer whether or not the address has an account, so the form can't be used to find accounts.
   return { message: "If that address has an account, a reset link is on its way." };
 }
@@ -90,6 +91,7 @@ export async function updatePassword(_: AuthState, form: FormData): Promise<Auth
   if (!supabase) return { error: "Sign-in isn't set up on this site yet." };
   const { data } = await supabase.auth.getUser();
   if (!data.user) return { error: "Your reset link has expired. Request a new one." };
+  if (!passwordChangeAllowed(data.user.email)) return { error: "Test account passwords are managed by the test-site setup and can't be changed here." };
   const { error } = await supabase.auth.updateUser({ password });
   if (error) return { error: error.message };
   redirect("/account?updated=1");
