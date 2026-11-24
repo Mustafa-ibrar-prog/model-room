@@ -10,6 +10,8 @@ import { publishedDir } from "@/server/engine/board";
 import { livePropPick, potdLiveStatus, type LiveResult } from "@/server/markets/potdLive";
 import { MIN_EDGE, MIN_PROB, RELIABILITY, S1U, TOP_N, type LivePropPick } from "@/server/markets/potdPick";
 import { mainConcern } from "@/lib/potdConcern";
+import type { HistFile } from "@/lib/potdHistory";
+import { ResultsDashboard } from "@/components/potd/ResultsDashboard";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -81,8 +83,18 @@ export default function PickOfTheDayPage() {
   );
 }
 
+/** Results dashboard data: every recorded pick and its grade (built from the append-only ledgers by the refresh). */
+async function loadHistory(): Promise<HistFile | null> {
+  try {
+    return JSON.parse(await readFile(path.join(publishedDir(), "potd_history.json"), "utf8")) as HistFile;
+  } catch {
+    return null;
+  }
+}
+
 async function Body() {
   const f = await load();                                  // load() awaits connection(): request time before any clock read
+  const hist = await loadHistory();
   const live = await livePropPick();
   const status = potdLiveStatus();
   const today = f?.today?.nba ?? null;
@@ -92,7 +104,7 @@ async function Body() {
         Unvalidated. Model Room hasn&apos;t shown an edge against the market yet. These are the top-ranked NBA props that qualify under the model&apos;s rules, not guaranteed results and not betting advice.
       </p>
       {live ? <LiveCard r={live} /> : f ? <PickCard p={today} liveOff={status.on ? null : status.reason} /> : <Unavailable title="Not built yet" body="Today's Pick of the Day appears after the next refresh." />}
-      {f ? <History f={f} /> : null}
+      {hist ? <ResultsDashboard f={hist} /> : f ? <History f={f} /> : null}
       <Rules />
     </div>
   );

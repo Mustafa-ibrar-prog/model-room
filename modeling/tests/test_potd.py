@@ -162,3 +162,61 @@ def test_player_logs_this_and_last_season_for_board_players_only():
     out = potd.player_logs(BOARD, pg)
     assert out["seasons"] == [2026, 2027] and set(out["players"]) == {"p1"}
     assert out["players"]["p1"]["2027"]["rebounds"] == [8] and out["players"]["p1"]["2026"]["rebounds"] == [12]
+
+
+# ------------------------------------------------------------------ results dashboard file (2026-11-24)
+def _pk(date, key, game_start="2026-11-22T03:00:00+00:00", **kw):
+    return {"pick_key": key, "date": date, "league": "nba", "status": "pick", "market": "prop", "player": "A", "player_id": "p1",
+            "team": "PHI", "home": "PHI", "away": "BOS", "stat": "points", "selection": "over", "line": 20.5, "projection": 23.0,
+            "model_prob": 0.6, "model_version": "0.2.0", "selected_at": "2026-11-21T15:00:00+00:00", "game_start": game_start, **kw}
+
+
+def test_history_counts_only_recorded_picks_and_excludes_push_void_pending_from_win_rate():
+    picks = [_pk("2026-11-21", "k1"), _pk("2026-11-21", "k2"), _pk("2026-11-21", "k3"), _pk("2026-11-21", "k4"), _pk("2026-11-22", "k5"),
+             {"pick_key": "potd:nba:2026-11-23", "date": "2026-11-23", "league": "nba", "status": "no_pick", "reason": "no approved player-prop line source"},
+             {"pick_key": "potd:nfl:2026-11-19", "date": "2026-11-19", "league": "nfl", "status": "pick", "market": "spread"},
+             {"pick_key": "old", "date": "2026-11-18", "league": "nba", "status": "pick", "market": "spread"}]
+    grades = {"k1": {"result": "hit", "generated_at": "x", "actual": 25.0}, "k2": {"result": "miss", "actual": 12.0, "graded_at": "y"},
+              "k3": {"result": "push"}, "k4": {"result": "void"}}
+    h = potd.history(picks, grades, NOW)
+    s = h["summary"]
+    assert (s["win"], s["loss"], s["push"], s["void"], s["pending"], s["settled"]) == (1, 1, 1, 1, 1, 2)
+    assert s["win_rate"] == 0.5 and s["validated"] is False and s["unvalidated_until"] == 100
+    assert {p["pick_key"] for p in h["picks"]} == {"k1", "k2", "k3", "k4", "k5"}           # no NFL, no pre-props game line
+    assert [d["date"] for d in h["days"]] == ["2026-11-23", "2026-11-22", "2026-11-21", "2026-11-18"]
+    assert h["days"][0] == {"date": "2026-11-23", "picks": 0, "reason": "no approved player-prop line source"}
+    k1 = next(p for p in h["picks"] if p["pick_key"] == "k1")
+    assert k1["result"] == "win" and k1["grade"]["actual"] == 25.0 and k1["frozen_before_start"] is True
+
+
+def test_history_of_an_empty_record_is_zero_zero():
+    h = potd.history([{"pick_key": "potd:nba:2026-11-24", "date": "2026-11-24", "league": "nba", "status": "no_pick", "reason": "r"}], {}, NOW)
+    assert h["summary"]["settled"] == 0 and h["summary"]["win_rate"] is None and h["picks"] == [] and h["days"][0]["reason"] == "r"
+
+
+def test_settle_ready_waits_for_the_grade_delay():
+    p = {"game_start": "2026-11-22T03:00:00+00:00"}
+    assert not potd.settle_ready(p, datetime(2026, 11, 22, 8, 29, tzinfo=timezone.utc))
+    assert potd.settle_ready(p, datetime(2026, 11, 22, 8, 30, tzinfo=timezone.utc))
+    assert not potd.settle_ready({}, NOW)
+
+
+def test_run_writes_grade_source_and_history(tmp_path, monkeypatch):
+    monkeypatch.setenv("MODELROOM_LEDGER_DIR", str(tmp_path)); monkeypatch.setenv("MODELROOM_DATA_DIR", str(tmp_path / "data"))
+    from modelroom import history as H
+    from modelroom import published as PUB
+    state = {"games": _games(), "lines": [_q(line=59.5)]}
+    monkeypatch.setattr(H, "_games_table", lambda lg: state["games"])
+    monkeypatch.setattr(H, "_pregame", lambda recs: {"k": {**PREC, "nba_game_id": "G1"}})
+    monkeypatch.setattr(PUB, "is_published", lambda lg, r: True)
+    monkeypatch.setattr(H, "_player_stats", lambda lg: ({("G1", "p1"): {"pts": 72.0}}, {"points": "pts"}, {}))
+    monkeypatch.setitem(potd.PROP_LINE_SOURCES, "test", lambda lg, now: state["lines"])
+    potd.run(("nba",), now=NOW)
+    state["games"] = _games("final")
+    out = potd.run(("nba",), now=datetime(2026, 11, 23, 0, 0, tzinfo=timezone.utc))          # 2.6 h after tip-off: too early
+    assert out["graded"] == 0
+    potd.run(("nba",), now=datetime(2026, 11, 23, 9, 0, tzinfo=timezone.utc))
+    g = potd.read_grades()["potd:nba:2026-11-22"]
+    assert g["result"] == "hit" and g["actual"] == 72.0 and "hoopR" in g["result_source"] and g["graded_at"].startswith("2026-11-23T09")
+    h = json.loads((tmp_path / "data" / "published" / "potd_history.json").read_text())
+    assert h["summary"]["win"] == 1 and h["picks"][0]["grade"]["actual"] == 72.0
