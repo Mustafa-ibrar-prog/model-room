@@ -1,0 +1,73 @@
+name: DunkAPI connection check (manual, one request)
+
+# One-off connection check for the DunkAPI free plan (Moose, 2026-11-24). Manual only: makes exactly ONE request,
+# POST /v1/get_standings (2 credits). Not used by Model Room; nothing is stored or published. The key comes from the
+# DUNKAPI_API_KEY secret, is sent only in the x-api-key header, and is never printed (GitHub also masks it). The step
+# fails instead of calling the API if the secret is missing.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dunkapi-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret present (name only, never the value)
+        env:
+          KEY: ${{ secrets.DUNKAPI_API_KEY }}
+        run: |
+          if [ -n "$KEY" ]; then echo "DUNKAPI_API_KEY: present (${#KEY} characters)"; else echo "::error::DUNKAPI_API_KEY is missing"; exit 1; fi
+          git grep -qF -- "$KEY" && { echo "::error::the key's value appears in the repository source"; exit 1; } || echo "key value in repository source: no"
+      - name: One request to get_standings (2 credits)
+        env:
+          KEY: ${{ secrets.DUNKAPI_API_KEY }}
+        run: |
+          code=$(curl -sS -o /tmp/body.json -D /tmp/headers.txt -w '%{http_code}' --max-time 30 \
+            -X POST https://mcp.dunkapi.com/v1/get_standings \
+            -H "x-api-key: $KEY" -H "Content-Type: application/json" -d '{"season": 2026}')
+          echo "HTTP status: $code"
+          echo "Credit-related response headers:"
+          grep -iE '^(x-)?(credit|ratelimit|remaining|usage|quota)[^:]*:' /tmp/headers.txt | tr -d '\r' || echo "  (none)"
+          python3 - "$KEY" <<'EOF'
+          import json, sys
+          key = sys.argv[1]
+          raw = open("/tmp/body.json", encoding="utf-8", errors="replace").read()
+          print("key value echoed in response:", "YES" if key and key in raw else "no")
+          try:
+              d = json.loads(raw)
+          except Exception:
+              print("response is not JSON; first 300 chars:", raw[:300].replace(key, "***") if key else raw[:300]); sys.exit(0)
+          def walk(x, path=""):
+              if isinstance(x, dict):
+                  for k, v in x.items():
+                      if any(w in k.lower() for w in ("credit", "remaining", "usage", "quota", "balance")) and not isinstance(v, (dict, list)):
+                          print(f"credit field {path}{k}: {v}")
+                      walk(v, f"{path}{k}.")
+              elif isinstance(x, list) and x:
+                  walk(x[0], path + "[0].")
+          print("top-level keys:", list(d)[:15] if isinstance(d, dict) else type(d).__name__)
+          walk(d)
+          rows = []
+          def find_teams(x):
+              if isinstance(x, list) and x and isinstance(x[0], dict) and any(k in x[0] for k in ("wins", "w", "win", "team", "team_name", "teamName")):
+                  rows.extend(x); return
+              if isinstance(x, dict):
+                  for v in x.values(): find_teams(v)
+              elif isinstance(x, list):
+                  for v in x: find_teams(v)
+          find_teams(d)
+          print("team rows found:", len(rows))
+          for r in rows[:3]:
+              print("  sample:", json.dumps({k: r[k] for k in list(r)[:8]}, default=str)[:300])
+          if isinstance(d, dict) and d.get("error"):
+              print("error from API:", str(d.get("error"))[:300])
+          EOF
+          [ "$code" = 200 ]
