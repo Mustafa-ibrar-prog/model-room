@@ -293,7 +293,9 @@ def _odds_store(args) -> int:
     from modelroom.sources import odds_store as OS
     res = OS.cmd(args.cmd, args.league, path=args.path, batch=args.batch)
     print(_json.dumps(res, indent=1, default=str))
-    v = res.get("verify") if args.cmd != "verify" else res
+    if args.cmd == "load":
+        return 0  # an integrity problem is reported (workflow warning) but never stops the refresh from using its lines
+    v = res.get("verify") if args.cmd not in ("verify", "verify-full") else res
     return 0 if (v is None or v.get("ok", True)) else 1
 
 
@@ -327,7 +329,7 @@ def main(argv: list[str] | None = None) -> int:
 
     sub.add_parser("ledger").add_argument("cmd", choices=["verify"])
     os_ = sub.add_parser("odds-store", help="sportsbook snapshots <-> append-only Supabase table (TEST)")
-    os_.add_argument("cmd", choices=["load", "sync", "verify", "import"])
+    os_.add_argument("cmd", choices=["load", "sync", "verify", "verify-full", "import"])
     os_.add_argument("--league", required=True, choices=["nba", "nfl"])
     os_.add_argument("--path", default=None)
     os_.add_argument("--batch", default=None)

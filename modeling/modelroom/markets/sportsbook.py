@@ -26,6 +26,7 @@ Labels, always:
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 from datetime import datetime, timezone
@@ -466,6 +467,38 @@ def _sigmas(league: str) -> dict:
     return out
 
 
+def _digest(obj) -> str:
+    return hashlib.sha256(json.dumps(obj, sort_keys=True, default=str, separators=(",", ":")).encode()).hexdigest()
+
+
+def analysis_signature(league: str, snaps: pd.DataFrame, recs: list[dict], finals: dict, sched: pd.DataFrame,
+                       sigmas: dict, usage: list[dict]) -> str:
+    """Everything the analysis reads, reduced to one hash. Equal signature = the comparisons and report would come out
+    the same, so the run is skipped. Changes that count: a new snapshot (chain head), a game result, a pre-game
+    prediction recorded before the latest stored line (later ones can't pair with any stored line), a schedule time,
+    the sigmas, the Odds API usage log, the month, or this module's code."""
+    head = str(snaps["snapshot_hash"].iloc[-1]) if len(snaps) and "snapshot_hash" in snaps.columns else "empty"
+    last_line = pd.to_datetime(snaps["collected_at"], utc=True, errors="coerce").max() if len(snaps) else None
+    relevant = [r for r in recs if r.get("generated_at") and r.get("game_start") and r["generated_at"] < r["game_start"]
+                and last_line is not None and pd.Timestamp(r["generated_at"]) < last_line]
+    schedule = sorted(zip(sched["game_id"].astype(str), sched["start_time"].astype(str))) if len(sched) else []
+    code = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    return _digest({"v": 1, "league": league, "snapshots_head": head, "predictions": _digest(relevant), "finals": _digest(sorted(finals.items())),
+                    "schedule": _digest(schedule), "sigmas": sigmas, "usage": _digest(usage),
+                    "month": datetime.now(timezone.utc).strftime("%Y-%m"), "code": code})
+
+
+def record_analysis(league: str, signature: str) -> None:
+    """Remember what the last stored report was built from (in store_checkpoints.json, beside the chain anchors)."""
+    from modelroom.sources import odds_store as S
+
+    cps = S.read_checkpoints()
+    cps.setdefault("analysis", {})[league] = {"signature": signature, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}
+    f = S.checkpoint_path()
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_text(json.dumps(cps, indent=1, sort_keys=True))
+
+
 def run(league: str, write_store: bool = True) -> dict:
     import os
 
@@ -477,7 +510,7 @@ def run(league: str, write_store: bool = True) -> dict:
 
     conn = S.connect()
     try:
-        snaps = S.load_with_hashes(conn, league)
+        snaps = S.local_snapshots(conn, league)          # this refresh's copy from `odds-store load`; no second download
         recs = ledger.read(ledger_path(league))
         games = _games_table(league)
         fin = games[games["status"] == "final"]
@@ -488,6 +521,17 @@ def run(league: str, write_store: bool = True) -> dict:
         if up.exists():
             usage = [json.loads(x) for x in up.read_text().splitlines() if x.strip()]
             usage = [u for u in usage if (u.get("league") == league)]
+        sig = analysis_signature(league, snaps, recs, finals, sched, _sigmas(league), usage)
+        last = (S.read_checkpoints().get("analysis") or {}).get(league) or {}
+        if write_store and last.get("signature") == sig:
+            # Nothing the analysis depends on changed since the last stored report: no new comparisons or report
+            # (they would be identical). The chains are still verified in full, inside the database.
+            chk = {t: S.check_and_advance(conn, t, league, "refresh (analysis skipped)") for t in S.TABLES}
+            res = {"league": league, "skipped": "no new snapshots, finals, predictions or schedule changes since the last report",
+                   "comparisons": chk["comparisons"]["rows"], "new_comparisons": 0, "report_stored": 0,
+                   "snapshots_chain_ok": chk["snapshots"]["ok"], "comparisons_chain_ok": chk["comparisons"]["ok"],
+                   "reports_chain_ok": chk["reports"]["ok"], "last_report_at": last.get("at"), "bytes_read": S.bytes_read()}
+            return res
         public, private, C = analyse(league, snaps, recs, _sigmas(league), finals, sched, usage)
         res = {"league": league, "comparisons": len(C)}
         public.setdefault("accumulation", {})
@@ -495,10 +539,14 @@ def run(league: str, write_store: bool = True) -> dict:
             run_id = os.environ.get("GITHUB_RUN_ID") or datetime.now(timezone.utc).strftime("local-%Y%m%dT%H%M%S")
             r1 = S.insert_payloads(conn, "comparisons", league, [(comparison_key(c), c) for c in C], "analysis", run_id)
             r2 = S.insert_payloads(conn, "reports", league, [(f"{run_id}|{league}|{public['generated_at']}", private)], "analysis", run_id)
-            v1, v2 = S.verify_table(conn, "comparisons", league), S.verify_table(conn, "reports", league)
+            # full chain checks computed in the database (every row's hash, link and seq; nothing downloaded)
+            v1 = S.check_and_advance(conn, "comparisons", league, "refresh analysis")
+            v2 = S.check_and_advance(conn, "reports", league, "refresh analysis")
+            v0 = S.check_and_advance(conn, "snapshots", league, "refresh analysis")
+            heads_ok = (not r1["inserted"] or v1["head"] == r1["head"]["row_hash"]) and (not r2["inserted"] or v2["head"] == r2["head"]["row_hash"])
             public["accumulation"]["stored_comparisons"] = v1["rows"]
-            public["storage_verification"] = {"comparisons_chain_ok": v1["ok"], "reports_chain_ok": v2["ok"],
-                                              "snapshots_chain_ok": S.verify(conn, league)["ok"],
+            public["storage_verification"] = {"comparisons_chain_ok": v1["ok"] and heads_ok, "reports_chain_ok": v2["ok"] and heads_ok,
+                                              "snapshots_chain_ok": v0["ok"],
                                               "_expected_comparisons": len({comparison_key(c) for c in C})}
             res.update(new_comparisons=r1["inserted"], report_stored=r2["inserted"], **public["storage_verification"])
     finally:
@@ -512,9 +560,11 @@ def run(league: str, write_store: bool = True) -> dict:
         sv["persisted"] = bool(persisted)
         sv.pop("_expected_comparisons", None)
         public["accumulation"]["stored_comparisons"] = after["comparisons"]["rows"]
-        res.update(persisted=sv["persisted"], after_reconnect=sv["after_reconnect"])
+        res.update(persisted=sv["persisted"], after_reconnect=sv["after_reconnect"], bytes_read=S.bytes_read())
         if not persisted:
             print(f"::warning::{league} sportsbook analysis: records did not persist after the connection closed", flush=True)
+        elif all(v["ok"] for v in after.values()):
+            record_analysis(league, sig)
     if not write_store:
         res["dry_run"] = True
         res["public_report"] = public

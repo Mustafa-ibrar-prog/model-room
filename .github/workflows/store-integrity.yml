@@ -1,0 +1,89 @@
+name: Store integrity (daily, test site)
+
+# Complete historical integrity check of the private sportsbook store (odds.snapshots, odds.comparisons, odds.reports),
+# both leagues, once a day (Moose, 2026-11-23). The database recomputes sha256(prev_hash || payload) for EVERY row,
+# every link, that seq runs 1..n with nothing missing or reordered, every content key and typed copy (snapshots), and
+# that the row at each verified checkpoint (preview-ledger/reports/store_checkpoints.json on the preview branch) still
+# carries exactly the recorded hash. Only counts and hashes come back (a few KB), never payloads. Read-only: no
+# checkpoint is written here. A failure fails the run and opens (or comments on) a "Store integrity" issue.
+# Manual runs can choose "full" to ALSO download every row and recompute it locally (about 0.5 GB of transfer).
+on:
+  schedule:
+    - cron: "37 11 * * *"   # 3:37 AM PT, between refreshes
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "verify (in the database, a few KB) or verify-full (also downloads everything: ~0.5 GB)"
+        default: verify
+        type: choice
+        options: [verify, verify-full]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: store-integrity
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: modeling
+    env:
+      MODELROOM_LEDGER_DIR: ${{ github.workspace }}/modeling/integrity-anchor
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . "psycopg[binary]"
+      - name: Checkpoints from the preview branch (hashes and counts only)
+        run: |
+          mkdir -p "$MODELROOM_LEDGER_DIR/reports"
+          git fetch -q origin preview
+          git show origin/preview:modeling/preview-ledger/reports/store_checkpoints.json > "$MODELROOM_LEDGER_DIR/reports/store_checkpoints.json" 2>/dev/null \
+            && echo "checkpoints found" || { echo "no checkpoints yet: chains are checked from genesis without an anchor"; rm -f "$MODELROOM_LEDGER_DIR/reports/store_checkpoints.json"; }
+      - name: Connect to the store (nothing printed)
+        working-directory: .
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+      - name: Verify every chain, both leagues
+        id: v
+        run: |
+          [ "${ODDS_STORE:-off}" = on ] || { echo "::error::store not reachable"; exit 1; }
+          mode="${{ github.event.inputs.mode || 'verify' }}"
+          fail=0
+          for lg in nba nfl; do
+            python -m modelroom odds-store $mode --league $lg > /tmp/v_$lg.json || fail=1
+            python3 - "$lg" <<'EOF'
+          import json, sys
+          lg = sys.argv[1]; d = json.load(open(f"/tmp/v_{lg}.json"))
+          for t in ("snapshots", "comparisons", "reports"):
+              v = d.get(t, {})
+              a = v.get("anchor") or {}
+              print(f"{lg} {t}: rows={v.get('rows')} ok={v.get('ok')} anchor_seq={a.get('seq')} anchor_ok={a.get('ok')}"
+                    + (f" client_ok={v['client']['ok']}" if 'client' in v else ""))
+              for p in v.get("problems") or []:
+                  print(f"::error::{lg} {t}: {p}")
+          print(f"{lg} bytes read: {d.get('bytes_read', {}).get('bytes')}")
+          EOF
+          done
+          echo "fail=$fail" >> "$GITHUB_OUTPUT"
+          [ $fail = 0 ]
+      - name: Open an issue on failure
+        if: failure()
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          n=$(gh issue list --state open --search "Store integrity check failed in:title" --json number -q '.[0].number')
+          body="The daily integrity check of the private sportsbook store failed or could not run: $url"
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "Store integrity check failed" --body "$body"; fi

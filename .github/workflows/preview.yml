@@ -231,11 +231,12 @@ jobs:
             [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || { echo "$lg lines skipped: $lg data not ready"; continue; }
             mkdir -p data/processed/$lg
             if [ "${ODDS_STORE:-off}" = on ] && python -m modelroom odds-store load --league $lg > /tmp/odds_load_$lg.json; then
-              python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); print('$lg snapshots loaded from the store:', d['rows'])"
+              python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); v=d['verify']; print('$lg snapshots loaded from the store:', d['rows'], '| chain ok:', v['ok'], '| store bytes read:', d['bytes_read']['bytes'])"
+              python3 -c "import json; v=json.load(open('/tmp/odds_load_$lg.json'))['verify']; v['ok'] or print('::warning::$lg odds.snapshots integrity check failed:', '; '.join(v['problems']))"
               if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|midday|workflow_dispatch"; then
                 if python -m modelroom $lg odds; then
                   python -m modelroom odds-store sync --league $lg --batch "collection" > /tmp/odds_sync_$lg.json \
-                    && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'])" \
+                    && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'], '| store bytes read:', d['bytes_read']['bytes'])" \
                     || echo "::warning::$lg new lines could not be written to the store"
                 else
                   echo "::warning::$lg lines not fetched; continuing without them"
@@ -266,7 +267,7 @@ jobs:
             for lg in nba nfl; do
               [ "$( [ $lg = nba ] && echo $NBA_OK || echo $NFL_OK)" = 1 ] || continue
               python -m modelroom markets sportsbook $lg > /tmp/sb_$lg.json \
-                && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'])" \
+                && python3 -c "import json; d=json.load(open('/tmp/sb_$lg.json')); print('$lg sportsbook analysis:', ('SKIPPED (' + d['skipped'] + ')') if d.get('skipped') else '', d['comparisons'], 'comparisons,', d['new_comparisons'], 'new | chains ok:', d['snapshots_chain_ok'], d['comparisons_chain_ok'], d['reports_chain_ok'], '| store bytes read:', d.get('bytes_read', {}).get('bytes'))" \
                 || echo "::warning::$lg sportsbook analysis failed; nothing else is affected"
             done
           fi

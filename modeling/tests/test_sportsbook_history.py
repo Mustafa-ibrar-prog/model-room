@@ -241,6 +241,7 @@ def test_sportsbook_run_persists_end_to_end(monkeypatch, tmp_path):
         c.close()
         monkeypatch.setenv("MODELROOM_ODDS_DB_URL", url)
         monkeypatch.setenv("MODELROOM_LEDGER_DIR", str(tmp_path))
+        monkeypatch.setenv("MODELROOM_DATA_DIR", str(tmp_path / "data"))
         monkeypatch.setenv("GITHUB_RUN_ID", "run-1")
         monkeypatch.setattr(ledger, "read", lambda p: [rec("2026-11-11T14:00:00+00:00")])
         monkeypatch.setattr(hist, "_games_table", lambda lg: pd.DataFrame({"game_id": ["g1"], "status": ["scheduled"], "home_score": [None],
@@ -254,11 +255,26 @@ def test_sportsbook_run_persists_end_to_end(monkeypatch, tmp_path):
         pub = json.loads((tmp_path / "reports" / "sportsbook_nba.json").read_text())
         assert "draftkings" not in json.dumps(pub).lower() and "fanduel" not in json.dumps(pub).lower()
         assert pub["storage_verification"]["persisted"] is True
-        # the same run again: no duplicates, one more report (a new run id), chains intact
+        # the same inputs again: nothing changed, so no analysis, no duplicate report; chains still verified in full
         monkeypatch.setenv("GITHUB_RUN_ID", "run-2")
         r2 = SB.run("nba")
-        assert r2["new_comparisons"] == 0 and r2["after_reconnect"]["comparisons"]["rows"] == r["comparisons"]
-        assert r2["after_reconnect"]["reports"]["rows"] == 2 and all(v["ok"] for v in r2["after_reconnect"].values())
+        assert r2.get("skipped") and r2["new_comparisons"] == 0 and r2["report_stored"] == 0
+        assert r2["comparisons"] == r["comparisons"] and r2["snapshots_chain_ok"] and r2["comparisons_chain_ok"] and r2["reports_chain_ok"]
+        assert S.server_check(S.connect(url), "reports", "nba")["rows"] == 1
+        # a game result arrives: relevant new data, so the analysis runs and stores report 2
+        monkeypatch.setenv("GITHUB_RUN_ID", "run-3")
+        monkeypatch.setattr(hist, "_games_table", lambda lg: pd.DataFrame({"game_id": ["g1"], "status": ["final"], "home_score": [110],
+                                                                           "away_score": [101], "start_time": ["2026-11-12T01:00:00Z"]}))
+        r3 = SB.run("nba")
+        assert not r3.get("skipped") and r3["report_stored"] == 1 and r3["new_comparisons"] == 0
+        assert r3["after_reconnect"]["reports"]["rows"] == 2 and all(v["ok"] for v in r3["after_reconnect"].values())
+        # a new line arrives: runs again, new comparisons only for it
+        c = S.connect(url)
+        S.insert(c, "nba", pd.DataFrame([snap("2026-11-11T22:00:00+00:00", line=-3.5)]).drop(columns=["snapshot_hash"]).reindex(columns=S.PAYLOAD_FIELDS), "test")
+        c.close()
+        monkeypatch.setenv("GITHUB_RUN_ID", "run-4")
+        r4 = SB.run("nba")
+        assert not r4.get("skipped") and r4["new_comparisons"] >= 1 and r4["after_reconnect"]["reports"]["rows"] == 3
     finally:
         admin.execute(f"drop database {name} with (force)")
         admin.close()
