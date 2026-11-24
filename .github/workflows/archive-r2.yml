@@ -47,11 +47,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: R2 settings present (names only)
+      - name: R2 settings present (names only, never values)
+        env:
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
         run: |
-          miss=""; for k in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET; do [ -n "${!k}" ] || miss="$miss $k"; done
+          miss=""
+          for k in R2_ACCOUNT_ID R2_ACCESS_KEY_ID R2_SECRET_ACCESS_KEY R2_BUCKET R2_READ_ACCESS_KEY_ID R2_READ_SECRET_ACCESS_KEY; do
+            if [ -n "${!k}" ]; then echo "present: $k"; else echo "MISSING: $k"; miss="$miss $k"; fi
+          done
           [ -z "$miss" ] || { echo "::error::missing repository secrets:$miss (Settings > Secrets and variables > Actions)"; exit 1; }
-          echo "R2 settings present"
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
