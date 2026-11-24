@@ -20,6 +20,7 @@ export type SigninError = { code?: unknown; status?: unknown; name?: unknown; me
 
 const CODE = /^[a-z][a-z0-9_]{1,63}$/;
 const NAME = /^Auth[A-Za-z]{1,40}Error$/;
+const RESTRICTION = /\b(?:exceed_[a-z_]{1,40}_quota|overdue_payment)\b/;
 
 /** Project reference from a Supabase URL (https://<ref>.supabase.co), or null. */
 export function projectRef(url: string | null | undefined): string | null {
@@ -37,7 +38,9 @@ export function diagFields(error: SigninError, ref: string | null) {
   const status = typeof error.status === "number" && Number.isInteger(error.status) && error.status >= 0 && error.status < 600 ? error.status : null;
   const name = typeof error.name === "string" && NAME.test(error.name) ? error.name : "other error";
   const testProject = ref ? refFingerprint(ref) === TEST_PROJECT_FP : null;
-  return { code, status, name, testProject };
+  // HTTP 402 = Supabase service restriction; its reason is a fixed token (exceed_*_quota or overdue_payment), never free text
+  const reason = status === 402 && typeof error.message === "string" ? (RESTRICTION.exec(error.message)?.[0] ?? null) : null;
+  return { code, status, name, testProject, reason };
 }
 
 /** The message a visitor sees after a failed sign-in. Production: unchanged generic text. */
@@ -46,11 +49,11 @@ export function signinErrorMessage(error: SigninError, opts: { production: boole
   if (opts.production) return GENERIC_SIGNIN_ERROR;
   const d = diagFields(error, opts.ref);
   const project = d.testProject === null ? "project unknown" : d.testProject ? "TEST project: yes" : "TEST project: NO";
-  return `${GENERIC_SIGNIN_ERROR} (TEST diagnostics: code ${d.code ?? "none"}, HTTP ${d.status ?? "none"}, ${d.name}, ${project})`;
+  return `${GENERIC_SIGNIN_ERROR} (TEST diagnostics: code ${d.code ?? "none"}, HTTP ${d.status ?? "none"}${d.reason ? ` (service restricted: ${d.reason})` : ""}, ${d.name}, ${project})`;
 }
 
 /** Server-log line (non-production only): same safe fields plus the first four characters of the project reference. */
 export function signinLogLine(error: SigninError, ref: string | null): string {
   const d = diagFields(error, ref);
-  return `[auth] sign-in failed: code=${d.code ?? "none"} status=${d.status ?? "none"} class=${d.name} project=${ref ? `${ref.slice(0, 4)}…` : "unknown"} test_project=${d.testProject ?? "unknown"}`;
+  return `[auth] sign-in failed: code=${d.code ?? "none"} status=${d.status ?? "none"}${d.reason ? ` restriction=${d.reason}` : ""} class=${d.name} project=${ref ? `${ref.slice(0, 4)}…` : "unknown"} test_project=${d.testProject ?? "unknown"}`;
 }

@@ -41,7 +41,18 @@ describe("sign-in diagnostics", () => {
       for (const leak of [SECRET_PW, SECRET_KEY, URL, REF, "supabase.co", "<script>"]) expect(s).not.toContain(leak);
       expect(s).toContain("none");
     }
-    expect(diagFields({ code: "A_Upper", status: 999, name: "TypeError" }, null)).toEqual({ code: null, status: null, name: "other error", testProject: null });
+    expect(diagFields({ code: "A_Upper", status: 999, name: "TypeError" }, null)).toEqual({ code: null, status: null, name: "other error", testProject: null, reason: null });
+  });
+
+  it("HTTP 402 shows Supabase's restriction reason token only, never the surrounding text", () => {
+    const e = { status: 402, name: "AuthApiError", message: `Service for this project is restricted due to the following violations: exceed_db_size_quota. ${SECRET_KEY}` };
+    const m = signinErrorMessage(e, { production: false, ref: null });
+    expect(m).toContain("HTTP 402 (service restricted: exceed_db_size_quota)");
+    expect(m).not.toContain(SECRET_KEY);
+    expect(m).not.toContain("violations");
+    expect(signinErrorMessage({ status: 402, name: "AuthApiError", message: "overdue_payment" }, { production: false, ref: null })).toContain("service restricted: overdue_payment");
+    expect(signinErrorMessage(e, { production: true, ref: null })).toBe(GENERIC_SIGNIN_ERROR);
+    expect(diagFields({ status: 400, message: "exceed_db_size_quota" }, null).reason).toBeNull();     // only with 402
   });
 
   it("server log line carries only the first four characters of the project reference", () => {
