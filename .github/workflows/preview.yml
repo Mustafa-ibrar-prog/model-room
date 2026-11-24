@@ -328,6 +328,7 @@ jobs:
                        modeling/data/published/injuries_live_nba.json modeling/data/published/injuries_live_nfl.json \
                        $( [ -f modeling/data/published/pick_of_the_day.json ] && echo modeling/data/published/pick_of_the_day.json ) \
                        $( [ -f modeling/data/published/nba_player_logs.json ] && echo modeling/data/published/nba_player_logs.json ) \
+                       $( [ -f modeling/data/published/nba_props_shadow_0.2.3c.json ] && echo modeling/data/published/nba_props_shadow_0.2.3c.json ) \
                        modeling/data/published/history modeling/preview-ledger
           fi
           git commit -m "Preview data refresh $(date -u +%Y-%m-%dT%H:%MZ) [$ST]" || echo "No data changes"

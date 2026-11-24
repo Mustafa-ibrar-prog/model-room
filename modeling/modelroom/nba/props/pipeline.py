@@ -136,6 +136,39 @@ def player_entry(x: M.PlayerProjection, p: PropParams, quotes: list, now: dateti
             "inputs": {k: v for k, v in x.inputs.items() if k != "sample"}}
 
 
+# Private shadow Pick of the Day (Moose, 2026-11-23, Phase 1b): the shadow's own projections in the board format, so the
+# owner-only view can price them with the same live fetch. Only the shadow's projections (already in its public shadow
+# ledger); no market data, no picks. Never read by any published page.
+SHADOW_BOARDS = ("0.2.3c",)
+
+
+def _shadow_boards(shadows: dict, games_json: list[dict], now, reliability: dict, inp, today, season: int, generated_at: str) -> dict:
+    out = {}
+    for v in SHADOW_BOARDS:
+        if v not in shadows:
+            continue
+        try:
+            pv, px, sd = shadows[v]
+            by = {}
+            for x in px:
+                by.setdefault(x.game_id, []).append(player_entry(x, pv, [], now, reliability))
+            games = [{**{k: gj[k] for k in ("game_id", "start_time", "game_date", "week", "home", "away")},
+                      "players": sorted(by.get(gj["game_id"], []), key=lambda e: (e["team"], -e["markets"]["points"]["mean"]))} for gj in games_json
+                     if gj.get("start_time") and pd.Timestamp(gj["start_time"]) <= pd.Timestamp(now) + pd.Timedelta(hours=30)]  # today's slate only
+            recent.attach(games, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool),
+                          season=season, regular=inp.player_games["season_type"].astype(str).eq("2") if "season_type" in inp.player_games.columns else None,
+                          opportunity={"minutes": "Minutes", "fga": "Shot attempts", "fg3a": "3-pt attempts", "fta": "Free throw attempts"})
+            board = {"league": "nba", "kind": "player_props_shadow", "generated_at": generated_at, "season": season, "week": None,
+                     "model": {"id": MODEL_ID, "version": v, "params_hash": hash_obj(pv.to_json()), "sims": pv.settings.sims, "seeds": sd,
+                               "status": "SHADOW: private shadow Pick of the Day only; not published, not active"},
+                     "games": games}
+            out[v] = str(write_board(published_path().parent / f"nba_props_shadow_{v}.json", board))
+        except Exception as e:  # noqa: BLE001  a shadow board never stops the published one
+            out[v] = f"failed: {type(e).__name__}: {e}"[:200]
+            print(f"::warning::shadow board {v} not written: {out[v]}", flush=True)
+    return out
+
+
 def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True, sims: int | None = None) -> dict:
     now = now or B.now_utc()
     version = active_version()
@@ -256,6 +289,7 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
     recent.attach(games_json, inp.player_games, {k: m["stat"] for k, m in MARKETS.items()}, today, inp.player_games["played"].astype(bool),
                   season=season, regular=inp.player_games["season_type"].astype(str).eq("2") if "season_type" in inp.player_games.columns else None,
                   opportunity={"minutes": "Minutes", "fga": "Shot attempts", "fg3a": "3-pt attempts", "fta": "Free throw attempts"})
+    shadow_boards = _shadow_boards(shadows, games_json, now, reliability, inp, today, season, generated_at)
     try:
         prev_board = json.loads(published_path().read_text())
     except (OSError, ValueError):
@@ -290,6 +324,6 @@ def run(*, days: int = 3, now: datetime | None = None, write_ledger: bool = True
         write_board(ensure(output_dir("nba")) / "props_compare_local.json",
                     {**board, "games": [{"game_id": k, "players": v} for k, v in local_games.items()], "note": "Local only."})
     state.record("nba_props_run", model_version=version, players=len(projs))
-    return {"board": str(path), "games": len(games_json), "players": len(projs),
+    return {"board": str(path), "shadow_boards": shadow_boards, "games": len(games_json), "players": len(projs),
             "quotes_matched": sum(len(v) for v in idx_all.values()), "evaluated_contracts": evaluated, "ledger": appended.__dict__ if appended else None,
             "shadow_ledger": shadow_appended, "shadow_errors": shadow_errors or None, "explained_changes": explained}

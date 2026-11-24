@@ -315,10 +315,24 @@ export interface LiveInfo { provider: string; fetchedAt: string; games: number; 
  * A copy of the board with live Polymarket US quotes merged into the listed games. Lines the board
  * doesn't carry are added, priced from the market's probability grid. Other games are left as they are.
  */
-export async function withLivePolymarket(league: League, board: EnginePropsBoard, gameIds: Set<string>, now = new Date()): Promise<{ board: EnginePropsBoard; info: LiveInfo }> {
+export async function withLivePolymarket(league: League, board: EnginePropsBoard, gameIds: Set<string>, now = new Date()): Promise<{ board: EnginePropsBoard; info: LiveInfo; events: Map<string, PmEvent> }> {
   const capturedAt = now.toISOString();
   const targets = board.games.filter((g) => gameIds.has(g.game_id));
   const events = await fetchMany(targets.map((g) => ({ id: g.game_id, g })), ({ g }) => fetchEvent(league, g.game_id, g.away.abbr, g.home.abbr, g.game_date));
+  const { board: merged, matched } = applyLiveEvents(board, events, now);
+  return {
+    board: merged,
+    info: { provider: PROVIDER, fetchedAt: capturedAt, games: targets.length, found: events.size, matched, ...failures(league, targets, events) },
+    events,
+  };
+}
+
+/**
+ * Merge already-fetched Polymarket events into a board (same game ids). Used to price a second board (the private
+ * shadow Pick of the Day) from the SAME fetch: no extra requests, identical prices and capture time.
+ */
+export function applyLiveEvents(board: EnginePropsBoard, events: Map<string, PmEvent>, now = new Date()): { board: EnginePropsBoard; matched: number } {
+  const capturedAt = now.toISOString();
   let matched = 0;
   const games = board.games.map((g) => {
     const ev = events.get(g.game_id);
@@ -363,10 +377,7 @@ export async function withLivePolymarket(league: League, board: EnginePropsBoard
     });
     return { ...g, players };
   });
-  return {
-    board: { ...board, games },
-    info: { provider: PROVIDER, fetchedAt: capturedAt, games: targets.length, found: events.size, matched, ...failures(league, targets, events) },
-  };
+  return { board: { ...board, games }, matched };
 }
 
 function failures(league: League, targets: { game_id: string; away: { abbr: string }; home: { abbr: string }; game_date: string }[], events: Map<string, PmEvent>) {

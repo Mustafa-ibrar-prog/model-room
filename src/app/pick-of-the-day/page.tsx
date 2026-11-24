@@ -8,7 +8,8 @@ import { PageHeader, Panel, TableSkeleton, Unavailable } from "@/components/ui/p
 import { formatProjection } from "@/lib/format";
 import { publishedDir } from "@/server/engine/board";
 import { livePropPick, potdLiveStatus, type LiveResult } from "@/server/markets/potdLive";
-import { MIN_EDGE, MIN_PROB, RELIABILITY, TOP_N, type LivePropPick } from "@/server/markets/potdPick";
+import { MIN_EDGE, MIN_PROB, RELIABILITY, S1U, TOP_N, type LivePropPick } from "@/server/markets/potdPick";
+import { mainConcern } from "@/lib/potdConcern";
 import type { PickResult } from "@/types/history";
 
 export const metadata: Metadata = { title: "Pick of the Day" };
@@ -224,6 +225,8 @@ function LiveCard({ r }: { r: LiveResult }) {
     return (
       <NoPick reason={r.reason} tag={TAG}>
         {r.rejected.length ? <div className="mt-1 text-xs text-faint"><MissList r={r} /></div> : null}
+        <SafeguardPanel r={r} />
+        <ShadowPanel r={r} />
         <p className="text-[0.7rem] text-faint">{r.games} games today · {r.found} on Polymarket · {r.diag?.lines ?? 0} main lines · {r.checked} checked · model {r.modelVersion ?? "—"} · updated {pt(r.fetchedAt)}</p>
       </NoPick>
     );
@@ -257,6 +260,8 @@ function LiveCard({ r }: { r: LiveResult }) {
         {repeats.length ? <p className="mt-1 text-xs text-faint">More than one prop for the same player: {repeats.map(([nm, v]) => `${nm} (#${v.join(", #")})`).join("; ")}.</p> : null}
       </div>
       {games.map((g) => <GameGroup key={g.id} picks={g.picks} rank={rank} byPlayer={byPlayer} />)}
+      <SafeguardPanel r={r} />
+      <ShadowPanel r={r} />
       {r.qualified < TOP_N && r.rejected.length ? (
         <Panel className="border-dashed p-4 text-xs text-faint">
           <MissList r={r} title={`Not in the top ${TOP_N}: closest props that didn't qualify`} />
@@ -264,9 +269,53 @@ function LiveCard({ r }: { r: LiveResult }) {
         </Panel>
       ) : null}
       <p className="text-[0.7rem] leading-snug text-faint">
-        Model {r.modelVersion} (active) · reliability {RELIABILITY.id} · projections {pt(r.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked · {r.qualified} qualified · {n} shown
+        Model {r.modelVersion} (active) · reliability {RELIABILITY.id} · injury safeguard {r.safeguardActive ? `${S1U.id} on (official report)` : "not run (no official report)"} · projections {pt(r.boardAt)} · prices {pt(r.fetchedAt)} · {r.checked} main lines checked · {r.qualified} qualified · {n} shown
       </p>
     </div>
+  );
+}
+
+/** Qualifying Unders the S1u injury safeguard left out, each with the teammate(s) behind it. */
+function SafeguardPanel({ r }: { r: LiveResult }) {
+  if (!r.safeguardActive) {
+    return <p className="text-xs text-faint">Injury safeguard: not run this time because the official NBA injury report wasn&apos;t available. No one is assumed out.</p>;
+  }
+  if (!r.safeguarded.length) return null;
+  return (
+    <Panel className="border-dashed p-4 text-sm" data-testid="potd-safeguard">
+      <h3 className="font-600 text-ink">Left out by the injury safeguard</h3>
+      <p className="mt-1 text-xs text-faint">
+        These Unders cleared both bars, but a high-minute starter on their team ({S1U.minMinutes}+ minutes a game, usually starts) is listed Out on the
+        official NBA injury report while model {r.modelVersion} still projects him. Questionable and Doubtful never count. Tested on 2024-25 and 2025-26:
+        Unders in this spot ran about 6 points overconfident.
+      </p>
+      <ul className="mt-2 space-y-1.5 text-mute">
+        {r.safeguarded.map((x, i) => (
+          <li key={i}><span className="text-ink">{x.player} ({x.team}) Under {x.line} {x.label.toLowerCase()}</span>, {x.matchup}: {x.why}</li>
+        ))}
+      </ul>
+    </Panel>
+  );
+}
+
+/** PRIVATE: the 0.2.3c shadow list on the same prices. r.shadow is only filled for the owner view; never stored. */
+function ShadowPanel({ r }: { r: LiveResult }) {
+  const sh = r.shadow;
+  if (!sh) return null;
+  const pub = new Set(r.picks.map((p) => `${p.player}|${p.stat}|${p.side}`));
+  return (
+    <Panel className="border border-dashed border-model/50 p-4 text-sm" data-testid="potd-shadow">
+      <h3 className="font-600 text-model">Private: shadow Pick of the Day, model {sh.modelVersion} (owner only)</h3>
+      <p className="mt-1 text-xs text-faint">Same games and the same Polymarket prices as the list above, scored by shadow {sh.modelVersion} with its own reliability fit. Not published, not recorded, not used.</p>
+      {sh.picks.length ? (
+        <ol className="mt-2 space-y-1 text-mute">
+          {sh.picks.map((p, i) => (
+            <li key={i}>#{i + 1} {p.player} ({p.team}) {p.side === "over" ? "Over" : "Under"} {p.line} {p.label.toLowerCase()}: {p1(p.adjProb)}, edge {(p.edge * 100).toFixed(1)} pts{pub.has(`${p.player}|${p.stat}|${p.side}`) ? " (also in the published list)" : " (shadow only)"}</li>
+          ))}
+        </ol>
+      ) : <p className="mt-2 text-mute">No shadow pick qualifies: {sh.reason}</p>}
+      <p className="mt-2 text-[0.7rem] text-faint">{sh.qualified} qualified · projections {pt(sh.boardAt)}</p>
+    </Panel>
   );
 }
 
@@ -316,14 +365,29 @@ function GameGroup({ picks, rank, byPlayer }: { picks: LivePropPick[]; rank: Map
   );
 }
 
+/** Starter / bench from the model's own input (share of recent minutes in starts); null when the board lacks it. */
+function rolePhrase(p: LivePropPick): string | null {
+  if (p.starterRate == null) return null;
+  const role = p.starterRate >= 0.8 ? "Starter" : p.starterRate <= 0.2 ? "Comes off the bench" : "Mixed role (starts some games)";
+  const mins = p.minutes.projected != null ? `${p.minutes.projected.toFixed(1)} projected minutes` : null;
+  return [role, mins].filter(Boolean).join(", ") + (p.minutes.usual != null ? ` (usually ${p.minutes.usual.toFixed(1)})` : "");
+}
+
 function LiveOpportunity({ p, rank, others }: { p: LivePropPick; rank: number; others: number[] }) {
   const lbl = p.label.toLowerCase();
+  const role = rolePhrase(p);
+  const f = p.form;
+  const lasts = ([[5, f.last5], [10, f.last10], [15, f.last15]] as const).filter(([, v]) => v != null).map(([n, v]) => `${avg(v as number)} last ${n}`);
+  const moved = p.factors.filter((x) => x.key !== "matchup");
   return (
     <Panel className="flex flex-col gap-3 p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3"><span className="text-xs font-600 tracking-wide text-faint">#{rank} · NBA player prop</span>{TAG}</div>
       <div>
         <div className="text-sm text-mute">{p.player} ({p.team}) vs {p.opp}{others.length ? ` · also #${others.join(", #")}` : ""}</div>
         <div className="mt-1 font-display text-2xl font-700 leading-tight text-edge sm:text-3xl">{p.side === "over" ? "Over" : "Under"} {p.line} {lbl}</div>
+        <p className="mt-1.5 text-sm text-ink" data-testid="potd-summary">
+          Model {p1(p.adjProb)} vs market {p1(p.marketProb)}: a {(p.edge * 100).toFixed(1)}-point edge after fees. Main concern: {mainConcern(p)}.
+        </p>
       </div>
       <dl className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         <div className="rounded-lg border border-model/40 bg-navy-900 p-2.5 sm:p-3">
@@ -347,29 +411,33 @@ function LiveOpportunity({ p, rank, others }: { p: LivePropPick; rank: number; o
           <dd className="mt-0.5 text-xs text-faint">vs {(p.cost * 100).toFixed(1)}¢ cost</dd>
         </div>
       </dl>
-      <div>
-        <h3 className="text-sm font-600 text-ink">What moved the projection (model {p.modelVersion})</h3>
-        {p.factors.length ? (
-          <ul className="mt-1 space-y-1 text-sm leading-relaxed text-mute">
-            {p.factors.map((x) => (
+      <div className="grid gap-3 lg:grid-cols-2">
+        <section className="rounded-lg border border-model/30 p-3 text-sm" data-testid="potd-model-inputs">
+          <h3 className="font-600 text-model">What the model used (model {p.modelVersion})</h3>
+          <ul className="mt-1.5 space-y-1.5 leading-relaxed text-mute">
+            {role ? <li>Role: {role}.</li> : <li>Role: not available for this player.</li>}
+            {p.matchupText ? <li>Matchup: {p.matchupText}</li> : null}
+            {moved.length ? moved.map((x) => (
               <li key={x.key}>
                 {x.text} <span className={x.favors === "pick" ? "text-edge" : "text-market"}>({x.favors === "pick" ? "toward" : "against"} the {p.side === "over" ? "Over" : "Under"})</span>
               </li>
-            ))}
+            )) : <li>No minutes, blowout, usage or pace step moved it by 0.05 or more.</li>}
+            <li>Probability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments toward this side, so the reliability adjustment takes ${p1(p.modelProb)} to ${p1(p.adjProb)}.` : `the projection rests on his own baseline; the reliability adjustment takes ${p1(p.modelProb)} to ${p1(p.adjProb)}.`} Fourth-quarter minutes are not modeled.</li>
           </ul>
-        ) : <p className="mt-1 text-sm text-mute">Nothing beyond his own rates and usual minutes: no adjustment moved it by 0.05 or more.</p>}
-      </div>
-      <div className="text-sm">
-        <h3 className="text-sm font-600 text-ink">About this line</h3>
-        <ul className="mt-1 space-y-1 leading-relaxed text-mute">
-          <li>Main line: {p.line} is the {lbl} contract priced closest to 50¢ for him. {histText(p)}</li>
-          <li>
-            Averages: {p.form.seasonAvg != null ? `${avg(p.form.seasonAvg)} ${lbl} this season (${p.form.seasonGames} games)` : "no games this season yet"}{p.form.last5 != null ? `, ${avg(p.form.last5)} over his last 5` : ""}.
-            Minutes: {p.minutes.projected != null ? `${p.minutes.projected.toFixed(1)} projected` : "projection unavailable"}{p.minutes.usual != null ? `, ${p.minutes.usual.toFixed(1)} usual` : ""}; fourth-quarter minutes are not modeled.
-          </li>
-          <li>Reliability: {p.toward > 0.005 ? `${Math.round(p.toward * 100)}% of the projection comes from adjustments toward this side, so its probability is marked down from ${p1(p.modelProb)} to ${p1(p.adjProb)}.` : `the projection rests on his own baseline; the standard reliability adjustment takes it from ${p1(p.modelProb)} to ${p1(p.adjProb)}.`} Model history: {p.support}.</li>
-          <li>Injury report: {ownStatus(p)} (context only; model {p.modelVersion} does not read the report).</li>
-        </ul>
+        </section>
+        <section className="rounded-lg border border-navy-700 p-3 text-sm" data-testid="potd-context">
+          <h3 className="font-600 text-ink">Context the model does not use</h3>
+          <ul className="mt-1.5 space-y-1.5 leading-relaxed text-mute">
+            <li>
+              Recent {lbl}: {f.seasonAvg != null ? `${avg(f.seasonAvg)} this season (${f.seasonGames} games)` : "no games this season yet"}{lasts.length ? `; ${lasts.join(", ")}` : ""}.
+              {f.range ? ` Typical range ${avg(f.range.lo)}–${avg(f.range.hi)} (middle half of his last ${f.range.games} games).` : ""}
+            </li>
+            <li>Main line: {p.line} is the {lbl} contract priced closest to 50¢ for him. {histText(p)}</li>
+            <li>Injury report: {ownStatus(p)}. Model {p.modelVersion} does not read the report.</li>
+            <li>Price: read from Polymarket at {pt(p.priceAt)}{p.spread != null ? `; bid/ask spread ${(p.spread * 100).toFixed(0)}¢` : ""}. Prices move; this one isn&apos;t recorded.</li>
+            <li>Model history at this stat: {p.support}.</li>
+          </ul>
+        </section>
       </div>
     </Panel>
   );
