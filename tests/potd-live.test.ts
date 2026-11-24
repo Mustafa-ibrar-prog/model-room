@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { formatProjection } from "@/lib/format";
-import { adjustedProb, delta, ELIGIBLE, factorsFor, gameContext, hitHistory, marginChance, inGrid, liveReason, pmFee, priceCenter, rankOrder, RELIABILITY, strongestLiveProp, TOP_N, todaysGameIds, towardShare, type PlayerLogs } from "@/server/markets/potdPick";
+import { adjustedProb, delta, ELIGIBLE, factorsFor, gameContext, hitHistory, lastForm, marginChance, matchupText, inGrid, liveReason, pmFee, priceCenter, rankOrder, RELIABILITY, RELIABILITY_0_2_3C, S1U, strongestLiveProp, TOP_N, todaysGameIds, towardShare, unaccountedOuts, type OfficialOut, type PlayerLogs } from "@/server/markets/potdPick";
 import type { EnginePropsBoard } from "@/types/props";
 
 const THETA = 0.0695;
@@ -235,7 +235,7 @@ describe("NBA Pick of the Day live preview", () => {
     ]);
     const { pick, diag } = run(b);
     expect(pick).toBeNull();
-    expect(diag).toEqual({ quotes: 8, lines: 8, offMain: 0, unusable: 4, outsideGrid: 1, noFee: 1, belowProb: 1, belowEdge: 1, checked: 2 });
+    expect(diag).toEqual({ quotes: 8, lines: 8, offMain: 0, unusable: 4, outsideGrid: 1, noFee: 1, belowProb: 1, belowEdge: 1, checked: 2, safeguard: 0 });
     const why = liveReason({ games: 1, found: 1, matched: 8 }, diag);
     expect(why).toContain("8 player-stat main lines checked");
     expect(why).toContain("1 under a 4-point edge after fees");
@@ -266,10 +266,91 @@ describe("NBA Pick of the Day live preview", () => {
   });
 
   it("reasons distinguish no listing, a failed fetch and no match", () => {
-    const d0 = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0 };
+    const d0 = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0, safeguard: 0 };
     expect(liveReason({ games: 4, found: 0, matched: 0 }, d0)).toBe("Polymarket has no market listed for any of today's 4 games yet.");
     expect(liveReason({ games: 4, found: 0, matched: 0, errors: 4, errorCodes: [0, 503] }, d0)).toContain("didn't answer for 4 of 4 games (timeout, HTTP 503)");
     expect(liveReason({ games: 4, found: 3, matched: 0 }, d0)).toContain("no player-prop line matched");
     expect(liveReason({ games: 0, found: 0, matched: 0 }, d0)).toBe("No NBA games left today.");
+  });
+
+  describe("S1u injury safeguard (approved 2026-11-23)", () => {
+    // an Under on DEN that clears both bars: model 30% over at a 50c line -> 70% under
+    const under = th(25, 0.3, [q(0.5, 0.5)]);
+    const star = (minutes: number, starterRate: number, projected = 34, id = "S", team = "DEN") => ({
+      ...player(id, "Star", [th(30, 0.5, [q(0.5, 0.52, false)])]), team,
+      inputs: { projected_minutes: projected, starter_rate: starterRate, contributions: undefined },
+      recent: { games: Array.from({ length: 10 }, () => ({ minutes })), values: {}, season: null },
+    });
+    const out = (id = "S"): OfficialOut => ({ playerId: id, name: "Star", team: "DEN", gameId: "G1", reportTime: "2026-11-22T23:30:00Z" });
+    const slate = (extra: ReturnType<typeof star>[]) => board(TONIGHT, [player("1", "A", [under]), ...(extra as unknown as ReturnType<typeof player>[])]);
+    const go = (b: EnginePropsBoard, outs: OfficialOut[] | null, safeguard = true) => strongestLiveProp(b, todaysGameIds(b, now), { outs, safeguard });
+
+    it("skips the Under when an Out high-minute starter on his team is still projected, and explains why", () => {
+      const r = go(slate([star(34, 0.95)]), [out()]);
+      expect(r.picks).toHaveLength(0);
+      expect(r.safeguarded).toHaveLength(1);
+      expect(r.safeguarded[0].why).toContain("Star (34.0 minutes a game, still projected for 34.0)");
+      expect(r.safeguarded[0].why).toContain("listed Out on the official injury report");
+      expect(r.diag.safeguard).toBe(1);
+      expect(liveReason({ games: 1, found: 1, matched: 1 }, r.diag)).toContain("left out by the injury safeguard");
+    });
+    it("never touches Overs", () => {
+      const over = th(25, 0.7, [q(0.5, 0.5)]);
+      const b = board(TONIGHT, [player("1", "A", [over]), star(34, 0.95) as unknown as ReturnType<typeof player>]);
+      const r = go(b, [out()]);
+      expect(r.picks.map((x) => x.side)).toEqual(["over"]);
+      expect(r.safeguarded).toHaveLength(0);
+    });
+    it("keeps the Under when the Out player isn't a high-minute starter, isn't projected, or plays for the other team", () => {
+      expect(go(slate([star(S1U.minMinutes - 1, 0.95)]), [out()]).picks).toHaveLength(1);          // under 28 minutes
+      expect(go(slate([star(34, 0.4)]), [out()]).picks).toHaveLength(1);                            // mostly a bench player
+      expect(go(slate([star(34, 0.95, 0)]), [out()]).picks).toHaveLength(1);                        // model already has him out
+      expect(go(slate([star(34, 0.95, 34, "S", "BOS")]), [{ ...out(), team: "BOS" }]).picks).toHaveLength(1);  // opponent
+      expect(go(slate([star(34, 0.95)]), [{ ...out(), gameId: "OTHER" }]).picks).toHaveLength(1);   // report for another game
+    });
+    it("only Out counts: a player not on the report (or Questionable / Doubtful, which never reach the list) changes nothing", () => {
+      expect(go(slate([star(34, 0.95)]), []).picks).toHaveLength(1);
+      expect(unaccountedOuts(slate([star(34, 0.95)]), new Set(["G1"]), []).size).toBe(0);
+    });
+    it("without a report the safeguard can't run and says so; it never assumes anyone is out", () => {
+      const r = go(slate([star(34, 0.95)]), null);
+      expect(r.safeguardActive).toBe(false);
+      expect(r.picks).toHaveLength(1);
+      const off = go(slate([star(34, 0.95)]), [out()], false);                    // the shadow reads the report itself
+      expect(off.picks).toHaveLength(1) ;
+    });
+    it("needs at least 3 recent games to call him a high-minute starter", () => {
+      const s = star(34, 0.95); s.recent.games = s.recent.games.slice(0, 2);
+      expect(go(slate([s]), [out()]).picks).toHaveLength(1);
+    });
+  });
+
+  it("each version uses its own reliability fit; 0.2.0's is unchanged", () => {
+    expect(RELIABILITY).toMatchObject({ intercept: 0.0566, logitP: 0.7479, toward: -2.1913, model: "0.2.0" });
+    expect(adjustedProb(0.65, 0)).toBeCloseTo(adjustedProb(0.65, 0, RELIABILITY), 12);
+    expect(adjustedProb(0.65, 0.1, RELIABILITY_0_2_3C)).not.toBeCloseTo(adjustedProb(0.65, 0.1), 3);
+    const b = one(TONIGHT, [th(25, 0.7, [q(0.5, 0.52)])]);
+    const a = strongestLiveProp(b, todaysGameIds(b, now), { reliability: RELIABILITY_0_2_3C });
+    expect(a.pick?.adjProb).toBeCloseTo(adjustedProb(0.7, 0, RELIABILITY_0_2_3C), 3);
+  });
+
+  it("recent form: last 5/10/15 and the middle 50% of the last 20, across seasons, oldest first", () => {
+    const logs: PlayerLogs = { seasons: [2026, 2027], players: { "1": { "2026": { points: Array.from({ length: 12 }, (_, i) => i) }, "2027": { points: [20, 22, 24, 26, 28, 30] } } } };
+    const f = lastForm(logs, "1", "points");
+    expect(f.last5).toBeCloseTo((22 + 24 + 26 + 28 + 30) / 5);
+    expect(f.last10).toBeCloseTo((8 + 9 + 10 + 11 + 20 + 22 + 24 + 26 + 28 + 30) / 10);
+    expect(f.last15).toBeCloseTo((3 + 4 + 5 + 6 + 7 + 8 + 9 + 10 + 11 + 20 + 22 + 24 + 26 + 28 + 30) / 15);
+    expect(f.range?.games).toBe(18);
+    expect(f.range!.lo).toBeLessThan(f.range!.hi);
+    expect(lastForm({ seasons: [2027], players: { "1": { "2027": { points: [1, 2, 3] } } } }, "1", "points")).toEqual({ last5: null, last10: null, last15: null, range: null });
+  });
+
+  it("matchup text says only what the model's matchup step did", () => {
+    const pts = { baseline: 25, minutes: 0, blowout: 0, usage: 0, pace: 0, matchup: -0.43, simulation: 0, final: 24.6 };
+    const p = { ...player("1", "A", [], { pts }), inputs: { opp_points_factor: 0.96, contributions: { stats: { pts } } } };
+    expect(matchupText(p as never, p.markets.points as never, "points")).toBe("BOS allows 4% fewer points to centers than average, so the model lowered his projection by 0.4.");
+    const flat = { ...p, inputs: { opp_points_factor: 1.01, contributions: { stats: { pts: { ...pts, matchup: 0.01 } } } } };
+    expect(matchupText(flat as never, p.markets.points as never, "points")).toContain("didn't move his projection");
+    expect(matchupText(player("1", "A", []) as never, p.markets.points as never, "points")).toBeNull();   // no breakdown: say nothing
   });
 });

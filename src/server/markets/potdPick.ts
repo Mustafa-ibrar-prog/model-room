@@ -21,6 +21,15 @@ export const STAT_KEY: Record<string, string> = { points: "pts", rebounds: "reb"
  * Fitted for 0.2.0: another model version needs its own fit before it can be used here.
  */
 export const RELIABILITY = { intercept: 0.0566, logitP: 0.7479, toward: -2.1913, model: "0.2.0", id: "potd-reliability-1" } as const;
+export type Reliability = { intercept: number; logitP: number; toward: number; model: string; id: string };
+
+/**
+ * Reliability adjustment for SHADOW 0.2.3c (private shadow Pick of the Day only; Moose 2026-11-23, Phase 1b). Same
+ * method and data split as 0.2.0's (research p8/rel_023c.py): fitted on 2023-24 candidate sides only, tested on
+ * untouched 2024-25 and 2025-26: log loss -0.0007 [-0.0010, -0.0005], Brier -0.0003, both seasons better; calibration
+ * error of candidates 0.017 -> 0.004. Never used by the published list.
+ */
+export const RELIABILITY_0_2_3C: Reliability = { intercept: 0.0291, logitP: 0.839, toward: 0.4501, model: "0.2.3c", id: "potd-reliability-0.2.3c-1" };
 // Applied only at main lines (the contract priced closest to 50¢), the rung it was fitted and tested on.
 
 export interface Factor { key: string; text: string; delta: number | null; favors: "pick" | "against" | "neutral" }
@@ -39,7 +48,15 @@ export interface LivePropPick {
   projection: number; difference: number; toward: number;
   modelVersion: string; boardAt: string | null; factors: Factor[];
   minutes: { projected: number | null; usual: number | null };
-  form: { seasonAvg: number | null; seasonGames: number | null; last5: number | null };
+  form: { seasonAvg: number | null; seasonGames: number | null; last5: number | null; last10: number | null; last15: number | null;
+    /** middle 50% of his last 20 games (25th to 75th percentile), null under 10 games */
+    range: { lo: number; hi: number; games: number } | null };
+  /** model input: share of recent minutes in starts (minutes-weighted), null when the board doesn't carry it */
+  starterRate: number | null;
+  /** the matchup adjustment in plain words (null when the model has no matchup step for this stat) */
+  matchupText: string | null;
+  /** when this price was read from Polymarket, and the contract's bid/ask spread */
+  priceAt: string | null; spread: number | null;
   support: string;
   /** his own entry on the board's injury field (the active model does not read the report) */
   status: string | null;
@@ -135,9 +152,9 @@ export function towardShare(c: Contribs | null, side: "over" | "under"): number 
   return Math.max(-0.5, Math.min(0.5, t));
 }
 
-export function adjustedProb(p: number, toward: number): number {
+export function adjustedProb(p: number, toward: number, rel: Reliability = RELIABILITY): number {
   const q = Math.min(Math.max(p, 1e-4), 1 - 1e-4);
-  const z = RELIABILITY.intercept + RELIABILITY.logitP * Math.log(q / (1 - q)) + RELIABILITY.toward * toward;
+  const z = rel.intercept + rel.logitP * Math.log(q / (1 - q)) + rel.toward * toward;
   return 1 / (1 + Math.exp(-z));
 }
 
@@ -183,11 +200,60 @@ export function factorsFor(p: EnginePropPlayer, m: EnginePropMarket, stat: strin
   return out;
 }
 
+/** A player on the official NBA injury report listed OUT for this game (current report, not stale). */
+export interface OfficialOut { playerId: string; name: string; team: string; gameId: string; reportTime: string | null }
+
+/** An Under that cleared both bars but was left out by the S1u injury safeguard, with the teammates that caused it. */
+export interface Safeguarded { player: string; team: string; matchup: string; label: string; side: "under"; line: number; adjProb: number; edge: number;
+  teammates: { name: string; projectedMinutes: number; usualMinutes: number; starterRate: number; reportTime: string | null }[]; why: string }
+
+/** S1u (research inj/safeguard.py, approved 2026-11-23): a high-minute starter = 28+ minutes a game over his last 10 games
+ *  (at least 3) and starts at least half his minutes. */
+export const S1U = { minMinutes: 28, minStarterRate: 0.5, minGames: 3, lastGames: 10, id: "S1u" } as const;
+
+/**
+ * Teammates officially OUT whom the active model still projects to play: per game id and team, the high-minute starters
+ * listed OUT on the current official report who are still on the model's board with projected minutes. The model does
+ * not read the report, so their minutes and usage were never handed to anyone else. Only "Out" counts; Questionable and
+ * Doubtful never do. Nothing is inferred: a player not on the official report is not treated as out.
+ */
+export function unaccountedOuts(board: EnginePropsBoard, ids: Set<string>, outs: OfficialOut[]): Map<string, Safeguarded["teammates"]> {
+  const res = new Map<string, Safeguarded["teammates"]>();
+  for (const g of board.games) {
+    if (!ids.has(g.game_id)) continue;
+    for (const o of outs) {
+      if (String(o.gameId) !== String(g.game_id)) continue;
+      const p = g.players.find((x) => String(x.player_id) === String(o.playerId));
+      if (!p) continue;                                                     // not projected: the model already leaves him out
+      const proj = num(p.inputs?.projected_minutes) ?? 0;
+      const sr = num(p.inputs?.starter_rate);
+      const mins = (p.recent?.games ?? []).slice(0, S1U.lastGames).map((x) => num((x as { minutes?: unknown }).minutes)).filter((v): v is number => v != null);
+      if (!(proj > 0) || sr == null || mins.length < S1U.minGames) continue;
+      const usual = mins.reduce((a, b) => a + b, 0) / mins.length;
+      if (usual < S1U.minMinutes || sr < S1U.minStarterRate) continue;
+      const k = `${g.game_id}|${p.team}`;
+      res.set(k, [...(res.get(k) ?? []), { name: p.name, projectedMinutes: proj, usualMinutes: usual, starterRate: sr, reportTime: o.reportTime }]);
+    }
+  }
+  return res;
+}
+
 /** Why quotes were dropped, in the order the filters run. */
 export interface LiveDiag {
   /** contracts matched, player-stats with at least one, contracts set aside because another rung is the main line */
   quotes: number; lines: number; offMain: number;
   unusable: number; outsideGrid: number; noFee: number; belowProb: number; belowEdge: number; checked: number;
+  /** qualifying Unders left out by the S1u injury safeguard */
+  safeguard: number;
+}
+
+export interface LiveOptions {
+  logs?: PlayerLogs | null;
+  /** official OUT entries for the S1u safeguard; omitted = safeguard can't run (reported, never assumed) */
+  outs?: OfficialOut[] | null;
+  reliability?: Reliability;
+  /** apply S1u (on for the published 0.2.0 list; the 0.2.3c shadow reads the report itself) */
+  safeguard?: boolean;
 }
 
 /**
@@ -198,10 +264,17 @@ export interface LiveDiag {
  * reliability-adjusted probability clears 56.5% with a 4-point edge after fees; ranked by adjusted probability (then
  * edge). Never estimates a line or a price. Also returns the closest rejected main lines and why.
  */
-export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, logs?: PlayerLogs | null): { pick: LivePropPick | null; picks: LivePropPick[]; qualified: number; checked: number; diag: LiveDiag; rejected: Rejected[] } {
+export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, opts: LiveOptions | PlayerLogs | null = {}): {
+  pick: LivePropPick | null; picks: LivePropPick[]; qualified: number; checked: number; diag: LiveDiag; rejected: Rejected[]; safeguarded: Safeguarded[]; safeguardActive: boolean } {
+  const o: LiveOptions = opts && "players" in (opts as object) && "seasons" in (opts as object) ? { logs: opts as PlayerLogs } : ((opts as LiveOptions | null) ?? {});
+  const logs = o.logs ?? null;
+  const rel = o.reliability ?? RELIABILITY;
+  const safeguardActive = Boolean(o.safeguard && o.outs);
+  const outsBy = safeguardActive ? unaccountedOuts(board, ids, o.outs!) : new Map<string, Safeguarded["teammates"]>();
   const picks: LivePropPick[] = [];
   const rej: Rejected[] = [];
-  const d: LiveDiag = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0 };
+  const guarded: Safeguarded[] = [];
+  const d: LiveDiag = { quotes: 0, lines: 0, offMain: 0, unusable: 0, outsideGrid: 0, noFee: 0, belowProb: 0, belowEdge: 0, checked: 0, safeguard: 0 };
   const boardAt = (board as unknown as { generated_at?: string }).generated_at ?? null;
   for (const g of board.games) {
     if (!ids.has(g.game_id)) continue;
@@ -234,7 +307,7 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
         for (const [side, prob, price] of sides) {
           if (price === null) continue;
           const toward = towardShare(c, side);
-          const adj = adjustedProb(prob, toward);
+          const adj = adjustedProb(prob, toward, rel);
           const fee = pmFee(q.fee_coef, price);
           const cost = price + fee;
           const edge = adj - cost;
@@ -250,8 +323,17 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
             continue;
           }
           edgeOk = true;
+          const tm = side === "under" ? outsBy.get(`${g.game_id}|${p.team}`) : undefined;
+          if (tm?.length) {                                                 // S1u: a vulnerable Under, left out and explained
+            d.safeguard++;
+            const names = tm.map((x) => `${x.name} (${x.usualMinutes.toFixed(1)} minutes a game, still projected for ${x.projectedMinutes.toFixed(1)})`).join(" and ");
+            guarded.push({ player: p.name, team: p.team, matchup: `${g.away.abbr} @ ${g.home.abbr}`, label: m.label, side: "under", line, adjProb: r3(adj), edge: r3(edge),
+              teammates: tm, why: `${names} ${tm.length > 1 ? "are" : "is"} listed Out on the official injury report, but model ${board.model.version} doesn't read the report and still projects ${tm.length > 1 ? "them" : "him"}. His minutes and shots haven't been handed to teammates, so an Under on ${p.team} could be too low. Left out by the injury safeguard.` });
+            continue;
+          }
           const sea = p.recent?.season ?? null;
           const vals = (p.recent?.values?.[stat] ?? []).slice(0, 5).filter((v): v is number => typeof v === "number");
+          const lf = lastForm(logs, p.player_id, stat);
           const mn = (p.inputs?.contributions as { minutes?: { usual?: number; projected?: number } } | undefined)?.minutes;
           picks.push({
             gameId: g.game_id, player: p.name, team: p.team, opp: p.opp, position: p.position, matchup: `${g.away.abbr} @ ${g.home.abbr}`, start: g.start_time, stat, label: m.label,
@@ -259,7 +341,9 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
             edge: r3(edge), rawEdge: r3(prob - cost), projection: m.mean, difference: m.mean - line, toward: r3(toward),
             modelVersion: board.model.version, boardAt, factors: factorsFor(p, m, stat, side),
             minutes: { projected: num(mn?.projected) ?? num(p.inputs?.projected_minutes), usual: num(mn?.usual) },
-            form: { seasonAvg: sea ? num(sea.avg?.[stat]) : null, seasonGames: sea ? sea.games : null, last5: vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null },
+            form: { seasonAvg: sea ? num(sea.avg?.[stat]) : null, seasonGames: sea ? sea.games : null,
+              last5: lf.last5 ?? (vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null), last10: lf.last10, last15: lf.last15, range: lf.range },
+            starterRate: num(p.inputs?.starter_rate), matchupText: matchupText(p, m, stat), priceAt: q.captured_at ?? null, spread: num(q.spread),
             support: m.support_note, history: hitHistory(logs, p.player_id, stat, t.threshold), status: p.injury_status ?? null,
           });
         }
@@ -273,7 +357,44 @@ export function strongestLiveProp(board: EnginePropsBoard, ids: Set<string>, log
   // Every qualifying main line (at most one side per player-stat) ranked across the whole slate, most reliable first;
   // only the top TOP_N are displayed (a display limit, Moose 2026-11-23), never padded, never a per-game or per-player cap.
   picks.sort(rankOrder);
-  return { pick: picks[0] ?? null, picks: picks.slice(0, TOP_N), qualified: picks.length, checked: d.checked, diag: d, rejected: rej.slice(0, 3) };
+  guarded.sort((a, b) => b.adjProb - a.adjProb || cmp(a.player, b.player) || cmp(a.label, b.label));
+  return { pick: picks[0] ?? null, picks: picks.slice(0, TOP_N), qualified: picks.length, checked: d.checked, diag: d, rejected: rej.slice(0, 3),
+    safeguarded: guarded, safeguardActive };
+}
+
+/** Last 5 / 10 / 15 games played (this season, then last season's latest games if needed) and the middle 50% of his
+ *  last 20. Box scores only; context, not a model input. */
+export function lastForm(logs: PlayerLogs | null | undefined, playerId: string, stat: string): { last5: number | null; last10: number | null; last15: number | null; range: { lo: number; hi: number; games: number } | null } {
+  const none = { last5: null, last10: null, last15: null, range: null };
+  if (!logs || !logs.seasons.length) return none;
+  const p = logs.players[playerId];
+  if (!p) return none;
+  const seq = logs.seasons.map(String).flatMap((s) => p[s]?.[stat] ?? []);   // oldest first
+  const avgOf = (n: number) => (seq.length >= n ? seq.slice(-n).reduce((a, b) => a + b, 0) / n : null);
+  const last20 = seq.slice(-20);
+  let range = null;
+  if (last20.length >= 10) {
+    const s = [...last20].sort((a, b) => a - b);
+    const q = (f: number) => { const x = f * (s.length - 1); const i = Math.floor(x); return s[i] + (s[Math.min(i + 1, s.length - 1)] - s[i]) * (x - i); };
+    range = { lo: q(0.25), hi: q(0.75), games: s.length };
+  }
+  return { last5: avgOf(5), last10: avgOf(10), last15: avgOf(15), range };
+}
+
+/** The matchup step in plain words, only as the model applied it (its own contribution breakdown). */
+export function matchupText(p: EnginePropPlayer, m: EnginePropMarket, stat: string): string | null {
+  const c = contribs(p, stat);
+  if (!c || c.matchup == null) return null;
+  const lbl = m.label.toLowerCase();
+  const who = POS[p.position] ?? "players at his position";
+  const oppF = stat === "threes" ? null : num(p.inputs?.[`opp_${stat}_factor`]);
+  if (Math.abs(c.matchup) < MOVED) {
+    return oppF == null ? `${p.opp}'s defense didn't move his ${lbl} projection.`
+      : `${p.opp} is close to average against ${who} for ${lbl} (${oppF >= 1 ? "+" : "−"}${Math.abs((oppF - 1) * 100).toFixed(0)}%), so the matchup didn't move his projection.`;
+  }
+  const dir = c.matchup > 0 ? "raised" : "lowered";
+  return oppF == null ? `${p.opp}'s defense ${dir} his ${lbl} projection by ${Math.abs(c.matchup).toFixed(1)}.`
+    : `${p.opp} allows ${Math.abs((oppF - 1) * 100).toFixed(0)}% ${oppF >= 1 ? "more" : "fewer"} ${lbl} to ${who} than average, so the model ${dir} his projection by ${Math.abs(c.matchup).toFixed(1)}.`;
 }
 
 /** Display limit for the live list (Moose 2026-11-23: "a maximum of 10 NBA player props across the entire slate"). */
@@ -304,5 +425,6 @@ export function liveReason(info: { games: number; found: number; matched: number
   if (d.noFee) parts.push(`${d.noFee} without a published fee`);
   if (d.belowProb) parts.push(`${d.belowProb} where neither side reaches ${(MIN_PROB * 100).toFixed(1)}% after the reliability adjustment`);
   if (d.belowEdge) parts.push(`${d.belowEdge} under a ${(MIN_EDGE * 100).toFixed(0)}-point edge after fees`);
+  if (d.safeguard) parts.push(`${d.safeguard} Under${d.safeguard > 1 ? "s" : ""} left out by the injury safeguard (a starter listed Out whom the model still projects)`);
   return parts.join("; ") + ".";
 }
