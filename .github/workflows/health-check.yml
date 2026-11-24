@@ -4,6 +4,9 @@ name: Health check (test site)
 # the preview branch or the ledgers, and never prints secrets (the database URL is masked; the GitHub token in Vault
 # is never read: only scheduler.health's yes/no "token_stored"). Alerts are GitHub issues labelled "health-alert":
 # one per incident type, updated silently while it lasts, closed when it clears (modeling/modelroom/health.py).
+# Also monitors Supabase capacity (2026-11-24): database size vs the 500 MB limit with a 30-day forecast, the Pick of
+# the Day audit table's daily growth, Storage objects, and the refresh's measured database reads projected per month.
+# The storage query is read-only and returns one small JSON row; nothing is ever deleted or archived by this check.
 #
 # Runs once a day at 2:13 PM PT (22:13 UTC in winter; 3:13 PM in summer), after the 12:00 PM refresh, so "latest
 # successful refresh older than 3 hours" is a real problem rather than the quiet overnight gap. "Run workflow"
@@ -61,11 +64,29 @@ jobs:
           gh api "repos/${{ github.repository }}/actions/workflows/preview.yml/runs?per_page=100&created=%3E%3D$since" --paginate \
             -q '[.workflow_runs[] | {id, event, status, conclusion, created_at}]' | python3 -c "import sys,json; r=[x for l in sys.stdin for x in json.loads(l)]; json.dump(r, open('/tmp/runs.json','w')); print(len(r), 'runs')"
 
+      - name: Database reads by the refresh, last 24 h (from the runs' own byte counters; no Supabase call)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'EOF'
+          import json, re, subprocess
+          runs = [r for r in json.load(open("/tmp/runs.json")) if r.get("status") == "completed"]
+          total, counted = 0, 0
+          for r in runs:
+              p = subprocess.run(["gh", "run", "view", str(r["id"]), "--log", "-R", "${{ github.repository }}"], capture_output=True, text=True)
+              hits = [int(x) for x in re.findall(r"store bytes read: (\d+)", p.stdout)]
+              if hits:
+                  total, counted = total + sum(hits), counted + 1
+          out = {"bytes_24h": total if counted else None, "runs": len(runs), "runs_counted": counted}
+          json.dump(out, open("/tmp/egress.json", "w")); print("refresh database reads, last 24 h:", out)
+          EOF
+
       - name: Supabase scheduler health (no secrets printed)
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
         run: |
           echo '{"ok": false, "error": "database not reachable from the health check"}' > /tmp/supabase.json
+          echo '{"ok": false, "error": "database not reachable from the health check"}' > /tmp/storage.json
           [ -n "$SUPABASE_DB_URL" ] || { echo '{"ok": false, "error": "SUPABASE_DB_URL is not set"}' > /tmp/supabase.json; exit 0; }
           echo "::add-mask::$SUPABASE_DB_URL"
           sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1 || true
@@ -89,6 +110,13 @@ jobs:
             echo "$row" | python3 -c "import sys,json; d=json.load(sys.stdin); d['ok']=True; json.dump(d, open('/tmp/supabase.json','w')); print({k: d.get(k) for k in ('enabled','token_stored','last_accepted','failures_24h')})"
           else
             echo '{"ok": false, "error": "scheduler.health could not be read"}' > /tmp/supabase.json
+          fi
+          # Storage and growth: computed inside the database, one small JSON row back (read-only; see the SQL file).
+          if st=$(psql "$url" -qtA -f scripts/supabase-storage.sql 2>/tmp/storage.err | tail -1) && [ -n "$st" ]; then
+            echo "$st" > /tmp/storage.json
+            python3 -c "import json; d=json.load(open('/tmp/storage.json')); print('database', round(d['db_bytes']/1e6,1), 'MB |', len(d.get('tables') or []), 'tables measured | storage objects', d.get('storage_objects'))"
+          else
+            echo '{"ok": false, "error": "storage query failed"}' > /tmp/storage.json; echo "storage query failed: $(head -c 300 /tmp/storage.err)"
           fi
 
       - name: Supabase API (Auth) health, as logins see it (no secrets printed)
@@ -120,7 +148,7 @@ jobs:
           DRY: ${{ github.event.inputs.dry_run || 'false' }}
           SIM: ${{ github.event.inputs.simulate || '' }}
         run: |
-          args="--status /tmp/status.json --runs /tmp/runs.json --supabase /tmp/supabase.json --auth /tmp/auth.json"
+          args="--status /tmp/status.json --runs /tmp/runs.json --supabase /tmp/supabase.json --auth /tmp/auth.json --storage /tmp/storage.json --egress /tmp/egress.json"
           [ "$DRY" = "true" ] || args="$args --apply"
           [ -z "$SIM" ] || args="$args --simulate $(echo "$SIM" | tr -cd 'a-z0-9-' | head -c 40)"
           python3 modeling/modelroom/health.py $args

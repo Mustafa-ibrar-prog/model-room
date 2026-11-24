@@ -79,3 +79,51 @@ def test_supabase_api_restriction_is_an_incident():
     assert "HTTP 402: exceed_db_size_quota" in inc[0]["detail"] and "resetting passwords will not help" in inc[0]["detail"]
     assert keys(H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, {"status": None})) == ["supabase-api"]
     assert H.evaluate(NOW, OK_STATUS, OK_RUNS, OK_SUPA, None) == []          # no probe = old behaviour
+
+
+# ------------------------------------------------------------------ storage, audit growth, egress (Phase 4, 2026-11-24)
+MB = 1_000_000
+
+
+def _storage(db_mb, audit_mb=12.0, audit_share=0.4, other_share=0.0):
+    return {"db_bytes": int(db_mb * MB), "storage_bytes": 0, "storage_objects": 0,
+            "tables": [{"name": "odds.potd_model_outputs", "bytes": int(audit_mb * MB), "share_7d": audit_share},
+                       {"name": "odds.reports", "bytes": int(60 * MB), "share_7d": other_share},
+                       {"name": "public.config", "bytes": 10_000, "share_7d": None}]}
+
+
+def test_growth_and_forecast():
+    g = H.growth(_storage(130, audit_mb=70, audit_share=0.7))   # 70 MB × 0.7 / 7 = 7 MB a day
+    assert round(g["per_day"] / MB, 3) == 7.0 and round(g["audit_per_day"] / MB, 3) == 7.0
+    assert round(g["days_to_limit"]) == round((500 - 130) / 7)
+    assert H.growth({"db_bytes": 100 * MB, "tables": []})["days_to_limit"] is None      # nothing growing: no forecast
+
+
+def test_small_quiet_database_raises_nothing():
+    assert H.evaluate_storage(_storage(130, audit_mb=12, audit_share=0.1), {"bytes_24h": 50 * MB, "runs_counted": 8}) == []
+
+
+def test_size_threshold_and_forecast_alerts():
+    assert [i["key"] for i in H.evaluate_storage(_storage(360, audit_share=0.0), None)] == ["supabase-db-size"]   # 72 %
+    # 130 MB but growing 15 MB a day: limit in ~25 days
+    inc = H.evaluate_storage(_storage(130, audit_mb=105, audit_share=1.0), None)
+    assert [i["key"] for i in inc] == ["supabase-db-size", "supabase-audit-growth"]
+    assert "about 25 days" in inc[0]["detail"] and "odds.potd_model_outputs" in inc[0]["detail"]
+
+
+def test_audit_growth_threshold():
+    assert H.evaluate_storage(_storage(130, audit_mb=35, audit_share=1.0), None) == []                    # 5.0 MB/day: not over
+    assert [i["key"] for i in H.evaluate_storage(_storage(130, audit_mb=42, audit_share=1.0), None)] == ["supabase-audit-growth"]
+
+
+def test_egress_projection():
+    assert H.evaluate_storage(None, {"bytes_24h": 99 * MB, "runs_counted": 9}) == []                      # 2.97 GB/month
+    inc = H.evaluate_storage(None, {"bytes_24h": 101 * MB, "runs_counted": 9})
+    assert [i["key"] for i in inc] == ["supabase-egress"] and "3.0 GB a month" in inc[0]["detail"]
+
+
+def test_missing_inputs_are_not_incidents_but_show_in_summary():
+    assert H.evaluate_storage(None, None) == [] and H.evaluate_storage({"ok": False, "error": "x"}, {}) == []
+    assert "not read (x)" in H.storage_summary({"ok": False, "error": "x"}, None)
+    s = H.storage_summary(_storage(130), {"bytes_24h": 40 * MB, "runs": 10, "runs_counted": 9})
+    assert "130.0 MB of 500 MB (26%)" in s and "odds.potd_model_outputs" in s and "40.0 MB over 9 of 10" in s

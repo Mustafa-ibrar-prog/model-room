@@ -17,6 +17,17 @@ Incidents (one GitHub issue per incident type, label "health-alert"):
   supabase-unreachable  the health view couldn't be read
   supabase-api        Supabase's API (Auth) answered with an error, e.g. HTTP 402 = project restricted for going over
                       its plan's quota or an overdue bill: every login fails while the database still looks fine
+  supabase-db-size    database size at or above 70 % of the plan limit (500 MB on Free), or forecast to reach the
+                      limit within 30 days at the last 7 days' growth rate
+  supabase-audit-growth  the Pick of the Day audit table (odds.potd_model_outputs) is growing more than 5 MB a day
+  supabase-egress     pipeline reads from the database (measured by the refresh's own byte counters over the last
+                      24 h) project to more than 3 GB a month: 60 % of the Free plan's 5 GB, leaving room for site,
+                      Auth and dashboard traffic, which these counters don't see
+
+  storage.json   optional: output of scripts/supabase-storage.sql (database size, largest tables with 7-day growth
+                 share, Storage objects, audit rows per day), or {"ok": false}
+  egress.json    optional: {"bytes_24h", "runs", "runs_counted"} summed from the "store bytes read:" lines of the last
+                 24 h of Preview runs
 
 No duplicate alerts: an incident that is already open only has its issue body refreshed (an edit, which sends no
 notification); a new issue is opened only for an incident type with no open issue; an open issue whose incident has
@@ -39,6 +50,14 @@ STUCK_AFTER = timedelta(minutes=60)
 # A wake time that passed this long ago without a dispatch means the scheduler is not firing.
 OVERDUE_MINUTES = 20
 BAD = {"failure", "cancelled", "timed_out", "startup_failure"}
+MB = 1_000_000
+DB_LIMIT = int(os.environ.get("MODELROOM_DB_LIMIT_BYTES", 500 * MB))       # Supabase Free plan database size
+DB_WARN_SHARE = 0.70
+FORECAST_DAYS = 30
+AUDIT_TABLE = "odds.potd_model_outputs"
+AUDIT_MB_PER_DAY = 5.0
+EGRESS_QUOTA = 5_000 * MB                                                   # Free plan, uncached, per billing cycle
+EGRESS_ALERT = 3_000 * MB
 
 
 def _ts(s: str | None) -> datetime | None:
@@ -108,6 +127,73 @@ def evaluate(now: datetime, status: dict, runs: list[dict], supa: dict, auth: di
         if why:
             out.append({"key": "supabase-dispatch", "title": "Supabase refresh dispatch is not healthy", "detail": "; ".join(why) + "."})
     return out
+
+
+def growth(storage: dict) -> dict:
+    """Bytes a day per table and in total, from each table's size × the share of its row data inserted in the last 7
+    days ÷ 7, plus the forecast to the database limit. Tables without a time column count as not growing."""
+    per = []
+    for t in storage.get("tables") or []:
+        sh = t.get("share_7d")
+        if sh is None:
+            continue
+        per.append({"name": t["name"], "bytes": int(t["bytes"]), "per_day": int(t["bytes"]) * float(sh) / 7})
+    per.sort(key=lambda x: -x["per_day"])
+    total = sum(x["per_day"] for x in per)
+    db = int(storage.get("db_bytes") or 0)
+    days = (DB_LIMIT - db) / total if total > 0 and db < DB_LIMIT else (0 if db >= DB_LIMIT else None)
+    audit = next((x for x in per if x["name"] == AUDIT_TABLE), None)
+    return {"per_table": per, "per_day": total, "db_bytes": db, "limit": DB_LIMIT, "days_to_limit": days,
+            "audit_per_day": audit["per_day"] if audit else None, "audit_bytes": audit["bytes"] if audit else None}
+
+
+def evaluate_storage(storage: dict | None, egress: dict | None) -> list[dict]:
+    out = []
+    if storage is not None and storage.get("db_bytes") is not None:
+        g = growth(storage)
+        db, share = g["db_bytes"], g["db_bytes"] / DB_LIMIT
+        days = g["days_to_limit"]
+        why = []
+        if share >= DB_WARN_SHARE:
+            why.append(f"the database is {db / MB:.0f} MB, {share:.0%} of the {DB_LIMIT / MB:.0f} MB limit")
+        if days is not None and days < FORECAST_DAYS:
+            why.append(f"at the last 7 days' rate (+{g['per_day'] / MB:.1f} MB a day) it reaches the limit in about {days:.0f} days")
+        if why:
+            top = ", ".join(f"{x['name']} +{x['per_day'] / MB:.1f} MB/day" for x in g["per_table"][:3])
+            out.append({"key": "supabase-db-size", "title": "Supabase database is approaching its size limit",
+                        "detail": "; ".join(why).capitalize() + f". Fastest-growing tables: {top or 'none measured'}. Over the limit the "
+                                  "project goes read-only. Nothing is deleted automatically; see the retention options in the infrastructure report."})
+        if g["audit_per_day"] is not None and g["audit_per_day"] / MB > AUDIT_MB_PER_DAY:
+            out.append({"key": "supabase-audit-growth", "title": "Pick of the Day audit table is growing fast",
+                        "detail": f"{AUDIT_TABLE} is {g['audit_bytes'] / MB:.0f} MB and growing about {g['audit_per_day'] / MB:.1f} MB a day "
+                                  f"(threshold {AUDIT_MB_PER_DAY:.0f} MB). The table is append-only and is not changed by this check."})
+    if egress is not None and egress.get("bytes_24h") is not None:
+        month = float(egress["bytes_24h"]) * 30
+        if month > EGRESS_ALERT:
+            out.append({"key": "supabase-egress", "title": "Supabase egress is on course to pass 3 GB this month",
+                        "detail": f"Refresh reads in the last 24 h: {egress['bytes_24h'] / MB:.1f} MB over {egress.get('runs_counted')} run(s), "
+                                  f"about {month / MB / 1000:.1f} GB a month against the Free plan's {EGRESS_QUOTA / MB / 1000:.0f} GB. Site, "
+                                  "Auth and dashboard traffic come on top; Supabase → Organization → Usage is the exact figure."})
+    return out
+
+
+def storage_summary(storage: dict | None, egress: dict | None) -> str:
+    lines = []
+    if storage is None or storage.get("db_bytes") is None:
+        lines.append(f"- Database storage: not read ({(storage or {}).get('error', 'no data')})")
+    else:
+        g = growth(storage)
+        d = g["days_to_limit"]
+        lines.append(f"- Database: {g['db_bytes'] / MB:.1f} MB of {DB_LIMIT / MB:.0f} MB ({g['db_bytes'] / DB_LIMIT:.0%}), "
+                     f"+{g['per_day'] / MB:.2f} MB a day, limit in {'n/a' if d is None else f'{d:.0f} days'}")
+        lines.append("- Largest tables: " + ", ".join(f"{t['name']} {int(t['bytes']) / MB:.1f} MB" for t in (storage.get("tables") or [])[:6]))
+        if g["audit_per_day"] is not None:
+            lines.append(f"- Audit table {AUDIT_TABLE}: {g['audit_bytes'] / MB:.1f} MB, +{g['audit_per_day'] / MB:.2f} MB a day")
+        lines.append(f"- Storage (files): {int(storage.get('storage_bytes') or 0) / MB:.1f} MB in {storage.get('storage_objects')} object(s)")
+    if egress is not None and egress.get("bytes_24h") is not None:
+        lines.append(f"- Refresh egress, last 24 h: {egress['bytes_24h'] / MB:.1f} MB over {egress.get('runs_counted')} of {egress.get('runs')} run(s) "
+                     f"(≈ {egress['bytes_24h'] * 30 / MB / 1000:.2f} GB a month; site and Auth traffic not included)")
+    return "\n".join(lines)
 
 
 def plan(incidents: list[dict], open_issues: list[dict]) -> list[dict]:
@@ -197,6 +283,8 @@ def main(argv=None) -> int:
     ap.add_argument("--runs", required=True)
     ap.add_argument("--supabase", required=True)
     ap.add_argument("--auth", default="", help="auth.json from the Auth API probe (optional)")
+    ap.add_argument("--storage", default="", help="storage.json from scripts/supabase-storage.sql (optional)")
+    ap.add_argument("--egress", default="", help="egress.json summed from the Preview runs' byte counters (optional)")
     ap.add_argument("--now")
     ap.add_argument("--apply", action="store_true", help="open / update / close issues (default: dry run, print only)")
     ap.add_argument("--simulate", default="", help="add a synthetic incident with this key (alert-path test)")
@@ -206,11 +294,13 @@ def main(argv=None) -> int:
     runs = json.load(open(a.runs))
     supa = json.load(open(a.supabase))
     auth = json.load(open(a.auth)) if a.auth and os.path.exists(a.auth) else None
-    inc = evaluate(now, status, runs, supa, auth)
+    storage = json.load(open(a.storage)) if a.storage and os.path.exists(a.storage) else None
+    egress = json.load(open(a.egress)) if a.egress and os.path.exists(a.egress) else None
+    inc = evaluate(now, status, runs, supa, auth) + evaluate_storage(storage, egress)
     if a.simulate:
         inc.append({"key": f"test-{a.simulate}", "title": "TEST alert (simulated, not a real problem)",
                     "detail": f"Simulated incident '{a.simulate}' to test the alert path. It closes on the next normal run."})
-    summary = summary_of(now, status, runs, supa)
+    summary = summary_of(now, status, runs, supa) + "\n" + storage_summary(storage, egress)
     report = {"checked_at": now.isoformat(timespec="seconds"), "incidents": [i["key"] for i in inc], "summary": summary}
     if a.apply:
         acts = plan(inc, open_alerts())
