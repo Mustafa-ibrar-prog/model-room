@@ -50,12 +50,15 @@ jobs:
           git show origin/preview:modeling/preview-ledger/reports/store_checkpoints.json > "$MODELROOM_LEDGER_DIR/reports/store_checkpoints.json" 2>/dev/null \
             && echo "checkpoints found" || { echo "no checkpoints yet: chains are checked from genesis without an anchor"; rm -f "$MODELROOM_LEDGER_DIR/reports/store_checkpoints.json"; }
       - name: Earlier checkpoints from the preview branch history (last 50 versions)
+        working-directory: .
         run: |
           mkdir -p /tmp/anchors
           for c in $(git log origin/preview -n 50 --format=%H -- modeling/preview-ledger/reports/store_checkpoints.json); do
             git show "$c:modeling/preview-ledger/reports/store_checkpoints.json" > "/tmp/anchors/$c.json" 2>/dev/null || rm -f "/tmp/anchors/$c.json"
           done
-          echo "$(ls /tmp/anchors | wc -l) earlier checkpoint versions"
+          n=$(ls /tmp/anchors | wc -l); echo "$n earlier checkpoint versions"
+          [ "$n" -gt 0 ] || git show origin/preview:modeling/preview-ledger/reports/store_checkpoints.json >/dev/null 2>&1 \
+            && { [ "$n" -gt 0 ] || { echo "::error::a checkpoint exists but its history couldn't be read"; exit 1; }; } || true
       - name: Connect to the store (nothing printed)
         working-directory: .
         env:
