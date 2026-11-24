@@ -56,6 +56,23 @@ jobs:
           select format('%-12s %-4s rows=%s  payload=%s MB  avg=%s KB  max=%s KB  %s .. %s', 'snapshots', league, count(*), round(sum(octet_length(payload))/1048576.0, 1), round(avg(octet_length(payload))/1024.0, 2), round(max(octet_length(payload))/1024.0, 1), min(inserted_at)::date, max(inserted_at)::date) from odds.snapshots group by league;
           select format('%-12s %-4s rows=%s  payload=%s MB  avg=%s KB  max=%s KB  %s .. %s', 'comparisons', league, count(*), round(sum(octet_length(payload))/1048576.0, 1), round(avg(octet_length(payload))/1024.0, 2), round(max(octet_length(payload))/1024.0, 1), min(inserted_at)::date, max(inserted_at)::date) from odds.comparisons group by league;
           select format('%-12s %-4s rows=%s  payload=%s MB  avg=%s KB  max=%s KB  %s .. %s', 'reports', league, count(*), round(sum(octet_length(payload))/1048576.0, 1), round(avg(octet_length(payload))/1024.0, 2), round(max(octet_length(payload))/1024.0, 1), min(inserted_at)::date, max(inserted_at)::date) from odds.reports group by league;
+          \echo '== latest report per league: size of each top-level field (names and sizes only, no content)'
+          select format('%s %-32s %8s KB  %s', r.league, k.key, round(octet_length(k.value::text)/1024.0, 1),
+                        case jsonb_typeof(k.value) when 'array' then jsonb_array_length(k.value)::text || ' items'
+                                                   when 'object' then (select count(*) from jsonb_object_keys(k.value))::text || ' keys' else '' end)
+          from (select distinct on (league) league, payload::jsonb as j from odds.reports order by league, seq desc) r,
+               lateral jsonb_each(r.j) k
+          order by r.league, octet_length(k.value::text) desc;
+          \echo '== line_histories: one entry = one game/book/market series (sizes only)'
+          select format('%s series=%s  avg observations per series=%s  avg KB per series=%s', league, jsonb_array_length(h),
+                        (select round(avg((e->>'observations')::numeric), 1) from jsonb_array_elements(h) e),
+                        round(octet_length(h::text)/1024.0/greatest(jsonb_array_length(h), 1), 2))
+          from (select distinct on (league) league, payload::jsonb->'line_histories' as h from odds.reports order by league, seq desc) x
+          where jsonb_typeof(h) = 'array';
+          \echo '== report size over time (first, middle, latest per league)'
+          select format('%s seq %s  %s  %s KB', league, seq, inserted_at::date, round(octet_length(payload)/1024.0)) from odds.reports r
+          where seq in (1, (select max(seq)/2 from odds.reports x where x.league = r.league), (select max(seq) from odds.reports x where x.league = r.league))
+          order by league, seq;
           \echo '== reports added per day (both leagues)'
           select format('%s  %s reports, %s MB', inserted_at::date, count(*), round(sum(octet_length(payload))/1048576.0, 1)) from odds.reports group by 1 order by 1 desc limit 14;
           \echo '== private audit table'
