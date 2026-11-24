@@ -1,6 +1,6 @@
 import "server-only";
 import { cookies } from "next/headers";
-import { authEnabled, isProduction } from "@/lib/auth-config";
+import { authEnabled, isProduction, testOpenAccess } from "@/lib/auth-config";
 import { getTierForUser } from "./membership";
 import { getSessionUserId } from "./session";
 import type { TierId } from "@/types/domain";
@@ -34,6 +34,8 @@ export function isTierPreviewEnabled(): boolean {
  * Callers must render inside <Suspense> because this reads cookies.
  */
 export async function getViewer(): Promise<Viewer> {
+  // TEST site, logins switched off: full access for everyone, no account lookup (never in production).
+  if (testOpenAccess()) return { userId: null, tier: "pro", isPreview: false };
   const userId = await getSessionUserId();
   if (userId) {
     return { userId, tier: await getTierForUser(userId), isPreview: false };

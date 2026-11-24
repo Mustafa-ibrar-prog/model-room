@@ -57,6 +57,14 @@ async function propsCheck(page, tier, who) {
     await browser.close(); process.exit(1);
   }
   check(home.status === 200, "home page loads without an account");
+  // TEST-site open access (logins switched off, Moose 2026-11-23): everyone gets full access; account checks don't apply.
+  if ((await page.locator("[data-open-access]").count()) > 0) {
+    ok("test site is in open access (logins switched off): account and plan checks skipped");
+    await propsCheck(page, "pro", "anonymous (open access)");
+    await ctx.close(); await browser.close();
+    if (failed) { console.log(`${failed} check(s) failed`); process.exit(1); }
+    console.log("all checks passed (open access)"); process.exit(0);
+  }
   check((await page.locator("header >> text=Log in").count()) > 0 && (await page.locator("header >> text=Sign up").count()) > 0, "header shows Log in and Sign up");
   const nfl = await text(page, "/nfl");
   check(nfl.status === 200 && !page.url().includes("/login"), "anonymous visitor can browse /nfl");

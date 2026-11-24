@@ -14,6 +14,16 @@ export function isProduction(): boolean {
   return process.env.VERCEL_ENV === "production" || process.env.MODELROOM_ENV === "production";
 }
 
+/**
+ * TEST-site open access (Moose, 2026-11-23: "just remove password access for now"): while the TEST Supabase project
+ * is restricted, logins can't work, so on non-production sites every visitor gets full (Pro) access with no account
+ * and no password. Production never: isProduction() wins. To bring logins back, set MODELROOM_TEST_OPEN_ACCESS=off
+ * in the TEST site's Vercel settings (or revert this). Nothing about accounts, plans or passwords is changed.
+ */
+export function testOpenAccess(): boolean {
+  return !isProduction() && process.env.MODELROOM_TEST_OPEN_ACCESS !== "off";
+}
+
 export const TEST_ACCOUNT_DOMAIN = "@modelroom.test";
 
 export function isTestAccount(email: string | null | undefined): boolean {

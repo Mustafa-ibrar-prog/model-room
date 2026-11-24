@@ -1,6 +1,6 @@
 /** Login rules that don't need a live Supabase project. */
 import { afterEach, describe, expect, it } from "vitest";
-import { authEnabled, isProduction, isTestAccount, passwordChangeAllowed, safeNext } from "@/lib/auth-config";
+import { authEnabled, isProduction, isTestAccount, passwordChangeAllowed, safeNext, testOpenAccess } from "@/lib/auth-config";
 
 const ENV = { ...process.env };
 afterEach(() => {
@@ -58,5 +58,23 @@ describe("test-account passwords stay in sync", () => {
     expect(passwordChangeAllowed("Free-Test@ModelRoom.TEST")).toBe(false);
     expect(passwordChangeAllowed("fan@example.com")).toBe(true);
     expect(passwordChangeAllowed(null)).toBe(true);
+  });
+});
+
+describe("TEST-site open access (logins switched off)", () => {
+  const env = { ...process.env };
+  afterEach(() => { process.env = { ...env }; });
+  it("is on for the test site by default, off with MODELROOM_TEST_OPEN_ACCESS=off", () => {
+    delete process.env.VERCEL_ENV; delete process.env.MODELROOM_ENV; delete process.env.MODELROOM_TEST_OPEN_ACCESS;
+    expect(testOpenAccess()).toBe(true);
+    process.env.MODELROOM_TEST_OPEN_ACCESS = "off";
+    expect(testOpenAccess()).toBe(false);
+  });
+  it("is never on in production", () => {
+    delete process.env.MODELROOM_TEST_OPEN_ACCESS;
+    process.env.VERCEL_ENV = "production";
+    expect(testOpenAccess()).toBe(false);
+    delete process.env.VERCEL_ENV; process.env.MODELROOM_ENV = "production";
+    expect(testOpenAccess()).toBe(false);
   });
 });
