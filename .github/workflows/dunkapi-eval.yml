@@ -1,0 +1,90 @@
+name: DunkAPI data evaluation (manual, max 2 requests)
+
+# One-off TEST evaluation of DunkAPI schedule and injury data (Moose, 2026-11-24). Manual only. At most two requests:
+# get_schedule (default parameters), then get_injuries only if get_schedule used 2 credits or fewer, keeping the run
+# within 4 credits. Responses are summarized in the log (fields, date ranges, identifiers, statuses) and discarded:
+# nothing is stored, committed, sent to Supabase or used by Model Room. The key is never printed.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dunkapi-check
+  cancel-in-progress: false
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      KEY: ${{ secrets.DUNKAPI_API_KEY }}
+    steps:
+      - name: Summarizer
+        run: |
+          cat > /tmp/summ.py <<'EOF'
+          import collections, json, re, sys
+          name, key = sys.argv[1], sys.argv[2]
+          raw = open(f"/tmp/{name}.json", encoding="utf-8", errors="replace").read()
+          print(f"== {name}: {len(raw)} bytes; key echoed: {'YES' if key and key in raw else 'no'}")
+          try:
+              d = json.loads(raw)
+          except Exception:
+              print("not JSON:", raw[:300]); sys.exit(0)
+          if isinstance(d, dict):
+              print("top-level keys:", list(d)[:20])
+              for k, v in d.items():
+                  if not isinstance(v, (dict, list)):
+                      print(f"  {k}: {str(v)[:120]}")
+          rows = []
+          def find(x):
+              if isinstance(x, list) and x and isinstance(x[0], dict):
+                  if len(x) > len(rows): rows[:] = x
+              if isinstance(x, dict):
+                  for v in x.values(): find(v)
+              elif isinstance(x, list):
+                  for v in x[:50]: find(v)
+          find(d)
+          print("rows:", len(rows))
+          if not rows: sys.exit(0)
+          fields = collections.Counter(k for r in rows for k in r)
+          print("fields (share of rows filled):")
+          for k, n in fields.most_common():
+              filled = sum(1 for r in rows if r.get(k) not in (None, "", [], {}))
+              ex = next((r[k] for r in rows if r.get(k) not in (None, "", [], {})), None)
+              print(f"  {k}: {filled}/{len(rows)}  e.g. {json.dumps(ex, default=str)[:110]}")
+          iso = re.compile(r"^\d{4}-\d{2}-\d{2}")
+          for k in fields:
+              vals = sorted(str(r[k]) for r in rows if isinstance(r.get(k), str) and iso.match(r[k]))
+              if vals:
+                  print(f"date field {k}: {vals[0]} .. {vals[-1]}  ({len(vals)} values)")
+          for k in fields:
+              if any(w in k.lower() for w in ("status", "season", "type", "designation", "state", "source")):
+                  c = collections.Counter(str(r.get(k)) for r in rows)
+                  if len(c) <= 25:
+                      print(f"values of {k}: {dict(c.most_common(25))}")
+          bookish = [k for k in fields if any(w in k.lower() for w in ("book", "odds", "line", "spread", "total", "moneyline", "ml"))]
+          print("sportsbook/odds fields:", bookish or "none")
+          print("sample rows:")
+          for r in rows[:2]:
+              print(" ", json.dumps(r, default=str)[:500])
+          EOF
+      - name: get_schedule (default parameters)
+        id: s
+        run: |
+          [ -n "$KEY" ] || { echo "::error::DUNKAPI_API_KEY missing"; exit 1; }
+          code=$(curl -sS -o /tmp/schedule.json -D /tmp/h1.txt -w '%{http_code}' --max-time 60 -X POST https://mcp.dunkapi.com/v1/get_schedule \
+            -H "x-api-key: $KEY" -H "Content-Type: application/json" -d '{}')
+          used=$(grep -i '^x-credits-used:' /tmp/h1.txt | tr -dc '0-9'); left=$(grep -i '^x-credits-remaining:' /tmp/h1.txt | tr -dc '0-9')
+          echo "HTTP $code | credits used: ${used:-?} | remaining: ${left:-?}"
+          echo "used=${used:-99}" >> "$GITHUB_OUTPUT"
+          python3 /tmp/summ.py schedule "$KEY"
+      - name: get_injuries (only if the run stays within 4 credits)
+        run: |
+          if [ "${{ steps.s.outputs.used }}" -gt 2 ]; then echo "SKIPPED: get_schedule used ${{ steps.s.outputs.used }} credits; another call could pass 4"; exit 0; fi
+          code=$(curl -sS -o /tmp/injuries.json -D /tmp/h2.txt -w '%{http_code}' --max-time 60 -X POST https://mcp.dunkapi.com/v1/get_injuries \
+            -H "x-api-key: $KEY" -H "Content-Type: application/json" -d '{}')
+          used=$(grep -i '^x-credits-used:' /tmp/h2.txt | tr -dc '0-9'); left=$(grep -i '^x-credits-remaining:' /tmp/h2.txt | tr -dc '0-9')
+          echo "HTTP $code | credits used: ${used:-?} | remaining: ${left:-?}"
+          python3 /tmp/summ.py injuries "$KEY"
