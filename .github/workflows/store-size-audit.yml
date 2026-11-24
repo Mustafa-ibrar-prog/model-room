@@ -1,0 +1,67 @@
+name: Store size audit (test site)
+
+# Manual, READ-ONLY. Table sizes and row counts for the TEST Supabase project, to size its egress (Moose approved,
+# 2026-11-23, Step 0 of the egress plan). Every query runs inside `begin read only` and is rolled back. Prints
+# numbers and table names only: no URLs, keys, passwords, payloads, sportsbook names or email addresses.
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Connect to the TEST project (read-only)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          [ -n "$SUPABASE_DB_URL" ] || { echo "SUPABASE_DB_URL is not set"; exit 1; }
+          echo "::add-mask::$SUPABASE_DB_URL"
+          sudo apt-get install -y -qq postgresql-client >/dev/null 2>&1 || true
+          url=""
+          case "$SUPABASE_DB_URL" in
+            *db.*.supabase.co*)
+              for host in aws-0-us-east-1 aws-1-us-east-1 aws-0-us-east-2 aws-1-us-east-2 aws-0-us-west-1 aws-1-us-west-1 aws-0-us-west-2 aws-1-us-west-2 aws-0-ca-central-1 aws-1-ca-central-1 aws-0-eu-west-1 aws-1-eu-west-1 aws-0-eu-west-2 aws-1-eu-west-2 aws-0-eu-central-1 aws-1-eu-central-1; do
+                cands=$(HOST="$host.pooler.supabase.com" python3 scripts/pooler-url.py 2>/dev/null) || continue
+                while IFS= read -r c; do
+                  echo "::add-mask::$c"
+                  PGCONNECT_TIMEOUT=8 psql "$c" -qtAc "select 1" >/dev/null 2>&1 && { url="$c"; break; }
+                done <<< "$cands"
+                [ -n "$url" ] && break
+              done;;
+            *) PGCONNECT_TIMEOUT=8 psql "$SUPABASE_DB_URL" -qtAc "select 1" >/dev/null 2>&1 && url="$SUPABASE_DB_URL";;
+          esac
+          [ -n "$url" ] || { echo "TEST project not reachable"; exit 1; }
+          echo "$url" > /tmp/dburl && chmod 600 /tmp/dburl
+
+      - name: Sizes (read-only, numbers only)
+        run: |
+          cat > /tmp/q.sql <<'SQL'
+          begin read only;
+          \echo '== database'
+          select 'database size: ' || pg_size_pretty(pg_database_size(current_database()));
+          \echo '== 25 largest tables (total incl. indexes and TOAST) | live rows (estimate)'
+          select format('%-45s %10s  rows~%s', n.nspname || '.' || c.relname, pg_size_pretty(pg_total_relation_size(c.oid)), coalesce(s.n_live_tup, c.reltuples::bigint))
+          from pg_class c join pg_namespace n on n.oid = c.relnamespace
+          left join pg_stat_all_tables s on s.relid = c.oid
+          where c.relkind in ('r', 'p') and n.nspname not in ('pg_catalog', 'information_schema', 'pg_toast')
+          order by pg_total_relation_size(c.oid) desc limit 25;
+          \echo '== odds store: exact rows | payload MB | avg payload KB | max payload KB | first and last insert, per league'
+          select format('%-12s %-4s rows=%-7s payload=%7.1f MB  avg=%6.2f KB  max=%7.1f KB  %s .. %s', 'snapshots', league, count(*), sum(octet_length(payload))/1048576.0, avg(octet_length(payload))/1024.0, max(octet_length(payload))/1024.0, min(inserted_at)::date, max(inserted_at)::date) from odds.snapshots group by league;
+          select format('%-12s %-4s rows=%-7s payload=%7.1f MB  avg=%6.2f KB  max=%7.1f KB  %s .. %s', 'comparisons', league, count(*), sum(octet_length(payload))/1048576.0, avg(octet_length(payload))/1024.0, max(octet_length(payload))/1024.0, min(inserted_at)::date, max(inserted_at)::date) from odds.comparisons group by league;
+          select format('%-12s %-4s rows=%-7s payload=%7.1f MB  avg=%6.2f KB  max=%7.1f KB  %s .. %s', 'reports', league, count(*), sum(octet_length(payload))/1048576.0, avg(octet_length(payload))/1024.0, max(octet_length(payload))/1024.0, min(inserted_at)::date, max(inserted_at)::date) from odds.reports group by league;
+          \echo '== reports added per day (both leagues)'
+          select format('%s  %s reports, %7.1f MB', inserted_at::date, count(*), sum(octet_length(payload))/1048576.0) from odds.reports group by 1 order by 1 desc limit 14;
+          \echo '== private audit table'
+          select format('potd_model_outputs rows=%s  first %s  last %s  distinct boards=%s', count(*), min(inserted_at)::date, max(inserted_at)::date, count(distinct board_generated_at)) from odds.potd_model_outputs;
+          \echo '== housekeeping tables that grow on their own'
+          select format('cron.job_run_details rows=%s', count(*)) from cron.job_run_details;
+          select format('net._http_response rows=%s', count(*)) from net._http_response;
+          rollback;
+          SQL
+          psql "$(cat /tmp/dburl)" -X -qtA -v ON_ERROR_STOP=0 -f /tmp/q.sql 2>&1 | sed -E 's#postgres(ql)?://[^ ]+#<masked>#g'
