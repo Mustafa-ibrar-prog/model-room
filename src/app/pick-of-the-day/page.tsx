@@ -277,6 +277,7 @@ function LiveCard({ r }: { r: LiveResult }) {
 
 /** Qualifying Unders the S1u injury safeguard left out, each with the teammate(s) behind it. */
 function SafeguardPanel({ r }: { r: LiveResult }) {
+  if (!r.diag) return null;                       // nothing was checked (no games, no board): nothing to say
   if (!r.safeguardActive) {
     return <p className="text-xs text-faint">Injury safeguard: not run this time because the official NBA injury report wasn&apos;t available. No one is assumed out.</p>;
   }
