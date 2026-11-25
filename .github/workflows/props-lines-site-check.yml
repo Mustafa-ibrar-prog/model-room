@@ -1,0 +1,47 @@
+name: Props lines site check (TEST, manual, read-only)
+
+# Loads the TEST NBA Props page and one player page and checks that stored sportsbook points lines render
+# (Moose, 2026-11-24). Read-only page loads; prints counts and yes/no checks only: no prices, lines or sportsbook names.
+on:
+  workflow_dispatch:
+    inputs:
+      game:
+        description: "ESPN game id"
+        required: true
+      player:
+        description: "player id for the detail page"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: https://model-room-git-preview-computer-citi.vercel.app
+    steps:
+      - name: Load the pages and count what renders
+        run: |
+          curl -sS -L --max-time 60 -o /tmp/list.html -w "list page HTTP %{http_code}\n" "$SITE/nba-props?game=${{ github.event.inputs.game }}&cat=points"
+          curl -sS -L --max-time 60 -o /tmp/detail.html -w "detail page HTTP %{http_code}\n" "$SITE/nba-props?game=${{ github.event.inputs.game }}&cat=points&player=${{ github.event.inputs.player }}"
+          python3 - <<'EOF'
+          import re, html
+          def text(f):
+              t = re.sub(r"<script.*?</script>", " ", open(f, encoding="utf-8", errors="replace").read(), flags=re.S)
+              return re.sub(r"[\u202f\u00a0]", " ", html.unescape(re.sub(r"<[^>]+>", "", t)))
+          L, D = text("/tmp/list.html"), text("/tmp/detail.html")
+          print("list: 'Sportsbook line' labels:", L.count("Sportsbook line"))
+          print("list: cards showing book count/name + update time:", len(re.findall(r"Sportsbook line\s*[\d.]+\s*[^·]{1,40}·\s*\d{1,2}:\d{2} [AP]M PT", L)))
+          print("list: cards with 'none':", len(re.findall(r"Sportsbook line\s+none", L)))
+          print("detail: sportsbook table present:", "Sportsbook lines (points, US books)" in D)
+          print("detail: table header present:", all(h in D for h in ("Sportsbook", "Line", "Over", "Under", "Updated")))
+          rows = re.findall(r"<tr[^>]*>.*?</tr>", open("/tmp/detail.html", encoding="utf-8", errors="replace").read(), flags=re.S)
+          print("detail: table rows (incl. header):", len(rows))
+          print("detail: update times shown:", len(re.findall(r"\d{1,2}:\d{2} [AP]M PT", D)) > 0)
+          print("detail: responsible-gambling line:", "Gamble responsibly. 18+" in D)
+          print("detail: 'more than' headline at a book line:", bool(re.search(r"Chance of more than \d+(\.\d)?", D)))
+          for s in ("R2_", "AKIA", "r2.cloudflarestorage.com", "x-amz", "Signature="):
+              print(f"credential marker '{s}' in page:", s in open("/tmp/list.html").read() or s in open("/tmp/detail.html").read())
+          EOF
