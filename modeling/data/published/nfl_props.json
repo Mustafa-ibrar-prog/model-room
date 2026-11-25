@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-25T00:03:11+00:00",
+  "generated_at": "2026-11-25T00:33:10+00:00",
   "season": 2026,
   "week": 12,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "b691d50637fe654e",
+    "inputs_hash": "77066f4ff4143b7c",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,7 +20,7 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-25T00:02:29.180153+00:00",
+      "generated_at": "2026-11-25T00:32:30.825075+00:00",
       "sources": {
         "espn": {
           "ok": true,
@@ -45,7 +45,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-25T00:02:06+00:00",
+    "last_ingest": "2026-11-25T00:32:04+00:00",
     "results_through": "2026-11-23",
     "markets": [
       {
@@ -101659,7 +101659,7 @@
           "opp": "NO",
           "position": "RB",
           "game_id": "2026_12_NO_CIN",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -102362,9 +102362,18 @@
             "qb_note": null,
             "team_pass_attempts": 36.4,
             "team_carries": 25.1,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.391,
-            "availability": null,
+            "availability": {
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-25T00:08:00+00:00",
+              "comment": "Perine turned six carries into 26 yards and caught all four of his targets for 71 yards during the Bengals' 22-20 loss to the Commanders on Monday. The Commanders' defense focused its attention toward slowing down both Ja'Marr Chase and Tee Higgins. That opened up the field for Perine, with most of his production coming on a 44-yard catch late in the second quarter, and the drive ended with a 31-yard touchdown pass from Joe Burrow to Higgins. Perine finished second on the Bengals in both catches and receiving yards behind tight end Mike Gesicki, and the former's 26 rushing yards were well ahead of Chase Brown's six. Perine has at least 10 touches on offense in each of his last three games, but Cincinnati's offense is mustering only 79.4 rushing yards per game, which is third-worst in the NFL. Given Brown's struggles this season, Perine could take on a larger role in the backfield for Week 12 against the Saints on Sunday.",
+              "conflict": null,
+              "notes": []
+            },
             "teammates_out_detail": [
               {
                 "name": "Tanner Hudson",
@@ -102642,7 +102651,7 @@
           "opp": "NO",
           "position": "WR",
           "game_id": "2026_12_NO_CIN",
-          "injury_status": "Available",
+          "injury_status": null,
           "markets": {
             "rushing_yards": {
               "label": "Rushing yards",
@@ -103247,18 +103256,9 @@
             "qb_note": null,
             "team_pass_attempts": 36.4,
             "team_carries": 25.1,
-            "injury_status": "Available",
+            "injury_status": null,
             "snap_share_recent": 0.424,
-            "availability": {
-              "status": "available",
-              "raw_status": "Active",
-              "source": "espn",
-              "confirmed": false,
-              "report_time": "2026-11-17T03:07:00+00:00",
-              "comment": "Meyers caught both of his targets for 20 yards and a touchdown while also adding 58 yards as a kick returner during Sunday night's 38-18 win over the Steelers. Meyers reeled in multiple passes for the third straight game, and he was able to secure his first score of the year in the second quarter on a 15-yard touchdown pass from Joe Burrow. The 26-year-old's 28 offensive snaps ranked fourth at wide receiver for Cincinnati behind Ja'Marr Chase (59), Tee Higgins (51) and Colbie Young (29). With Andrei Iosivas (thumb) nearing a return to action, Meyers may see a sharp drop in offensive opportunities in the near future.",
-              "conflict": null,
-              "notes": []
-            },
+            "availability": null,
             "teammates_out_detail": [
               {
                 "name": "Tanner Hudson",
