@@ -9,7 +9,7 @@ import os
 import re
 import subprocess
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import date, UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -40,6 +40,7 @@ create table if not exists scheduler.dispatch_log (
 
 # ------------------------------------------------------------------ the planner
 def _plan(tmp_path, monkeypatch, log_rows=(), games=()):
+    monkeypatch.setattr(R, "NEW_SCHEDULE_FROM", date(2000, 1, 1))     # these fixtures predate the 2026-11-26 slots
     monkeypatch.setattr(R, "LOG", tmp_path / "refresh_log.jsonl")
     monkeypatch.setattr(R, "PUBLISHED", tmp_path)
     R.LOG.write_text("".join(json.dumps(r) + "\n" for r in log_rows))
@@ -51,11 +52,11 @@ def test_next_check_waits_for_the_next_slot(tmp_path, monkeypatch):
     # 9:30 PT on a day whose three daily slots have all succeeded, one game at 19:00 PT tomorrow.
     now = datetime(2026, 11, 13, 17, 30, tzinfo=UTC)  # 09:30 PT
     done = [{"slot": f"{k}:2026-11-12", "status": "success"} for k in ("morning", "midday", "afternoon")]
-    done += [{"slot": "morning:2026-11-13", "status": "success"}]
+    done += [{"slot": f"{k}:2026-11-13", "status": "success"} for k in ("lines", "morning", "linesretry")]
     _plan(tmp_path, monkeypatch, done, games=["2026-11-14T03:00:00+00:00"])
     at, why = R.next_check(now)
-    assert at == datetime(2026, 11, 13, 20, 0, tzinfo=UTC)  # midday 12:00 PT, the next slot
-    assert "midday:2026-11-13" in why
+    assert at == datetime(2026, 11, 13, 20, 0, tzinfo=UTC)  # 12:00 PT game lines, the next slot (2026-11-25)
+    assert "gamelines:2026-11-13" in why
     # Nothing is dispatched before then: the scheduler sleeps through 2.5 hours it used to spend waking up.
     assert at - now == timedelta(hours=2, minutes=30)
 
@@ -78,7 +79,7 @@ def test_never_sleeps_longer_than_four_hours(tmp_path, monkeypatch):
 
 def test_pregame_slot_is_the_next_wake(tmp_path, monkeypatch):
     now = datetime(2026, 11, 13, 21, 0, tzinfo=UTC)  # 13:00 PT
-    done = [{"slot": f"{k}:2026-11-13", "status": "success"} for k in ("morning", "midday")]
+    done = [{"slot": f"{k}:2026-11-13", "status": "success"} for k in ("lines", "morning", "linesretry", "gamelines", "midday")]
     _plan(tmp_path, monkeypatch, done, games=["2026-11-13T23:00:00+00:00"])
     at, why = R.next_check(now)
     assert at == datetime(2026, 11, 13, 22, 30, tzinfo=UTC)  # start − 30 min, before the 16:00 PT daily slot
@@ -242,6 +243,7 @@ def _run_week(tmp_path, monkeypatch, label, new_scheduler: bool):
         if (day.astimezone(UTC).weekday()) == 6:  # Sunday: three kickoff times
             nfl += [(day + timedelta(hours=18)).isoformat(), (day + timedelta(hours=21, minutes=5)).isoformat(),
                     (day + timedelta(hours=25, minutes=20)).isoformat()]
+    monkeypatch.setattr(R, "NEW_SCHEDULE_FROM", date(2000, 1, 1))
     home = tmp_path / label
     home.mkdir()
     monkeypatch.setattr(R, "LOG", home / "refresh_log.jsonl")
@@ -270,7 +272,7 @@ def test_the_same_slots_are_covered_with_far_fewer_runs(tmp_path, monkeypatch):
     new_slots, new_runs = _run_week(tmp_path, monkeypatch, "new", new_scheduler=True)
     assert new_slots == old_slots, f"coverage changed: {old_slots ^ new_slots}"
     assert len(new_slots) >= 7 * 3, "the three daily slots must run every day"
-    assert {s.split(":")[0] for s in new_slots} == {"morning", "midday", "afternoon", "pregame", "inactives"}
+    assert {s.split(":")[0] for s in new_slots} == {"lines", "morning", "linesretry", "gamelines", "midday", "afternoon", "pregame", "inactives"}
     assert old_runs == 7 * 24 * 12  # every 5 minutes, all week
     assert new_runs < old_runs / 10, f"{new_runs} runs vs {old_runs}"
     print(f"\na week: {len(new_slots)} slots covered by both; runs {old_runs} -> {new_runs} "

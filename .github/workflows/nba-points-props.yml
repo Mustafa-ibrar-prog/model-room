@@ -1,21 +1,22 @@
 name: NBA player points lines (TEST)
 
-# NBA player points lines from The Odds API, one request per game per day, stored in the private R2 bucket
-# (Moose, approved 2026-11-24). No Supabase. Game-line refreshes always come first: the run waits for today's noon
-# game-line refresh and keeps 12 credits a day for the rest of the credit cycle + 30 in reserve
-# (modeling/modelroom/sources/odds_props.py). Nothing is bought or upgraded.
-#   12:40 PM PT  main run: every NBA game today that hasn't started, earliest first, within the daily allowance
-#    3:40 PM PT  follow-up: only games whose market wasn't posted yet at 12:40 (0 credits when still empty)
-# Logs show counts and credit numbers only: no lines, prices, sportsbook names or player-line pairs (public repository).
-# Times are UTC for Pacific Standard Time (NBA season); in daylight time they run an hour later.
+# BACKUP trigger for the NBA player points lines (Moose, 2026-11-25). The primary trigger is the Supabase scheduler,
+# which wakes the Preview workflow at 5:30 AM PT (main) and 9:30 AM PT (retry of empty games only); it sends only the
+# wake-up, and nothing is stored in Supabase. These GitHub schedules fire at both the standard-time and daylight-time
+# UTC equivalents; a scheduled run proceeds only inside the Pacific window (main 5:30-8:30, retry 9:30-12:30) and only
+# if that mode hasn't already run today (write-once R2 lock + attempt markers), so a duplicate trigger never pays
+# twice. Credit cap: 12 a day held back for game lines (today included) + 30, spread over the cycle, max 15 a day
+# (modeling/modelroom/sources/odds_props.py). Logs show counts only: no lines, prices, sportsbook names or players.
 on:
   schedule:
-    - cron: "40 20 * * *"
-    - cron: "40 23 * * *"
+    - cron: "30 12 * * *"   # 5:30 AM PDT
+    - cron: "30 13 * * *"   # 5:30 AM PST
+    - cron: "30 16 * * *"   # 9:30 AM PDT
+    - cron: "30 17 * * *"   # 9:30 AM PST
   workflow_dispatch:
     inputs:
       mode:
-        description: "main (all games not yet requested today) or followup (only games empty earlier today)"
+        description: "main (games not yet requested today) or followup (only games whose one request was empty)"
         default: main
         type: choice
         options: [main, followup]
@@ -52,18 +53,20 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -q -e . boto3
-      - name: Today's board and refresh log from the preview branch
+      - name: Today's board from the preview branch
         working-directory: .
         run: |
           git fetch -q --depth 1 origin preview
           mkdir -p /tmp/pv
           git show FETCH_HEAD:modeling/data/published/nba_props.json > /tmp/pv/nba_props.json
-          git show FETCH_HEAD:modeling/preview-ledger/refresh_log.jsonl > /tmp/pv/refresh_log.jsonl
       - name: Fetch and store (counts only in the log)
         run: |
-          mode="${{ github.event.inputs.mode || '' }}"
-          [ -n "$mode" ] || { [ "${{ github.event.schedule }}" = "40 23 * * *" ] && mode=followup || mode=main; }
-          rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" --board /tmp/pv/nba_props.json --refresh-log /tmp/pv/refresh_log.jsonl > /tmp/out.json || rc=$?
+          mode="${{ github.event.inputs.mode || '' }}"; win=""
+          if [ -z "$mode" ]; then
+            case "${{ github.event.schedule }}" in "30 16 * * *"|"30 17 * * *") mode=followup;; *) mode=main;; esac
+            win="--only-in-window"
+          fi
+          rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" $win --board /tmp/pv/nba_props.json > /tmp/out.json || rc=$?
           python3 -c "import json; d=json.load(open('/tmp/out.json')); print(json.dumps(d, indent=1))"
           exit $rc
       - name: Verify today's snapshots with the read-only token

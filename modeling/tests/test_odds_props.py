@@ -89,10 +89,9 @@ def test_cycle_reset_dates():
 
 
 # ------------------------------------------------------------------ run
-def test_waits_for_game_lines(tmp_path):
-    f = Fake()
-    out, _ = _run(tmp_path, f, lines=False)
-    assert "game lines go first" in out["stopped"] and f.calls == []
+def test_morning_run_reserves_todays_game_lines(tmp_path):
+    out, _ = _run(tmp_path, Fake(remaining=325), lines=False)
+    assert out["budget"]["reserve"] == 12 * 15 + 30                 # today's 12 game-line credits included
 
 
 def test_one_request_per_game_today_earliest_first_and_stored(tmp_path):
@@ -102,8 +101,8 @@ def test_one_request_per_game_today_earliest_first_and_stored(tmp_path):
     assert [c.split("/events/")[1].split("/")[0] for c in odds_calls] == ["e2", "e1"]      # today, not started, earliest first
     assert out["captured"] == 2 and out["credits_billed"] == 2 and out["stopped"] is None
     assert all("regions=us" in c and "markets=player_points" in c for c in odds_calls)
-    again, _ = _run(tmp_path, f, store=st)                                                   # second run same day: nothing
-    assert [c for c in f.calls if "/odds?" in c] == odds_calls and again["to_request"] == 0
+    again, _ = _run(tmp_path, f, store=st)                                                   # second trigger same day: nothing
+    assert [c for c in f.calls if "/odds?" in c] == odds_calls and "already completed" in again["skipped"]
     v = MS.verify_day(st, "2026-11-25")
     assert v["ok"] and v["runs"] == 1 and v["objects"] == 5                                   # 2 raw + 2 rows + view
     view = json.loads(st.get(MS.read_latest(st, "2026-11-25")["view"]))
@@ -137,8 +136,77 @@ def test_empty_market_gets_one_followup_only(tmp_path):
     fu, _ = _run(tmp_path, f, mode="followup", store=st)
     assert fu["to_request"] == 1 and fu["captured"] == 1
     fu2, _ = _run(tmp_path, f, mode="followup", store=st)
-    assert fu2["to_request"] == 0
+    assert "already completed" in fu2["skipped"]
     assert MS.verify_day(st, "2026-11-25")["runs"] == 2
+
+
+def test_followup_never_touches_captured_games_and_retries_an_empty_game_once(tmp_path):
+    f = Fake(empty={"e2"})
+    _, st = _run(tmp_path, f)
+    f.empty = {"e2"}                                                 # still empty at 9:30
+    fu, _ = _run(tmp_path, f, mode="followup", store=st)
+    odds = [c.split("/events/")[1].split("/")[0] for c in f.calls if "/odds?" in c]
+    assert odds == ["e2", "e1", "e2"] and fu["empty"] == 1 and fu["credits_billed"] == 0
+    h = OP.day_history(st, "2026-11-25")
+    assert h["attempts"] == {"e2": 2, "e1": 1} and h["status"]["e1"] == "captured"
+
+
+def test_bookmakers_without_player_points_outcomes_count_as_empty(tmp_path):
+    class NoOutcomes(Fake):
+        def __call__(self, url, key):
+            res, x = super().__call__(url, key)
+            if "/odds?" in url:
+                d = json.loads(res["body"])
+                d["bookmakers"] = [{"key": "bookA", "title": "Book A", "markets": [{"key": "player_points", "outcomes": []}]}]
+                res["body"] = json.dumps(d).encode()
+            return res, x
+    out, _ = _run(tmp_path, NoOutcomes())
+    assert out["captured"] == 0 and out["empty"] == 2
+
+
+def test_concurrent_trigger_is_locked_out(tmp_path):
+    st = LocalStore(tmp_path / "r2")
+    ok, _ = OP.acquire_lock(st, st, "2026-11-25", "main", NOW, "r1")
+    assert ok
+    f = Fake()
+    out, _ = _run(tmp_path, f, store=st)                             # a second trigger while the first is running
+    assert "another main run" in out["skipped"] and f.calls == []
+    later = NOW.replace(hour=21, minute=20)                          # 40 min later: the first run died without finishing
+    out, _ = _run(tmp_path, f, store=st, now=later)
+    assert out["captured"] >= 1
+
+
+def test_run_that_died_after_paying_is_never_paid_again(tmp_path):
+    f = Fake()
+    st = LocalStore(tmp_path / "r2")
+    import modelroom.archive.market_snapshots as M
+    real = M.write_run
+    M.write_run = lambda *a, **k: (_ for _ in ()).throw(RuntimeError("crash before the manifest"))
+    try:
+        with pytest.raises(RuntimeError):
+            _run(tmp_path, f, store=st)
+    finally:
+        M.write_run = real
+    paid = [c for c in f.calls if "/odds?" in c]
+    later = NOW.replace(hour=21, minute=20)
+    out, _ = _run(tmp_path, f, store=st, now=later)                  # takeover after the stale lock
+    assert [c for c in f.calls if "/odds?" in c] == paid and out["captured"] == 0 and out["to_request"] == 0
+
+
+def test_daily_paid_requests_never_exceed_allowance_across_both_runs(tmp_path):
+    f = Fake(remaining=225, empty={"e2"})                            # allowance 1 a day
+    a, st = _run(tmp_path, f)
+    f.empty = set()
+    b, _ = _run(tmp_path, f, mode="followup", store=st)
+    assert a["credits_billed"] + b["credits_billed"] <= 1 and b["skipped_cap"] == 1
+
+
+def test_pacific_windows_follow_daylight_saving():
+    assert OP.in_window("main", datetime(2026, 11, 25, 13, 30, tzinfo=timezone.utc))      # 5:30 PST
+    assert not OP.in_window("main", datetime(2026, 11, 25, 12, 30, tzinfo=timezone.utc))  # 4:30 PST
+    assert OP.in_window("main", datetime(2027, 6, 1, 12, 30, tzinfo=timezone.utc))        # 5:30 PDT
+    assert OP.in_window("followup", datetime(2026, 11, 25, 17, 30, tzinfo=timezone.utc))  # 9:30 PST
+    assert not OP.in_window("followup", datetime(2026, 11, 25, 20, 40, tzinfo=timezone.utc))
 
 
 def test_auth_failure_stops_and_never_leaks_key(tmp_path):

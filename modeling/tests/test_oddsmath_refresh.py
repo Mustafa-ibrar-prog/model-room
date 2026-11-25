@@ -49,6 +49,7 @@ def test_refresh_slots_and_no_duplicates(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "PUBLISHED", pub)
     monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
     t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
+    R.record(["lines:2026-11-08", "linesretry:2026-11-08"], "success")          # player-points slots: own test below
     assert [s["kind"] for s in R.due(t("2026-11-08T16:35:00"))] == ["morning", "inactives"]  # 1:00 PM ET kickoff − 85 min
     assert [s["kind"] for s in R.due(t("2026-11-08T17:35:00"))] == ["morning", "pregame"]
     assert [s["kind"] for s in R.due(t("2026-11-08T15:10:00"))] == ["morning"]     # 7:10 AM PT
@@ -66,14 +67,43 @@ def test_failed_runs_are_retried_reported_and_missed(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "PUBLISHED", pub)
     monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
     t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
-    R.record(["midday:2026-11-08"], "failed", "schedule run 1", t("2026-11-08T20:05:00"))
-    assert [s["id"] for s in R.due(t("2026-11-08T20:15:00"))] == ["midday:2026-11-08"]   # retried while the window is open
+    R.record(["gamelines:2026-11-08"], "success", "schedule run 0", t("2026-11-08T20:02:00"))
+    R.record(["midday:2026-11-08"], "failed", "schedule run 1", t("2026-11-08T20:35:00"))
+    assert [s["id"] for s in R.due(t("2026-11-08T20:45:00"))] == ["midday:2026-11-08"]   # retried while the window is open
     assert R.pending(["midday:2026-11-08", "morning:2026-11-08"]) == ["midday:2026-11-08", "morning:2026-11-08"]
-    R.record(["midday:2026-11-08"], "success", "schedule run 2", t("2026-11-08T20:20:00"))
+    R.record(["midday:2026-11-08"], "success", "schedule run 2", t("2026-11-08T20:50:00"))
     assert R.pending(["midday:2026-11-08"]) == []                # a queued duplicate run sees it's done
     st = R.status(t("2026-11-09T01:00:00"))                      # 5 PM PT: morning window long closed, never ran
     assert "morning:2026-11-08" in st["missed"] and "midday:2026-11-08" not in st["missed"]
     assert st["recent_failures"][-1]["note"] == "schedule run 1" and st["last_success_by_kind"]["midday"]["note"] == "schedule run 2"
+
+
+def test_new_slots_start_on_nov_26():
+    t = datetime(2026, 11, 25, 22, 50, tzinfo=timezone.utc)                      # 2:50 PM PT on the change day
+    assert not [s for s in R.all_slots(t) if s["kind"] in R.NEW_KINDS and s["id"].endswith("2026-11-25")]
+    assert "gamelines:2026-11-26" in {s["id"] for s in R.all_slots(t)}
+
+
+def test_new_daily_slots_and_daylight_saving(tmp_path, monkeypatch):
+    """2026-11-25: 5:30 AM player points, 9:30 AM retry, game lines alone at exactly 12:00, full refresh at 12:30."""
+    pub = tmp_path / "published"
+    pub.mkdir()
+    monkeypatch.setattr(R, "PUBLISHED", pub)
+    monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
+    t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
+    assert [s["kind"] for s in R.due(t("2026-11-26T13:31:00"))] == ["lines"]            # 5:31 AM PST
+    assert [s["kind"] for s in R.due(t("2027-06-02T12:31:00"))] == ["lines"]            # 5:31 AM PDT
+    assert not R.due(t("2026-11-26T13:29:00"))                                           # 5:29 AM: nothing yet
+    R.record(["lines:2026-11-26"], "success")
+    R.record(["morning:2026-11-26"], "success")
+    assert [s["kind"] for s in R.due(t("2026-11-26T17:31:00"))] == ["linesretry"]       # 9:31 AM
+    R.record(["linesretry:2026-11-26"], "success")
+    assert [s["kind"] for s in R.due(t("2026-11-26T20:01:00"))] == ["gamelines"]        # 12:01 PM: game lines only
+    R.record(["gamelines:2026-11-26"], "success")
+    assert not R.due(t("2026-11-26T20:29:00"))
+    assert [s["kind"] for s in R.due(t("2026-11-26T20:31:00"))] == ["midday"]           # 12:31 PM full refresh
+    R.record(["midday:2026-11-26"], "success")
+    assert [s["kind"] for s in R.due(t("2026-11-27T00:01:00"))] == ["afternoon"]        # 4:01 PM
 
 
 def test_pregame_slots_that_never_started_are_missed(tmp_path, monkeypatch):

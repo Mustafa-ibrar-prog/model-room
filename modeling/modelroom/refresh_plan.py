@@ -7,8 +7,11 @@
 Standard library only, so the scheduler's every-few-minutes check runs in seconds without installing anything.
 
 Slots (all Pacific time):
-  morning   07:00 PT every day             injury reports, questionable / doubtful / out, depth charts
-  midday    12:00 PT every day             updated designations, lineup changes
+  lines     05:30 PT every day             NBA player points sportsbook lines -> private R2 only (no projections)
+  morning   07:00 PT every day             injury reports, questionable / doubtful / out, depth charts; game lines
+  linesretry 09:30 PT every day            player points retry, ONLY games whose 5:30 response was empty
+  gamelines 12:00 PT every day             game lines only (spreads, totals, moneylines); no projections
+  midday    12:30 PT every day             updated designations, lineup changes (reuses the 12:00 prices)
   afternoon 16:00 PT every day             late reports before evening games
   inactives kickoff − 90 min, each NFL kickoff time   official NFL inactive lists (when a source is connected)
   pregame   start − 30 min, each game start time (NFL and NBA)   late scratches, confirmed lineups
@@ -27,7 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -35,8 +38,14 @@ PT = ZoneInfo("America/Los_Angeles")
 ROOT = Path(__file__).resolve().parents[1]
 LOG = Path(os.environ.get("MODELROOM_LEDGER_DIR", ROOT / "preview-ledger")) / "refresh_log.jsonl"
 PUBLISHED = ROOT / "data" / "published"
-DAILY = (("morning", 7, 0), ("midday", 12, 0), ("afternoon", 16, 0))
+# (2026-11-25) lines = 5:30 AM NBA player points to R2; linesretry = 9:30 AM retry of games whose 5:30 response had no
+# player points; gamelines = 12:00 PM game-line fetch only; midday = 12:30 PM full refresh (injuries, lineups,
+# projections; reuses the 12:00 prices). Game lines stay at exactly 7:00 AM (morning) and 12:00 PM (gamelines).
+DAILY = (("lines", 5, 30), ("morning", 7, 0), ("linesretry", 9, 30), ("gamelines", 12, 0), ("midday", 12, 30), ("afternoon", 16, 0))
 DAILY_WINDOW = timedelta(hours=3)
+# The new slots start on 2026-11-26 (Pacific): on Nov 25 the old 12:00 refresh had already fetched game lines.
+NEW_KINDS = {"lines", "linesretry", "gamelines"}
+NEW_SCHEDULE_FROM = date(2026, 11, 26)
 # How far back "missed" looks. The two daily days below, so a stale miss stops being reported and the alert clears.
 MISSED_LOOKBACK = timedelta(days=2)
 INACTIVES_BEFORE = timedelta(minutes=90)
@@ -99,6 +108,8 @@ def all_slots(now: datetime) -> list[dict]:
     for day in (local.date() - timedelta(days=1), local.date(), local.date() + timedelta(days=1)):
         for name, h, m in DAILY:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
+            if name in NEW_KINDS and day < NEW_SCHEDULE_FROM:
+                continue                    # today's game lines already ran under the old noon refresh: never twice
             out.append({"id": f"{name}:{day.isoformat()}", "kind": name, "at": at, "until": at + DAILY_WINDOW})
     starts = upcoming_starts(now)
     for lg, ts in starts.items():
@@ -183,6 +194,8 @@ def status(now: datetime | None = None) -> dict:
         for name, h, m in DAILY:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
             sid = f"{name}:{day.isoformat()}"
+            if name in NEW_KINDS and day < NEW_SCHEDULE_FROM:
+                continue
             if at + DAILY_WINDOW <= now and sid not in done:
                 missed.append(sid)
     # Game slots come from the games' start times, so a pregame refresh that never started still counts as
@@ -206,7 +219,7 @@ def status(now: datetime | None = None) -> dict:
             if now - MISSED_LOOKBACK <= t <= now:
                 missed.append(sl)
     return {"last_success": ok[-1] if ok else None, "last_success_by_kind": by_kind, "recent_failures": bad, "missed": missed[-20:],
-            "schedule": "7:00 AM, 12:00 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min",
+            "schedule": "5:30 AM player points, 7:00 AM, 9:30 AM player-points retry, 12:00 PM game lines, 12:30 PM and 4:00 PM PT, NFL kickoff − 90 min, every game − 30 min",
             "next_check": next_check(now)[0].isoformat(timespec="seconds"),
             "triggers": "Supabase wakes a run only when a slot is due (pg_cron checks every 5 min inside Postgres); "
                         "GitHub's own schedule every 6 hours is the backup"}
