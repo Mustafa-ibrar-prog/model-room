@@ -1,3 +1,4 @@
+import { loadPropLines, propLinesEnabled, ptDate, type GameBookLines, type PlayerBookLines } from "@/server/markets/propLines";
 import "server-only";
 import { canAccess, gate } from "@/lib/entitlements";
 import { loadLiveInjuries, loadPropsBoard, type LiveInjuries } from "@/server/engine/board";
@@ -159,6 +160,8 @@ export interface ExplorerRow {
   supportNote: string;
   /** The market's main line for this player and stat (a quoted contract); null when no market lists one. */
   headline: PropLineView | null;
+  /** NBA points only (TEST): sportsbook lines from the latest Odds API snapshot in private R2; null when none. */
+  bookLines: (PlayerBookLines & { capturedAt: string }) | null;
   lines: PropLineView[];
   /** Model thresholds with no market quote: the model's own ladder, never presented as a market line. */
   ladder: PropLineView[];
@@ -332,6 +335,7 @@ function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: strin
     support: m.support,
     supportNote: m.support_note,
     headline: head,
+    bookLines: null,
     lines,
     ladder: lines.filter((l) => !l.quotes.length),
     grid: m.grid ?? null,
@@ -356,6 +360,19 @@ function sortRows(rows: ExplorerRow[], sort: SortKey): ExplorerRow[] {
     player: (a, b) => a.name.localeCompare(b.name),
   };
   return [...rows].sort(by[sort]);
+}
+
+/** Attach the latest stored sportsbook points lines (TEST, private R2) to each row; rows without one stay null. */
+async function withBookLines(rows: ExplorerRow[], games: { game_id: string; start_time: string | null }[]): Promise<ExplorerRow[]> {
+  const dates = [...new Set(games.filter((g) => g.start_time).map((g) => ptDate(g.start_time!)))];
+  const views = await Promise.all(dates.map((d) => loadPropLines(d)));
+  const byGame = new Map<string, GameBookLines>();
+  for (const v of views) for (const [gid, gv] of Object.entries(v?.games ?? {})) byGame.set(gid, gv);
+  return rows.map((r) => {
+    const gv = byGame.get(r.gameId);
+    const p = gv?.players[r.id];
+    return p && p.consensus_line != null ? { ...r, bookLines: { ...p, capturedAt: gv!.captured_at } } : r;
+  });
 }
 
 export async function getExplorer(league: League, tier: TierId, query: ExplorerQuery, at?: Date): Promise<Explorer> {
@@ -396,6 +413,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
   } else {
     const pool = searchAll ? dayGames : selected ? [selected] : [];
     let list = pool.flatMap((g) => g.players.map((p) => rowFor(p, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season))).filter((r): r is ExplorerRow => r !== null);
+    if (league === "nba" && category.key === "points" && propLinesEnabled()) list = await withBookLines(list, pool);
     total = list.length;
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.team.toLowerCase() === q || r.matchup.toLowerCase().includes(q));
     if (query.team && selected && !searchAll && [selected.home.abbr, selected.away.abbr].includes(query.team)) list = list.filter((r) => r.team === query.team);
@@ -408,7 +426,8 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
       const pid = query.line.split("~")[0];
       const src = (selected?.players ?? []).concat(searchAll ? b.games.flatMap((g) => g.players) : []).find((p) => p.player_id === pid);
       const g = src ? b.games.find((x) => x.game_id === src.game_id) : undefined;
-      const row = src && g ? rowFor(src, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season) : null;
+      let row = src && g ? rowFor(src, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season) : null;
+      if (row && g && league === "nba" && category.key === "points" && propLinesEnabled()) row = (await withBookLines([row], [g]))[0];
       const line = row?.lines.find((l) => lineKey(row.id, l) === query.line) ?? null;
       const cardOnly = row && query.line === `${row.id}~card`;
       detail = row && (line || cardOnly) ? { row, line, key: query.line, marketStats: b.performance.backtest?.by_market?.[category.key] ?? null } : null;

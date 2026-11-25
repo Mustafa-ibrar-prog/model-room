@@ -25,6 +25,18 @@ export interface Headline {
   fromMarket: boolean;
   /** The market's own implied probability, when there is one. */
   marketProb: number | null;
+  /** Stored sportsbook lines behind this headline (NBA points, TEST), when the threshold is a sportsbook line. */
+  book: { line: number; books: { title: string; line: number; over: number | null; under: number | null; lastUpdate: string | null }[];
+    alternates: number; lastUpdate: string | null; capturedAt: string } | null;
+}
+
+/** Calibrated P(stat >= k) from the board's grid; null outside the grid or without one. Never extrapolated. */
+export function gridAtLeast(grid: { k0: number; step: number; p: number[] } | null, k: number): number | null {
+  if (!grid || !grid.p.length) return null;
+  const x = (k - grid.k0) / grid.step;
+  if (x < 0 || x > grid.p.length - 1) return null;
+  const i = Math.floor(x), f = x - i;
+  return f === 0 ? grid.p[i] : grid.p[i] * (1 - f) + grid.p[i + 1] * f;
 }
 
 const nice = (n: number) => (Number.isInteger(n) ? n.toFixed(0) : n.toFixed(1));
@@ -39,6 +51,22 @@ export function marketLine(r: ExplorerRow): PropLineView | null {
  * closest to the projection, which is the one a reader can sanity-check against the number beside it.
  */
 export function headlineFor(r: ExplorerRow): Headline | null {
+  // A stored sportsbook line (NBA points, TEST) leads when the model's own distribution can be read at it: "more than
+  // 24.5" = P(points >= 25). The model never read the line; its numbers are unchanged.
+  const bl = r.bookLines;
+  if (bl && bl.consensus_line != null) {
+    const L = bl.consensus_line;
+    const prob = gridAtLeast(r.grid, Math.floor(L) + 1);
+    if (prob != null) {
+      const n = nice(L);
+      return {
+        threshold: L, thresholdText: `more than ${n}`, prob, belowProb: 1 - prob, belowText: `${n} or less`, fromMarket: true,
+        marketProb: bl.consensus_over_novig,
+        book: { line: L, alternates: bl.alternates, lastUpdate: bl.last_update, capturedAt: bl.capturedAt,
+          books: bl.books.map((b) => ({ title: b.title, line: b.line, over: b.over, under: b.under, lastUpdate: b.last_update })) },
+      };
+    }
+  }
   const quoted = marketLine(r);
   const line =
     quoted ??
@@ -54,6 +82,7 @@ export function headlineFor(r: ExplorerRow): Headline | null {
     belowText: line.op === ">=" ? `below ${n}` : `${n} or less`,
     fromMarket: Boolean(quoted),
     marketProb: quoted ? marketMid(quoted) : null,
+    book: null,
   };
 }
 
