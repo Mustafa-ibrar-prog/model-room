@@ -30,7 +30,7 @@ on:
 
 permissions:
   contents: read
-  actions: read
+  actions: write      # only to start the one-time Supabase archive dry run (below)
   issues: write
 
 concurrency:
@@ -141,6 +141,24 @@ jobs:
                   out["error"] = type(e).__name__
           json.dump(out, open("/tmp/auth.json", "w")); print("auth health:", out)
           EOF
+
+      - name: Start the one-time Supabase archive dry run once Supabase has recovered (approved 2026-11-24)
+        # Only when the Auth API answers 200 (restriction cleared), not on dry runs of this check, and only if the dry-run
+        # workflow has NEVER run before: one attempt in total, never retried automatically.
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          st=$(python3 -c "import json; print(json.load(open('/tmp/auth.json')).get('status'))")
+          if [ "$st" != 200 ]; then echo "Supabase still restricted or unreachable (HTTP $st): dry run keeps waiting"; exit 0; fi
+          # Count only runs this check started (github-actions[bot]); manual rehearsals don't count.
+          n=$(gh api "repos/${{ github.repository }}/actions/workflows/supabase-dryrun.yml/runs?per_page=100" \
+                -q '[.workflow_runs[] | select(.triggering_actor.login == "github-actions[bot]")] | length' 2>/dev/null || echo error)
+          case "$n" in
+            0) gh api -X POST "repos/${{ github.repository }}/actions/workflows/supabase-dryrun.yml/dispatches" -f ref=main && echo "Supabase recovered: started the one-time archive dry run";;
+            error|"") echo "::warning::couldn't check whether the dry run already ran; not starting it";;
+            *) echo "archive dry run already ran ($n run(s)); not starting it again";;
+          esac
 
       - name: Evaluate and alert
         env:
