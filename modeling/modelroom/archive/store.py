@@ -35,6 +35,16 @@ class LocalStore:
         f.write_bytes(body)
         return {"key": key, "bytes": len(body), "sha256": sha256(body)}
 
+    def put_once(self, key: str, body: bytes, meta: dict | None = None) -> dict:
+        """Write-once: refuses to replace an existing object."""
+        if self.exists(key):
+            raise ArchiveError(f"object already exists (write-once): {key}")
+        return self.put(key, body, meta)
+
+    def list(self, prefix: str) -> list[str]:
+        base = self.root / prefix
+        return sorted(str(p.relative_to(self.root)) for p in self.root.rglob("*") if p.is_file() and str(p.relative_to(self.root)).startswith(prefix)) if self.root.exists() else []
+
     def get(self, key: str) -> bytes:
         f = self.root / key
         if not f.exists():
@@ -66,6 +76,27 @@ class R2Store:
         self.s3.put_object(Bucket=self.bucket, Key=key, Body=body, Metadata={"sha256": h, **{k: str(v) for k, v in (meta or {}).items()}})
         return {"key": key, "bytes": len(body), "sha256": h}
 
+    def put_once(self, key: str, body: bytes, meta: dict | None = None) -> dict:
+        """Write-once (conditional PUT, If-None-Match: *): R2 refuses with 412 if the key exists."""
+        h = sha256(body)
+        try:
+            self.s3.put_object(Bucket=self.bucket, Key=key, Body=body, IfNoneMatch="*",
+                               Metadata={"sha256": h, **{k: str(v) for k, v in (meta or {}).items()}})
+        except self.s3.exceptions.ClientError as e:
+            if e.response.get("ResponseMetadata", {}).get("HTTPStatusCode") == 412:
+                raise ArchiveError(f"object already exists (write-once): {key}") from e
+            raise
+        return {"key": key, "bytes": len(body), "sha256": h}
+
+    def list(self, prefix: str) -> list[str]:
+        out, tok = [], None
+        while True:
+            r = self.s3.list_objects_v2(Bucket=self.bucket, Prefix=prefix, **({"ContinuationToken": tok} if tok else {}))
+            out += [o["Key"] for o in r.get("Contents", [])]
+            if not r.get("IsTruncated"):
+                return sorted(out)
+            tok = r["NextContinuationToken"]
+
     def get(self, key: str) -> bytes:
         try:
             return self.s3.get_object(Bucket=self.bucket, Key=key)["Body"].read()
@@ -91,6 +122,16 @@ class R2Store:
                 return r.status
         except urllib.error.HTTPError as e:
             return e.code
+
+
+def reader_from_env(local_root: str | None = None):
+    """The READ-ONLY token's view of the bucket (used to verify uploads independently), or the local folder."""
+    keys = ("R2_ACCOUNT_ID", "R2_READ_ACCESS_KEY_ID", "R2_READ_SECRET_ACCESS_KEY", "R2_BUCKET")
+    if all(os.environ.get(k) for k in keys):
+        return R2Store(*(os.environ[k].strip() for k in keys))
+    if local_root:
+        return LocalStore(local_root)
+    raise ArchiveError("R2 read-only settings are missing (R2_READ_ACCESS_KEY_ID, R2_READ_SECRET_ACCESS_KEY)")
 
 
 def from_env(local_root: str | None = None):

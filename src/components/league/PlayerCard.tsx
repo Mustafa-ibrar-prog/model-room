@@ -3,6 +3,10 @@ import { TeamBadge } from "@/components/ui/TeamBadge";
 import { formatPct } from "@/lib/format";
 import type { ExplorerRow } from "@/server/data/explorer";
 import type { League } from "@/types/domain";
+
+/** "4:32 PM" Pacific: when the sportsbook last updated the line. */
+export const bookTime = (iso: string | null) =>
+  iso ? new Date(iso).toLocaleTimeString("en-US", { timeZone: "America/Los_Angeles", hour: "numeric", minute: "2-digit" }) + " PT" : "time unknown";
 import { headlineFor, historyCaveat, listedText, playerSub, projText } from "./simple";
 
 /**
@@ -64,7 +68,10 @@ export function PlayerCard({ league, r, catLabel, href, listed = null }: { leagu
         <div className="flex-[0_0_6.5rem]">
           <p className="text-xs text-faint">Sportsbook line</p>
           {h?.fromMarket ? (
-            <p className="font-display text-2xl font-600 leading-none text-market">{h.threshold}</p>
+            <>
+              <p className="font-display text-2xl font-600 leading-none text-market">{h.threshold}</p>
+              {h.book ? <p className="mt-1 text-[0.7rem] leading-tight text-faint">{h.book.books.length === 1 ? h.book.books[0].title : `${h.book.books.length} books`} · {bookTime(h.book.lastUpdate)}</p> : null}
+            </>
           ) : (
             <p className="text-sm text-faint">none</p>
           )}

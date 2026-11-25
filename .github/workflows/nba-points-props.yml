@@ -1,0 +1,82 @@
+name: NBA player points lines (TEST)
+
+# NBA player points lines from The Odds API, one request per game per day, stored in the private R2 bucket
+# (Moose, approved 2026-11-24). No Supabase. Game-line refreshes always come first: the run waits for today's noon
+# game-line refresh and keeps 12 credits a day for the rest of the credit cycle + 30 in reserve
+# (modeling/modelroom/sources/odds_props.py). Nothing is bought or upgraded.
+#   12:40 PM PT  main run: every NBA game today that hasn't started, earliest first, within the daily allowance
+#    3:40 PM PT  follow-up: only games whose market wasn't posted yet at 12:40 (0 credits when still empty)
+# Logs show counts and credit numbers only: no lines, prices, sportsbook names or player-line pairs (public repository).
+# Times are UTC for Pacific Standard Time (NBA season); in daylight time they run an hour later.
+on:
+  schedule:
+    - cron: "40 20 * * *"
+    - cron: "40 23 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "main (all games not yet requested today) or followup (only games empty earlier today)"
+        default: main
+        type: choice
+        options: [main, followup]
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: nba-points-props
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: modeling
+    env:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      ODDS_API_CYCLE_DAY: ${{ vars.ODDS_API_CYCLE_DAY || '10' }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+      R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q -e . boto3
+      - name: Today's board and refresh log from the preview branch
+        working-directory: .
+        run: |
+          git fetch -q --depth 1 origin preview
+          mkdir -p /tmp/pv
+          git show FETCH_HEAD:modeling/data/published/nba_props.json > /tmp/pv/nba_props.json
+          git show FETCH_HEAD:modeling/preview-ledger/refresh_log.jsonl > /tmp/pv/refresh_log.jsonl
+      - name: Fetch and store (counts only in the log)
+        run: |
+          mode="${{ github.event.inputs.mode || '' }}"
+          [ -n "$mode" ] || { [ "${{ github.event.schedule }}" = "40 23 * * *" ] && mode=followup || mode=main; }
+          rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" --board /tmp/pv/nba_props.json --refresh-log /tmp/pv/refresh_log.jsonl > /tmp/out.json || rc=$?
+          python3 -c "import json; d=json.load(open('/tmp/out.json')); print(json.dumps(d, indent=1))"
+          exit $rc
+      - name: Verify today's snapshots with the read-only token
+        run: |
+          python -m modelroom.sources.odds_props verify > /tmp/verify.json; rc=$?
+          cat /tmp/verify.json; exit $rc
+      - name: Open an issue on failure
+        if: failure()
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          n=$(gh issue list --state open --search "NBA player points lines failed in:title" --json number -q '.[0].number')
+          body="The NBA player points run failed or stopped (credit cap, provider or storage problem): $url"
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "NBA player points lines failed" --body "$body"; fi

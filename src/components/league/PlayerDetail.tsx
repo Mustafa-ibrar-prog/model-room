@@ -3,6 +3,9 @@ import { TeamBadge } from "@/components/ui/TeamBadge";
 import { LockedCell } from "@/components/ui/primitives";
 import { fmt } from "@/components/market/bits";
 import { formatProjection } from "@/lib/format";
+import { bookTime } from "@/components/league/PlayerCard";
+
+const american = (o: number | null) => (o == null ? "—" : o > 0 ? `+${o}` : `${o}`);
 import { Section, InjurySection, MatchupSection, type InjuryFeed } from "@/components/market/AnalysisSections";
 import { Contributions, DistributionChart } from "@/components/market/PropParts";
 import { HistoryTabs, type HistoryTabsData } from "@/components/market/HistoryTabs";
@@ -115,12 +118,12 @@ export function PlayerDetail({
                 {h.fromMarket ? (
                   <>
                     <dd className="font-display text-3xl font-600 leading-none text-market">{h.threshold}</dd>
-                    {h.marketProb != null ? <p className="mt-1.5 hidden max-w-[20ch] text-xs text-mute sm:block">The market makes it {formatPct(h.marketProb)}.</p> : null}
+                    {h.marketProb != null ? <p className="mt-1.5 hidden max-w-[20ch] text-xs text-mute sm:block">{h.book ? "Books, margin removed" : "The market"}: {formatPct(h.marketProb)} over.</p> : null}
                   </>
                 ) : (
                   <>
                     <dd className="font-display text-3xl font-600 leading-none text-faint">none</dd>
-                    <p className="mt-1.5 hidden max-w-[22ch] text-xs text-mute sm:block">No sportsbook line is published for this prop, so the threshold above is our own.</p>
+                    <p className="mt-1.5 hidden max-w-[22ch] text-xs text-mute sm:block">No sportsbook line is stored for this prop, so the threshold above is our own.</p>
                   </>
                 )}
               </div>
@@ -143,8 +146,35 @@ export function PlayerDetail({
         )}
         {h && !h.fromMarket ? (
           <p className="mt-4 text-xs text-mute sm:hidden">
-            No sportsbook line is published for this prop, so the threshold is our own and we call no side. In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
+            No sportsbook line is stored for this prop, so the threshold is our own and we call no side. In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
           </p>
+        ) : null}
+        {h?.book ? (
+          <div className="mt-6">
+            <p className="text-xs text-faint">Sportsbook lines (points, US books) · captured {bookTime(h.book.capturedAt)} · consensus is the middle of the books&apos; main lines</p>
+            <table className="mt-2 w-full max-w-lg text-sm">
+              <thead>
+                <tr className="text-left text-xs text-faint">
+                  <th className="py-1 font-400">Sportsbook</th><th className="py-1 font-400">Line</th><th className="py-1 font-400">Over</th><th className="py-1 font-400">Under</th><th className="py-1 font-400">Updated</th>
+                </tr>
+              </thead>
+              <tbody>
+                {h.book.books.map((b) => (
+                  <tr key={b.title} className="border-t border-navy-800">
+                    <td className="py-1.5 text-ink">{b.title}</td>
+                    <td className="py-1.5 tabular-nums text-market">{b.line}</td>
+                    <td className="py-1.5 tabular-nums text-mute">{american(b.over)}</td>
+                    <td className="py-1.5 tabular-nums text-mute">{american(b.under)}</td>
+                    <td className="py-1.5 text-faint">{bookTime(b.lastUpdate)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p className="mt-2 text-[0.7rem] leading-snug text-faint">
+              {h.book.alternates ? `${h.book.alternates} alternate line${h.book.alternates > 1 ? "s" : ""} kept on record, not shown. ` : ""}
+              Lines from The Odds API as captured, not live; the model never reads them. Gamble responsibly. 18+.
+            </p>
+          </div>
         ) : null}
         {caveat ? <p className="mt-5 text-sm text-edge">{caveat}</p> : null}
       </section>
