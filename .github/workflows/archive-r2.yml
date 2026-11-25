@@ -77,7 +77,8 @@ jobs:
         if: github.event.inputs.mode != 'check'
         run: |
           git fetch -q origin preview
-          mkdir -p /tmp/ledgers && git archive origin/preview modeling/preview-ledger | tar -x -C /tmp/ledgers
+          mkdir -p /tmp/ledgers && git archive FETCH_HEAD modeling/preview-ledger | tar -x -C /tmp/ledgers
+          echo "preview commit: $(git rev-parse FETCH_HEAD)"; ls /tmp/ledgers/modeling/preview-ledger/*.jsonl | wc -l
       - name: Archive and verify
         if: github.event.inputs.mode != 'check'
         run: |
