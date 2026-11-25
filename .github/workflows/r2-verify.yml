@@ -1,0 +1,155 @@
+name: R2 configuration check (read-only, manual)
+
+# TEST-only verification of the six R2 secrets (Moose, 2026-11-24). Writes, overwrites and deletes NOTHING: only
+# HeadBucket, ListObjectsV2 (at most 5 keys), ListBuckets and HeadBucket on a made-up bucket name (scope) and, if an object already exists, a 1-byte ranged GET with the read-only
+# token, plus one UNSIGNED request to confirm the bucket refuses anonymous access. A write test needs a test object and
+# separate approval (archive-r2.yml "check" mode does that). Secret values are never printed (lengths only).
+on:
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: "Also run the one-time write/read/delete probe (writes and deletes one tiny _probe/ file; approved by Moose 2026-11-24)"
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archive-r2
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+      R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+      EXPECTED_BUCKET: model-room-test-archive
+    steps:
+      - run: pip install -q boto3
+      - name: Verify (read-only)
+        run: |
+          python3 - <<'EOF'
+          import os, re, sys, urllib.request, urllib.error
+          import boto3
+          from botocore.config import Config
+          from botocore.exceptions import ClientError, EndpointConnectionError
+          names = ["R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_READ_ACCESS_KEY_ID", "R2_READ_SECRET_ACCESS_KEY"]
+          v = {n: os.environ.get(n, "") for n in names}
+          problems = []
+          print("1. Secrets (lengths only):")
+          for n in names:
+              print(f"   {n}: {'present, ' + str(len(v[n])) + ' characters' if v[n] else 'MISSING'}")
+              if not v[n]: problems.append(f"{n} missing")
+              elif v[n] != v[n].strip(): problems.append(f"{n} has leading/trailing whitespace")
+          acct = v["R2_ACCOUNT_ID"].strip()
+          print("   account ID format (32 hex):", bool(re.fullmatch(r"[0-9a-f]{32}", acct)))
+          if acct and not re.fullmatch(r"[0-9a-f]{32}", acct): problems.append("R2_ACCOUNT_ID is not a 32-character hex account ID")
+          bucket = v["R2_BUCKET"].strip()
+          print("   bucket name matches model-room-test-archive:", bucket == os.environ["EXPECTED_BUCKET"])
+          if bucket and bucket != os.environ["EXPECTED_BUCKET"]: problems.append("R2_BUCKET is not model-room-test-archive")
+          if any(p.endswith("missing") for p in problems):
+              print("problems:", problems); sys.exit(1)
+          endpoint = f"https://{acct}.r2.cloudflarestorage.com"
+          def client(k, s):
+              return boto3.client("s3", endpoint_url=endpoint, aws_access_key_id=k.strip(), aws_secret_access_key=s.strip(),
+                                  region_name="auto", config=Config(signature_version="s3v4", retries={"max_attempts": 2}))
+          def err(e):
+              if isinstance(e, ClientError):
+                  return f"{e.response.get('Error', {}).get('Code')} (HTTP {e.response.get('ResponseMetadata', {}).get('HTTPStatusCode')})"
+              return type(e).__name__
+          sample = None
+          for label, k, s in (("write token", v["R2_ACCESS_KEY_ID"], v["R2_SECRET_ACCESS_KEY"]),
+                              ("read-only token", v["R2_READ_ACCESS_KEY_ID"], v["R2_READ_SECRET_ACCESS_KEY"])):
+              c = client(k, s)
+              print(f"{'2/3' if label == 'write token' else '4'}. {label}:")
+              try:
+                  c.head_bucket(Bucket=bucket); print("   endpoint + authentication + bucket access (HeadBucket): OK")
+              except Exception as e:
+                  print("   HeadBucket FAILED:", err(e)); problems.append(f"{label}: HeadBucket {err(e)}")
+              try:
+                  r = c.list_objects_v2(Bucket=bucket, MaxKeys=5)
+                  n = r.get("KeyCount", 0)
+                  print(f"   list objects: OK ({n} object(s) in the first page{', more exist' if r.get('IsTruncated') else ''})")
+                  if n and sample is None: sample = r["Contents"][0]["Key"]
+              except Exception as e:
+                  print("   list objects FAILED:", err(e)); problems.append(f"{label}: ListObjects {err(e)}")
+              # Scope (read-only calls): a token limited to this bucket is refused ListBuckets and gets 403 on another
+              # bucket name; an account-wide token lists buckets and gets 404 for a bucket that doesn't exist.
+              try:
+                  c.list_buckets(); print("   scope: ListBuckets ALLOWED -> token is not limited to this bucket"); problems.append(f"{label}: can list all buckets")
+              except Exception as e:
+                  print("   scope: ListBuckets refused:", err(e))
+              try:
+                  c.head_bucket(Bucket="model-room-scope-probe-does-not-exist"); print("   scope: other bucket ALLOWED"); problems.append(f"{label}: reaches other buckets")
+              except Exception as e:
+                  code = err(e)
+                  print("   scope: other bucket ->", code, "(403 = restricted to this bucket; 404 = account-wide)")
+                  if "404" in code: problems.append(f"{label}: looks account-wide (404 on another bucket)")
+              if label == "read-only token":
+                  if sample:
+                      try:
+                          c.get_object(Bucket=bucket, Key=sample, Range="bytes=0-0")["Body"].read()
+                          print("   read an existing object (1-byte ranged GET): OK")
+                      except Exception as e:
+                          print("   read object FAILED:", err(e)); problems.append(f"read-only token: GetObject {err(e)}")
+                  else:
+                      print("   read object: not tested (bucket is empty; nothing written to test with)")
+          print("5. Privacy: unsigned request to list the bucket")
+          try:
+              with urllib.request.urlopen(urllib.request.Request(f"{endpoint}/{bucket}?list-type=2&max-keys=1"), timeout=15) as r:
+                  st = r.status
+          except urllib.error.HTTPError as e:
+              st = e.code
+          except Exception as e:
+              st = None; print("   unsigned request error:", type(e).__name__)
+          print(f"   anonymous answer: HTTP {st} -> {'private (refused)' if st and 400 <= st < 500 else 'NOT REFUSED'}")
+          if st is not None and not (400 <= st < 500): problems.append(f"bucket answered an unsigned request with HTTP {st}")
+          print("problems:", problems or "none")
+          sys.exit(1 if problems else 0)
+          EOF
+      - name: Write / read / delete probe (only when probe = true)
+        if: github.event.inputs.probe == 'true'
+        run: |
+          python3 - <<'EOF'
+          import hashlib, os, sys, urllib.request, urllib.error
+          from datetime import datetime, timezone
+          import boto3
+          from botocore.config import Config
+          e = {k: os.environ[k].strip() for k in ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_READ_ACCESS_KEY_ID", "R2_READ_SECRET_ACCESS_KEY")}
+          ep, b = f"https://{e['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com", e["R2_BUCKET"]
+          mk = lambda k, s: boto3.client("s3", endpoint_url=ep, aws_access_key_id=k, aws_secret_access_key=s, region_name="auto", config=Config(signature_version="s3v4"))
+          w, r = mk(e["R2_ACCESS_KEY_ID"], e["R2_SECRET_ACCESS_KEY"]), mk(e["R2_READ_ACCESS_KEY_ID"], e["R2_READ_SECRET_ACCESS_KEY"])
+          key = f"_probe/{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}.txt"
+          body = b"model-room archive access probe"
+          ok, wrote = {}, False
+          try:
+              w.put_object(Bucket=b, Key=key, Body=body); wrote = True
+              ok["1 write (write token)"] = True; print(f"1. wrote {key} ({len(body)} bytes, sha256 {hashlib.sha256(body).hexdigest()[:16]}...)")
+              got = r.get_object(Bucket=b, Key=key)["Body"].read()
+              ok["2 read back (read-only token)"] = got == body; print("2. read back with the read-only token:", "contents match" if got == body else "CONTENTS DIFFER")
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(f"{ep}/{b}/{key}"), timeout=15) as x: st = x.status
+              except urllib.error.HTTPError as x: st = x.code
+              ok["3 anonymous denied"] = 400 <= st < 500; print(f"3. unsigned request for the object: HTTP {st} ->", "denied" if ok["3 anonymous denied"] else "NOT DENIED")
+          except Exception as x:
+              print("probe step FAILED:", type(x).__name__, getattr(x, "response", {}).get("Error", {}).get("Code", ""))
+          finally:
+              if wrote:
+                  w.delete_object(Bucket=b, Key=key)
+                  try:
+                      w.head_object(Bucket=b, Key=key); gone = False
+                  except Exception: gone = True
+                  ok["4 deleted"] = gone; print("4. deleted the probe file:", "gone" if gone else "STILL PRESENT")
+              n = w.list_objects_v2(Bucket=b, MaxKeys=5).get("KeyCount", 0)
+              ok["5 bucket empty"] = n == 0; print(f"5. objects in the bucket now: {n}")
+          print("result:", ok)
+          sys.exit(0 if len(ok) == 5 and all(ok.values()) else 1)
+          EOF
