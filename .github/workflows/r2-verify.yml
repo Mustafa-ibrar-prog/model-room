@@ -1,7 +1,7 @@
 name: R2 configuration check (read-only, manual)
 
 # TEST-only verification of the six R2 secrets (Moose, 2026-11-24). Writes, overwrites and deletes NOTHING: only
-# HeadBucket, ListObjectsV2 (at most 5 keys) and, if an object already exists, a 1-byte ranged GET with the read-only
+# HeadBucket, ListObjectsV2 (at most 5 keys), ListBuckets and HeadBucket on a made-up bucket name (scope) and, if an object already exists, a 1-byte ranged GET with the read-only
 # token, plus one UNSIGNED request to confirm the bucket refuses anonymous access. A write test needs a test object and
 # separate approval (archive-r2.yml "check" mode does that). Secret values are never printed (lengths only).
 on:
@@ -75,6 +75,18 @@ jobs:
                   if n and sample is None: sample = r["Contents"][0]["Key"]
               except Exception as e:
                   print("   list objects FAILED:", err(e)); problems.append(f"{label}: ListObjects {err(e)}")
+              # Scope (read-only calls): a token limited to this bucket is refused ListBuckets and gets 403 on another
+              # bucket name; an account-wide token lists buckets and gets 404 for a bucket that doesn't exist.
+              try:
+                  c.list_buckets(); print("   scope: ListBuckets ALLOWED -> token is not limited to this bucket"); problems.append(f"{label}: can list all buckets")
+              except Exception as e:
+                  print("   scope: ListBuckets refused:", err(e))
+              try:
+                  c.head_bucket(Bucket="model-room-scope-probe-does-not-exist"); print("   scope: other bucket ALLOWED"); problems.append(f"{label}: reaches other buckets")
+              except Exception as e:
+                  code = err(e)
+                  print("   scope: other bucket ->", code, "(403 = restricted to this bucket; 404 = account-wide)")
+                  if "404" in code: problems.append(f"{label}: looks account-wide (404 on another bucket)")
               if label == "read-only token":
                   if sample:
                       try:
