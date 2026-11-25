@@ -18,6 +18,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from modelroom.common import ledger as L
+
 from .ledgers import _zstd, summarize
 
 
@@ -64,6 +66,10 @@ def main(argv=None) -> int:
             except Exception as ex:  # noqa: BLE001
                 c["chain_head_matches"] = False
                 row["error"] = type(ex).__name__
+            try:                                               # the same reader the refresh and the site use
+                c["loads_with_ledger_reader"] = len(L.read(Path(t.name))) == m["lines"]
+            except Exception:  # noqa: BLE001
+                c["loads_with_ledger_reader"] = False
         row["ok"] = all(c.values())
         if not row["ok"]:
             problems.append(f"{name}: " + ", ".join(k for k, v in c.items() if not v))

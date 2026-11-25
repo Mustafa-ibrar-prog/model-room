@@ -1,0 +1,143 @@
+name: Supabase archive dry run (TEST, one time)
+
+# The one-time, read-only Supabase archive dry run Moose approved on 2026-11-24, started automatically by the daily
+# health check the first time Supabase answers normally again (no exceed_egress_quota restriction). Never retried:
+# the health check starts it only if this workflow has never run. Read-only throughout:
+#   - Supabase: a few KB of summaries computed in the database (size, chain checks, archive projection). Nothing is
+#     written, deleted or migrated, and no table is downloaded.
+#   - R2: the 26 archived ledgers are read back with the READ-ONLY token and checked; nothing is written or deleted.
+#   - The app: archive reads stay off; nothing in storage behaviour, production or model versions changes.
+# Any unexpected error stops the run and the report says so. The report is posted as a GitHub issue.
+on:
+  workflow_dispatch:
+    inputs:
+      rehearsal:
+        description: "true = rehearse the R2 and GitHub-only steps without touching Supabase or posting an issue"
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+
+permissions:
+  contents: read
+  actions: read
+  issues: write
+
+concurrency:
+  group: supabase-dryrun
+  cancel-in-progress: false
+
+jobs:
+  dryrun:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      OUT: /tmp/dry
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: mkdir -p "$OUT"
+      - name: Supabase API available (stop if still restricted)
+        if: github.event.inputs.rehearsal != 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          mkdir -p "$OUT"
+          python3 - <<'EOF'
+          import json, os, urllib.request, urllib.error
+          url, key = os.environ.get("SUPABASE_URL", "").rstrip("/"), os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+          out = {"status": None}
+          try:
+              with urllib.request.urlopen(urllib.request.Request(url + "/auth/v1/health", headers={"apikey": key}), timeout=20) as r:
+                  out["status"] = r.status
+          except urllib.error.HTTPError as e:
+              out["status"] = e.code
+          except Exception as e:
+              out["error"] = type(e).__name__
+          json.dump(out, open(os.environ["OUT"] + "/auth.json", "w")); print("auth health:", out)
+          raise SystemExit(0 if out["status"] == 200 else 1)
+          EOF
+      - run: cd modeling && pip install -q -e . "psycopg[binary]" boto3 zstandard
+      - name: Connect to the database (nothing printed)
+        if: github.event.inputs.rehearsal != 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bash scripts/odds-store-connect.sh
+      - name: Database size and archive projection (computed in the database, read-only)
+        if: github.event.inputs.rehearsal != 'true'
+        run: |
+          [ "${ODDS_STORE:-off}" = on ] || { echo "::error::database not reachable"; exit 1; }
+          psql "$MODELROOM_ODDS_DB_URL" -qtA -v ON_ERROR_STOP=1 -f scripts/supabase-storage.sql | tail -1 > "$OUT/storage.json"
+          psql "$MODELROOM_ODDS_DB_URL" -qtA -v ON_ERROR_STOP=1 -f scripts/archive-projection.sql | tail -1 > "$OUT/projection.json"
+          python3 -c "import json; d=json.load(open('$OUT/storage.json')); print('database', round(d['db_bytes']/1e6,1), 'MB')"
+      - name: Checkpoints from the preview branch (for the chain anchors)
+        run: |
+          git fetch -q --depth 60 origin preview
+          mkdir -p modeling/integrity-anchor/reports /tmp/ledgers
+          git show FETCH_HEAD:modeling/preview-ledger/reports/store_checkpoints.json > modeling/integrity-anchor/reports/store_checkpoints.json 2>/dev/null || rm -f modeling/integrity-anchor/reports/store_checkpoints.json
+          git archive FETCH_HEAD modeling/preview-ledger | tar -x -C /tmp/ledgers
+          echo "preview commit: $(git rev-parse FETCH_HEAD)"
+      - name: Store chains, both leagues (checked in the database, a few KB back)
+        if: github.event.inputs.rehearsal != 'true'
+        working-directory: modeling
+        env:
+          MODELROOM_LEDGER_DIR: ${{ github.workspace }}/modeling/integrity-anchor
+        run: |
+          for lg in nba nfl; do python -m modelroom odds-store verify --league $lg > "$OUT/verify_$lg.json" || true; done
+          python3 -c "import json; [print(lg, {t: json.load(open('$OUT/verify_'+lg+'.json')).get(t,{}).get('ok') for t in ('snapshots','comparisons','reports')}) for lg in ('nba','nfl')]"
+      - name: Archived ledgers from R2 with the READ-ONLY token
+        working-directory: modeling
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+        run: |
+          python -m modelroom.archive.readonly_verify --ledgers /tmp/ledgers/modeling/preview-ledger --prefix v1 > "$OUT/readonly.json" || true
+          python3 -c "import json; d=json.load(open('$OUT/readonly.json')); print('ledgers', d['files'], 'ok', d['ok'], d['problems'][:3])"
+      - name: Refresh reads and app state (GitHub only, no Supabase call)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, re, subprocess
+          from datetime import datetime, timedelta, timezone
+          repo, out = os.environ["GITHUB_REPOSITORY"], os.environ["OUT"]
+          since = (datetime.now(timezone.utc) - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ")
+          runs = json.loads(subprocess.run(["gh", "api", f"repos/{repo}/actions/workflows/preview.yml/runs?per_page=100&created=%3E%3D{since}",
+                                            "-q", "[.workflow_runs[] | {id, status, conclusion, created_at}]"], capture_output=True, text=True).stdout or "[]")
+          total, counted, loads = 0, 0, []
+          for r in [x for x in runs if x["status"] == "completed"]:
+              log = subprocess.run(["gh", "run", "view", str(r["id"]), "--log", "-R", repo], capture_output=True, text=True).stdout
+              hits = [int(x) for x in re.findall(r"store bytes read: (\d+)", log)]
+              if hits:
+                  total, counted = total + sum(hits), counted + 1
+              for lg, b, n in re.findall(r"(nba|nfl) snapshots loaded from the store: \d+ .*?store bytes read: (\d+) rows: (\d+)", log):
+                  loads.append({"league": lg, "bytes": int(b), "rows": int(n)})
+          json.dump({"bytes_24h": total if counted else None, "runs_counted": counted, "loads": loads}, open(out + "/egress.json", "w"))
+          flag = re.search(r'MODELROOM_ARCHIVE_READ:\s*"?(\w+)"?', open(".github/workflows/preview.yml").read())
+          done = [x for x in runs if x["status"] == "completed" and x["conclusion"] not in ("cancelled", "skipped")]   # superseded runs don't count
+          json.dump({"archive_read_flag": flag.group(1) if flag else None, "last_refresh": done[0] if done else None}, open(out + "/app.json", "w"))
+          print("refresh runs counted:", counted, "| snapshot loads:", len(loads), "| archive read flag:", flag.group(1) if flag else None)
+          EOF
+      - name: Report
+        id: rep
+        if: always()
+        run: |
+          rc=0; (cd modeling && python -m modelroom.archive.dryrun_report --dir "$OUT") > /tmp/report.md || rc=$?; echo "ok=$rc" >> "$GITHUB_OUTPUT"
+          cat /tmp/report.md >> "$GITHUB_STEP_SUMMARY"; cat /tmp/report.md
+      - name: Post the report as an issue
+        if: always() && github.event.inputs.rehearsal != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          [ -f /tmp/report.md ] || echo "The dry run stopped before a report could be built (unexpected error). Nothing was written, deleted or activated." > /tmp/report.md
+          printf '\n\nRun: %s\n' "$url" >> /tmp/report.md
+          t="[dry run] Supabase archive dry run: $([ '${{ steps.rep.outputs.ok }}' = 0 ] && echo 'all checks passed' || echo 'stopped, see report')"
+          gh issue create --title "$t" --body-file /tmp/report.md
+          [ "${{ steps.rep.outputs.ok }}" = 0 ]
