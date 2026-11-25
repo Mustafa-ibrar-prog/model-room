@@ -120,7 +120,7 @@ jobs:
                   loads.append({"league": lg, "bytes": int(b), "rows": int(n)})
           json.dump({"bytes_24h": total if counted else None, "runs_counted": counted, "loads": loads}, open(out + "/egress.json", "w"))
           flag = re.search(r'MODELROOM_ARCHIVE_READ:\s*"?(\w+)"?', open(".github/workflows/preview.yml").read())
-          done = [x for x in runs if x["status"] == "completed"]
+          done = [x for x in runs if x["status"] == "completed" and x["conclusion"] not in ("cancelled", "skipped")]   # superseded runs don't count
           json.dump({"archive_read_flag": flag.group(1) if flag else None, "last_refresh": done[0] if done else None}, open(out + "/app.json", "w"))
           print("refresh runs counted:", counted, "| snapshot loads:", len(loads), "| archive read flag:", flag.group(1) if flag else None)
           EOF
