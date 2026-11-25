@@ -120,7 +120,7 @@ jobs:
           print(f"read-only verification: {d['files']} files | {d['objects_listed']} objects listed, {d['objects_expected']} expected | unexpected {d['unexpected_objects']} | ok {d['ok']}")
           print(f"bytes original {d['bytes_original']} | stored {d['bytes_stored']} | manifest object {d['manifest_object_bytes']}")
           for r in d["rows"]:
-              print(f"{'OK ' if r['ok'] else 'BAD'} {r['file']}\t{r['lines']} lines\t{r['bytes_original']} -> {r['bytes_stored']} B\tsha256 {r['sha256_original'][:16]}...")
+              print("ROW " + json.dumps({k: r[k] for k in ("file", "key", "lines", "chained", "bytes_original", "bytes_stored", "sha256_original", "sha256_stored", "ok")} | {"checks": r["checks"]}))
           for p in d["problems"]: print("::error::", p)
           PY
           exit $rc
