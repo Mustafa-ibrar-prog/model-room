@@ -1,4 +1,7 @@
 # Continuous deployment of the public test site (the `preview` branch on Vercel).
+# Refresh times (PT, 2026-11-25): 5:30 AM NBA player points to R2 · 7:00 AM full refresh + game lines · 9:30 AM retry
+# of empty player-points games · 12:00 PM game lines only · 12:30 PM and 4:00 PM full refreshes (injuries, lineups,
+# projections) · NFL kickoff − 90 min · every game − 30 min.
 #
 #   push to main      → main is merged into `preview` within about a minute; Vercel rebuilds the test site.
 #                       If the push changed modeling/ (engines, params), projections are regenerated first.
@@ -161,6 +164,17 @@ jobs:
           if [ -n "$SLOTS" ]; then
             left=$(cd modeling && python3 modelroom/refresh_plan.py pending --slots "$SLOTS" | python3 -c "import sys,json;print(','.join(json.load(sys.stdin)['pending']))")
             if [ -z "$left" ]; then echo "data=no" >> "$GITHUB_OUTPUT"; echo "Slots already done by an earlier run: $SLOTS"; exit 0; fi
+            # Light slots (2026-11-25): lines = 5:30 AM player points, linesretry = 9:30 AM retry of empty games (R2 only,
+            # no projections); gamelines = 12:00 PM game-line fetch only (projections are rebuilt by the 12:30 refresh).
+            kinds=$(python3 -c "import sys; print(' '.join(sorted({x.split(':')[0] for x in sys.argv[1].split(',') if x})))" "$left")
+            props=""; echo " $kinds " | grep -q " linesretry " && props=followup; echo " $kinds " | grep -q " lines " && props=main
+            echo "props=$props" >> "$GITHUB_OUTPUT"
+            heavy=$(python3 -c "import sys; print(' '.join(k for k in sys.argv[1].split() if k not in ('lines', 'linesretry', 'gamelines')))" "$kinds")
+            if [ -z "$heavy" ]; then
+              if echo " $kinds " | grep -q " gamelines "; then echo "data=yes" >> "$GITHUB_OUTPUT"; echo "gamelines_only=yes" >> "$GITHUB_OUTPUT"
+              else echo "data=no" >> "$GITHUB_OUTPUT"; fi
+              echo "Light run: $kinds"; exit 0
+            fi
           fi
           if [ "$EVENT" != "push" ] || [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
             echo "data=yes" >> "$GITHUB_OUTPUT"
@@ -171,7 +185,7 @@ jobs:
           fi
 
       - uses: actions/setup-python@v5
-        if: steps.plan.outputs.data == 'yes'
+        if: steps.plan.outputs.data == 'yes' || steps.plan.outputs.props != ''
         with:
           python-version: "3.12"
 
@@ -188,6 +202,7 @@ jobs:
         working-directory: modeling
         env:
           KINDS: ${{ needs.plan.outputs.kinds }}
+          GAMELINES_ONLY: ${{ steps.plan.outputs.gamelines_only }}
           # R2 archive reads: a READ-ONLY token (Object Read only), separate from the archive workflow's write token.
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
@@ -218,17 +233,19 @@ jobs:
           # Injury feed (test site): the official NBA injury report + ESPN's injury reports (+ nflverse's copy of the
           # NFL report). A failed source is logged on the site; the engines then fall back to their own
           # availability rules. Then the NFL starters are rebuilt with the live depth chart and designations.
+          if [ "${GAMELINES_ONLY:-}" != yes ]; then
           run nba python -m modelroom injuries nba || echo "::warning::NBA injury feed failed; NBA engines use the missed-games rule"
           run nfl python -m modelroom injuries nfl || echo "::warning::NFL injury feed failed; NFL engines use nflverse injury reports"
           run nfl python -m modelroom nfl starters > /dev/null
+          fi
           # Pregame wind forecasts (NWS GFS MOS via the Iowa Environmental Mesonet mirror; public domain, free, no key) for
           # open-air NFL games in the next 40 h, stored append-only in preview-ledger/nfl_weather_week_*.jsonl. Read only by the
           # 0.1.6 shadow; a failure never fails the refresh (that shadow then keeps its unadjusted projection).
-          run nfl python -m modelroom nfl weather > /tmp/nfl_weather.json || echo "::warning::NFL wind forecasts not fetched; the 0.1.6 shadow runs without them"
+          [ "${GAMELINES_ONLY:-}" = yes ] || run nfl python -m modelroom nfl weather > /tmp/nfl_weather.json || echo "::warning::NFL wind forecasts not fetched; the 0.1.6 shadow runs without them"
           # Sportsbook lines (DraftKings, FanDuel and other US books) from The Odds API, only when the
           # ODDS_API_KEY secret is set. Free tier = 500 credits a month; each league costs 3 credits a call, so
-          # lines are fetched only at the 7:00 AM and 12:00 PM PT refreshes (and manual runs): about 360 a month.
-          # The 4:00 PM injury refresh reuses the midday prices (a third fetch would exceed the free 500).
+          # lines are fetched only at 7:00 AM and 12:00 PM PT (and manual runs): about 360 a month.
+          # The 12:30 PM and 4:00 PM injury refreshes reuse the 12:00 prices (a third fetch would exceed the free 500).
           # Snapshots are kept in the append-only Supabase table odds.snapshots, NOT in this public repository (The Odds
           # API's terms allow storing and displaying the data, not offering it as downloadable files). Each refresh rebuilds
           # the working copy from the table, fetches (7 AM / noon only), and appends new rows; nothing is ever updated.
@@ -243,7 +260,9 @@ jobs:
             if [ "${ODDS_STORE:-off}" = on ] && python -m modelroom odds-store load --league $lg > /tmp/odds_load_$lg.json; then
               python3 -c "import json; d=json.load(open('/tmp/odds_load_$lg.json')); v=d['verify']; b=d['bytes_read']; print('$lg snapshots loaded from the store:', d['rows'], '| chain ok:', v['ok'], '| check', v.get('elapsed_ms'), 'ms | store bytes read:', b['bytes'], 'rows:', b['rows'], 'queries:', b['queries'])"
               python3 -c "import json; v=json.load(open('/tmp/odds_load_$lg.json'))['verify']; v['ok'] or print('::warning::$lg odds.snapshots integrity check failed:', '; '.join(v['problems']))"
-              if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|midday|workflow_dispatch"; then
+              # Game lines at exactly 7:00 AM (morning) and 12:00 PM (gamelines) PT, and manual runs (2026-11-25: the
+              # midday injury refresh moved to 12:30 and no longer fetches; it reuses the 12:00 prices).
+              if [ -n "${ODDS_API_KEY:-}" ] && echo "$KINDS" | grep -Eq "morning|gamelines|workflow_dispatch"; then
                 if python -m modelroom $lg odds; then
                   python -m modelroom odds-store sync --league $lg --batch "collection" > /tmp/odds_sync_$lg.json \
                     && python3 -c "import json; d=json.load(open('/tmp/odds_sync_$lg.json')); print('$lg stored:', d['inserted'], 'new rows | chain ok:', d['verify']['ok'], '| rows:', d['verify']['rows'], '| store bytes read:', d['bytes_read']['bytes'], 'rows:', d['bytes_read']['rows'], 'queries:', d['bytes_read']['queries'])" \
@@ -256,6 +275,7 @@ jobs:
               echo "::warning::sportsbook snapshot store not reachable: $lg lines not loaded or fetched this refresh"
             fi
           done
+          if [ "${GAMELINES_ONLY:-}" = yes ]; then echo "12:00 PM game lines only: projections are rebuilt by the 12:30 PM refresh"; exit 0; fi
           run nba python -m modelroom nba project
           run nfl python -m modelroom nfl project
           run nfl python -m modelroom nfl props
@@ -286,6 +306,31 @@ jobs:
           run nfl python -m modelroom markets settle nfl
           run nba python -m modelroom markets settle nba
 
+      # NBA player points lines (5:30 AM main, 9:30 AM retry of empty games only): The Odds API -> private R2. No
+      # Supabase access in this step (the scheduler only sent the wake-up). Credit cap, once-per-mode lock and
+      # attempt markers: modeling/modelroom/sources/odds_props.py. Counts only in the log.
+      - name: NBA player points lines to private R2
+        id: props
+        if: steps.plan.outputs.props != ''
+        continue-on-error: true
+        working-directory: modeling
+        env:
+          ODDS_API_CYCLE_DAY: ${{ vars.ODDS_API_CYCLE_DAY || '10' }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+          SUPABASE_DB_URL: ""
+          MODELROOM_ODDS_DB_URL: ""
+        run: |
+          pip install -q -e . boto3
+          rc=0; python -m modelroom.sources.odds_props fetch --mode "${{ steps.plan.outputs.props }}" --board data/published/nba_props.json > /tmp/props.json || rc=$?
+          cat /tmp/props.json
+          python -m modelroom.sources.odds_props verify || rc=1
+          exit $rc
+
       - name: Keep the last good projections if anything failed
         if: steps.data.outcome == 'failure'
         run: git checkout -- modeling/data/published modeling/preview-ledger 2>/dev/null || true
@@ -307,9 +352,14 @@ jobs:
           NFL_OK: ${{ steps.data.outputs.nfl_ok }}
           NFL_WHY: ${{ steps.data.outputs.nfl_why }}
           NBA_WHY: ${{ steps.data.outputs.nba_why }}
+          PROPS: ${{ steps.props.outcome }}
         run: |
           # Every attempt is logged (append-only), success or failure, with the slots it covered.
           if [ "$DATA" = "success" ]; then ST=success; elif [ "$DATA" = "skipped" ]; then ST=skipped; else ST=failed; fi
+          # Player-points-only runs (5:30 / 9:30 AM): no data step; the slot's result is the R2 step's.
+          if [ "$ST" = skipped ] && [ "$PROPS" != "skipped" ] && [ -n "$PROPS" ]; then ST=$( [ "$PROPS" = success ] && echo success || echo failed ); fi
+          # A full or game-lines run that also carried a player-points slot fails that slot if the R2 step failed.
+          if [ "$ST" = success ] && [ -n "$PROPS" ] && [ "$PROPS" != skipped ] && [ "$PROPS" != success ]; then ST=failed; fi
           NOTE="${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}"
           ALL="${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}"
           if [ "$ST" = "success" ] && { [ "$NBA_OK" = 0 ] || [ "$NFL_OK" = 0 ]; }; then

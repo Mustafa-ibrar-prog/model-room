@@ -4,6 +4,11 @@ approved 2026-11-24). No Supabase. Never estimates a line; the model never reads
 Request: GET /v4/sports/basketball_nba/events/{event_id}/odds?regions=us&markets=player_points
   cost = markets returned x regions = 1 credit (0 when the book hasn't posted the market). The events list is free.
 
+Schedule (Moose, 2026-11-25): 5:30 AM PT main run (every game today not yet requested) and a 9:30 AM PT retry ONLY
+for games whose single paid request came back with no player points. Each mode runs once a day (write-once R2 lock;
+a completed mode is never repeated), and every paid request leaves a write-once attempt marker before anything else,
+so duplicate triggers can never pay twice for a game.
+
 Credit rules (Moose, 2026-11-24): game lines (NBA + NFL, 7 AM and noon PT) always come first. Their reserve is
 GAME_LINES_PER_DAY x the game-line days left in the credit cycle (360 a month = 12 a day), plus a SAFETY margin of 30.
 Props may use only what is above that, spread evenly over the days left in the cycle, at most MAX_PER_DAY a day:
@@ -121,19 +126,55 @@ def today_events(events: list[dict], now: datetime) -> list[dict]:
 
 
 def day_history(reader, day: str) -> dict:
-    """{event_id: status} and credits billed today, from the day's manifest chain (status: captured | empty | error)."""
+    """What has been done today, from R2:
+      - write-once attempt markers (one per PAID request, written before anything else): attempts per game, the
+        newest outcome (captured | empty) and credits billed. They are the authority, so a run that died before its
+        manifest still counts.
+      - manifests: which modes completed, and games never requested (skipped_cap, error) so a later main run of the
+        same day doesn't pick them up again."""
+    status, attempts, billed, modes, newest = {}, {}, 0, set(), {}
+    for k in reader.list(f"{MS.day_prefix(day)}/"):
+        parts = k.rsplit("/", 2)
+        if len(parts) == 3 and parts[2].startswith("attempt-") and parts[2].endswith(".json"):
+            eid = parts[1]
+            m = json.loads(reader.get(k))
+            attempts[eid] = attempts.get(eid, 0) + 1
+            billed += int(m.get("cost", 0))
+            if parts[2] > newest.get(eid, ""):
+                newest[eid] = parts[2]
+                status[eid] = m["status"]
     latest = MS.read_latest(reader, day)
-    status, billed = {}, 0
     key = latest["manifest"] if latest else None
     seen = set()
     while key and key not in seen:
         seen.add(key)
         m = json.loads(reader.get(key))
-        billed += int(m.get("credits_billed", 0))
+        modes.add(m.get("mode"))
         for r in m.get("requests", []):
-            status.setdefault(r["event_id"], r["status"])        # newest run first: its status wins
+            status.setdefault(r["event_id"], r["status"])
         key = m.get("prev_manifest")
-    return {"status": status, "billed": billed}
+    return {"status": status, "attempts": attempts, "billed": billed, "modes": modes}
+
+
+LOCK_STALE = timedelta(minutes=30)        # the job times out at 15 minutes, so an older lock's run is gone
+MAX_LOCKS = 3
+
+
+def acquire_lock(store, reader, day: str, mode: str, now: datetime, run_ts: str) -> tuple[bool, str]:
+    """A write-once lock per day and mode, so two triggers (scheduler + GitHub backup) can never run the same
+    mode at the same time. A lock younger than 30 minutes means another run is active or just finished: skip. An
+    older lock whose run never completed may be taken over, at most MAX_LOCKS times a day."""
+    from modelroom.archive.store import ArchiveError
+    for k in range(1, MAX_LOCKS + 1):
+        lk = f"{MS.day_prefix(day)}/locks/{mode}-{k}.json"
+        try:
+            store.put_once(lk, json.dumps({"run_ts": run_ts, "at": now.isoformat(timespec="seconds")}).encode())
+            return True, lk
+        except ArchiveError:
+            held = json.loads(reader.get(lk))
+            if now - datetime.fromisoformat(held["at"]) < LOCK_STALE:
+                return False, f"another {mode} run started at {held['at']} (lock {k})"
+    return False, f"{mode} already attempted {MAX_LOCKS} times today"
 
 
 def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = None, reset_day: int = 10,
@@ -142,8 +183,12 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
     now = now or datetime.now(timezone.utc)
     day = now.astimezone(PT).date()
     run_ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")       # unique per run, even within one second
-    if not lines_done_today:
-        return {"mode": mode, "stopped": "today's noon game-line fetch hasn't finished: game lines go first", "requested": 0}
+    hist0 = day_history(reader, day.isoformat())
+    if mode in hist0["modes"]:
+        return {"mode": mode, "date": day.isoformat(), "skipped": f"{mode} run already completed today", "requested": 0}
+    ok, why = acquire_lock(store, reader, day.isoformat(), mode, now, run_ts)
+    if not ok:
+        return {"mode": mode, "date": day.isoformat(), "skipped": why, "requested": 0}
     end = datetime.combine(day + timedelta(days=1), datetime.min.time(), PT).astimezone(timezone.utc)
     ev = get(f"{BASE}/events?apiKey={key}&dateFormat=iso&commenceTimeFrom={now.strftime('%Y-%m-%dT%H:%M:%SZ')}"
              f"&commenceTimeTo={end.strftime('%Y-%m-%dT%H:%M:%SZ')}", key, http, sleep)
@@ -152,9 +197,9 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
         raise StopRun(f"the events list cost {cost} credits (expected 0)")
     events = today_events(json.loads(ev["body"]), now)
     hist = day_history(reader, day.isoformat())
-    b = budget(remaining, day, reset_day, lines_done_today, hist["billed"])
-    if mode == "followup":
-        todo = [e for e in events if hist["status"].get(e["id"]) == "empty"]
+    b = budget(remaining, day, reset_day, False, hist["billed"])   # today's 12 game-line credits always held back
+    if mode == "followup":                                          # retry ONLY games whose one paid attempt was empty
+        todo = [e for e in events if hist["status"].get(e["id"]) == "empty" and hist["attempts"].get(e["id"], 0) == 1]
     else:
         todo = [e for e in events if e["id"] not in hist["status"]]
     aliases = PM.load_aliases(aliases_path)
@@ -182,7 +227,13 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
         body = res["body"]
         data = json.loads(body)
         game = PM.match_game(e, games)
-        if not data.get("bookmakers"):
+        n_out = sum(len(m.get("outcomes") or []) for bk in data.get("bookmakers") or [] for m in bk.get("markets") or [] if m.get("key") == "player_points")
+        try:
+            MS.put_verified(store, reader, f"{MS.day_prefix(day.isoformat())}/{e['id']}/attempt-{run_ts}.json",
+                            json.dumps({"mode": mode, "status": "captured" if n_out else "empty", "cost": cost, "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}).encode())
+        except Exception:  # noqa: BLE001  can't record the attempt: stop before spending more
+            stop = "could not record a request in R2: stopping before any further request"
+        if n_out == 0:                                              # genuinely empty: no player points offered yet
             requests.append({"event_id": e["id"], "status": "empty", "cost": cost, "game_id": game["game_id"] if game else None})
             if stop:
                 break
@@ -227,6 +278,16 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
     return out
 
 
+WINDOWS = {"main": ((5, 30), (8, 30)), "followup": ((9, 30), (12, 30))}     # Pacific time
+
+
+def in_window(mode: str, now: datetime) -> bool:
+    """For backup (GitHub schedule) triggers: only inside the mode's Pacific-time window (handles daylight saving)."""
+    t = now.astimezone(PT)
+    (h0, m0), (h1, m1) = WINDOWS[mode]
+    return (h0, m0) <= (t.hour, t.minute) < (h1, m1)
+
+
 def lines_done(refresh_log: Path, day: date) -> bool:
     """Today's noon game-line refresh (midday slot) succeeded, per the refresh log on the preview branch."""
     want = f"midday:{day.isoformat()}"
@@ -246,6 +307,7 @@ def main(argv=None) -> int:
     ap.add_argument("--refresh-log", default="preview-ledger/refresh_log.jsonl")
     ap.add_argument("--date", default=None)
     ap.add_argument("--local", default=None, help="local folder instead of R2 (tests)")
+    ap.add_argument("--only-in-window", action="store_true", help="skip unless now is inside the mode's Pacific window")
     a = ap.parse_args(argv)
     reset_day = int(os.environ.get("ODDS_API_CYCLE_DAY", "10") or 10)
     now = datetime.now(timezone.utc)
@@ -255,25 +317,27 @@ def main(argv=None) -> int:
         out = MS.verify_day(reader, a.date or day.isoformat())
         print(json.dumps(out))
         return 0 if out["ok"] else 1
-    done = lines_done(Path(a.refresh_log), day)
     if a.action == "plan":                         # no paid request: budget from the last known remaining credits
         hist = day_history(reader, day.isoformat())
         rem = int(os.environ.get("ODDS_REMAINING_HINT", "0") or 0)
-        print(json.dumps({"lines_done_today": done, **budget(rem, day, reset_day, done, hist["billed"])}))
+        print(json.dumps(budget(rem, day, reset_day, False, hist["billed"])))
+        return 0
+    if a.only_in_window and not in_window(a.mode, now):
+        print(json.dumps({"mode": a.mode, "skipped": f"outside the {a.mode} window ({now.astimezone(PT):%H:%M} PT)"}))
         return 0
     key = os.environ.get("ODDS_API_KEY", "")
     if not key:
         print(json.dumps({"stopped": "ODDS_API_KEY not set"}))
         return 1
     try:
-        out = run(a.mode, key, json.loads(Path(a.board).read_text()), from_env(a.local), reader, now, reset_day, done,
+        out = run(a.mode, key, json.loads(Path(a.board).read_text()), from_env(a.local), reader, now, reset_day, False,
                   Path("config/nba_player_aliases.csv"))
     except StopRun as s:
         out = {"mode": a.mode, "stopped": scrub(str(s), key)}
     except Exception as e:  # noqa: BLE001  never print a traceback that could carry the request URL
         out = {"mode": a.mode, "stopped": f"unexpected error: {type(e).__name__}: {scrub(str(e), key)[:200]}"}
     print(json.dumps(out))
-    return 1 if out.get("stopped") and "noon game-line" not in str(out.get("stopped")) else 0
+    return 1 if out.get("stopped") else 0
 
 
 if __name__ == "__main__":
