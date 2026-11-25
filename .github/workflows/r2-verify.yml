@@ -6,6 +6,12 @@ name: R2 configuration check (read-only, manual)
 # separate approval (archive-r2.yml "check" mode does that). Secret values are never printed (lengths only).
 on:
   workflow_dispatch:
+    inputs:
+      probe:
+        description: "Also run the one-time write/read/delete probe (writes and deletes one tiny _probe/ file; approved by Moose 2026-11-24)"
+        default: "false"
+        type: choice
+        options: ["false", "true"]
 
 permissions:
   contents: read
@@ -108,4 +114,42 @@ jobs:
           if st is not None and not (400 <= st < 500): problems.append(f"bucket answered an unsigned request with HTTP {st}")
           print("problems:", problems or "none")
           sys.exit(1 if problems else 0)
+          EOF
+      - name: Write / read / delete probe (only when probe = true)
+        if: github.event.inputs.probe == 'true'
+        run: |
+          python3 - <<'EOF'
+          import hashlib, os, sys, urllib.request, urllib.error
+          from datetime import datetime, timezone
+          import boto3
+          from botocore.config import Config
+          e = {k: os.environ[k].strip() for k in ("R2_ACCOUNT_ID", "R2_ACCESS_KEY_ID", "R2_SECRET_ACCESS_KEY", "R2_BUCKET", "R2_READ_ACCESS_KEY_ID", "R2_READ_SECRET_ACCESS_KEY")}
+          ep, b = f"https://{e['R2_ACCOUNT_ID']}.r2.cloudflarestorage.com", e["R2_BUCKET"]
+          mk = lambda k, s: boto3.client("s3", endpoint_url=ep, aws_access_key_id=k, aws_secret_access_key=s, region_name="auto", config=Config(signature_version="s3v4"))
+          w, r = mk(e["R2_ACCESS_KEY_ID"], e["R2_SECRET_ACCESS_KEY"]), mk(e["R2_READ_ACCESS_KEY_ID"], e["R2_READ_SECRET_ACCESS_KEY"])
+          key = f"_probe/{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}.txt"
+          body = b"model-room archive access probe"
+          ok, wrote = {}, False
+          try:
+              w.put_object(Bucket=b, Key=key, Body=body); wrote = True
+              ok["1 write (write token)"] = True; print(f"1. wrote {key} ({len(body)} bytes, sha256 {hashlib.sha256(body).hexdigest()[:16]}...)")
+              got = r.get_object(Bucket=b, Key=key)["Body"].read()
+              ok["2 read back (read-only token)"] = got == body; print("2. read back with the read-only token:", "contents match" if got == body else "CONTENTS DIFFER")
+              try:
+                  with urllib.request.urlopen(urllib.request.Request(f"{ep}/{b}/{key}"), timeout=15) as x: st = x.status
+              except urllib.error.HTTPError as x: st = x.code
+              ok["3 anonymous denied"] = 400 <= st < 500; print(f"3. unsigned request for the object: HTTP {st} ->", "denied" if ok["3 anonymous denied"] else "NOT DENIED")
+          except Exception as x:
+              print("probe step FAILED:", type(x).__name__, getattr(x, "response", {}).get("Error", {}).get("Code", ""))
+          finally:
+              if wrote:
+                  w.delete_object(Bucket=b, Key=key)
+                  try:
+                      w.head_object(Bucket=b, Key=key); gone = False
+                  except Exception: gone = True
+                  ok["4 deleted"] = gone; print("4. deleted the probe file:", "gone" if gone else "STILL PRESENT")
+              n = w.list_objects_v2(Bucket=b, MaxKeys=5).get("KeyCount", 0)
+              ok["5 bucket empty"] = n == 0; print(f"5. objects in the bucket now: {n}")
+          print("result:", ok)
+          sys.exit(0 if len(ok) == 5 and all(ok.values()) else 1)
           EOF
