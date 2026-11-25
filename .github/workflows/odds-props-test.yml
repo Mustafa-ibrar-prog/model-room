@@ -1,0 +1,104 @@
+name: Odds API player-points test (manual, one request)
+
+# One-off TEST check of NBA player points props from The Odds API (Moose, approved 2026-11-24). Manual only.
+#   1. GET /v4/sports/basketball_nba/events (free: does not count against the quota) to pick ONE upcoming game.
+#   2. ONE GET /v4/sports/basketball_nba/events/{id}/odds?regions=us&markets=player_points
+#      cost = markets returned x regions = at most 1 credit (0 if nothing is returned).
+# The response is summarized in counts and yes/no checks and then discarded: no odds, prices, sportsbook names or
+# player lines are printed (the repository and its logs are public), stored, committed or published. The key is never
+# printed. Stops before step 2 if fewer than 15 credits remain or the request could cost more than 1 credit.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: odds-props-test
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Board players for matching (published TEST board)
+        run: |
+          git fetch -q --depth 1 origin preview
+          git show FETCH_HEAD:modeling/data/published/nba_props.json > /tmp/board.json
+      - name: One player-points request
+        env:
+          KEY: ${{ secrets.ODDS_API_KEY }}
+        run: |
+          python3 - <<'EOF'
+          import json, os, re, sys, unicodedata, urllib.request, urllib.error
+          from datetime import datetime, timedelta, timezone
+          key = os.environ.get("KEY", "")
+          if not key: print("::error::ODDS_API_KEY missing"); sys.exit(1)
+          base = "https://api.the-odds-api.com/v4/sports/basketball_nba"
+          def get(url):
+              with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "ModelRoom/0.1"}), timeout=30) as r:
+                  return json.loads(r.read()), {k.lower(): v for k, v in r.headers.items() if k.lower().startswith("x-requests")}
+          start = (datetime.now(timezone.utc) + timedelta(minutes=45)).strftime("%Y-%m-%dT%H:%M:%SZ")
+          events, h = get(f"{base}/events?apiKey={key}&dateFormat=iso&commenceTimeFrom={start}")
+          print("events endpoint: credits for this call:", h.get("x-requests-last"), "| remaining:", h.get("x-requests-remaining"), "| used:", h.get("x-requests-used"))
+          print("upcoming NBA events listed:", len(events))
+          if not events: print("no upcoming game: stopping without a props request"); sys.exit(0)
+          if int(float(h.get("x-requests-remaining") or 0)) < 15: print("fewer than 15 credits left: stopping"); sys.exit(0)
+          ev = sorted(events, key=lambda e: e["commence_time"])[0]
+          print("chosen game:", ev["away_team"], "@", ev["home_team"], "| starts", ev["commence_time"], "| event id length", len(ev["id"]))
+          try:
+              d, h = get(f"{base}/events/{ev['id']}/odds?apiKey={key}&regions=us&markets=player_points&oddsFormat=american&dateFormat=iso")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode("utf-8", "replace")
+              print("props request refused: HTTP", e.code, "|", re.sub(r"apiKey=\w+", "apiKey=***", body)[:300])
+              sys.exit(0)
+          print("props request: credits for this call:", h.get("x-requests-last"), "| remaining:", h.get("x-requests-remaining"), "| used:", h.get("x-requests-used"))
+          books = d.get("bookmakers") or []
+          mk = [(b, m) for b in books for m in b.get("markets", []) if m.get("key") == "player_points"]
+          outs = [o for _, m in mk for o in m.get("outcomes", [])]
+          players = {o.get("description") for o in outs if o.get("description")}
+          print("top-level fields:", sorted(d.keys()))
+          print("bookmakers returned:", len(books), "| with player_points:", len(mk))
+          print("bookmaker fields:", sorted(books[0].keys()) if books else None, "| market fields:", sorted(mk[0][1].keys()) if mk else None)
+          print("outcome fields:", sorted(outs[0].keys()) if outs else None)
+          print("outcomes:", len(outs), "| distinct players:", len(players))
+          print("has player names:", bool(players), "| has thresholds (point):", all("point" in o for o in outs) if outs else False,
+                "| has prices:", all("price" in o for o in outs) if outs else False,
+                "| has sportsbook names (title):", all(b.get("title") for b in books) if books else False,
+                "| has timestamps (last_update):", all(m.get("last_update") for _, m in mk) if mk else False)
+          print("outcome names:", sorted({o.get("name") for o in outs}))
+          pts = sorted({o.get("point") for o in outs if o.get("point") is not None})
+          print("thresholds: count", len(pts), "| all .5 lines:", all(abs(p % 1 - 0.5) < 1e-9 for p in pts) if pts else None)
+          per_player = {}
+          for b, m in mk:
+              for o in m.get("outcomes", []):
+                  per_player.setdefault(o.get("description"), set()).add(b.get("key"))
+          if per_player:
+              c = sorted(len(v) for v in per_player.values())
+              print("books per player: min", c[0], "| median", c[len(c) // 2], "| max", c[-1])
+          ups = sorted(m.get("last_update") for _, m in mk if m.get("last_update"))
+          if ups:
+              now = datetime.now(timezone.utc)
+              age = lambda s: (now - datetime.fromisoformat(s.replace("Z", "+00:00"))).total_seconds() / 60
+              print(f"line age: newest {age(ups[-1]):.0f} min, oldest {age(ups[0]):.0f} min")
+          # Player matching against the TEST board (names normalized: case, accents, punctuation, suffixes)
+          def norm(s):
+              s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode().lower()
+              s = re.sub(r"[.'\-]", " ", s)
+              return " ".join(w for w in s.split() if w not in ("jr", "sr", "ii", "iii", "iv"))
+          board = json.load(open("/tmp/board.json"))
+          nick = lambda full: full.split()[-1].lower()
+          g = next((g for g in board["games"] if nick(ev["home_team"]) in json.dumps(g.get("home", "")).lower() and nick(ev["away_team"]) in json.dumps(g.get("away", "")).lower()), None)
+          if g is None:
+              print("board game: not found on the TEST board (matching not checked)")
+          else:
+              names = {norm(p["name"]): p["name"] for p in g["players"]}
+              hit = [p for p in players if norm(p) in names]
+              print(f"player matching vs TEST board game {g['game_id']}: {len(hit)} of {len(players)} matched by name; board has {len(g['players'])} players")
+              miss = len(players) - len(hit)
+              if miss: print("unmatched players:", miss, "(names not printed)")
+          EOF
