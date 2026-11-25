@@ -75,6 +75,7 @@ jobs:
         run: bash scripts/odds-store-connect.sh
       - name: Closed ledgers from the preview branch
         if: github.event.inputs.mode != 'check'
+        working-directory: .
         run: |
           git fetch -q origin preview
           mkdir -p /tmp/ledgers && git archive FETCH_HEAD modeling/preview-ledger | tar -x -C /tmp/ledgers
