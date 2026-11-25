@@ -30,7 +30,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -43,6 +43,9 @@ PUBLISHED = ROOT / "data" / "published"
 # projections; reuses the 12:00 prices). Game lines stay at exactly 7:00 AM (morning) and 12:00 PM (gamelines).
 DAILY = (("lines", 5, 30), ("morning", 7, 0), ("linesretry", 9, 30), ("gamelines", 12, 0), ("midday", 12, 30), ("afternoon", 16, 0))
 DAILY_WINDOW = timedelta(hours=3)
+# The new slots start on 2026-11-26 (Pacific): on Nov 25 the old 12:00 refresh had already fetched game lines.
+NEW_KINDS = {"lines", "linesretry", "gamelines"}
+NEW_SCHEDULE_FROM = date(2026, 11, 26)
 # How far back "missed" looks. The two daily days below, so a stale miss stops being reported and the alert clears.
 MISSED_LOOKBACK = timedelta(days=2)
 INACTIVES_BEFORE = timedelta(minutes=90)
@@ -105,6 +108,8 @@ def all_slots(now: datetime) -> list[dict]:
     for day in (local.date() - timedelta(days=1), local.date(), local.date() + timedelta(days=1)):
         for name, h, m in DAILY:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
+            if name in NEW_KINDS and day < NEW_SCHEDULE_FROM:
+                continue                    # today's game lines already ran under the old noon refresh: never twice
             out.append({"id": f"{name}:{day.isoformat()}", "kind": name, "at": at, "until": at + DAILY_WINDOW})
     starts = upcoming_starts(now)
     for lg, ts in starts.items():
@@ -189,6 +194,8 @@ def status(now: datetime | None = None) -> dict:
         for name, h, m in DAILY:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
             sid = f"{name}:{day.isoformat()}"
+            if name in NEW_KINDS and day < NEW_SCHEDULE_FROM:
+                continue
             if at + DAILY_WINDOW <= now and sid not in done:
                 missed.append(sid)
     # Game slots come from the games' start times, so a pregame refresh that never started still counts as

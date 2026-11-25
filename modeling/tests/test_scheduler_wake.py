@@ -9,7 +9,7 @@ import os
 import re
 import subprocess
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import date, UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -40,6 +40,7 @@ create table if not exists scheduler.dispatch_log (
 
 # ------------------------------------------------------------------ the planner
 def _plan(tmp_path, monkeypatch, log_rows=(), games=()):
+    monkeypatch.setattr(R, "NEW_SCHEDULE_FROM", date(2000, 1, 1))     # these fixtures predate the 2026-11-26 slots
     monkeypatch.setattr(R, "LOG", tmp_path / "refresh_log.jsonl")
     monkeypatch.setattr(R, "PUBLISHED", tmp_path)
     R.LOG.write_text("".join(json.dumps(r) + "\n" for r in log_rows))
@@ -242,6 +243,7 @@ def _run_week(tmp_path, monkeypatch, label, new_scheduler: bool):
         if (day.astimezone(UTC).weekday()) == 6:  # Sunday: three kickoff times
             nfl += [(day + timedelta(hours=18)).isoformat(), (day + timedelta(hours=21, minutes=5)).isoformat(),
                     (day + timedelta(hours=25, minutes=20)).isoformat()]
+    monkeypatch.setattr(R, "NEW_SCHEDULE_FROM", date(2000, 1, 1))
     home = tmp_path / label
     home.mkdir()
     monkeypatch.setattr(R, "LOG", home / "refresh_log.jsonl")

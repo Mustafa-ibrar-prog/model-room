@@ -78,6 +78,12 @@ def test_failed_runs_are_retried_reported_and_missed(tmp_path, monkeypatch):
     assert st["recent_failures"][-1]["note"] == "schedule run 1" and st["last_success_by_kind"]["midday"]["note"] == "schedule run 2"
 
 
+def test_new_slots_start_on_nov_26():
+    t = datetime(2026, 11, 25, 22, 50, tzinfo=timezone.utc)                      # 2:50 PM PT on the change day
+    assert not [s for s in R.all_slots(t) if s["kind"] in R.NEW_KINDS and s["id"].endswith("2026-11-25")]
+    assert "gamelines:2026-11-26" in {s["id"] for s in R.all_slots(t)}
+
+
 def test_new_daily_slots_and_daylight_saving(tmp_path, monkeypatch):
     """2026-11-25: 5:30 AM player points, 9:30 AM retry, game lines alone at exactly 12:00, full refresh at 12:30."""
     pub = tmp_path / "published"
