@@ -6,11 +6,17 @@ on:
   workflow_dispatch:
     inputs:
       game:
-        description: "ESPN game id"
-        required: true
+        description: "ESPN game id (blank = skip the page check)"
+        required: false
+        default: ""
       player:
         description: "player id for the detail page"
-        required: true
+        required: false
+        default: ""
+      date:
+        description: "snapshot date to verify in R2 (YYYY-MM-DD, Pacific; blank = skip)"
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -22,7 +28,38 @@ jobs:
     env:
       SITE: https://model-room-git-preview-computer-citi.vercel.app
     steps:
+      - uses: actions/checkout@v4
+        if: github.event.inputs.date != ''
+        with:
+          fetch-depth: 1
+      - name: Verify stored snapshots with the READ-ONLY token (no Odds API call)
+        if: github.event.inputs.date != ''
+        working-directory: modeling
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+        run: |
+          pip install -q -e . boto3
+          python -m modelroom.sources.odds_props verify --date "${{ github.event.inputs.date }}"
+          python3 - <<'PY'
+          import json, os
+          from modelroom.archive import market_snapshots as MS
+          from modelroom.archive.store import reader_from_env
+          r = reader_from_env(); d = "${{ github.event.inputs.date }}"
+          latest = MS.read_latest(r, d)
+          if latest:
+              v = json.loads(r.get(latest["view"]))
+              for gid, g in v["games"].items():
+                  books = [len(p["books"]) for p in g["players"].values()]
+                  print(f"game {gid}: players with a line {len(books)}, unmatched provider players {g['unmatched_players']}, books per player min {min(books) if books else 0} max {max(books) if books else 0}")
+              print("objects under the day:", len(r.list(MS.day_prefix(d) + "/")))
+          else:
+              print("no snapshots stored for", d)
+          PY
       - name: Load the pages and count what renders
+        if: github.event.inputs.game != ''
         run: |
           curl -sS -L --max-time 60 -o /tmp/list.html -w "list page HTTP %{http_code}\n" "$SITE/nba-props?game=${{ github.event.inputs.game }}&cat=points"
           curl -sS -L --max-time 60 -o /tmp/detail.html -w "detail page HTTP %{http_code}\n" "$SITE/nba-props?game=${{ github.event.inputs.game }}&cat=points&player=${{ github.event.inputs.player }}"
