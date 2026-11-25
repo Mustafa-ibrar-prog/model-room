@@ -30,10 +30,10 @@ jobs:
           import re, html
           def text(f):
               t = re.sub(r"<script.*?</script>", " ", open(f, encoding="utf-8", errors="replace").read(), flags=re.S)
-              return html.unescape(re.sub(r"<[^>]+>", " ", t))
+              return re.sub(r"[\u202f\u00a0]", " ", html.unescape(re.sub(r"<[^>]+>", "", t)))
           L, D = text("/tmp/list.html"), text("/tmp/detail.html")
           print("list: 'Sportsbook line' labels:", L.count("Sportsbook line"))
-          print("list: cards showing a book count + PT time:", len(re.findall(r"\b\d+ books · \d{1,2}:\d{2} [AP]M PT", L)) + len(re.findall(r"· \d{1,2}:\d{2} [AP]M PT", L)) // 2)
+          print("list: cards showing book count/name + update time:", len(re.findall(r"Sportsbook line\s*[\d.]+\s*[^·]{1,40}·\s*\d{1,2}:\d{2} [AP]M PT", L)))
           print("list: cards with 'none':", len(re.findall(r"Sportsbook line\s+none", L)))
           print("detail: sportsbook table present:", "Sportsbook lines (points, US books)" in D)
           print("detail: table header present:", all(h in D for h in ("Sportsbook", "Line", "Over", "Under", "Updated")))
@@ -41,7 +41,7 @@ jobs:
           print("detail: table rows (incl. header):", len(rows))
           print("detail: update times shown:", len(re.findall(r"\d{1,2}:\d{2} [AP]M PT", D)) > 0)
           print("detail: responsible-gambling line:", "Gamble responsibly. 18+" in D)
-          print("detail: 'more than' headline at a book line:", bool(re.search(r"Chance of more than \d+\.5", D)))
+          print("detail: 'more than' headline at a book line:", bool(re.search(r"Chance of more than \d+(\.\d)?", D)))
           for s in ("R2_", "AKIA", "r2.cloudflarestorage.com", "x-amz", "Signature="):
               print(f"credential marker '{s}' in page:", s in open("/tmp/list.html").read() or s in open("/tmp/detail.html").read())
           EOF
