@@ -62,6 +62,7 @@ jobs:
           python-version: "3.12"
       - run: pip install -e . "psycopg[binary]" boto3 zstandard
       - name: Bucket access and privacy probe (no Supabase)
+        if: github.event.inputs.mode == 'check'
         run: |
           python -m modelroom archive check > /tmp/check.json
           python3 -c "import json; d=json.load(open('/tmp/check.json')); print({k: d[k] for k in ('write','read_back','anonymous_status','private','deleted','ok')})"
@@ -74,9 +75,11 @@ jobs:
         run: bash scripts/odds-store-connect.sh
       - name: Closed ledgers from the preview branch
         if: github.event.inputs.mode != 'check'
+        working-directory: .
         run: |
           git fetch -q origin preview
-          mkdir -p /tmp/ledgers && git archive origin/preview modeling/preview-ledger | tar -x -C /tmp/ledgers
+          mkdir -p /tmp/ledgers && git archive FETCH_HEAD modeling/preview-ledger | tar -x -C /tmp/ledgers
+          echo "preview commit: $(git rev-parse FETCH_HEAD)"; ls /tmp/ledgers/modeling/preview-ledger/*.jsonl | wc -l
       - name: Archive and verify
         if: github.event.inputs.mode != 'check'
         run: |
@@ -104,3 +107,28 @@ jobs:
           print("Supabase:", d.get("supabase"), "| bytes read:", d["supabase_bytes_read"]["bytes"], "| rows:", d["supabase_bytes_read"]["rows"])
           PY
           exit $rc
+      - name: Independent verification with the READ-ONLY token (size, checksums, git source, chains)
+        if: github.event.inputs.mode == 'run' || github.event.inputs.mode == 'verify'
+        env:
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+        run: |
+          python -m modelroom.archive.readonly_verify --ledgers /tmp/ledgers/modeling/preview-ledger --prefix v1 > /tmp/r2_manifest_verified.json; rc=$?
+          python3 - <<'PY'
+          import json
+          d = json.load(open("/tmp/r2_manifest_verified.json"))
+          print(f"read-only verification: {d['files']} files | {d['objects_listed']} objects listed, {d['objects_expected']} expected | unexpected {d['unexpected_objects']} | ok {d['ok']}")
+          print(f"bytes original {d['bytes_original']} | stored {d['bytes_stored']} | manifest object {d['manifest_object_bytes']}")
+          for r in d["rows"]:
+              print("ROW " + json.dumps({k: r[k] for k in ("file", "key", "lines", "chained", "bytes_original", "bytes_stored", "sha256_original", "sha256_stored", "ok")} | {"checks": r["checks"]}))
+          for p in d["problems"]: print("::error::", p)
+          PY
+          exit $rc
+      - name: Keep the verified manifest (names, sizes and hashes only; no ledger contents)
+        if: always() && (github.event.inputs.mode == 'run' || github.event.inputs.mode == 'verify')
+        uses: actions/upload-artifact@v4
+        with:
+          name: r2-ledger-manifest-verified
+          path: /tmp/r2_manifest_verified.json
+          if-no-files-found: ignore
+          retention-days: 90
