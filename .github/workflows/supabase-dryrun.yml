@@ -39,6 +39,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: mkdir -p "$OUT"
       - name: Supabase API available (stop if still restricted)
         if: github.event.inputs.rehearsal != 'true'
         env:
