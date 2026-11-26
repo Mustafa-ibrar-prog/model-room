@@ -1,9 +1,9 @@
 {
  "last_success": {
-  "slot": "inactives:nfl:2026-11-26T18:00:00+00:00",
+  "slot": "pregame:nfl:2026-11-26T18:00:00+00:00",
   "status": "success",
-  "at": "2026-11-26T16:40:03+00:00",
-  "note": "supabase run 45859327896"
+  "at": "2026-11-26T17:39:47+00:00",
+  "note": "supabase run 45868234256"
  },
  "last_success_by_kind": {
   "manual": {
@@ -31,10 +31,10 @@
    "note": "supabase run 45725499173"
   },
   "pregame": {
-   "slot": "pregame:nba:2026-11-26T03:00:00+00:00",
+   "slot": "pregame:nfl:2026-11-26T18:00:00+00:00",
    "status": "success",
-   "at": "2026-11-26T02:36:48+00:00",
-   "note": "supabase run 45742820502"
+   "at": "2026-11-26T17:39:47+00:00",
+   "note": "supabase run 45868234256"
   },
   "inactives": {
    "slot": "inactives:nfl:2026-11-26T18:00:00+00:00",
@@ -47,6 +47,12 @@
    "status": "success",
    "at": "2026-11-26T13:35:01+00:00",
    "note": "supabase run 45829720552"
+  },
+  "linesretry": {
+   "slot": "linesretry:2026-11-26",
+   "status": "success",
+   "at": "2026-11-26T17:39:47+00:00",
+   "note": "supabase run 45868234256"
   }
  },
  "recent_failures": [
@@ -113,6 +119,6 @@
  ],
  "missed": [],
  "schedule": "5:30 AM player points, 7:00 AM, 9:30 AM player-points retry, 12:00 PM game lines, 12:30 PM and 4:00 PM PT, NFL kickoff \u2212 90 min, every game \u2212 30 min",
- "next_check": "2026-11-26T17:30:00+00:00",
+ "next_check": "2026-11-26T20:00:00+00:00",
  "triggers": "Supabase wakes a run only when a slot is due (pg_cron checks every 5 min inside Postgres); GitHub's own schedule every 6 hours is the backup"
 }
