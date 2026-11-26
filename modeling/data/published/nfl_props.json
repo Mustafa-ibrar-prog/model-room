@@ -2,7 +2,7 @@
   "schema_version": 1,
   "league": "nfl",
   "kind": "player_props",
-  "generated_at": "2026-11-26T15:03:58+00:00",
+  "generated_at": "2026-11-26T16:33:48+00:00",
   "season": 2026,
   "week": 12,
   "model": {
@@ -10,7 +10,7 @@
     "version": "0.1.1",
     "default_version": "0.1.0",
     "params_hash": "5e6e087475f07bab",
-    "inputs_hash": "f75d81e748dbc622",
+    "inputs_hash": "eaf374fade926767",
     "status": "test site only: 0.1.0 + the live injury feed (ESPN, nflverse) for availability and starters, and the inexperienced-QB passing factor. 0.1.0 keeps running in the ledger as a shadow; rollback = MODELROOM_NFL_PROPS_VERSION=0.1.0",
     "fitted_at": "2026-11-04T19:00:00+00:00",
     "sims": 10000,
@@ -20,7 +20,7 @@
     },
     "independence": "Uses only player, team and game-engine data. Exchange prices are never an input; they are compared afterwards.",
     "injury_feed": {
-      "generated_at": "2026-11-26T15:02:46.395463+00:00",
+      "generated_at": "2026-11-26T16:32:46.219548+00:00",
       "sources": {
         "espn": {
           "ok": true,
@@ -45,7 +45,7 @@
     ]
   },
   "data": {
-    "last_ingest": "2026-11-26T15:02:26+00:00",
+    "last_ingest": "2026-11-26T16:32:18+00:00",
     "results_through": "2026-11-25",
     "markets": [
       {
@@ -222311,32 +222311,6 @@
                 "carries": 12.27
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-26T02:32:54+00:00",
-            "reasons": [
-              "his status: not listed \u2192 available"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 15.79,
-                "to": 19.51
-              },
-              {
-                "market": "rushing_yards",
-                "label": "Rushing yards",
-                "from": 47.94,
-                "to": 60.83
-              },
-              {
-                "market": "rushing_attempts",
-                "label": "Rush attempts",
-                "from": 9.92,
-                "to": 12.54
-              }
-            ]
           }
         },
         {
@@ -224398,7 +224372,7 @@
           "opp": "KC",
           "position": "TE",
           "game_id": "2026_13_KC_LA",
-          "injury_status": null,
+          "injury_status": "Available",
           "markets": {
             "receiving_yards": {
               "label": "Receiving yards",
@@ -224964,15 +224938,15 @@
             "qb_note": null,
             "team_pass_attempts": 35.7,
             "team_carries": 28.9,
-            "injury_status": null,
+            "injury_status": "Available",
             "snap_share_recent": 0.726,
             "availability": {
-              "status": "unknown",
-              "raw_status": null,
-              "source": "nflverse",
-              "confirmed": true,
-              "report_time": null,
-              "comment": null,
+              "status": "available",
+              "raw_status": "Active",
+              "source": "espn",
+              "confirmed": false,
+              "report_time": "2026-11-26T15:30:00+00:00",
+              "comment": "Parkinson caught both of his targets for minus-1 yard in a 26-13 victory over the Packers on Wednesday. Parkinson logged a hefty 83 percent offensive snap count, highest among Los Angeles tight ends. His two receptions also tied for the team lead among players at the position, but he couldn't do much with those catches, gaining just one yard on the first and losing two yards on the second. However, Parkinson could take on an even more important role moving forward, as Tyler Higbee (chest) and Davis Allen (ankle) both left Wednesday's win early and didn't return. If neither of those players is ready to suit up in Week 13 against Kansas City on Thursday, Dec. 3, Parkinson and untested rookie Max Klare would lead a tight-end corps that quarterback Matthew Stafford typically looks to often.",
               "conflict": null,
               "notes": []
             },
@@ -226127,20 +226101,6 @@
                 "carries": 0.0
               }
             }
-          },
-          "changes": {
-            "previous_at": "2026-11-26T02:32:54+00:00",
-            "reasons": [
-              "his status: available \u2192 questionable"
-            ],
-            "markets": [
-              {
-                "market": "receiving_yards",
-                "label": "Receiving yards",
-                "from": 46.49,
-                "to": 41.98
-              }
-            ]
           }
         }
       ],
@@ -226484,7 +226444,7 @@
             "raw_status": "Questionable",
             "source": "espn",
             "confirmed": false,
-            "report_time": "2026-11-26T12:31:00+00:00",
+            "report_time": "2026-11-26T15:09:00+00:00",
             "detail": "Leg",
             "long_term": false,
             "late_scratch": false,
