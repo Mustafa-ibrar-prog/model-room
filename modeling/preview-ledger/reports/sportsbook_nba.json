@@ -1,25 +1,25 @@
 {
  "league": "nba",
- "generated_at": "2026-11-26T15:07:24+00:00",
+ "generated_at": "2026-11-26T20:08:36+00:00",
  "notice": "Historical sportsbook record and unvalidated model-vs-book comparisons. Lines are the earliest and latest observed by Model Room's 7 AM / noon PT fetches; they are not opening or closing lines. No profitability, return or betting edge is claimed. Summary statistics appear only once a league and market has 250 settled games.",
  "accumulation": {
-  "snapshot_rows": 6341,
-  "fetches": 32,
+  "snapshot_rows": 6547,
+  "fetches": 33,
   "first_collected_at": "2026-11-10T22:53:37+00:00",
-  "last_collected_at": "2026-11-26T15:03:04+00:00",
-  "days_of_history": 15.67,
+  "last_collected_at": "2026-11-26T20:03:08+00:00",
+  "days_of_history": 15.88,
   "calendar_days_with_fetches": 17,
   "books": 9,
-  "games": 125,
-  "games_matched_to_schedule": 125,
-  "series_game_book_market": 3218,
+  "games": 131,
+  "games_matched_to_schedule": 131,
+  "series_game_book_market": 3349,
   "rows_by_market": {
-   "moneyline": 2103,
-   "spread": 2120,
-   "total": 2118
+   "moneyline": 2157,
+   "spread": 2196,
+   "total": 2194
   },
   "comparisons": {
-   "matched": 6188,
+   "matched": 6394,
    "not_matched": {
     "post_start": 81,
     "not_matched_to_schedule": 0,
@@ -30,7 +30,7 @@
   },
   "games_with_comparisons": {
    "settled": 116,
-   "upcoming_or_unsettled": 5
+   "upcoming_or_unsettled": 11
   },
   "settled_events_by_market": {
    "spread": 114,
@@ -52,13 +52,13 @@
    }
   },
   "odds_api": {
-   "calls_logged": 32,
-   "calls_this_month": 32,
-   "credits_used_this_month_logged": 96,
-   "credits_remaining_last_reported": "303",
-   "as_of": "2026-11-26T15:03:04+00:00"
+   "calls_logged": 33,
+   "calls_this_month": 33,
+   "credits_used_this_month_logged": 99,
+   "credits_remaining_last_reported": "297",
+   "as_of": "2026-11-26T20:03:08+00:00"
   },
-  "stored_comparisons": 6188
+  "stored_comparisons": 6394
  },
  "coverage": {
   "fetches": [
@@ -445,12 +445,24 @@
     "stale_rows": 0,
     "unmatched_to_schedule_rows": 0,
     "unchanged_since_previous_fetch_rows": 0
+   },
+   {
+    "collected_at": "2026-11-26T20:03:08+00:00",
+    "rows": 206,
+    "games": 11,
+    "books": 7,
+    "game_book_pairs_missing_a_book": 1,
+    "missing_market_slots": 22,
+    "scheduled_games_next_72h_without_lines": 0,
+    "stale_rows": 0,
+    "unmatched_to_schedule_rows": 0,
+    "unchanged_since_previous_fetch_rows": 19
    }
   ],
-  "rows_total": 6341,
+  "rows_total": 6547,
   "stale_rows_total": 0,
   "stale_rule": "book's own update time older than 6 h when collected",
-  "unchanged_rows_total": 755,
+  "unchanged_rows_total": 774,
   "unchanged_rule": "same line and prices as the previous observation of that game, book and market (not necessarily stale)",
   "post_start_rows_excluded": 81,
   "markets_seen": [
@@ -459,49 +471,49 @@
    "total"
   ],
   "rows_by_market": {
-   "moneyline": 2103,
-   "spread": 2120,
-   "total": 2118
+   "moneyline": 2157,
+   "spread": 2196,
+   "total": 2194
   }
  },
  "movement": {
   "overall": {
-   "series": 3218,
-   "series_with_2plus_observations": 2843,
-   "moved": 1936,
-   "mean_abs_line_change": 0.667,
+   "series": 3349,
+   "series_with_2plus_observations": 2918,
+   "moved": 1987,
+   "mean_abs_line_change": 0.663,
    "mean_abs_novig_change_pp": 0.86
   },
   "by_market": {
    "moneyline": {
-    "series": 1073,
-    "series_with_2plus_observations": 946,
-    "moved": 601,
+    "series": 1102,
+    "series_with_2plus_observations": 971,
+    "moved": 616,
     "mean_abs_line_change": null,
     "mean_abs_novig_change_pp": 1.55
    },
    "spread": {
-    "series": 1073,
-    "series_with_2plus_observations": 949,
-    "moved": 650,
-    "mean_abs_line_change": 0.56,
-    "mean_abs_novig_change_pp": 0.6
+    "series": 1124,
+    "series_with_2plus_observations": 974,
+    "moved": 667,
+    "mean_abs_line_change": 0.556,
+    "mean_abs_novig_change_pp": 0.61
    },
    "total": {
-    "series": 1072,
-    "series_with_2plus_observations": 948,
-    "moved": 685,
-    "mean_abs_line_change": 0.773,
-    "mean_abs_novig_change_pp": 0.42
+    "series": 1123,
+    "series_with_2plus_observations": 973,
+    "moved": 704,
+    "mean_abs_line_change": 0.77,
+    "mean_abs_novig_change_pp": 0.43
    }
   },
   "by_team": {
    "Atlanta Hawks": {
     "moved_toward": 70,
-    "moved_against": 8
+    "moved_against": 13
    },
    "Boston Celtics": {
-    "moved_toward": 42,
+    "moved_toward": 47,
     "moved_against": 34
    },
    "Brooklyn Nets": {
@@ -525,7 +537,7 @@
     "moved_against": 49
    },
    "Denver Nuggets": {
-    "moved_toward": 52,
+    "moved_toward": 60,
     "moved_against": 22
    },
    "Detroit Pistons": {
@@ -541,7 +553,7 @@
     "moved_against": 66
    },
    "Indiana Pacers": {
-    "moved_toward": 33,
+    "moved_toward": 41,
     "moved_against": 37
    },
    "Los Angeles Clippers": {
@@ -549,16 +561,16 @@
     "moved_against": 19
    },
    "Los Angeles Lakers": {
-    "moved_toward": 22,
-    "moved_against": 26
+    "moved_toward": 27,
+    "moved_against": 27
    },
    "Memphis Grizzlies": {
     "moved_toward": 46,
     "moved_against": 57
    },
    "Miami Heat": {
-    "moved_toward": 73,
-    "moved_against": 4
+    "moved_toward": 76,
+    "moved_against": 6
    },
    "Milwaukee Bucks": {
     "moved_toward": 4,
@@ -573,8 +585,8 @@
     "moved_against": 67
    },
    "New York Knicks": {
-    "moved_toward": 30,
-    "moved_against": 96
+    "moved_toward": 32,
+    "moved_against": 99
    },
    "Oklahoma City Thunder": {
     "moved_toward": 43,
@@ -586,7 +598,7 @@
    },
    "Philadelphia 76ers": {
     "moved_toward": 1,
-    "moved_against": 82
+    "moved_against": 90
    },
    "Phoenix Suns": {
     "moved_toward": 26,
@@ -601,8 +613,8 @@
     "moved_against": 45
    },
    "San Antonio Spurs": {
-    "moved_toward": 68,
-    "moved_against": 9
+    "moved_toward": 69,
+    "moved_against": 14
    },
    "Toronto Raptors": {
     "moved_toward": 57,
@@ -610,23 +622,23 @@
    },
    "Utah Jazz": {
     "moved_toward": 23,
-    "moved_against": 40
+    "moved_against": 48
    },
    "Washington Wizards": {
     "moved_toward": 64,
     "moved_against": 19
    }
   },
-  "games_with_any_movement": 105,
-  "games_with_repeat_observations": 109
+  "games_with_any_movement": 110,
+  "games_with_repeat_observations": 114
  },
  "upcoming": {
   "status": "unvalidated comparisons (games not settled)",
-  "games": 5,
-  "comparisons": 75,
+  "games": 11,
+  "comparisons": 281,
   "abs_model_minus_book_novig_pp": {
-   "median": 5.83,
-   "p90": 10.27
+   "median": 4.8,
+   "p90": 11.22
   },
   "note": "A difference is a disagreement between the model and the book, not a verified edge."
  },
@@ -663,15 +675,15 @@
   "snapshots_chain_ok": true,
   "after_reconnect": {
    "snapshots": {
-    "rows": 6341,
+    "rows": 6547,
     "ok": true
    },
    "comparisons": {
-    "rows": 6188,
+    "rows": 6394,
     "ok": true
    },
    "reports": {
-    "rows": 136,
+    "rows": 137,
     "ok": true
    }
   },
