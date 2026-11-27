@@ -2,7 +2,7 @@
 storage with verification, manifest chain, player matching and main-line selection. No network: a fake provider."""
 import json
 import urllib.error
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 
@@ -98,7 +98,7 @@ def test_one_request_per_game_today_earliest_first_and_stored(tmp_path):
     f = Fake(remaining=325)
     out, st = _run(tmp_path, f)
     odds_calls = [c for c in f.calls if "/odds?" in c]
-    assert [c.split("/events/")[1].split("/")[0] for c in odds_calls] == ["e2", "e1"]      # today, not started, earliest first
+    assert [c.split("/events/")[1].split("/")[0] for c in odds_calls] == ["e1", "e2"]      # today, not started, rotation order (Nov 25: offset 1)
     assert out["captured"] == 2 and out["credits_billed"] == 2 and out["stopped"] is None
     assert all("regions=us" in c and "markets=player_points" in c for c in odds_calls)
     again, _ = _run(tmp_path, f, store=st)                                                   # second trigger same day: nothing
@@ -146,7 +146,7 @@ def test_followup_never_touches_captured_games_and_retries_an_empty_game_once(tm
     f.empty = {"e2"}                                                 # still empty at 9:30
     fu, _ = _run(tmp_path, f, mode="followup", store=st)
     odds = [c.split("/events/")[1].split("/")[0] for c in f.calls if "/odds?" in c]
-    assert odds == ["e2", "e1", "e2"] and fu["empty"] == 1 and fu["credits_billed"] == 0
+    assert odds == ["e1", "e2", "e2"] and fu["empty"] == 1 and fu["credits_billed"] == 0
     h = OP.day_history(st, "2026-11-25")
     assert h["attempts"] == {"e2": 2, "e1": 1} and h["status"]["e1"] == "captured"
 
@@ -194,7 +194,7 @@ def test_run_that_died_after_paying_is_never_paid_again(tmp_path):
 
 
 def test_daily_paid_requests_never_exceed_allowance_across_both_runs(tmp_path):
-    f = Fake(remaining=225, empty={"e2"})                            # allowance 1 a day
+    f = Fake(remaining=225, empty={"e1"})                            # allowance 1 a day; e1 first (rotation), empty
     a, st = _run(tmp_path, f)
     f.empty = set()
     b, _ = _run(tmp_path, f, mode="followup", store=st)
@@ -296,10 +296,10 @@ def test_nfl_probe_runs_once_respects_reserve_and_stores(tmp_path):
 
 
 def test_view_records_each_games_status_for_labels(tmp_path):
-    f = Fake(remaining=225, empty={"e2"})                       # allowance 1: e2 empty (free), e1 captured... order e2, e1
+    f = Fake(remaining=225, empty={"e1"})                       # allowance 1: e1 empty (free), then e2 captured
     out, st = _run(tmp_path, f)
     view = json.loads(st.get(MS.read_latest(st, "2026-11-25")["view"]))
-    assert view["game_status"]["G2"]["status"] == "empty" and view["game_status"]["G1"]["status"] == "captured"
+    assert view["game_status"]["G1"]["status"] == "empty" and view["game_status"]["G2"]["status"] == "captured"
     f2 = Fake(remaining=211)                                    # nothing affordable: everything skipped by the cap
     out, st2 = _run(tmp_path / "b", f2)
     v2 = json.loads(st2.get(MS.read_latest(st2, "2026-11-25")["view"]))
@@ -307,4 +307,42 @@ def test_view_records_each_games_status_for_labels(tmp_path):
     f.empty = set()
     _run(tmp_path, f, mode="followup", store=st)                # retry: e2 now capped (allowance spent) -> stays labelled
     v3 = json.loads(st.get(MS.read_latest(st, "2026-11-25")["view"]))
-    assert v3["game_status"]["G1"]["status"] == "captured" and v3["game_status"]["G2"]["status"] in ("skipped_cap", "captured")
+    assert v3["game_status"]["G2"]["status"] == "captured" and v3["game_status"]["G1"]["status"] in ("skipped_cap", "captured")
+
+
+
+# ------------------------------------------------------------------ rotation
+def _slate(n):
+    return [{"id": f"g{i:02d}", "commence_time": f"2026-12-01T{23 + i // 4 - (24 if 23 + i // 4 >= 24 else 0):02d}:{(i % 4) * 15:02d}:00Z"} for i in range(n)]
+
+
+def test_rotation_is_deterministic_and_keeps_every_game():
+    s = _slate(9)
+    a, b = OP.rotation(s, date(2026, 12, 12)), OP.rotation(list(reversed(s)), date(2026, 12, 12))
+    assert [e["id"] for e in a["order"]] == [e["id"] for e in b["order"]]                 # same day + slate = same order
+    assert sorted(e["id"] for e in a["order"]) == sorted(e["id"] for e in s)              # nobody dropped
+    assert OP.rotation(s, date(2026, 12, 13))["offset"] != a["offset"]                    # moves day to day
+    assert OP.rotation([], date(2026, 12, 12))["order"] == []
+
+
+def test_rotation_shares_coverage_fairly_across_start_slots():
+    # 3 requests a day (next cycle's allowance) on an 8-game slate for 62 days: every start slot gets close to 3/8
+    n, a, days = 8, 3, 62
+    hits = [0] * n
+    for d in range(days):
+        r = OP.rotation(_slate(n), date(2026, 12, 10) + timedelta(days=d))
+        for e in r["order"][:a]:
+            hits[int(e["id"][1:])] += 1
+    expect = days * a / n
+    assert max(hits) - min(hits) <= 6 and all(abs(h - expect) <= 4 for h in hits), hits
+    # earliest-first would have given slots 0-2 every day and slots 3-7 nothing
+    assert min(hits) > 0
+
+
+def test_manifest_records_selection_for_audit(tmp_path):
+    out, st = _run(tmp_path, Fake(remaining=225))                    # allowance 1 of 2 games
+    m = json.loads(st.get(MS.read_latest(st, "2026-11-25")["manifest"]))
+    sel = m["selection"]
+    assert sel["rule"].startswith("golden-ratio") and sel["slate_size"] == 2 and len(sel["order"]) == 2
+    assert len(sel["requested"]) == 1 and len(sel["credit_limited"]) == 1
+    assert out["rotation"]["requested_start_slots"] == [1] and out["rotation"]["credit_limited_start_slots"] == [0]
