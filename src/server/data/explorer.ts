@@ -388,7 +388,9 @@ async function withBookLines(rows: ExplorerRow[], games: { game_id: string; star
     const st = start.get(r.gameId) ?? null;
     const lineStatus = lineStatusFor({
       league: league === "nfl" ? "nfl" : "nba", category, hasLine: has, gameDate: st ? ptDate(st) : "",
-      gameStarted: st ? Date.parse(st) <= now.getTime() : false, fetch: status.get(r.gameId) ?? null, now,
+      gameStarted: st ? Date.parse(st) <= now.getTime() : false,
+      // a game with stored lines was captured even if its view predates per-game statuses (2026-11-27)
+      fetch: status.get(r.gameId) ?? (gv ? { status: "captured" } : null), now,
     });
     return has ? { ...r, bookLines: { ...p!, capturedAt: gv!.captured_at }, lineStatus } : { ...r, lineStatus };
   });
