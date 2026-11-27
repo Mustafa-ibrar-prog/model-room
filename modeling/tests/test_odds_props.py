@@ -262,3 +262,34 @@ def test_main_line_most_balanced_ties_lower_alternates_kept():
            {"book_key": "b", "player_name": "x", "line": 9.5, "over_novig": 0.52, "is_main": False}]
     PM.mark_main(tie)
     assert [r["is_main"] for r in tie] == [False, True]
+
+
+# ------------------------------------------------------------------ one-off NFL probe
+def test_nfl_probe_runs_once_respects_reserve_and_stores(tmp_path):
+    nfl_board = {"games": [{"game_id": "N1", "start_time": "2026-11-29T18:00:00+00:00", "home": {"abbr": "NYG", "name": "New York Giants"},
+                            "away": {"abbr": "DAL", "name": "Dallas Cowboys"}, "players": [{"player_id": "w1", "name": "CeeDee Lamb"}]}]}
+    calls = []
+    def http(url, key):
+        calls.append(url)
+        if "/events?" in url:
+            return {"body": json.dumps([{"id": "n1", "commence_time": "2026-11-29T18:00:00Z", "home_team": "New York Giants", "away_team": "Dallas Cowboys"}]).encode(),
+                    "headers": {"x-requests-remaining": "274", "x-requests-last": "0"}}, {}
+        body = {"id": "n1", "bookmakers": [{"key": "bk", "title": "Book", "markets": [{"key": "player_reception_yds", "last_update": "t", "outcomes": [
+            {"name": "Over", "description": "CeeDee Lamb", "point": 72.5, "price": -115}, {"name": "Under", "description": "CeeDee Lamb", "point": 72.5, "price": -105}]}]}]}
+        return {"body": json.dumps(body).encode(), "headers": {"x-requests-remaining": "273", "x-requests-last": "1"}}, {}
+    st = LocalStore(tmp_path / "r2")
+    out = OP.probe_nfl_receiving_yards(KEY, nfl_board, st, st, NOW, 10, http=http, sleep=lambda s: None)
+    assert out["credits_billed"] == 1 and out["players"] == 1 and out["players_matched_to_board"] == 1 and out["stored"]["verified"]
+    assert "72.5" not in json.dumps(out) and "Lamb" not in json.dumps(out) and KEY not in json.dumps(out)
+    again = OP.probe_nfl_receiving_yards(KEY, nfl_board, st, st, NOW, 10, http=http, sleep=lambda s: None)
+    assert "already ran" in again["skipped"] and len(calls) == 2
+    st2 = LocalStore(tmp_path / "r2b")
+    def poor(url, key):
+        return {"body": b"[]" if "/events?" in url else b"{}", "headers": {"x-requests-remaining": "180", "x-requests-last": "0"}}, {}
+    def poor_events(url, key):
+        if "/events?" in url:
+            return {"body": json.dumps([{"id": "n1", "commence_time": "2026-11-29T18:00:00Z", "home_team": "a", "away_team": "b"}]).encode(),
+                    "headers": {"x-requests-remaining": "180", "x-requests-last": "0"}}, {}
+        raise AssertionError("must not request")
+    out = OP.probe_nfl_receiving_yards(KEY, nfl_board, st2, st2, NOW, 10, http=poor_events, sleep=lambda s: None)
+    assert "reserve" in out["skipped"]
