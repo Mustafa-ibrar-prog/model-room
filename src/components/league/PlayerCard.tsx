@@ -45,7 +45,7 @@ export function PlayerCard({ league, r, catLabel, href, listed = null }: { leagu
         ) : null}
         <p className="mt-2 text-[0.8rem] text-faint">
           {catLabel} &middot; we project <span className="font-600 text-model">{projText(r)}</span> &middot;{" "}
-          {h?.fromMarket ? <>line <span className="text-market">{h.threshold}</span></> : "no sportsbook line"}
+          {h?.fromMarket ? <>line <span className="text-market">{h.threshold}</span></> : r.lineStatus ? `sportsbook line ${r.lineStatus.label.toLowerCase()}` : "no sportsbook line"}
         </p>
         {caveat ? <p className="mt-1 text-xs text-edge">{caveat}</p> : null}
         <p className="mt-1.5 text-[0.8rem] font-500 text-model">See why</p>
@@ -71,6 +71,11 @@ export function PlayerCard({ league, r, catLabel, href, listed = null }: { leagu
             <>
               <p className="font-display text-2xl font-600 leading-none text-market">{h.threshold}</p>
               {h.book ? <p className="mt-1 text-[0.7rem] leading-tight text-faint">{h.book.books.length === 1 ? h.book.books[0].title : `${h.book.books.length} books`} · {bookTime(h.book.lastUpdate)}</p> : null}
+            </>
+          ) : r.lineStatus ? (
+            <>
+              <p className={`text-sm font-600 ${r.lineStatus.state === "pending" ? "text-pending" : "text-faint"}`}>{r.lineStatus.label}</p>
+              <p className="mt-1 text-[0.7rem] leading-tight text-faint">{r.lineStatus.reason}</p>
             </>
           ) : (
             <p className="text-sm text-faint">none</p>

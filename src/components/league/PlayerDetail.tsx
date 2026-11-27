@@ -122,8 +122,8 @@ export function PlayerDetail({
                   </>
                 ) : (
                   <>
-                    <dd className="font-display text-3xl font-600 leading-none text-faint">none</dd>
-                    <p className="mt-1.5 hidden max-w-[22ch] text-xs text-mute sm:block">No sportsbook line is stored for this prop, so the threshold above is our own.</p>
+                    <dd className={`font-display text-3xl font-600 leading-none ${r.lineStatus?.state === "pending" ? "text-pending" : "text-faint"}`}>{r.lineStatus ? r.lineStatus.label : "none"}</dd>
+                    <p className="mt-1.5 hidden max-w-[22ch] text-xs text-mute sm:block">{r.lineStatus ? `${r.lineStatus.reason} ` : ""}The threshold above is our own.</p>
                   </>
                 )}
               </div>
@@ -146,7 +146,7 @@ export function PlayerDetail({
         )}
         {h && !h.fromMarket ? (
           <p className="mt-4 text-xs text-mute sm:hidden">
-            No sportsbook line is stored for this prop, so the threshold is our own and we call no side. In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
+            {r.lineStatus ? `Sportsbook line ${r.lineStatus.label.toLowerCase()}: ${r.lineStatus.reason}` : "No sportsbook line is stored for this prop."} The threshold is our own and we call no side. In 8 games out of 10 he lands between {formatProjection(r.range80[0])} and {formatProjection(r.range80[1])}.
           </p>
         ) : null}
         {h?.book ? (

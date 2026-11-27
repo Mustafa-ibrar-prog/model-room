@@ -1,4 +1,5 @@
 import { loadPropLines, propLinesEnabled, ptDate, type GameBookLines, type PlayerBookLines } from "@/server/markets/propLines";
+import { lineStatus as lineStatusFor, type GameFetchStatus, type LineStatus } from "@/lib/lineStatus";
 import "server-only";
 import { canAccess, gate } from "@/lib/entitlements";
 import { loadLiveInjuries, loadPropsBoard, type LiveInjuries } from "@/server/engine/board";
@@ -162,6 +163,8 @@ export interface ExplorerRow {
   headline: PropLineView | null;
   /** NBA points only (TEST): sportsbook lines from the latest Odds API snapshot in private R2; null when none. */
   bookLines: (PlayerBookLines & { capturedAt: string }) | null;
+  /** TEST: Available / Pending / Unavailable label for the sportsbook line, with the reason; null in production. */
+  lineStatus: LineStatus | null;
   lines: PropLineView[];
   /** Model thresholds with no market quote: the model's own ladder, never presented as a market line. */
   ladder: PropLineView[];
@@ -336,6 +339,7 @@ function rowFor(p: EnginePropPlayer, cat: Category, tier: TierId, matchup: strin
     supportNote: m.support_note,
     headline: head,
     bookLines: null,
+    lineStatus: null,
     lines,
     ladder: lines.filter((l) => !l.quotes.length),
     grid: m.grid ?? null,
@@ -362,16 +366,31 @@ function sortRows(rows: ExplorerRow[], sort: SortKey): ExplorerRow[] {
   return [...rows].sort(by[sort]);
 }
 
-/** Attach the latest stored sportsbook points lines (TEST, private R2) to each row; rows without one stay null. */
-async function withBookLines(rows: ExplorerRow[], games: { game_id: string; start_time: string | null }[]): Promise<ExplorerRow[]> {
-  const dates = [...new Set(games.filter((g) => g.start_time).map((g) => ptDate(g.start_time!)))];
+/** Attach the latest stored sportsbook points lines (TEST, private R2) and every row's Available / Pending /
+ *  Unavailable label. Only NBA points lines are collected; other stats and NFL get an Unavailable label without any
+ *  R2 read. Rows without a stored line never get a number. */
+async function withBookLines(rows: ExplorerRow[], games: { game_id: string; start_time: string | null }[], league: League, category: string): Promise<ExplorerRow[]> {
+  const start = new Map(games.map((g) => [g.game_id, g.start_time]));
+  const now = new Date();
+  const collect = league === "nba" && category === "points";
+  const dates = collect ? [...new Set(games.filter((g) => g.start_time).map((g) => ptDate(g.start_time!)))] : [];
   const views = await Promise.all(dates.map((d) => loadPropLines(d)));
   const byGame = new Map<string, GameBookLines>();
-  for (const v of views) for (const [gid, gv] of Object.entries(v?.games ?? {})) byGame.set(gid, gv);
+  const status = new Map<string, GameFetchStatus>();
+  for (const v of views) {
+    for (const [gid, gv] of Object.entries(v?.games ?? {})) byGame.set(gid, gv);
+    for (const [gid, st] of Object.entries(v?.game_status ?? {})) status.set(gid, st);
+  }
   return rows.map((r) => {
     const gv = byGame.get(r.gameId);
-    const p = gv?.players[r.id];
-    return p && p.consensus_line != null ? { ...r, bookLines: { ...p, capturedAt: gv!.captured_at } } : r;
+    const p = collect ? gv?.players[r.id] : undefined;
+    const has = Boolean(p && p.consensus_line != null);
+    const st = start.get(r.gameId) ?? null;
+    const lineStatus = lineStatusFor({
+      league: league === "nfl" ? "nfl" : "nba", category, hasLine: has, gameDate: st ? ptDate(st) : "",
+      gameStarted: st ? Date.parse(st) <= now.getTime() : false, fetch: status.get(r.gameId) ?? null, now,
+    });
+    return has ? { ...r, bookLines: { ...p!, capturedAt: gv!.captured_at }, lineStatus } : { ...r, lineStatus };
   });
 }
 
@@ -413,7 +432,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
   } else {
     const pool = searchAll ? dayGames : selected ? [selected] : [];
     let list = pool.flatMap((g) => g.players.map((p) => rowFor(p, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season))).filter((r): r is ExplorerRow => r !== null);
-    if (league === "nba" && category.key === "points" && propLinesEnabled()) list = await withBookLines(list, pool);
+    if (propLinesEnabled()) list = await withBookLines(list, pool, league, category.key);
     total = list.length;
     if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.team.toLowerCase() === q || r.matchup.toLowerCase().includes(q));
     if (query.team && selected && !searchAll && [selected.home.abbr, selected.away.abbr].includes(query.team)) list = list.filter((r) => r.team === query.team);
@@ -427,7 +446,7 @@ export async function getExplorer(league: League, tier: TierId, query: ExplorerQ
       const src = (selected?.players ?? []).concat(searchAll ? b.games.flatMap((g) => g.players) : []).find((p) => p.player_id === pid);
       const g = src ? b.games.find((x) => x.game_id === src.game_id) : undefined;
       let row = src && g ? rowFor(src, category, tier, `${g.away.abbr} @ ${g.home.abbr}`, league, b.season) : null;
-      if (row && g && league === "nba" && category.key === "points" && propLinesEnabled()) row = (await withBookLines([row], [g]))[0];
+      if (row && g && propLinesEnabled()) row = (await withBookLines([row], [g], league, category.key))[0];
       const line = row?.lines.find((l) => lineKey(row.id, l) === query.line) ?? null;
       const cardOnly = row && query.line === `${row.id}~card`;
       detail = row && (line || cardOnly) ? { row, line, key: query.line, marketStats: b.performance.backtest?.by_market?.[category.key] ?? null } : null;

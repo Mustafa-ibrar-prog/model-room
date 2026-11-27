@@ -70,8 +70,15 @@ def write_run(store, reader, date: str, run_ts: str, objects: list[dict], game_v
     for v in game_views:
         if v.get("game_id"):
             games[v["game_id"]] = v
+    # Per-game outcome for the site's labels (Available / Pending / Unavailable): newest run wins, but a captured game
+    # stays captured. Statuses: captured | empty (no player points posted) | skipped_cap (credit limit) | error.
+    status = dict(prev_view.get("game_status", {}))
+    for r in meta.get("requests", []):
+        gid = r.get("game_id")
+        if gid and status.get(gid, {}).get("status") != "captured":
+            status[gid] = {"status": r["status"], "mode": meta.get("mode"), "at": meta.get("finished_at")}
     view = {"date": date, "updated_at": meta.get("finished_at"), "source": "the_odds_api", "market": "player_points",
-            "regions": "us", "games": games}
+            "regions": "us", "games": games, "game_status": status}
     vkey = f"{day_prefix(date)}/view-{run_ts}.json"
     vput = put_verified(store, reader, vkey, json.dumps(view, sort_keys=True, separators=(",", ":")).encode())
     manifest = {"date": date, "run_ts": run_ts, **meta, "objects": objects + [{"key": vkey, "bytes": vput["bytes"], "sha256": vput["sha256"], "kind": "view"}],
