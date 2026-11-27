@@ -1,0 +1,74 @@
+name: Gemini verification (TEST, manual, one request)
+
+# Stage 1 (Moose, 2026-11-27): confirm GEMINI_API_KEY works, list the models it can use, and make exactly ONE small
+# generateContent request with no sports data. The key is sent only in the x-goog-api-key header and never printed.
+# No billing is enabled by this check; free-tier requests over quota are refused, not charged.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gemini-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      KEY: ${{ secrets.GEMINI_API_KEY }}
+    steps:
+      - name: Key present, models, one small request
+        run: |
+          python3 - <<'PY'
+          import json, os, sys, urllib.request, urllib.error
+          key = os.environ.get("KEY", "").strip()
+          if not key:
+              print("GEMINI_API_KEY: MISSING in GitHub Actions secrets"); sys.exit(1)
+          print(f"GEMINI_API_KEY: present ({len(key)} characters)")
+          base = "https://generativelanguage.googleapis.com/v1beta"
+          def call(path, body=None):
+              req = urllib.request.Request(base + path, data=None if body is None else json.dumps(body).encode(),
+                                           headers={"x-goog-api-key": key, "Content-Type": "application/json"}, method="GET" if body is None else "POST")
+              try:
+                  with urllib.request.urlopen(req, timeout=60) as r:
+                      return r.status, dict(r.headers), json.loads(r.read())
+              except urllib.error.HTTPError as e:
+                  raw = e.read().decode("utf-8", "replace").replace(key, "***")
+                  return e.code, dict(e.headers), {"_error": raw[:1500]}
+          # 1. models (no generation)
+          models, tok = [], ""
+          for _ in range(5):
+              st, h, d = call("/models?pageSize=200" + (f"&pageToken={tok}" if tok else ""))
+              if st != 200:
+                  print("model list failed: HTTP", st, d.get("_error", "")[:500]); sys.exit(1)
+              models += d.get("models", [])
+              tok = d.get("nextPageToken", "")
+              if not tok: break
+          gen = [m for m in models if "generateContent" in (m.get("supportedGenerationMethods") or [])]
+          print(f"authentication: OK | models listed: {len(models)} | supporting generateContent: {len(gen)}")
+          for m in sorted(gen, key=lambda m: m["name"]):
+              print(f"  {m['name'].split('/')[-1]:45s} in {m.get('inputTokenLimit')} out {m.get('outputTokenLimit')} | {m.get('displayName','')}")
+          names = {m["name"].split("/")[-1] for m in gen}
+          prefer = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-lite-latest", "gemini-3.8-flash", "gemini-3.6-flash", "gemini-flash-latest", "gemini-2.5-flash-lite", "gemini-2.5-flash"]
+          pick = next((p for p in prefer if p in names), None)
+          print("2.5 models still listed:", sorted(n for n in names if n.startswith("gemini-2.5")))
+          if not pick:
+              print("no preferred Flash-Lite/Flash model available: stopping before any generation request"); sys.exit(0)
+          # 2. exactly one small request, no sports data
+          body = {"contents": [{"role": "user", "parts": [{"text": "Reply with exactly one word: ready"}]}],
+                  "generationConfig": {"maxOutputTokens": 16, "temperature": 0}}
+          st, h, d = call(f"/models/{pick}:generateContent", body)
+          print(f"test request: model {pick} | HTTP {st}")
+          if st != 200:
+              print("error:", d.get("_error", "")[:1200]); sys.exit(1)
+          text = "".join(p.get("text", "") for c in d.get("candidates", []) for p in c.get("content", {}).get("parts", []))
+          print("response text:", repr(text.strip()[:80]))
+          print("finish reason:", [c.get("finishReason") for c in d.get("candidates", [])])
+          print("model version:", d.get("modelVersion"))
+          print("usage:", json.dumps(d.get("usageMetadata", {})))
+          rl = {k: v for k, v in h.items() if any(w in k.lower() for w in ("ratelimit", "quota", "retry", "x-goog"))}
+          print("rate-limit headers:", rl or "none returned (Gemini reports limits in AI Studio and in 429 errors)")
+          PY
