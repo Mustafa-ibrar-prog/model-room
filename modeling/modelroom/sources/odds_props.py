@@ -9,6 +9,9 @@ for games whose single paid request came back with no player points. Each mode r
 a completed mode is never repeated), and every paid request leaves a write-once attempt marker before anything else,
 so duplicate triggers can never pay twice for a game.
 
+Storage date: every snapshot sits under its game's Pacific date. Only today's games are ever requested (tomorrow's
+stay Pending until their own 5:30 AM run, Moose 2026-11-27), so the run day and the game date are the same.
+
 Credit rules (Moose, 2026-11-24): game lines (NBA + NFL, 7 AM and noon PT) always come first. Their reserve is
 GAME_LINES_PER_DAY x the game-line days left in the credit cycle (360 a month = 12 a day), plus a SAFETY margin of 30.
 Props may use only what is above that, spread evenly over the days left in the cycle, at most MAX_PER_DAY a day:
@@ -209,7 +212,8 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
     for e in todo:
         if billed >= b["allowance"] or not may_request(remaining, b["reserve"]):
             skipped_cap += 1
-            requests.append({"event_id": e["id"], "status": "skipped_cap"})
+            g0 = PM.match_game(e, games)
+            requests.append({"event_id": e["id"], "status": "skipped_cap", "game_id": g0["game_id"] if g0 else None})
             continue
         try:
             res = get(f"{BASE}/events/{e['id']}/odds?apiKey={key}&regions=us&markets=player_points&oddsFormat=american&dateFormat=iso",
@@ -219,7 +223,8 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
             stop = scrub(str(s), key)
             break
         except Exception as x:  # noqa: BLE001  one game failed: skip it today, keep going
-            requests.append({"event_id": e["id"], "status": "error", "error": scrub(str(x), key)[:120]})
+            g0 = PM.match_game(e, games)
+            requests.append({"event_id": e["id"], "status": "error", "game_id": g0["game_id"] if g0 else None, "error": scrub(str(x), key)[:120]})
             continue
         billed += cost
         if cost > 1:
@@ -248,7 +253,8 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
             rbody = "".join(json.dumps(r, sort_keys=True) + "\n" for r in rows).encode()
             rput = MS.put_verified(store, reader, f"{base}.rows.jsonl", rbody)
         except Exception as x:  # noqa: BLE001  credit spent, response discarded; never re-requested today
-            requests.append({"event_id": e["id"], "status": "error", "cost": cost, "error": f"upload failed: {type(x).__name__}"})
+            requests.append({"event_id": e["id"], "status": "error", "cost": cost, "game_id": game["game_id"] if game else None,
+                             "error": f"upload failed: {type(x).__name__}"})
             if stop:
                 break
             continue

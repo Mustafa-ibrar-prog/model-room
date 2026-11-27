@@ -71,7 +71,13 @@ jobs:
           L, D = text("/tmp/list.html"), text("/tmp/detail.html")
           print("list: 'Sportsbook line' labels:", L.count("Sportsbook line"))
           print("list: cards showing book count/name + update time:", len(re.findall(r"Sportsbook line\s*[\d.]+\s*[^·]{1,40}·\s*\d{1,2}:\d{2} [AP]M PT", L)))
-          print("list: cards with 'none':", len(re.findall(r"Sportsbook line\s+none", L)))
+          print("list: cards with 'none':", len(re.findall(r"Sportsbook line\s*none", L)))
+          for lab in ("Pending", "Unavailable"):
+              print(f"list: cards labelled {lab}:", len(re.findall(r"Sportsbook line\s*" + lab, L)))
+          reasons = {}
+          for m in re.finditer(r"Sportsbook line\s*(Pending|Unavailable)([^.]{0,90}\.)", L):
+              reasons[m.group(1) + ": " + m.group(2).strip()] = reasons.get(m.group(1) + ": " + m.group(2).strip(), 0) + 1
+          print("list: label reasons:", reasons)
           print("detail: sportsbook table present:", "Sportsbook lines (points, US books)" in D)
           print("detail: table header present:", all(h in D for h in ("Sportsbook", "Line", "Over", "Under", "Updated")))
           rows = re.findall(r"<tr[^>]*>.*?</tr>", open("/tmp/detail.html", encoding="utf-8", errors="replace").read(), flags=re.S)

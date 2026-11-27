@@ -293,3 +293,18 @@ def test_nfl_probe_runs_once_respects_reserve_and_stores(tmp_path):
         raise AssertionError("must not request")
     out = OP.probe_nfl_receiving_yards(KEY, nfl_board, st2, st2, NOW, 10, http=poor_events, sleep=lambda s: None)
     assert "reserve" in out["skipped"]
+
+
+def test_view_records_each_games_status_for_labels(tmp_path):
+    f = Fake(remaining=225, empty={"e2"})                       # allowance 1: e2 empty (free), e1 captured... order e2, e1
+    out, st = _run(tmp_path, f)
+    view = json.loads(st.get(MS.read_latest(st, "2026-11-25")["view"]))
+    assert view["game_status"]["G2"]["status"] == "empty" and view["game_status"]["G1"]["status"] == "captured"
+    f2 = Fake(remaining=211)                                    # nothing affordable: everything skipped by the cap
+    out, st2 = _run(tmp_path / "b", f2)
+    v2 = json.loads(st2.get(MS.read_latest(st2, "2026-11-25")["view"]))
+    assert {g["status"] for g in v2["game_status"].values()} == {"skipped_cap"} and v2["games"] == {}
+    f.empty = set()
+    _run(tmp_path, f, mode="followup", store=st)                # retry: e2 now capped (allowance spent) -> stays labelled
+    v3 = json.loads(st.get(MS.read_latest(st, "2026-11-25")["view"]))
+    assert v3["game_status"]["G1"]["status"] == "captured" and v3["game_status"]["G2"]["status"] in ("skipped_cap", "captured")

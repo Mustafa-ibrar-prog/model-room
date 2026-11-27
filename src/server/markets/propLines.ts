@@ -12,7 +12,8 @@ import { isProduction } from "@/lib/auth-config";
 export type BookLine = { book: string; title: string; line: number; over: number | null; under: number | null; over_novig: number | null; last_update: string | null };
 export type PlayerBookLines = { name: string; books: BookLine[]; alternates: number; consensus_line: number | null; consensus_over_novig: number | null; last_update: string | null };
 export type GameBookLines = { game_id: string | null; captured_at: string; players: Record<string, PlayerBookLines>; unmatched_players: number };
-export type DayView = { date: string; updated_at: string | null; games: Record<string, GameBookLines> };
+export type DayView = { date: string; updated_at: string | null; games: Record<string, GameBookLines>;
+  game_status?: Record<string, { status: "captured" | "empty" | "skipped_cap" | "error"; mode?: string; at?: string | null }> };
 
 const PREFIX = "v1/market-snapshots/nba/player-points";
 const TTL_MS = 10 * 60 * 1000;
