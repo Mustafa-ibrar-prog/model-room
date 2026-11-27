@@ -14,6 +14,7 @@ import { AccountMenu } from "@/components/auth/AccountMenu";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Suspense } from "react";
 import { DataStatus, DataStatusFallback } from "@/components/layout/DataStatus";
+import { isProduction } from "@/lib/auth-config";
 
 export const metadata: Metadata = {
   title: { default: "Model Room — NFL and NBA projections", template: "%s · Model Room" },
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         ) : null}
         <SiteHeader
+          extra={isProduction() ? [] : [{ href: "/parlay", label: "Parlay Builder" }]}
           account={
             <Suspense fallback={null}>
               <AccountMenu variant="desktop" />

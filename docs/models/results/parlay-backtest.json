@@ -1,0 +1,2509 @@
+{
+ "kind": "parlay_backtest",
+ "generated_at": "2026-11-27T23:14:16+00:00",
+ "leg_band": [
+  0.2,
+  0.8
+ ],
+ "method": "Parlay calibration backtest (TEST, Moose 2026-11-27).",
+ "sections": {
+  "nba_walkforward_2025_26": {
+   "model": "nba-props 0.2.0 (TEST)",
+   "table_seasons": "2020-21 to 2024-25",
+   "legs_available": 125829,
+   "by_type": {
+    "same_player_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.26,
+     "mean_predicted_independent": 0.2524,
+     "mean_predicted_correlated": 0.2533,
+     "log_loss_independent": 0.52942,
+     "log_loss_correlated": 0.51991,
+     "log_loss_gain": 0.00951,
+     "log_loss_gain_95ci": [
+      0.0061,
+      0.01301
+     ],
+     "brier_independent": 0.17582,
+     "brier_correlated": 0.17273,
+     "ece_independent": 0.0107,
+     "ece_correlated": 0.0135,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 118,
+       "predicted": 0.0276,
+       "actual": 0.0169
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 331,
+       "predicted": 0.0775,
+       "actual": 0.0906
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 594,
+       "predicted": 0.1264,
+       "actual": 0.1279
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 609,
+       "predicted": 0.1757,
+       "actual": 0.1626
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 532,
+       "predicted": 0.2255,
+       "actual": 0.2368
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 475,
+       "predicted": 0.2735,
+       "actual": 0.2589
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 706,
+       "predicted": 0.3461,
+       "actual": 0.3966
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 401,
+       "predicted": 0.4443,
+       "actual": 0.4389
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 229,
+       "predicted": 0.5525,
+       "actual": 0.5415
+      }
+     ],
+     "dates": 209
+    },
+    "teammates_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.257,
+     "mean_predicted_independent": 0.2473,
+     "mean_predicted_correlated": 0.2473,
+     "log_loss_independent": 0.52096,
+     "log_loss_correlated": 0.52097,
+     "log_loss_gain": -1e-05,
+     "log_loss_gain_95ci": [
+      -0.00024,
+      0.00024
+     ],
+     "brier_independent": 0.17298,
+     "brier_correlated": 0.17297,
+     "ece_independent": 0.0171,
+     "ece_correlated": 0.0163,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 319,
+       "predicted": 0.0805,
+       "actual": 0.069
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 643,
+       "predicted": 0.1255,
+       "actual": 0.1042
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 739,
+       "predicted": 0.1742,
+       "actual": 0.18
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 572,
+       "predicted": 0.2246,
+       "actual": 0.2448
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 506,
+       "predicted": 0.2748,
+       "actual": 0.3024
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 662,
+       "predicted": 0.346,
+       "actual": 0.3686
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 374,
+       "predicted": 0.4442,
+       "actual": 0.4733
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 165,
+       "predicted": 0.5485,
+       "actual": 0.5515
+      }
+     ],
+     "dates": 208
+    },
+    "opponents_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.2477,
+     "mean_predicted_independent": 0.2479,
+     "mean_predicted_correlated": 0.2479,
+     "log_loss_independent": 0.51739,
+     "log_loss_correlated": 0.51735,
+     "log_loss_gain": 4e-05,
+     "log_loss_gain_95ci": [
+      -6e-05,
+      0.00013
+     ],
+     "brier_independent": 0.17084,
+     "brier_correlated": 0.17082,
+     "ece_independent": 0.0124,
+     "ece_correlated": 0.0137,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 340,
+       "predicted": 0.0791,
+       "actual": 0.0618
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 653,
+       "predicted": 0.1273,
+       "actual": 0.1271
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 669,
+       "predicted": 0.1748,
+       "actual": 0.1614
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 607,
+       "predicted": 0.2239,
+       "actual": 0.257
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 495,
+       "predicted": 0.2743,
+       "actual": 0.2626
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 693,
+       "predicted": 0.3472,
+       "actual": 0.3521
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 366,
+       "predicted": 0.4428,
+       "actual": 0.4071
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 164,
+       "predicted": 0.5463,
+       "actual": 0.6037
+      }
+     ],
+     "dates": 209
+    },
+    "cross_game_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.2507,
+     "mean_predicted_independent": 0.2496,
+     "mean_predicted_correlated": 0.2496,
+     "log_loss_independent": 0.52077,
+     "log_loss_correlated": 0.52077,
+     "log_loss_gain": 0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.17185,
+     "brier_correlated": 0.17185,
+     "ece_independent": 0.0072,
+     "ece_correlated": 0.0072,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 324,
+       "predicted": 0.0801,
+       "actual": 0.071
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 653,
+       "predicted": 0.1263,
+       "actual": 0.1302
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 694,
+       "predicted": 0.1751,
+       "actual": 0.1729
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 593,
+       "predicted": 0.2245,
+       "actual": 0.2175
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 485,
+       "predicted": 0.2736,
+       "actual": 0.2928
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 698,
+       "predicted": 0.3476,
+       "actual": 0.3453
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 360,
+       "predicted": 0.4449,
+       "actual": 0.4222
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 182,
+       "predicted": 0.5466,
+       "actual": 0.6044
+      }
+     ],
+     "dates": 188
+    },
+    "same_game_3": {
+     "parlays": 2500,
+     "priced_with_correlations": 2500,
+     "bounds_only": 0,
+     "hit_rate": 0.118,
+     "mean_predicted_independent": 0.1238,
+     "mean_predicted_correlated": 0.1239,
+     "log_loss_independent": 0.3323,
+     "log_loss_correlated": 0.33266,
+     "log_loss_gain": -0.00035,
+     "log_loss_gain_95ci": [
+      -0.00146,
+      0.00071
+     ],
+     "brier_independent": 0.09678,
+     "brier_correlated": 0.09682,
+     "ece_independent": 0.0187,
+     "ece_correlated": 0.018,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 371,
+       "predicted": 0.0354,
+       "actual": 0.0323
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 805,
+       "predicted": 0.0752,
+       "actual": 0.0795
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 605,
+       "predicted": 0.1231,
+       "actual": 0.0843
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 328,
+       "predicted": 0.172,
+       "actual": 0.1524
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 189,
+       "predicted": 0.2244,
+       "actual": 0.2804
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 111,
+       "predicted": 0.2729,
+       "actual": 0.2883
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 78,
+       "predicted": 0.3434,
+       "actual": 0.3462
+      }
+     ],
+     "dates": 205
+    },
+    "cross_game_3": {
+     "parlays": 2500,
+     "priced_with_correlations": 2500,
+     "bounds_only": 0,
+     "hit_rate": 0.116,
+     "mean_predicted_independent": 0.1238,
+     "mean_predicted_correlated": 0.1238,
+     "log_loss_independent": 0.33122,
+     "log_loss_correlated": 0.33122,
+     "log_loss_gain": -0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.09639,
+     "brier_correlated": 0.09639,
+     "ece_independent": 0.0101,
+     "ece_correlated": 0.0101,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 374,
+       "predicted": 0.0359,
+       "actual": 0.0321
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 791,
+       "predicted": 0.074,
+       "actual": 0.0708
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 585,
+       "predicted": 0.1222,
+       "actual": 0.1043
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 337,
+       "predicted": 0.1723,
+       "actual": 0.1573
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 210,
+       "predicted": 0.2231,
+       "actual": 0.2095
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 119,
+       "predicted": 0.2723,
+       "actual": 0.2773
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 78,
+       "predicted": 0.3329,
+       "actual": 0.359
+      }
+     ],
+     "dates": 169
+    },
+    "two_plus_two_4": {
+     "parlays": 2000,
+     "priced_with_correlations": 2000,
+     "bounds_only": 0,
+     "hit_rate": 0.053,
+     "mean_predicted_independent": 0.0609,
+     "mean_predicted_correlated": 0.0608,
+     "log_loss_independent": 0.19641,
+     "log_loss_correlated": 0.19707,
+     "log_loss_gain": -0.00066,
+     "log_loss_gain_95ci": [
+      -0.00143,
+      4e-05
+     ],
+     "brier_independent": 0.04915,
+     "brier_correlated": 0.04923,
+     "ece_independent": 0.0079,
+     "ece_correlated": 0.0078,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 1033,
+       "predicted": 0.0287,
+       "actual": 0.0242
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 649,
+       "predicted": 0.0708,
+       "actual": 0.0693
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 214,
+       "predicted": 0.1212,
+       "actual": 0.1028
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 67,
+       "predicted": 0.1696,
+       "actual": 0.1194
+      }
+     ],
+     "dates": 188
+    }
+   },
+   "same_game_all": {
+    "parlays": 14500,
+    "priced_with_correlations": 14500,
+    "bounds_only": 0,
+    "hit_rate": 0.2313,
+    "mean_predicted_independent": 0.2276,
+    "mean_predicted_correlated": 0.2278,
+    "log_loss_independent": 0.48978,
+    "log_loss_correlated": 0.48721,
+    "log_loss_gain": 0.00257,
+    "log_loss_gain_95ci": [
+     0.0016,
+     0.00357
+    ],
+    "brier_independent": 0.16003,
+    "brier_correlated": 0.15918,
+    "ece_independent": 0.0106,
+    "ece_correlated": 0.0122,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 522,
+      "predicted": 0.0343,
+      "actual": 0.0307
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 1795,
+      "predicted": 0.0773,
+      "actual": 0.0763
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 2495,
+      "predicted": 0.1256,
+      "actual": 0.111
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 2345,
+      "predicted": 0.1744,
+      "actual": 0.1663
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 1900,
+      "predicted": 0.2246,
+      "actual": 0.25
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 1587,
+      "predicted": 0.2741,
+      "actual": 0.276
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 2139,
+      "predicted": 0.3463,
+      "actual": 0.3717
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 1154,
+      "predicted": 0.4437,
+      "actual": 0.4402
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 558,
+      "predicted": 0.5495,
+      "actual": 0.5627
+     }
+    ],
+    "dates": 210
+   },
+   "all": {
+    "parlays": 23000,
+    "priced_with_correlations": 23000,
+    "bounds_only": 0,
+    "hit_rate": 0.2067,
+    "mean_predicted_independent": 0.2056,
+    "mean_predicted_correlated": 0.2058,
+    "log_loss_independent": 0.45242,
+    "log_loss_correlated": 0.45086,
+    "log_loss_gain": 0.00156,
+    "log_loss_gain_95ci": [
+     0.00094,
+     0.00222
+    ],
+    "brier_independent": 0.14553,
+    "brier_correlated": 0.145,
+    "ece_independent": 0.0089,
+    "ece_correlated": 0.0099,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 1940,
+      "predicted": 0.0317,
+      "actual": 0.0278
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 3559,
+      "predicted": 0.0757,
+      "actual": 0.0733
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 3947,
+      "predicted": 0.125,
+      "actual": 0.1127
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 3443,
+      "predicted": 0.1743,
+      "actual": 0.1658
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 2732,
+      "predicted": 0.2244,
+      "actual": 0.2394
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 2195,
+      "predicted": 0.2739,
+      "actual": 0.2793
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 2919,
+      "predicted": 0.3462,
+      "actual": 0.3645
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 1519,
+      "predicted": 0.4439,
+      "actual": 0.4365
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 741,
+      "predicted": 0.5487,
+      "actual": 0.5722
+     }
+    ],
+    "dates": 210
+   },
+   "leg_calibration": {
+    "mean_p": 0.4992,
+    "hit_rate": 0.5003,
+    "ece": 0.0029,
+    "legs": 125829
+   }
+  },
+  "nba_live_2026_27": {
+   "model": "published ledger probabilities",
+   "versions": [
+    "0.1.0",
+    "0.2.0",
+    "0.2.1",
+    "0.2.3a"
+   ],
+   "dates": [
+    "2026-11-02",
+    "2026-11-10"
+   ],
+   "table_seasons": "2021-22 to 2025-26",
+   "legs_available": 7293,
+   "by_type": {
+    "same_player_2": {
+     "parlays": 1000,
+     "priced_with_correlations": 1000,
+     "bounds_only": 0,
+     "hit_rate": 0.258,
+     "mean_predicted_independent": 0.2472,
+     "mean_predicted_correlated": 0.2467,
+     "log_loss_independent": 0.50941,
+     "log_loss_correlated": 0.50044,
+     "log_loss_gain": 0.00896,
+     "log_loss_gain_95ci": [
+      0.00311,
+      0.01705
+     ],
+     "brier_independent": 0.16895,
+     "brier_correlated": 0.16587,
+     "ece_independent": 0.0403,
+     "ece_correlated": 0.0427,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 36,
+       "predicted": 0.0245,
+       "actual": 0.0
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 83,
+       "predicted": 0.0785,
+       "actual": 0.0482
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 132,
+       "predicted": 0.1276,
+       "actual": 0.0985
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 165,
+       "predicted": 0.1737,
+       "actual": 0.1273
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 148,
+       "predicted": 0.2255,
+       "actual": 0.2703
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 116,
+       "predicted": 0.2758,
+       "actual": 0.3276
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 178,
+       "predicted": 0.3429,
+       "actual": 0.3876
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 101,
+       "predicted": 0.4438,
+       "actual": 0.4356
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 41,
+       "predicted": 0.5514,
+       "actual": 0.7073
+      }
+     ],
+     "dates": 8
+    },
+    "teammates_2": {
+     "parlays": 1000,
+     "priced_with_correlations": 1000,
+     "bounds_only": 0,
+     "hit_rate": 0.271,
+     "mean_predicted_independent": 0.2483,
+     "mean_predicted_correlated": 0.2484,
+     "log_loss_independent": 0.54976,
+     "log_loss_correlated": 0.5497,
+     "log_loss_gain": 5e-05,
+     "log_loss_gain_95ci": [
+      -0.00029,
+      0.00044
+     ],
+     "brier_independent": 0.18459,
+     "brier_correlated": 0.1846,
+     "ece_independent": 0.0318,
+     "ece_correlated": 0.031,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 80,
+       "predicted": 0.08,
+       "actual": 0.0625
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 154,
+       "predicted": 0.127,
+       "actual": 0.1429
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 191,
+       "predicted": 0.175,
+       "actual": 0.1937
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 150,
+       "predicted": 0.2242,
+       "actual": 0.3067
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 118,
+       "predicted": 0.273,
+       "actual": 0.322
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 163,
+       "predicted": 0.3458,
+       "actual": 0.3497
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 97,
+       "predicted": 0.444,
+       "actual": 0.4227
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 44,
+       "predicted": 0.5367,
+       "actual": 0.5682
+      }
+     ],
+     "dates": 8
+    },
+    "opponents_2": {
+     "parlays": 1000,
+     "priced_with_correlations": 1000,
+     "bounds_only": 0,
+     "hit_rate": 0.265,
+     "mean_predicted_independent": 0.2559,
+     "mean_predicted_correlated": 0.2559,
+     "log_loss_independent": 0.52405,
+     "log_loss_correlated": 0.5241,
+     "log_loss_gain": -5e-05,
+     "log_loss_gain_95ci": [
+      -0.00018,
+      9e-05
+     ],
+     "brier_independent": 0.17398,
+     "brier_correlated": 0.174,
+     "ece_independent": 0.0179,
+     "ece_correlated": 0.018,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 67,
+       "predicted": 0.0806,
+       "actual": 0.0448
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 156,
+       "predicted": 0.1234,
+       "actual": 0.1474
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 170,
+       "predicted": 0.1723,
+       "actual": 0.1706
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 151,
+       "predicted": 0.2245,
+       "actual": 0.1854
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 137,
+       "predicted": 0.2749,
+       "actual": 0.3066
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 162,
+       "predicted": 0.3481,
+       "actual": 0.3457
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 104,
+       "predicted": 0.4428,
+       "actual": 0.5288
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 51,
+       "predicted": 0.5468,
+       "actual": 0.5686
+      }
+     ],
+     "dates": 8
+    },
+    "cross_game_2": {
+     "parlays": 1000,
+     "priced_with_correlations": 1000,
+     "bounds_only": 0,
+     "hit_rate": 0.247,
+     "mean_predicted_independent": 0.2491,
+     "mean_predicted_correlated": 0.2491,
+     "log_loss_independent": 0.50862,
+     "log_loss_correlated": 0.50862,
+     "log_loss_gain": 0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.16612,
+     "brier_correlated": 0.16612,
+     "ece_independent": 0.0267,
+     "ece_correlated": 0.0267,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 81,
+       "predicted": 0.0814,
+       "actual": 0.0864
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 167,
+       "predicted": 0.1256,
+       "actual": 0.1198
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 170,
+       "predicted": 0.1733,
+       "actual": 0.1471
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 160,
+       "predicted": 0.2256,
+       "actual": 0.225
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 105,
+       "predicted": 0.2752,
+       "actual": 0.2667
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 175,
+       "predicted": 0.3486,
+       "actual": 0.3029
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 95,
+       "predicted": 0.4477,
+       "actual": 0.5053
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 43,
+       "predicted": 0.5436,
+       "actual": 0.6744
+      }
+     ],
+     "dates": 8
+    },
+    "same_game_3": {
+     "parlays": 625,
+     "priced_with_correlations": 625,
+     "bounds_only": 0,
+     "hit_rate": 0.1392,
+     "mean_predicted_independent": 0.1262,
+     "mean_predicted_correlated": 0.1265,
+     "log_loss_independent": 0.37155,
+     "log_loss_correlated": 0.37018,
+     "log_loss_gain": 0.00136,
+     "log_loss_gain_95ci": [
+      -0.00091,
+      0.00386
+     ],
+     "brier_independent": 0.11145,
+     "brier_correlated": 0.1111,
+     "ece_independent": 0.0287,
+     "ece_correlated": 0.0294,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 98,
+       "predicted": 0.0345,
+       "actual": 0.051
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 196,
+       "predicted": 0.0756,
+       "actual": 0.0612
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 136,
+       "predicted": 0.1243,
+       "actual": 0.1765
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 92,
+       "predicted": 0.1732,
+       "actual": 0.1739
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 48,
+       "predicted": 0.2216,
+       "actual": 0.2083
+      }
+     ],
+     "dates": 8
+    },
+    "cross_game_3": {
+     "parlays": 625,
+     "priced_with_correlations": 625,
+     "bounds_only": 0,
+     "hit_rate": 0.1232,
+     "mean_predicted_independent": 0.1241,
+     "mean_predicted_correlated": 0.1241,
+     "log_loss_independent": 0.35457,
+     "log_loss_correlated": 0.35457,
+     "log_loss_gain": -0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.10438,
+     "brier_correlated": 0.10438,
+     "ece_independent": 0.0126,
+     "ece_correlated": 0.0126,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 97,
+       "predicted": 0.0354,
+       "actual": 0.0412
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 193,
+       "predicted": 0.0744,
+       "actual": 0.0725
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 149,
+       "predicted": 0.1217,
+       "actual": 0.1342
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 89,
+       "predicted": 0.1731,
+       "actual": 0.191
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 42,
+       "predicted": 0.2229,
+       "actual": 0.2143
+      }
+     ],
+     "dates": 7
+    },
+    "two_plus_two_4": {
+     "parlays": 500,
+     "priced_with_correlations": 500,
+     "bounds_only": 0,
+     "hit_rate": 0.068,
+     "mean_predicted_independent": 0.0614,
+     "mean_predicted_correlated": 0.0615,
+     "log_loss_independent": 0.22752,
+     "log_loss_correlated": 0.22702,
+     "log_loss_gain": 0.0005,
+     "log_loss_gain_95ci": [
+      -0.00034,
+      0.0015
+     ],
+     "brier_independent": 0.06047,
+     "brier_correlated": 0.06047,
+     "ece_independent": 0.0066,
+     "ece_correlated": 0.0065,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 262,
+       "predicted": 0.0287,
+       "actual": 0.0267
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 155,
+       "predicted": 0.0706,
+       "actual": 0.0903
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 54,
+       "predicted": 0.1243,
+       "actual": 0.1296
+      }
+     ],
+     "dates": 8
+    }
+   },
+   "same_game_all": {
+    "parlays": 3625,
+    "priced_with_correlations": 3625,
+    "bounds_only": 0,
+    "hit_rate": 0.243,
+    "mean_predicted_independent": 0.229,
+    "mean_predicted_correlated": 0.229,
+    "log_loss_independent": 0.50081,
+    "log_loss_correlated": 0.4981,
+    "log_loss_gain": 0.00271,
+    "log_loss_gain_95ci": [
+     0.0008,
+     0.00503
+    ],
+    "brier_independent": 0.16474,
+    "brier_correlated": 0.16384,
+    "ece_independent": 0.0183,
+    "ece_correlated": 0.0188,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 139,
+      "predicted": 0.0323,
+      "actual": 0.036
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 426,
+      "predicted": 0.0778,
+      "actual": 0.0563
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 578,
+      "predicted": 0.1255,
+      "actual": 0.1419
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 618,
+      "predicted": 0.1736,
+      "actual": 0.1667
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 497,
+      "predicted": 0.2245,
+      "actual": 0.2495
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 396,
+      "predicted": 0.2747,
+      "actual": 0.3081
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 532,
+      "predicted": 0.3455,
+      "actual": 0.3722
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 303,
+      "predicted": 0.4436,
+      "actual": 0.462
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 136,
+      "predicted": 0.5449,
+      "actual": 0.6103
+     }
+    ],
+    "dates": 8
+   },
+   "all": {
+    "parlays": 5750,
+    "priced_with_correlations": 5750,
+    "bounds_only": 0,
+    "hit_rate": 0.2155,
+    "mean_predicted_independent": 0.2066,
+    "mean_predicted_correlated": 0.2065,
+    "log_loss_independent": 0.46251,
+    "log_loss_correlated": 0.46076,
+    "log_loss_gain": 0.00175,
+    "log_loss_gain_95ci": [
+     0.00061,
+     0.00301
+    ],
+    "brier_independent": 0.14935,
+    "brier_correlated": 0.14878,
+    "ece_independent": 0.0103,
+    "ece_correlated": 0.0106,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 502,
+      "predicted": 0.0312,
+      "actual": 0.0339
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 855,
+      "predicted": 0.076,
+      "actual": 0.069
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 948,
+      "predicted": 0.1249,
+      "actual": 0.1361
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 895,
+      "predicted": 0.1735,
+      "actual": 0.1654
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 709,
+      "predicted": 0.2246,
+      "actual": 0.2412
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 530,
+      "predicted": 0.2748,
+      "actual": 0.2981
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 733,
+      "predicted": 0.3459,
+      "actual": 0.3506
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 399,
+      "predicted": 0.4445,
+      "actual": 0.4712
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 179,
+      "predicted": 0.5446,
+      "actual": 0.6257
+     }
+    ],
+    "dates": 8
+   },
+   "leg_calibration": {
+    "mean_p": 0.4992,
+    "hit_rate": 0.4994,
+    "ece": 0.0092,
+    "legs": 7293
+   }
+  },
+  "nfl_walkforward_2025": {
+   "model": "nfl-props 0.1.1 (TEST)",
+   "table_seasons": "2018 to 2024",
+   "legs_available": 23107,
+   "by_type": {
+    "same_player_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.25,
+     "mean_predicted_independent": 0.2512,
+     "mean_predicted_correlated": 0.2516,
+     "log_loss_independent": 0.51573,
+     "log_loss_correlated": 0.47962,
+     "log_loss_gain": 0.03611,
+     "log_loss_gain_95ci": [
+      0.02808,
+      0.04416
+     ],
+     "brier_independent": 0.16878,
+     "brier_correlated": 0.1587,
+     "ece_independent": 0.0206,
+     "ece_correlated": 0.0109,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 400,
+       "predicted": 0.0246,
+       "actual": 0.0275
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 404,
+       "predicted": 0.0747,
+       "actual": 0.0545
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 436,
+       "predicted": 0.126,
+       "actual": 0.1009
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 490,
+       "predicted": 0.1766,
+       "actual": 0.1694
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 472,
+       "predicted": 0.2237,
+       "actual": 0.2225
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 404,
+       "predicted": 0.274,
+       "actual": 0.2822
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 614,
+       "predicted": 0.3473,
+       "actual": 0.3648
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 422,
+       "predicted": 0.4475,
+       "actual": 0.4455
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 313,
+       "predicted": 0.5626,
+       "actual": 0.5719
+      },
+      {
+       "bin": [
+        0.65,
+        1.0
+       ],
+       "n": 45,
+       "predicted": 0.6746,
+       "actual": 0.6667
+      }
+     ],
+     "dates": 64
+    },
+    "teammates_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 3990,
+     "bounds_only": 10,
+     "hit_rate": 0.2283,
+     "mean_predicted_independent": 0.2466,
+     "mean_predicted_correlated": 0.2466,
+     "log_loss_independent": 0.49877,
+     "log_loss_correlated": 0.49839,
+     "log_loss_gain": 0.00038,
+     "log_loss_gain_95ci": [
+      -0.00076,
+      0.00152
+     ],
+     "brier_independent": 0.16282,
+     "brier_correlated": 0.16275,
+     "ece_independent": 0.0183,
+     "ece_correlated": 0.0182,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 398,
+       "predicted": 0.0786,
+       "actual": 0.0754
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 637,
+       "predicted": 0.1264,
+       "actual": 0.1005
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 713,
+       "predicted": 0.174,
+       "actual": 0.1599
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 584,
+       "predicted": 0.2247,
+       "actual": 0.2295
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 426,
+       "predicted": 0.2738,
+       "actual": 0.2465
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 616,
+       "predicted": 0.346,
+       "actual": 0.3377
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 376,
+       "predicted": 0.4452,
+       "actual": 0.4202
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 216,
+       "predicted": 0.5483,
+       "actual": 0.4491
+      }
+     ],
+     "dates": 64
+    },
+    "opponents_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 3997,
+     "bounds_only": 3,
+     "hit_rate": 0.2422,
+     "mean_predicted_independent": 0.2512,
+     "mean_predicted_correlated": 0.2513,
+     "log_loss_independent": 0.51428,
+     "log_loss_correlated": 0.51414,
+     "log_loss_gain": 0.00014,
+     "log_loss_gain_95ci": [
+      -0.00018,
+      0.00048
+     ],
+     "brier_independent": 0.16894,
+     "brier_correlated": 0.16895,
+     "ece_independent": 0.0095,
+     "ece_correlated": 0.0101,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 336,
+       "predicted": 0.0786,
+       "actual": 0.0863
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 639,
+       "predicted": 0.126,
+       "actual": 0.1268
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 743,
+       "predicted": 0.174,
+       "actual": 0.1602
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 555,
+       "predicted": 0.2242,
+       "actual": 0.2216
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 443,
+       "predicted": 0.2731,
+       "actual": 0.2573
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 642,
+       "predicted": 0.3477,
+       "actual": 0.338
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 397,
+       "predicted": 0.4454,
+       "actual": 0.4332
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 224,
+       "predicted": 0.5436,
+       "actual": 0.5045
+      }
+     ],
+     "dates": 64
+    },
+    "cross_game_2": {
+     "parlays": 4000,
+     "priced_with_correlations": 4000,
+     "bounds_only": 0,
+     "hit_rate": 0.257,
+     "mean_predicted_independent": 0.254,
+     "mean_predicted_correlated": 0.254,
+     "log_loss_independent": 0.53124,
+     "log_loss_correlated": 0.53124,
+     "log_loss_gain": 0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.17601,
+     "brier_correlated": 0.17601,
+     "ece_independent": 0.0135,
+     "ece_correlated": 0.0135,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 386,
+       "predicted": 0.0784,
+       "actual": 0.0907
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 596,
+       "predicted": 0.1269,
+       "actual": 0.1426
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 702,
+       "predicted": 0.1736,
+       "actual": 0.1781
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 545,
+       "predicted": 0.2243,
+       "actual": 0.2312
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 461,
+       "predicted": 0.2758,
+       "actual": 0.3015
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 624,
+       "predicted": 0.3466,
+       "actual": 0.3285
+      },
+      {
+       "bin": [
+        0.4,
+        0.5
+       ],
+       "n": 433,
+       "predicted": 0.4455,
+       "actual": 0.4273
+      },
+      {
+       "bin": [
+        0.5,
+        0.65
+       ],
+       "n": 234,
+       "predicted": 0.5497,
+       "actual": 0.5427
+      }
+     ],
+     "dates": 32
+    },
+    "same_game_3": {
+     "parlays": 2500,
+     "priced_with_correlations": 2499,
+     "bounds_only": 1,
+     "hit_rate": 0.1321,
+     "mean_predicted_independent": 0.1279,
+     "mean_predicted_correlated": 0.128,
+     "log_loss_independent": 0.36509,
+     "log_loss_correlated": 0.36186,
+     "log_loss_gain": 0.00323,
+     "log_loss_gain_95ci": [
+      -0.0005,
+      0.00724
+     ],
+     "brier_independent": 0.10798,
+     "brier_correlated": 0.10736,
+     "ece_independent": 0.0138,
+     "ece_correlated": 0.0142,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 462,
+       "predicted": 0.0325,
+       "actual": 0.0455
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 719,
+       "predicted": 0.0737,
+       "actual": 0.0834
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 519,
+       "predicted": 0.1228,
+       "actual": 0.1098
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 343,
+       "predicted": 0.1735,
+       "actual": 0.1691
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 192,
+       "predicted": 0.2236,
+       "actual": 0.2604
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 108,
+       "predicted": 0.2737,
+       "actual": 0.25
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 126,
+       "predicted": 0.3427,
+       "actual": 0.381
+      }
+     ],
+     "dates": 64
+    },
+    "cross_game_3": {
+     "parlays": 2500,
+     "priced_with_correlations": 2500,
+     "bounds_only": 0,
+     "hit_rate": 0.1336,
+     "mean_predicted_independent": 0.1262,
+     "mean_predicted_correlated": 0.1262,
+     "log_loss_independent": 0.35582,
+     "log_loss_correlated": 0.35582,
+     "log_loss_gain": -0.0,
+     "log_loss_gain_95ci": [
+      -0.0,
+      0.0
+     ],
+     "brier_independent": 0.10663,
+     "brier_correlated": 0.10663,
+     "ece_independent": 0.0096,
+     "ece_correlated": 0.0096,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 413,
+       "predicted": 0.0348,
+       "actual": 0.0218
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 796,
+       "predicted": 0.0727,
+       "actual": 0.0817
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 539,
+       "predicted": 0.1227,
+       "actual": 0.1243
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 304,
+       "predicted": 0.1705,
+       "actual": 0.1875
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 188,
+       "predicted": 0.2222,
+       "actual": 0.2394
+      },
+      {
+       "bin": [
+        0.25,
+        0.3
+       ],
+       "n": 117,
+       "predicted": 0.274,
+       "actual": 0.2821
+      },
+      {
+       "bin": [
+        0.3,
+        0.4
+       ],
+       "n": 116,
+       "predicted": 0.3419,
+       "actual": 0.4224
+      }
+     ],
+     "dates": 21
+    },
+    "two_plus_two_4": {
+     "parlays": 2000,
+     "priced_with_correlations": 1996,
+     "bounds_only": 4,
+     "hit_rate": 0.0571,
+     "mean_predicted_independent": 0.0645,
+     "mean_predicted_correlated": 0.0649,
+     "log_loss_independent": 0.20693,
+     "log_loss_correlated": 0.20644,
+     "log_loss_gain": 0.00049,
+     "log_loss_gain_95ci": [
+      -0.0008,
+      0.00165
+     ],
+     "brier_independent": 0.05302,
+     "brier_correlated": 0.05304,
+     "ece_independent": 0.0074,
+     "ece_correlated": 0.0078,
+     "calibration_correlated": [
+      {
+       "bin": [
+        0,
+        0.05
+       ],
+       "n": 1011,
+       "predicted": 0.0273,
+       "actual": 0.0267
+      },
+      {
+       "bin": [
+        0.05,
+        0.1
+       ],
+       "n": 591,
+       "predicted": 0.0709,
+       "actual": 0.0711
+      },
+      {
+       "bin": [
+        0.1,
+        0.15
+       ],
+       "n": 241,
+       "predicted": 0.1237,
+       "actual": 0.1079
+      },
+      {
+       "bin": [
+        0.15,
+        0.2
+       ],
+       "n": 97,
+       "predicted": 0.1734,
+       "actual": 0.1134
+      },
+      {
+       "bin": [
+        0.2,
+        0.25
+       ],
+       "n": 44,
+       "predicted": 0.2219,
+       "actual": 0.1818
+      }
+     ],
+     "dates": 32
+    }
+   },
+   "same_game_all": {
+    "parlays": 14500,
+    "priced_with_correlations": 14486,
+    "bounds_only": 14,
+    "hit_rate": 0.2215,
+    "mean_predicted_independent": 0.2287,
+    "mean_predicted_correlated": 0.2288,
+    "log_loss_independent": 0.48467,
+    "log_loss_correlated": 0.474,
+    "log_loss_gain": 0.01067,
+    "log_loss_gain_95ci": [
+     0.0082,
+     0.01311
+    ],
+    "brier_independent": 0.15669,
+    "brier_correlated": 0.15378,
+    "ece_independent": 0.0114,
+    "ece_correlated": 0.0089,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 904,
+      "predicted": 0.0297,
+      "actual": 0.0365
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 1857,
+      "predicted": 0.0759,
+      "actual": 0.0759
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 2231,
+      "predicted": 0.1254,
+      "actual": 0.1103
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 2289,
+      "predicted": 0.1745,
+      "actual": 0.1634
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 1803,
+      "predicted": 0.2241,
+      "actual": 0.2285
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 1381,
+      "predicted": 0.2736,
+      "actual": 0.2607
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 1998,
+      "predicted": 0.3467,
+      "actual": 0.3488
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 1224,
+      "predicted": 0.4458,
+      "actual": 0.4297
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 754,
+      "predicted": 0.5528,
+      "actual": 0.5172
+     },
+     {
+      "bin": [
+       0.65,
+       1.0
+      ],
+      "n": 45,
+      "predicted": 0.6746,
+      "actual": 0.6667
+     }
+    ],
+    "dates": 64
+   },
+   "all": {
+    "parlays": 23000,
+    "priced_with_correlations": 22982,
+    "bounds_only": 18,
+    "hit_rate": 0.2039,
+    "mean_predicted_independent": 0.2077,
+    "mean_predicted_correlated": 0.2078,
+    "log_loss_independent": 0.45464,
+    "log_loss_correlated": 0.44787,
+    "log_loss_gain": 0.00677,
+    "log_loss_gain_95ci": [
+     0.00515,
+     0.00824
+    ],
+    "brier_independent": 0.1456,
+    "brier_correlated": 0.14377,
+    "ece_independent": 0.0066,
+    "ece_correlated": 0.0057,
+    "calibration_correlated": [
+     {
+      "bin": [
+       0,
+       0.05
+      ],
+      "n": 2347,
+      "predicted": 0.0297,
+      "actual": 0.0298
+     },
+     {
+      "bin": [
+       0.05,
+       0.1
+      ],
+      "n": 3630,
+      "predicted": 0.0746,
+      "actual": 0.078
+     },
+     {
+      "bin": [
+       0.1,
+       0.15
+      ],
+      "n": 3607,
+      "predicted": 0.1251,
+      "actual": 0.1175
+     },
+     {
+      "bin": [
+       0.15,
+       0.2
+      ],
+      "n": 3392,
+      "predicted": 0.1739,
+      "actual": 0.1672
+     },
+     {
+      "bin": [
+       0.2,
+       0.25
+      ],
+      "n": 2580,
+      "predicted": 0.224,
+      "actual": 0.2291
+     },
+     {
+      "bin": [
+       0.25,
+       0.3
+      ],
+      "n": 1966,
+      "predicted": 0.2741,
+      "actual": 0.2706
+     },
+     {
+      "bin": [
+       0.3,
+       0.4
+      ],
+      "n": 2743,
+      "predicted": 0.3465,
+      "actual": 0.3467
+     },
+     {
+      "bin": [
+       0.4,
+       0.5
+      ],
+      "n": 1684,
+      "predicted": 0.4455,
+      "actual": 0.4276
+     },
+     {
+      "bin": [
+       0.5,
+       0.65
+      ],
+      "n": 988,
+      "predicted": 0.5521,
+      "actual": 0.5233
+     },
+     {
+      "bin": [
+       0.65,
+       1.0
+      ],
+      "n": 45,
+      "predicted": 0.6746,
+      "actual": 0.6667
+     }
+    ],
+    "dates": 64
+   },
+   "leg_calibration": {
+    "mean_p": 0.5002,
+    "hit_rate": 0.5001,
+    "ece": 0.0091,
+    "legs": 23107
+   }
+  }
+ },
+ "runtime_s": 338.9
+}
