@@ -4,6 +4,10 @@ approved 2026-11-24). No Supabase. Never estimates a line; the model never reads
 Request: GET /v4/sports/basketball_nba/events/{event_id}/odds?regions=us&markets=player_points
   cost = markets returned x regions = 1 credit (0 when the book hasn't posted the market). The events list is free.
 
+Which games when the allowance is short (Moose, 2026-11-27): a deterministic golden-ratio rotation over the day's
+start order (rotation() below), so later West Coast games get the same share as early ones over a month. Every
+requested, credit-limited and unattempted game is recorded in the manifest's "selection" for auditing.
+
 Schedule (Moose, 2026-11-25): 5:30 AM PT main run (every game today not yet requested) and a 9:30 AM PT retry ONLY
 for games whose single paid request came back with no player points. Each mode runs once a day (write-once R2 lock;
 a completed mode is never repeated), and every paid request leaves a write-once attempt marker before anything else,
@@ -120,6 +124,27 @@ def _credits(h: dict) -> tuple[int, int]:
     return int(float(h["x-requests-remaining"])), int(float(h["x-requests-last"]))
 
 
+# ------------------------------------------------------------------ rotation (Moose, 2026-11-27)
+ROTATION_RULE = "golden-ratio rotation over the day's start order, v1"
+PHI_FRAC = 0.6180339887498949            # golden ratio's fractional part: low-discrepancy, so every slot gets its turn
+EPOCH = date(2026, 1, 1)
+
+
+def rotation(events: list[dict], day: date) -> dict:
+    """Deterministic, fair request order for one day's games. Games are numbered by start time (ties by event id); the
+    day's start slot is floor(frac(day_index x 0.618...) x n), and the order runs round the slate from there. When the
+    allowance covers only part of the slate, the covered part moves to a different stretch of the evening each day,
+    so early and late (West Coast) games get the same share over a month. Same day + same slate = same order."""
+    ordered = sorted(events, key=lambda e: (e["commence_time"], e["id"]))
+    n = len(ordered)
+    if not n:
+        return {"rule": ROTATION_RULE, "day_index": (day - EPOCH).days, "n": 0, "offset": 0, "order": []}
+    di = (day - EPOCH).days
+    off = math.floor(((di * PHI_FRAC) % 1.0) * n)
+    order = ordered[off:] + ordered[:off]
+    return {"rule": ROTATION_RULE, "day_index": di, "n": n, "offset": off, "order": order}
+
+
 # ------------------------------------------------------------------ run
 def today_events(events: list[dict], now: datetime) -> list[dict]:
     t = now.astimezone(PT).date()
@@ -205,6 +230,10 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
         todo = [e for e in events if hist["status"].get(e["id"]) == "empty" and hist["attempts"].get(e["id"], 0) == 1]
     else:
         todo = [e for e in events if e["id"] not in hist["status"]]
+    rot = rotation(events, day)                                     # fair order across the slate, day by day
+    pos = {e["id"]: i for i, e in enumerate(rot["order"])}
+    todo.sort(key=lambda e: pos[e["id"]])
+    start_slot = {e["id"]: i for i, e in enumerate(sorted(events, key=lambda e: (e["commence_time"], e["id"])))}
     aliases = PM.load_aliases(aliases_path)
     games = board.get("games") or []
     requests, objects, views = [], [], []
@@ -267,17 +296,27 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
         if stop:
             break
     finished = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    meta = {"mode": mode, "started_at": now.isoformat(timespec="seconds"), "finished_at": finished, "budget": b,
+    selection = {"rule": rot["rule"], "day_index": rot["day_index"], "slate_size": rot["n"], "offset": rot["offset"],
+                 "order": [{"event_id": e["id"], "start_slot": start_slot[e["id"]]} for e in rot["order"]],
+                 "requested": [r["event_id"] for r in requests if r["status"] in ("captured", "empty", "error") and "cost" in r],
+                 "credit_limited": [r["event_id"] for r in requests if r["status"] == "skipped_cap"],
+                 "not_attempted": [e["id"] for e in events if e["id"] not in {r["event_id"] for r in requests} and e in todo]}
+    meta = {"mode": mode, "started_at": now.isoformat(timespec="seconds"), "finished_at": finished, "budget": b, "selection": selection,
             "credits_billed": billed, "credits_remaining_after": remaining, "requests": requests, "stopped": stop,
             "source": "the_odds_api", "endpoint": "/v4/sports/basketball_nba/events/{event_id}/odds", "params": {"regions": "us", "markets": "player_points",
             "oddsFormat": "american"}}
     out = {"mode": mode, "date": day.isoformat(), "budget": b, "games_today": len(events), "to_request": len(todo),
+           "rotation": {"offset": rot["offset"], "slate_size": rot["n"],
+                        "requested_start_slots": sorted(start_slot[x] for x in selection["requested"]),
+                        "credit_limited_start_slots": sorted(start_slot[x] for x in selection["credit_limited"])},
            "captured": sum(r["status"] == "captured" for r in requests), "empty": sum(r["status"] == "empty" for r in requests),
            "errors": sum(r["status"] == "error" for r in requests), "skipped_cap": skipped_cap, "credits_billed": billed,
            "credits_remaining_after": remaining, "stopped": stop}
     if requests:
         w = MS.write_run(store, reader, day.isoformat(), run_ts, objects, views, meta)
         usage = {k: meta[k] for k in ("mode", "started_at", "finished_at", "budget", "credits_billed", "credits_remaining_after", "stopped")}
+        usage["selection"] = {k: selection[k] for k in ("rule", "day_index", "slate_size", "offset")} | {
+            "requested": len(selection["requested"]), "credit_limited": len(selection["credit_limited"])}
         MS.put_verified(store, reader, f"{MS.PREFIX}/_usage/{day.strftime('%Y-%m')}/{run_ts}.json", json.dumps(usage, sort_keys=True).encode())
         out.update(objects=len(objects) + 1, games_in_view=w["games_in_view"],
                    matched_players=sum(r.get("matched_players", 0) for r in requests), players=sum(r.get("players", 0) for r in requests))
