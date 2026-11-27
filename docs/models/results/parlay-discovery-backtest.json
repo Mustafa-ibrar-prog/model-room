@@ -1,0 +1,138 @@
+{
+ "kind": "parlay_discovery_backtest",
+ "generated_at": "2026-11-27T23:19:07+00:00",
+ "seasons": [
+  2023,
+  2024,
+  2025
+ ],
+ "games": 855,
+ "market": "NFL moneyline, nflverse closing prices",
+ "model": "nfl-game (params.json, fitted on 2021-22)",
+ "baseline_all_sides": {
+  "picks": 1710,
+  "win_rate": 0.4994,
+  "model_p": 0.5,
+  "market_p": 0.5,
+  "roi_per_dollar": -0.057,
+  "roi_95ci": [
+   -0.081,
+   -0.0303
+  ]
+ },
+ "by_edge": [
+  {
+   "edge": [
+    -1,
+    0
+   ],
+   "picks": 855,
+   "win_rate": 0.6327,
+   "model_p": 0.5414,
+   "market_p": 0.6101,
+   "roi_per_dollar": -0.0001,
+   "roi_95ci": [
+    -0.0521,
+    0.056
+   ]
+  },
+  {
+   "edge": [
+    0,
+    0.02
+   ],
+   "picks": 157,
+   "win_rate": 0.4522,
+   "model_p": 0.4911,
+   "market_p": 0.4819,
+   "roi_per_dollar": -0.0904,
+   "roi_95ci": [
+    -0.2607,
+    0.0883
+   ]
+  },
+  {
+   "edge": [
+    0.02,
+    0.04
+   ],
+   "picks": 154,
+   "win_rate": 0.4091,
+   "model_p": 0.4793,
+   "market_p": 0.449,
+   "roi_per_dollar": -0.1638,
+   "roi_95ci": [
+    -0.3592,
+    0.0445
+   ]
+  },
+  {
+   "edge": [
+    0.04,
+    0.07
+   ],
+   "picks": 181,
+   "win_rate": 0.4088,
+   "model_p": 0.4507,
+   "market_p": 0.3967,
+   "roi_per_dollar": -0.0239,
+   "roi_95ci": [
+    -0.2106,
+    0.1907
+   ]
+  },
+  {
+   "edge": [
+    0.07,
+    1
+   ],
+   "picks": 363,
+   "win_rate": 0.2893,
+   "model_p": 0.4398,
+   "market_p": 0.3216,
+   "roi_per_dollar": -0.1477,
+   "roi_95ci": [
+    -0.2773,
+    -0.028
+   ]
+  }
+ ],
+ "ranker_top3_per_week": {
+  "picks": 189,
+  "win_rate": 0.3122,
+  "model_p": 0.4884,
+  "market_p": 0.3572,
+  "roi_per_dollar": -0.1596,
+  "roi_95ci": [
+   -0.3122,
+   -0.0075
+  ]
+ },
+ "ranker_rest_positive_edge": {
+  "picks": 666,
+  "win_rate": 0.3814,
+  "model_p": 0.4502,
+  "market_p": 0.3992,
+  "roi_per_dollar": -0.1009,
+  "roi_95ci": [
+   -0.1885,
+   -0.001
+  ]
+ },
+ "long_shots_positive_edge": {
+  "picks": 214,
+  "win_rate": 0.229,
+  "model_p": 0.2813,
+  "market_p": 0.2151,
+  "roi_per_dollar": -0.0407,
+  "roi_95ci": [
+   -0.2725,
+   0.2001
+  ]
+ },
+ "notes": [
+  "Closing prices: the hardest prices to beat; an edge here is conservative.",
+  "Ties count as losses for simplicity (rare in the NFL).",
+  "ROI intervals resample whole weeks."
+ ]
+}

@@ -6,7 +6,7 @@ import { useState, type ReactNode } from "react";
 import { Wordmark } from "./Logo";
 import { NAV } from "./nav";
 
-export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mobileAccount?: ReactNode }) {
+export function SiteHeader({ account, mobileAccount, extra = [] }: { account?: ReactNode; mobileAccount?: ReactNode; extra?: { href: string; label: string }[] }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
@@ -20,7 +20,7 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
 
         <nav aria-label="Main" className="hidden flex-1 lg:block">
           <ul className="flex items-center gap-1">
-            {NAV.map((item) => (
+            {[...NAV, ...extra].map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
@@ -61,6 +61,11 @@ export function SiteHeader({ account, mobileAccount }: { account?: ReactNode; mo
       {open && (
         <div id="mobile-account" className="border-t border-navy-700/70 lg:hidden" onClick={(e) => { if ((e.target as HTMLElement).closest("a")) setOpen(false); }}>
           <div className="mx-auto max-w-7xl space-y-3 px-4 py-3">
+            {extra.map((item) => (
+              <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="block rounded-md border border-navy-600 px-4 py-2.5 text-center font-600 text-ink">
+                {item.label}
+              </Link>
+            ))}
             {mobileAccount}
             <Link href="/pricing" onClick={() => setOpen(false)} className="block rounded-full bg-model px-4 py-2.5 text-center font-600 text-navy-950">
               See plans
