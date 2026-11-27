@@ -347,9 +347,6 @@ def main(argv=None) -> int:
     return 1 if out.get("stopped") else 0
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
-
 
 # ------------------------------------------------------------------ one-off probe (Moose, 2026-11-27)
 NFL_BASE = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl"
@@ -407,3 +404,7 @@ def probe_nfl_receiving_yards(key: str, board: dict, store, reader, now: datetim
             "has_book_names": all(b_.get("title") for b_ in books) if books else False, "has_timestamps": bool(ups),
             "half_point_lines": all(abs(p % 1 - 0.5) < 1e-9 for p in pts) if pts else None,
             "stored": {"raw_bytes": raw["bytes"], "verified": raw["verified"]}}
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
