@@ -1,0 +1,47 @@
+name: Parlay Builder site check (TEST, manual, read-only)
+
+# Loads the TEST Parlay Builder page and its read-only APIs (Moose, 2026-11-27). Prints counts and yes/no checks only:
+# no lines, prices, sportsbook names or player-line pairs. Does not call Analyze (no Gemini request).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      SITE: https://model-room-git-preview-computer-citi.vercel.app
+    steps:
+      - name: Page and APIs
+        run: |
+          curl -sS -L --max-time 60 -o /tmp/page.html -w "page HTTP %{http_code}\n" "$SITE/parlay"
+          for lg in nba nfl; do curl -sS --max-time 60 -o /tmp/games_$lg.json -w "games $lg HTTP %{http_code}\n" "$SITE/api/parlay/games?league=$lg"; done
+          python3 - <<'PY'
+          import json, re, urllib.request, os
+          site = os.environ["SITE"]
+          page = open("/tmp/page.html", encoding="utf-8", errors="replace").read()
+          print("page has builder heading:", "Build a parlay" in page)
+          print("page has Analyze button:", "Analyze My Parlay" in page)
+          for s in ("GEMINI", "AIza", "generativelanguage", "x-goog-api-key", "R2_", "r2.cloudflarestorage.com"):
+              print(f"secret marker {s!r} in page:", s in page)
+          ids = []
+          for lg in ("nba", "nfl"):
+              g = json.load(open(f"/tmp/games_{lg}.json"))["games"]
+              withlegs = [x for x in g if x["props"] or x["lines"]]
+              print(f"{lg}: games {len(g)}, with legs {len(withlegs)}")
+              if withlegs:
+                  gid = withlegs[0]["gameId"]
+                  legs = json.load(urllib.request.urlopen(f"{site}/api/parlay/legs?league={lg}&game={gid}"))["legs"]
+                  src = {}
+                  for l in legs: src[l["source"]] = src.get(l["source"], 0) + 1
+                  print(f"{lg}: first game legs {len(legs)} by source {src}")
+                  ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:2]
+          req = urllib.request.Request(f"{site}/api/parlay/price", data=json.dumps({"legs": ids}).encode(), headers={"content-type": "application/json"})
+          p = json.load(urllib.request.urlopen(req))
+          print("price ok:", p["ok"], "| legs", len(p["legs"]), "| single number:", p["p"] is not None, "| range present:", p["range"] is not None, "| warnings", len(p["warnings"]))
+          pk = json.load(urllib.request.urlopen(f"{site}/api/parlay/picks"))
+          print("picks:", len(pk["picks"]), "| history note present:", pk["history"] is not None)
+          PY
