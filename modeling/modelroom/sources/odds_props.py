@@ -301,7 +301,7 @@ def main(argv=None) -> int:
     import argparse
     from modelroom.archive.store import from_env, reader_from_env
     ap = argparse.ArgumentParser()
-    ap.add_argument("action", choices=["plan", "fetch", "verify"])
+    ap.add_argument("action", choices=["plan", "fetch", "verify", "probe-nfl-receiving-yards"])
     ap.add_argument("--mode", choices=["main", "followup"], default="main")
     ap.add_argument("--board", default="data/published/nba_props.json")
     ap.add_argument("--refresh-log", default="preview-ledger/refresh_log.jsonl")
@@ -329,6 +329,13 @@ def main(argv=None) -> int:
     if not key:
         print(json.dumps({"stopped": "ODDS_API_KEY not set"}))
         return 1
+    if a.action == "probe-nfl-receiving-yards":
+        try:
+            out = probe_nfl_receiving_yards(key, json.loads(Path(a.board).read_text()), from_env(a.local), reader, now, reset_day)
+        except Exception as e:  # noqa: BLE001
+            out = {"stopped": f"{type(e).__name__}: {scrub(str(e), key)[:200]}"}
+        print(json.dumps(out))
+        return 1 if out.get("stopped") else 0
     try:
         out = run(a.mode, key, json.loads(Path(a.board).read_text()), from_env(a.local), reader, now, reset_day, False,
                   Path("config/nba_player_aliases.csv"))
@@ -342,3 +349,61 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# ------------------------------------------------------------------ one-off probe (Moose, 2026-11-27)
+NFL_BASE = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl"
+
+
+def probe_nfl_receiving_yards(key: str, board: dict, store, reader, now: datetime | None = None, reset_day: int = 10,
+                              http=_http, sleep=time.sleep) -> dict:
+    """ONE request: player receiving yards (player_reception_yds, US books) for the next upcoming NFL game. Approved
+    once by Moose (2026-11-27); no recurring schedule. Hard limits: the game-line reserve + safety margin and the
+    15-credit floor (the monthly guarantee) must hold after it; a cost above 1 or missing credit headers is reported.
+    A write-once lock makes a second dispatch a no-op. The raw response is stored write-once in private R2 and read
+    back with the read-only token. Returns counts only."""
+    from modelroom.archive.store import ArchiveError
+    now = now or datetime.now(timezone.utc)
+    lock = "v1/market-snapshots/nfl/player-reception-yds/_probe/lock.json"
+    try:
+        store.put_once(lock, json.dumps({"at": now.isoformat(timespec="seconds")}).encode())
+    except ArchiveError:
+        return {"skipped": "the approved one-time NFL probe already ran"}
+    ev = get(f"{NFL_BASE}/events?apiKey={key}&dateFormat=iso&commenceTimeFrom={now.strftime('%Y-%m-%dT%H:%M:%SZ')}", key, http, sleep)
+    remaining, cost = _credits(ev["headers"])
+    if cost != 0:
+        raise StopRun(f"the events list cost {cost} credits (expected 0)")
+    events = sorted(json.loads(ev["body"]), key=lambda e: (e["commence_time"], e["id"]))
+    if not events:
+        return {"skipped": "no upcoming NFL game listed"}
+    e = events[0]
+    day = now.astimezone(PT).date()
+    b = budget(remaining, day, reset_day, False, 0)
+    if not may_request(remaining, b["reserve"]):
+        return {"skipped": "the request would dip into the game-line reserve", "budget": b}
+    res = get(f"{NFL_BASE}/events/{e['id']}/odds?apiKey={key}&regions=us&markets=player_reception_yds&oddsFormat=american&dateFormat=iso",
+              key, http, sleep)
+    remaining, cost = _credits(res["headers"])
+    data = json.loads(res["body"])
+    gdate = datetime.fromisoformat(e["commence_time"].replace("Z", "+00:00")).astimezone(PT).date().isoformat()
+    base = f"v1/market-snapshots/nfl/player-reception-yds/{gdate}/{e['id']}/{MS.stamp(now)}"
+    MS.put_verified(store, reader, f"{base}.attempt.json", json.dumps({"cost": cost, "at": now.isoformat(timespec="seconds"), "probe": True}).encode())
+    raw = MS.put_verified(store, reader, f"{base}.raw.json", res["body"])
+    books = data.get("bookmakers") or []
+    outs = [(b_.get("key"), o) for b_ in books for m in b_.get("markets") or [] if m.get("key") == "player_reception_yds" for o in m.get("outcomes") or []]
+    players = {o.get("description") for _, o in outs if o.get("description")}
+    game = PM.match_game(e, board.get("games") or [])
+    matched = {p for p in players if game and PM.match_player(p, game, {})[0]} if game else set()
+    per = {}
+    for bk, o in outs:
+        per.setdefault(o.get("description"), set()).add(bk)
+    ups = [m.get("last_update") for b_ in books for m in b_.get("markets") or [] if m.get("key") == "player_reception_yds" and m.get("last_update")]
+    pts = [o.get("point") for _, o in outs if o.get("point") is not None]
+    return {"game_date": gdate, "starts": e["commence_time"], "credits_billed": cost, "credits_remaining_after": remaining,
+            "budget_before": b, "bookmakers": len(books), "outcomes": len(outs), "players": len(players),
+            "board_game_found": bool(game), "players_matched_to_board": len(matched),
+            "books_per_player": [min(len(v) for v in per.values()), max(len(v) for v in per.values())] if per else None,
+            "has_lines": bool(pts), "has_prices": all("price" in o for _, o in outs) if outs else False,
+            "has_book_names": all(b_.get("title") for b_ in books) if books else False, "has_timestamps": bool(ups),
+            "half_point_lines": all(abs(p % 1 - 0.5) < 1e-9 for p in pts) if pts else None,
+            "stored": {"raw_bytes": raw["bytes"], "verified": raw["verified"]}}

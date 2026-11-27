@@ -1,0 +1,50 @@
+name: NFL receiving-yards probe (TEST, one time, manual)
+
+# The ONE approved test request (Moose, 2026-11-27): player receiving yards (player_reception_yds), US books, for the
+# next upcoming NFL game, 1 credit. Not a recurring schedule. Guarded by the game-line reserve, the 15-credit floor and
+# a write-once R2 lock (a second dispatch does nothing). Raw response stored write-once in private R2 and verified with
+# the read-only token. Logs show counts only: no lines, prices, sportsbook names or players.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nfl-props-probe
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: modeling
+    env:
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+      ODDS_API_CYCLE_DAY: ${{ vars.ODDS_API_CYCLE_DAY || '10' }}
+      R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+      R2_BUCKET: ${{ secrets.R2_BUCKET }}
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+      R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -q -e . boto3
+      - name: NFL board from the preview branch
+        working-directory: .
+        run: |
+          git fetch -q --depth 1 origin preview
+          git show FETCH_HEAD:modeling/data/published/nfl_props.json > /tmp/nfl_props.json
+      - name: One request (counts only)
+        run: |
+          rc=0; python -m modelroom.sources.odds_props probe-nfl-receiving-yards --board /tmp/nfl_props.json > /tmp/out.json || rc=$?
+          python3 -c "import json; print(json.dumps(json.load(open('/tmp/out.json')), indent=1))"
+          exit $rc
