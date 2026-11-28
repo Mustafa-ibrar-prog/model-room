@@ -15,11 +15,12 @@ const odds = (a: number | null | undefined) => (a == null ? "–" : a > 0 ? `+${
 const time = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("en-US", { timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", minute: "2-digit" }) + " PT" : "";
 
-export function ParlayBuilder({ games, asOf, validation, ai }: {
+export function ParlayBuilder({ games, asOf, validation, ai, viewer }: {
   games: Record<League, GameOption[]>;
   asOf: { label: string; at: string | null }[];
   validation: Validation | null;
   ai: { enabled: boolean; model: string; perDay: number };
+  viewer: { configured: boolean; active: boolean; pm?: string | null };
 }) {
   const [league, setLeague] = useState<League>(games.nba.length || !games.nfl.length ? "nba" : "nfl");
   const [gameId, setGameId] = useState<string | null>(null);
@@ -96,6 +97,7 @@ export function ParlayBuilder({ games, asOf, validation, ai }: {
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0 space-y-6">
+        <PrivateBar viewer={viewer} />
         <section aria-label="Games">
           <div className="mb-3 flex items-center gap-1" role="tablist" aria-label="League">
             {(["nba", "nfl"] as const).map((lg) => (
@@ -185,7 +187,7 @@ function GameLegs({ league, gameId, slip, onAdd }: { league: League; gameId: str
   );
 }
 
-const SOURCE = { book_line: "Sportsbook line", market_line: "Game line (consensus of books)", model_line: "Model line, not a sportsbook line" } as const;
+const SOURCE = { book_line: "Sportsbook line", market_line: "Game line (consensus of books)", model_line: "Model line, not a sportsbook line", exchange_line: "Polymarket contract line" } as const;
 
 function Record10({ r }: { r: NonNullable<LegOption["last10"]> }) {
   return (
@@ -216,6 +218,7 @@ function LegRow({ l, added, onAdd }: { l: LegOption; added: boolean; onAdd: (l: 
           {l.kind === "prop" ? (
             <p className="mt-0.5 text-[0.72rem]">{l.last10 ? <Record10 r={l.last10} /> : <span className="text-faint">No game log for this stat</span>}</p>
           ) : null}
+          {l.polymarket ? <PmChip l={l} /> : null}
         </div>
         <div className="w-16 text-right">
           <p className="font-mono text-sm text-model">{pct(l.p)}</p>
@@ -243,6 +246,56 @@ function LegRow({ l, added, onAdd }: { l: LegOption; added: boolean; onAdd: (l: 
       ) : null}
       {open ? <Quotes l={l} /> : null}
     </li>
+  );
+}
+
+function PmChip({ l }: { l: LegOption }) {
+  const q = l.polymarket!;
+  const c = (x: number | null) => (x === null ? "–" : `${Math.round(x * 100)}¢`);
+  const gap = q.implied === null ? null : (l.p - q.implied) * 100;
+  return (
+    <p className="mt-0.5 text-[0.72rem] text-mute">
+      <span className="font-600 text-ink">Polymarket</span>{" "}
+      {q.implied === null ? (
+        <span className="text-faint">no two-sided price (bid {c(q.bid)}, ask {c(q.ask)})</span>
+      ) : (
+        <>
+          <span className="font-mono text-market">{pct(q.implied)}</span> <span className="text-faint">(bid {c(q.bid)} / ask {c(q.ask)})</span> · model{" "}
+          <span className={`font-mono ${gap! > 0 ? "text-good" : gap! < 0 ? "text-edge" : "text-ink"}`}>{gap! > 0 ? "+" : ""}{gap!.toFixed(1)} pts</span>
+        </>
+      )}
+      <span className="text-faint"> · {q.updatedAt ? `updated ${time(q.updatedAt)}` : `checked ${time(q.fetchedAt)}`} · size not listed</span>
+    </p>
+  );
+}
+
+function PrivateBar({ viewer }: { viewer: { configured: boolean; active: boolean; pm?: string | null } }) {
+  const [key, setKey] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+  if (!viewer.configured && !viewer.active) return null;
+  const send = async (method: "POST" | "DELETE") => {
+    const r = await fetch("/api/parlay/unlock", { method, headers: { "content-type": "application/json" }, body: method === "POST" ? JSON.stringify({ key }) : undefined });
+    if (r.ok) window.location.reload();
+    else setMsg((await r.json().catch(() => ({}))).error ?? "Couldn't unlock.");
+  };
+  if (viewer.active) {
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-model/40 bg-navy-900 px-4 py-2.5 text-sm">
+        <p className="text-mute"><span className="font-600 text-ink">Private view:</span> live Polymarket US prices next to the model. Not stored, not shown to other visitors.{viewer.pm ? ` ${viewer.pm}` : ""}</p>
+        <button onClick={() => send("DELETE")} className="text-mute hover:text-ink">Lock</button>
+      </div>
+    );
+  }
+  return (
+    <details className="rounded-xl border border-navy-700 bg-navy-900 px-4 py-2.5 text-sm">
+      <summary className="cursor-pointer text-mute">Private view (live Polymarket prices)</summary>
+      <form className="mt-2 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); send("POST"); }}>
+        <input type="password" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" aria-label="Private-view key" placeholder="Private-view key"
+          className="min-w-0 flex-1 rounded-md border border-navy-600 bg-navy-950 px-2.5 py-1.5 text-ink placeholder:text-faint" />
+        <button className="rounded-md border border-navy-600 px-3 py-1.5 font-600 text-ink hover:border-model">Unlock</button>
+      </form>
+      {msg ? <p className="mt-1 text-danger">{msg}</p> : null}
+    </details>
   );
 }
 
@@ -308,6 +361,7 @@ function Slip({ slip, price, pricing, onRemove, onClear, onAnalyze, analyzing, a
                   <button onClick={() => onRemove(l.id)} aria-label={`Remove ${l.label}`} className="px-1 text-faint hover:text-ink">×</button>
                 </div>
                 {live?.last10 ? <p className="mt-1 text-[0.72rem] text-mute">{live.last10.text} <span className="text-faint">Past results, not the model&apos;s chance.</span></p> : null}
+                {live?.polymarket?.implied != null ? <p className="mt-0.5 text-[0.72rem] text-faint">Polymarket {pct(live.polymarket.implied)} (model {live.p - live.polymarket.implied > 0 ? "+" : ""}{((live.p - live.polymarket.implied) * 100).toFixed(1)} pts)</p> : null}
                 <p className="mt-0.5 text-[0.72rem] text-faint">{live?.price ? `Best price ${odds(live.price.american)} at ${live.price.bookTitle ?? "a book"}` : live ? live.noPrice ?? "No sportsbook price available" : ""}</p>
                 {live?.warnings.length ? <p className="mt-1 text-[0.72rem] leading-snug text-mute">{live.warnings.filter((w) => !w.startsWith("No sportsbook")).join(" ")}</p> : null}
               </li>
@@ -460,15 +514,15 @@ function Picks({ slipIds, onAdd, ai, history }: { slipIds: string[]; onAdd: (l: 
           {picks.map((p, i) => {
             const n = notes.get(`P${i + 1}`);
             return (
-              <li key={p.leg.id} className="px-4 py-3">
+              <li key={`${p.benchmark}-${p.leg.id}`} className="px-4 py-3">
                 <div className="flex flex-wrap items-start gap-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-600 text-ink">{p.leg.label}</p>
                     <p className="text-xs text-faint">{p.gameLabel} · data {p.quality} · risk {p.risk}</p>
                   </div>
                   <div className="text-right font-mono text-sm">
-                    <span className="text-model">{pct(p.leg.p)}</span> <span className="text-faint">vs</span> <span className="text-market">{pct(p.leg.marketP)}</span>
-                    <p className="text-[0.7rem] text-edge">gap {p.edge == null ? "–" : `${(p.edge * 100).toFixed(1)} pts`} · {odds(p.leg.price?.american)}</p>
+                    <span className="text-model">{pct(p.leg.p)}</span> <span className="text-faint">vs {p.benchmark === "polymarket" ? "Polymarket" : "books"}</span> <span className="text-market">{pct(p.marketP)}</span>
+                    <p className="text-[0.7rem] text-edge">gap {p.edge == null ? "–" : `${(p.edge * 100).toFixed(1)} pts`}{p.benchmark === "sportsbook" ? ` · ${odds(p.leg.price?.american)}` : ""}</p>
                   </div>
                   <button onClick={() => onAdd(p.leg)} disabled={slipIds.includes(p.leg.id)}
                     className="rounded-md border border-navy-600 px-2.5 py-1 text-sm font-600 text-ink hover:border-model disabled:text-faint">

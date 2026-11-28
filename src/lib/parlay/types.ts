@@ -13,6 +13,25 @@ export interface BookPrice {
   capturedAt: string | null;
 }
 
+/** A live Polymarket US quote matched EXACTLY to a leg (same player and team, stat, threshold and side). Prices are
+ *  per $1 contract for this leg's side. Not stored anywhere; shown only in the TEST owner view. */
+export interface PolymarketQuote {
+  contract: string;
+  /** Best bid / ask for this side (for an under / away leg: the NO side of the contract). */
+  bid: number | null;
+  ask: number | null;
+  /** Mid of a two-sided book: the market's implied probability for this side. null when one-sided. */
+  implied: number | null;
+  spread: number | null;
+  fee: number | null;
+  status: string;
+  /** Polymarket's own last update for the contract, and when we fetched it. */
+  updatedAt: string | null;
+  fetchedAt: string;
+  /** Not in Polymarket's listing (needs one order-book request per contract): always null here. */
+  liquidity: null;
+}
+
 /** One sportsbook's quote for a leg's market (its own line, which may differ from the leg's line). */
 export interface BookQuote {
   book: string;
@@ -55,8 +74,11 @@ export interface LegOption {
   price: BookPrice | null;
   /** The market's own no-vig probability for this side, when stored. */
   marketP: number | null;
-  /** book_line: a posted sportsbook line; market_line: the consensus game line; model_line: a model threshold with no posted line. */
-  source: "book_line" | "market_line" | "model_line";
+  /** book_line: a posted sportsbook line; market_line: the consensus game line; model_line: a model threshold with no
+   *  posted line; exchange_line: a Polymarket US contract's line (owner view only). */
+  source: "book_line" | "market_line" | "model_line" | "exchange_line";
+  /** Live Polymarket US quote for exactly this outcome (owner view on TEST only; never stored). */
+  polymarket?: PolymarketQuote | null;
   playerId?: string;
   playerName?: string;
   team?: string;
@@ -118,6 +140,10 @@ export interface ParlayPrice {
 
 export interface Pick {
   leg: LegOption;
+  /** Which market the model is compared with. Polymarket appears only in the TEST owner view. */
+  benchmark: "sportsbook" | "polymarket";
+  /** That market's implied probability for this side. */
+  marketP: number | null;
   gameLabel: string;
   /** Model probability minus the market's no-vig probability (only for legs with a stored price). */
   edge: number | null;

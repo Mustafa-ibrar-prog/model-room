@@ -68,6 +68,7 @@ export interface PmMarket {
   closed?: boolean;
   metadata?: { playerName?: string; teamId?: number } | null;
   marketSides?: PmSide[];
+  updatedAt?: string | null;
 }
 export interface PmEvent { slug?: string; startTime?: string; teams?: { id?: number; name?: string; abbreviation?: string }[]; markets?: PmMarket[] }
 

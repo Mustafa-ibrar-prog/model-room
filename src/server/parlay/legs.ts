@@ -7,6 +7,13 @@ import type { League } from "@/types/domain";
 import type { EngineBoard, EngineGame } from "@/types/engine";
 import type { EnginePropMarket, EnginePropPlayer, EnginePropsBoard } from "@/types/props";
 import type { Variable } from "./correlations";
+import { fetchEvent, type PmEvent } from "@/server/markets/polymarketLive";
+import { isProduction } from "@/lib/auth-config";
+import { contractsOf, gameContract, matchProps, sideQuote, type PmContract } from "./polymarket";
+
+export interface PmInput { events: Map<string, PmEvent>; fetchedAt: string }
+export interface PmStats { games: number; eventsFound: number; contracts: number; matchedProps: number; legsWithQuote: number; exchangeLegs: number;
+  skipped: { ambiguous: number; teamMismatch: number; notOnBoard: number } }
 
 /**
  * Every leg the Parlay Builder can offer, built from what is already stored (TEST, Moose 2026-11-27):
@@ -27,6 +34,8 @@ export interface Catalog {
   gameLabel: Map<string, string>;
   injuries: Map<string, string[]>;
   asOf: { label: string; at: string | null }[];
+  /** Present only in the private view with live Polymarket US data. */
+  pm?: PmStats;
 }
 
 /** The prop market each league's stored sportsbook lines cover (one market per game: the free-plan budget). */
@@ -208,7 +217,8 @@ function bookQuotes(bl: PlayerBookLines, side: "over" | "under"): BookQuote[] {
   return bl.books.map((b) => ({ book: b.book, title: b.title, line: b.line, price: b[side], other: b[side === "over" ? "under" : "over"], lastUpdate: b.last_update }));
 }
 
-function playerLegs(league: League, gameId: string, homeAbbr: string, pl: EnginePropPlayer, view: DayView | null, out: CatalogLeg[]) {
+function playerLegs(league: League, gameId: string, homeAbbr: string, pl: EnginePropPlayer, view: DayView | null, out: CatalogLeg[],
+  pm?: { lines: Map<string, Map<number, PmContract>>; fetchedAt: string; stats: PmStats }) {
   if (/^out$/i.test(pl.injury_status ?? "")) return;
   const context = { opp: pl.opp, usage: usageOf(league, pl) };
   for (const [mkey, m] of Object.entries(pl.markets)) {
@@ -218,6 +228,7 @@ function playerLegs(league: League, gameId: string, homeAbbr: string, pl: Engine
       support: m.support, injury: pl.injury_status, context };
     const noun = m.label.toLowerCase();
     const values = pl.recent?.values?.[mkey];
+    const marketStart = out.length;
     // Posted sportsbook line (NBA points / NFL receiving yards, TEST only)
     const bl = mkey === BOOK_MARKET[league].market ? view?.games[gameId]?.players[pl.player_id] : undefined;
     const line = bl ? mainLine(bl.books) : null;
@@ -250,12 +261,72 @@ function playerLegs(league: League, gameId: string, homeAbbr: string, pl: Engine
           last10: last10(values, t.threshold, side, "atleast", noun, side > 0 ? `${m.label} ${t.threshold}+` : `${m.label} under ${t.threshold}`) } });
       }
     }
+    // Polymarket US (private view): exact contracts only. "N+" = at least N = over N-0.5; NO side = fewer than N.
+    const pml = pm?.lines.get(`${pl.player_id}|${mkey}`);
+    if (pm && pml) {
+      const have = new Set<number>();
+      for (const leg of out.slice(marketStart)) {
+        const parts = leg.option.id.split("~");
+        const tag = parts[5];
+        const n = tag.startsWith("m") ? Number(tag.slice(1)) : tag.startsWith("b") && Math.abs((Number(tag.slice(1)) % 1) - 0.5) < 1e-9 ? Number(tag.slice(1)) + 0.5 : NaN;
+        const c = Number.isFinite(n) ? pml.get(n) : undefined;
+        if (!c) continue;
+        if (tag.startsWith("m")) have.add(n);
+        leg.option.polymarket = sideQuote(c, leg.side > 0, pm.fetchedAt, `${c.title} ${noun}`);
+        pm.stats.legsWithQuote++;
+      }
+      for (const [n, c] of pml) {
+        if (have.has(n)) continue;
+        const g = gridP(m, n);
+        if (!g) continue;
+        for (const side of [1, -1] as const) {
+          const p = side > 0 ? g.p : 1 - g.p;
+          if (p < MIN_P || p > MAX_P) continue;
+          const label = side > 0 ? `${pl.name} ${n}+ ${noun}` : `${pl.name} under ${n} ${noun}`;
+          out.push({ variable, side, option: { ...common, id: legId([league, gameId, "prop", pl.player_id, mkey, `p${n}`, side > 0 ? "o" : "u"]),
+            label, p: r4(p), push: 0, price: null, marketP: null, source: "exchange_line", interpolated: g.interpolated,
+            noPrice: `${NO_PRICE}: Polymarket contract line`, polymarket: sideQuote(c, side > 0, pm.fetchedAt, `${c.title} ${noun}`),
+            last10: last10(values, n, side, "atleast", noun, side > 0 ? `${m.label} ${n}+` : `${m.label} under ${n}`) } });
+          pm.stats.exchangeLegs++;
+          pm.stats.legsWithQuote++;
+        }
+      }
+    }
   }
 }
 
 /** Pure: the catalog from already-loaded inputs (tests call this directly). */
 export function buildCatalog(league: League, board: EngineBoard | null, props: EnginePropsBoard | null, views: Record<string, DayView | null>, now: Date,
-  gl: GameLinesView | null = null): Catalog {
+  gl: GameLinesView | null = null, pmIn: PmInput | null = null): Catalog {
+  const stats: PmStats = { games: 0, eventsFound: 0, contracts: 0, matchedProps: 0, legsWithQuote: 0, exchangeLegs: 0, skipped: { ambiguous: 0, teamMismatch: 0, notOnBoard: 0 } };
+  const pmFor = (gid: string, players: EnginePropPlayer[]) => {
+    if (!pmIn) return { contracts: null as PmContract[] | null, props: undefined };
+    stats.games++;
+    const ev = pmIn.events.get(gid);
+    if (!ev) return { contracts: null, props: undefined };
+    stats.eventsFound++;
+    const contracts = contractsOf(ev);
+    stats.contracts += contracts.length;
+    const mt = matchProps(league, contracts, players.map((p) => ({ playerId: p.player_id, name: p.name, team: p.team })));
+    stats.matchedProps += mt.matched;
+    stats.skipped.ambiguous += mt.skipped.ambiguous;
+    stats.skipped.teamMismatch += mt.skipped.teamMismatch;
+    stats.skipped.notOnBoard += mt.skipped.notOnBoard;
+    return { contracts, props: { lines: mt.byPlayerMarket, fetchedAt: pmIn.fetchedAt, stats } };
+  };
+  const attachGame = (list: CatalogLeg[], contracts: PmContract[] | null, home: string, away: string) => {
+    if (!contracts || !pmIn) return;
+    for (const l of list) {
+      const o = l.option;
+      if (o.kind === "prop") continue;
+      const team = o.kind === "total" ? null : o.team ?? null;
+      const other = team === null ? null : team === home ? away : home;
+      const hit = gameContract(league, contracts, o.kind, team, other, o.kind === "moneyline" ? null : o.line ?? null, l.side > 0);
+      if (!hit) continue;
+      o.polymarket = sideQuote(hit.c, hit.yes, pmIn.fetchedAt, hit.c.title);
+      stats.legsWithQuote++;
+    }
+  };
   const legs = new Map<string, CatalogLeg>();
   const byGame = new Map<string, LegOption[]>();
   const games: GameOption[] = [];
@@ -275,7 +346,9 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     const list: CatalogLeg[] = [];
     gameLines(league, g, gl, list);
     const pg = propGames.get(g.game_id);
-    if (pg) for (const pl of pg.players) playerLegs(league, g.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list);
+    const pmg = pmFor(g.game_id, pg?.players ?? []);
+    attachGame(list, pmg.contracts, g.home.abbr, g.away.abbr);
+    if (pg) for (const pl of pg.players) playerLegs(league, g.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list, pmg.props);
     add(g.game_id, list);
     seen.add(g.game_id);
     const lab = gameText(g);
@@ -286,7 +359,8 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
   for (const pg of props?.games ?? []) {
     if (seen.has(pg.game_id) || started(pg.start_time, now)) continue;
     const list: CatalogLeg[] = [];
-    for (const pl of pg.players) playerLegs(league, pg.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list);
+    const pmg = pmFor(pg.game_id, pg.players);
+    for (const pl of pg.players) playerLegs(league, pg.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list, pmg.props);
     add(pg.game_id, list);
     const lab = gameText(pg);
     gameLabel.set(pg.game_id, lab);
@@ -303,11 +377,12 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     { label: `${league.toUpperCase()} player model`, at: props?.generated_at ?? null },
     ...Object.entries(views).filter(([, v]) => v).map(([d, v]) => ({ label: `${league.toUpperCase()} ${BOOK_MARKET[league].noun} lines for ${d}`, at: v!.updated_at })),
   ];
-  return { league, games, legs, byGame, gameLabel, injuries, asOf };
+  if (pmIn) asOf.push({ label: `${league.toUpperCase()} Polymarket US prices (live, not stored)`, at: pmIn.fetchedAt });
+  return { league, games, legs, byGame, gameLabel, injuries, asOf, ...(pmIn ? { pm: stats } : {}) };
 }
 
 /** Loads the stored boards and, on TEST, the stored sportsbook lines (private R2), and builds the catalog. */
-export async function getCatalog(league: League, now = new Date()): Promise<Catalog> {
+export async function getCatalog(league: League, now = new Date(), opts: { live?: boolean } = {}): Promise<Catalog> {
   const [b, p] = await Promise.all([loadBoard(league), loadPropsBoard(league)]);
   const board = b.ok ? b.board : null;
   const props = p.ok ? p.board : null;
@@ -319,5 +394,18 @@ export async function getCatalog(league: League, now = new Date()): Promise<Cata
     await Promise.all([...dates].map(async (d) => { views[d] = await loadPropLines(d, prefix); }));
     gl = await loadGameLines(league);
   }
-  return buildCatalog(league, board, props, views, now, gl);
+  let pmIn: PmInput | null = null;
+  if (opts.live && !isProduction()) {
+    // Private view: games in the next day (NBA) or 8 days (NFL); a few requests at a time; 60 s cache per event.
+    const horizon = now.getTime() + (league === "nba" ? 36 : 8 * 24) * 3600_000;
+    const want = (board?.upcoming ?? []).filter((g) => g.start_time && !started(g.start_time, now) && new Date(g.start_time).getTime() <= horizon).slice(0, 20);
+    const events = new Map<string, PmEvent>();
+    for (let i = 0; i < want.length; i += 4) {
+      const part = want.slice(i, i + 4);
+      const evs = await Promise.all(part.map((g) => fetchEvent(league, g.game_id, g.away.abbr, g.home.abbr, g.game_date)));
+      part.forEach((g, j) => evs[j] && events.set(g.game_id, evs[j]!));
+    }
+    pmIn = { events, fetchedAt: now.toISOString() };
+  }
+  return buildCatalog(league, board, props, views, now, gl, pmIn);
 }

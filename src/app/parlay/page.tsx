@@ -9,6 +9,8 @@ import { geminiEnabled, GEMINI_MODEL } from "@/server/ai/gemini";
 import { limits } from "@/server/ai/limits";
 import { getCatalog } from "@/server/parlay/legs";
 import { loadValidation } from "@/server/parlay/validation";
+import { cookies } from "next/headers";
+import { isPrivateViewer, PRIVATE_COOKIE, privateKeyConfigured } from "@/server/parlay/privateView";
 
 export const metadata: Metadata = { title: "Parlay Builder" };
 
@@ -31,13 +33,18 @@ export default function ParlayPage() {
 
 async function Loaded() {
   await connection();
-  const [nba, nfl] = await Promise.all([getCatalog("nba"), getCatalog("nfl")]);
+  const priv = isPrivateViewer((await cookies()).get(PRIVATE_COOKIE)?.value);
+  const [nba, nfl] = await Promise.all([getCatalog("nba", new Date(), { live: priv }), getCatalog("nfl", new Date(), { live: priv })]);
+  const pmNote = priv
+    ? [nba, nfl].filter((c) => c.pm).map((c) => `${c.league.toUpperCase()}: ${c.pm!.eventsFound}/${c.pm!.games} games found, ${c.pm!.legsWithQuote} legs priced.`).join(" ")
+    : null;
   return (
     <ParlayBuilder
       games={{ nba: nba.games, nfl: nfl.games }}
       asOf={[...nba.asOf, ...nfl.asOf]}
       validation={loadValidation()}
       ai={{ enabled: geminiEnabled(), model: GEMINI_MODEL, perDay: limits().user }}
+      viewer={{ configured: privateKeyConfigured(), active: priv, pm: pmNote }}
     />
   );
 }

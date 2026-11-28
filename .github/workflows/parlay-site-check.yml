@@ -24,7 +24,8 @@ jobs:
           site = os.environ["SITE"]
           page = open("/tmp/page.html", encoding="utf-8", errors="replace").read()
           print("page has builder heading:", "Build a parlay" in page)
-          print("page has Analyze button:", "Analyze My Parlay" in page)
+          print("GEMINI_API_KEY visible to the TEST server (AI switched on):", "isn't switched on yet" not in page and "it isn" not in page)
+          print("private view key configured (unlock form shown):", "Private view (live Polymarket prices)" in page)
           for s in ("GEMINI", "AIza", "generativelanguage", "x-goog-api-key", "R2_", "r2.cloudflarestorage.com"):
               print(f"secret marker {s!r} in page:", s in page)
           ids = []
@@ -47,6 +48,7 @@ jobs:
                       if not l["price"]: tot["no_price_text"] += bool(l.get("noPrice"))
                       tot["max_books"] = max(tot["max_books"], len(l.get("quotes") or []))
                       if l["source"] == "model_line" and l["price"]: print("PROBLEM: a model line carries a price")
+                      if l.get("polymarket"): print("PROBLEM: Polymarket data in a public response")
                   if len(ids) < 6:
                       ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:1]
               print(f"{lg} (first {tot['games']} games):", json.dumps(tot))
