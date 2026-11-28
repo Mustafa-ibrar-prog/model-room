@@ -58,3 +58,62 @@ jobs:
           pk = json.load(urllib.request.urlopen(f"{site}/api/parlay/picks"))
           print("picks:", len(pk["picks"]), "| history note present:", pk["history"] is not None)
           PY
+      - name: Explorer cards (one per player per stat; selections match the server's legs)
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request, urllib.parse
+          site = os.environ["SITE"]
+          get = lambda u: json.load(urllib.request.urlopen(site + u, timeout=60))
+          def grid_at(g, k):
+              i = (k - g["k0"]) / g["step"]
+              return g["p"][round(i)] if abs(i - round(i)) < 1e-9 and 0 <= round(i) < len(g["p"]) else None
+          problems = 0
+          for lg in ("nba", "nfl"):
+              games = [x for x in get(f"/api/parlay/games?league={lg}")["games"] if x["props"] or x["lines"]][:8]
+              t = {"games": len(games), "prop_cards": 0, "duplicate_cards": 0, "markets": set(), "cards_with_books": 0, "cards_with_polymarket": 0,
+                   "thresholds": 0, "game_cards": 0, "game_lines_offered": 0, "checked": 0, "mismatch": 0, "book_checked": 0, "pm_checked": 0}
+              for x in games:
+                  d = get(f"/api/parlay/legs?league={lg}&game={x['gameId']}")
+                  cp, cg = d["cards"]["props"], d["cards"]["games"]
+                  keys = [c["key"] for c in cp]
+                  t["prop_cards"] += len(cp); t["duplicate_cards"] += len(keys) - len(set(keys)); t["markets"] |= {c["market"] for c in cp}
+                  t["cards_with_books"] += sum(bool(c["quotes"]) for c in cp); t["cards_with_polymarket"] += sum(bool(c["pm"]) for c in cp)
+                  t["thresholds"] += sum(len(c["thresholds"]) for c in cp)
+                  t["game_cards"] += len(cg); t["game_lines_offered"] += sum(len(c["lines"]) for c in cg)
+                  seen = set()
+                  for c in cp:
+                      pick = []
+                      if c["market"] not in seen: pick.append(c["thresholds"][len(c["thresholds"]) // 2]); seen.add(c["market"])
+                      if c["bookLine"] is not None: pick.append(c["bookLine"] + 0.5)
+                      pick += [q["line"] for q in c["pm"]][:1]
+                      for K in pick:
+                          if K not in c["thresholds"]: continue
+                          for sd in ("o", "u"):
+                              base = f"{lg}~{c['gameId']}~prop~{c['playerId']}~{c['market']}"
+                              cand = ([f"{base}~b{c['bookLine']}~{sd}"] if c["bookLine"] is not None and c["bookLine"] + 0.5 == K else []) + ([f"{base}~p{K}~{sd}"] if any(q["line"] == K for q in c["pm"]) else []) + [f"{base}~m{K}~{sd}"]
+                              lid = next((i for i in cand if i in c["legIds"]), cand[-1])
+                              try: leg = get(f"/api/parlay/legs?league={lg}&id={urllib.parse.quote(lid)}")["leg"]
+                              except Exception: continue
+                              gp = grid_at(c["grid"], K)
+                              want = gp if sd == "o" else 1 - gp
+                              t["checked"] += 1
+                              ok = abs(leg["p"] - want) < 2e-4
+                              if "~b" in lid:
+                                  t["book_checked"] += 1
+                                  exact = [q for q in c["quotes"] if q["line"] == K - 0.5 and q["over" if sd == "o" else "under"] is not None]
+                                  ok = ok and bool(leg["price"]) == bool(exact)
+                              q = next((q for q in c["pm"] if q["line"] == K), None)
+                              if q:
+                                  t["pm_checked"] += 1
+                                  ok = ok and bool(leg.get("polymarket"))
+                              elif leg.get("polymarket"): ok = False
+                              if leg["source"] == "model_line" and leg["price"]: ok = False
+                              t["mismatch"] += not ok
+              problems += t["mismatch"] + t["duplicate_cards"]
+              t["markets"] = len(t["markets"])
+              print(f"{lg} cards:", json.dumps(t))
+              if games:
+                  page = urllib.request.urlopen(f"{site}/{lg}-props?game={games[0]['gameId']}", timeout=60).read().decode("utf-8", "replace")
+                  print(f"{lg} explorer page: player pickers {page.count('data-card=')}, add-to-parlay buttons {page.count('Add to parlay')}")
+          print("PROBLEMS:", problems)
+          PY
