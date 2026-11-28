@@ -15,12 +15,12 @@ const odds = (a: number | null | undefined) => (a == null ? "–" : a > 0 ? `+${
 const time = (iso: string | null) =>
   iso ? new Date(iso).toLocaleString("en-US", { timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", minute: "2-digit" }) + " PT" : "";
 
-export function ParlayBuilder({ games, asOf, validation, ai, viewer }: {
+export function ParlayBuilder({ games, asOf, validation, ai, live }: {
   games: Record<League, GameOption[]>;
   asOf: { label: string; at: string | null }[];
   validation: Validation | null;
   ai: { enabled: boolean; model: string; perDay: number };
-  viewer: { configured: boolean; active: boolean; pm?: string | null };
+  live: { on: boolean; pm?: string | null };
 }) {
   const [league, setLeague] = useState<League>(games.nba.length || !games.nfl.length ? "nba" : "nfl");
   const [gameId, setGameId] = useState<string | null>(null);
@@ -97,7 +97,7 @@ export function ParlayBuilder({ games, asOf, validation, ai, viewer }: {
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
       <div className="min-w-0 space-y-6">
-        <PrivateBar viewer={viewer} />
+        <LiveBar live={live} />
         <section aria-label="Games">
           <div className="mb-3 flex items-center gap-1" role="tablist" aria-label="League">
             {(["nba", "nfl"] as const).map((lg) => (
@@ -269,33 +269,12 @@ function PmChip({ l }: { l: LegOption }) {
   );
 }
 
-function PrivateBar({ viewer }: { viewer: { configured: boolean; active: boolean; pm?: string | null } }) {
-  const [key, setKey] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
-  if (!viewer.configured && !viewer.active) return null;
-  const send = async (method: "POST" | "DELETE") => {
-    const r = await fetch("/api/parlay/unlock", { method, headers: { "content-type": "application/json" }, body: method === "POST" ? JSON.stringify({ key }) : undefined });
-    if (r.ok) window.location.reload();
-    else setMsg((await r.json().catch(() => ({}))).error ?? "Couldn't unlock.");
-  };
-  if (viewer.active) {
-    return (
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-model/40 bg-navy-900 px-4 py-2.5 text-sm">
-        <p className="text-mute"><span className="font-600 text-ink">Private view:</span> live Polymarket US prices next to the model. Not stored, not shown to other visitors.{viewer.pm ? ` ${viewer.pm}` : ""}</p>
-        <button onClick={() => send("DELETE")} className="text-mute hover:text-ink">Lock</button>
-      </div>
-    );
-  }
+function LiveBar({ live }: { live: { on: boolean; pm?: string | null } }) {
+  if (!live.on) return null;
   return (
-    <details className="rounded-xl border border-navy-700 bg-navy-900 px-4 py-2.5 text-sm">
-      <summary className="cursor-pointer text-mute">Private view (live Polymarket prices)</summary>
-      <form className="mt-2 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); send("POST"); }}>
-        <input type="password" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" aria-label="Private-view key" placeholder="Private-view key"
-          className="min-w-0 flex-1 rounded-md border border-navy-600 bg-navy-950 px-2.5 py-1.5 text-ink placeholder:text-faint" />
-        <button className="rounded-md border border-navy-600 px-3 py-1.5 font-600 text-ink hover:border-model">Unlock</button>
-      </form>
-      {msg ? <p className="mt-1 text-danger">{msg}</p> : null}
-    </details>
+    <p className="rounded-xl border border-navy-700 bg-navy-900 px-4 py-2.5 text-sm text-mute">
+      <span className="font-600 text-ink">Live Polymarket US prices</span> next to the model, fetched when the page loads. Not stored.{live.pm ? ` ${live.pm}` : ""}
+    </p>
   );
 }
 

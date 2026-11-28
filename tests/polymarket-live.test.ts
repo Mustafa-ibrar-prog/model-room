@@ -62,8 +62,12 @@ describe("polymarket live", () => {
     expect(l.homeWin).toBeCloseTo(0.79, 6);
   });
 
-  it("is off for logged-out viewers and in production", async () => {
+  it("is on for every TEST viewer (Moose 2026-11-27), off in production and when switched off", async () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    expect(await ownerLiveMarkets()).toBe(true);
+    vi.stubEnv("MODELROOM_OWNER_LIVE_MARKETS", "off");
     expect(await ownerLiveMarkets()).toBe(false);
+    vi.stubEnv("MODELROOM_OWNER_LIVE_MARKETS", "");
     vi.stubEnv("VERCEL_ENV", "production");
     expect(await ownerLiveMarkets()).toBe(false);
   });

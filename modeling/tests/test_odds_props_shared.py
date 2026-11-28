@@ -1,7 +1,7 @@
 """NBA points + NFL receiving yards from ONE daily allowance (Moose 2026-11-27), and per-book game lines to R2.
 No network: a fake provider that serves both leagues."""
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
@@ -120,3 +120,91 @@ def test_gamelines_publish_is_private_write_once_and_verified(tmp_path):
     out = GL.publish(st, st, "nba", v, datetime(2026, 11, 29, 16, 0, tzinfo=timezone.utc))
     ptr = json.loads(st.get("v1/market-snapshots/nba/game-lines/latest.json"))
     assert ptr["view"].startswith("v1/market-snapshots/nba/game-lines/2026-11-29/view-") and out["games"] == 0
+
+
+# ------------------------------------------------------------------ three refreshes, today AND tomorrow
+TOM_EV = [_ev(f"t{i}", f"2026-12-01T0{i}:00:00Z", "Denver Nuggets", "Dallas Mavericks") for i in range(1, 4)]   # Nov 30 PT evening = tomorrow
+
+
+class Fake2(Fake):
+    """NBA events today (Nov 29 PT) and tomorrow; empty for listed events (no lines posted yet: cost 0)."""
+    def __init__(self, remaining, empty=()):
+        super().__init__(remaining)
+        self.empty = set(empty)
+
+    def __call__(self, url, key):
+        if "/events?" in url and "basketball_nba" in url:
+            self.calls.append(url)
+            return {"body": json.dumps(NBA_EV + TOM_EV).encode(), "headers": {"x-requests-remaining": str(self.remaining), "x-requests-last": "0"}}, {}
+        eid = url.split("/events/")[1].split("/")[0] if "/events/" in url else ""
+        if eid in self.empty:
+            self.calls.append(url)
+            ev = next(e for e in NBA_EV + TOM_EV if e["id"] == eid)
+            return {"body": json.dumps({**ev, "bookmakers": []}).encode(), "headers": {"x-requests-remaining": str(self.remaining), "x-requests-last": "0"}}, {}
+        if eid.startswith("t"):
+            self.calls.append(url)
+            ev = next(e for e in TOM_EV if e["id"] == eid)
+            body = {**ev, "bookmakers": [{"key": "fanduel", "title": "FanDuel", "markets": [{"key": "player_points", "last_update": "x", "outcomes": [
+                {"name": "Over", "description": "Nikola Jokic", "point": 27.5, "price": -110}, {"name": "Under", "description": "Nikola Jokic", "point": 27.5, "price": -110}]}]}]}
+            self.remaining -= 1
+            return {"body": json.dumps(body).encode(), "headers": {"x-requests-remaining": str(self.remaining), "x-requests-last": "1"}}, {}
+        return super().__call__(url, key)
+
+
+def _slot(tmp_path, slot, remaining, now, store=None, empty=()):
+    st = store or LocalStore(tmp_path / "r2")
+    f = Fake2(remaining, empty)
+    out = OP.run_day(slot, KEY, {"nba": NBA_BOARD}, st, st, now, 10, None, http=f, sleep=lambda s: None)
+    return out, st, f
+
+
+def test_each_refresh_covers_today_and_tomorrow_and_never_requests_a_captured_game_twice(tmp_path):
+    out, st, f = _slot(tmp_path, "morning", 400, NOW)                  # plenty of credits: allowance 15
+    lg = out["leagues"]["nba"]
+    assert lg["window"] == ["2026-11-29", "2026-11-30"] and lg["games_in_window"] == 9
+    assert lg["by_date"]["2026-11-29"]["captured"] == 6 and lg["by_date"]["2026-11-30"]["captured"] == 3
+    paid = [c for c in f.calls if "/odds?" in c]
+    assert [c.split("/events/")[1].split("/")[0] for c in paid][:6] == [c.split("/events/")[1].split("/")[0] for c in paid if "/n" in c][:6]   # today first
+    # tomorrow's lines are stored under tomorrow's date (where the site reads them); billing stays on today
+    assert MS.verify_day(st, "2026-11-30")["ok"]
+    v = json.loads(st.get(MS.read_latest(st, "2026-11-30")["view"]))
+    assert {x["status"] for x in json.loads(st.get(MS.read_latest(st, "2026-11-30")["manifest"]))["requests"]} == {"captured"} and v["date"] == "2026-11-30"
+    assert OP.day_history(st, "2026-11-29")["billed"] == 9 and OP.day_history(st, "2026-11-30")["billed"] == 0
+    # the midday refresh: everything captured, so nothing is requested
+    out2, _, f2 = _slot(tmp_path, "midday", 391, NOW + timedelta(hours=5), store=st)
+    assert not [c for c in f2.calls if "/odds?" in c] and out2["leagues"]["nba"]["already_captured"] == 9
+    # the same slot again: skipped outright
+    out3, _, f3 = _slot(tmp_path, "midday", 391, NOW + timedelta(hours=5, minutes=40), store=st)
+    assert "already completed" in out3["leagues"]["nba"]["skipped"]
+
+
+def test_empty_games_are_rechecked_by_later_refreshes_but_at_most_three_times(tmp_path):
+    out, st, f = _slot(tmp_path, "morning", 400, NOW, empty={"t1"})
+    assert out["leagues"]["nba"]["by_date"]["2026-11-30"]["empty"] == 1
+    _slot(tmp_path, "midday", 400, NOW + timedelta(hours=5), store=st, empty={"t1"})
+    _slot(tmp_path, "afternoon", 400, NOW + timedelta(hours=9), store=st, empty={"t1"})
+    assert OP.day_history(st, "2026-11-29")["attempts"]["t1"] == 3        # one check per refresh: three today
+    out4, _, f4 = _slot(tmp_path, "afternoon", 400, NOW + timedelta(hours=9, minutes=40), store=st, empty={"t1"})
+    assert not [c for c in f4.calls if "/odds?" in c]                     # never a fourth time today
+    # on its own game day (tomorrow) the game gets fresh checks: that's when books post player lines
+
+
+def test_refresh_respects_the_same_daily_allowance(tmp_path):
+    out, st, f = _slot(tmp_path, "morning", 200, NOW)                  # reserve 162: 3 a day
+    lg = out["leagues"]["nba"]
+    assert lg["credits_billed"] == 3 and lg["skipped_cap"] == 6
+    out2, _, f2 = _slot(tmp_path, "midday", 197, NOW + timedelta(hours=5), store=st)
+    assert out2["leagues"]["nba"]["credits_billed"] == 0                # the day's allowance is spent
+
+
+def test_one_league_failing_never_stops_the_other(tmp_path):
+    class Broken(Fake2):
+        def __call__(self, url, key):
+            if "americanfootball_nfl" in url:
+                raise RuntimeError("nfl provider down")
+            return super().__call__(url, key)
+    st = LocalStore(tmp_path / "r2")
+    f = Broken(400)
+    out = OP.run_day("morning", KEY, {"nba": NBA_BOARD, "nfl": NFL_BOARD}, st, st, NOW, 10, None, http=f, sleep=lambda s: None)
+    assert out["leagues"]["nba"]["captured"] == 9
+    assert "events list failed" in out["leagues"]["nfl"]["stopped"] and KEY not in json.dumps(out)

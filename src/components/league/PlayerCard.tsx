@@ -45,7 +45,7 @@ export function PlayerCard({ league, r, catLabel, href, listed = null }: { leagu
         ) : null}
         <p className="mt-2 text-[0.8rem] text-faint">
           {catLabel} &middot; we project <span className="font-600 text-model">{projText(r)}</span> &middot;{" "}
-          {h?.fromMarket ? <>line <span className="text-market">{h.threshold}</span></> : r.lineStatus ? `sportsbook line ${r.lineStatus.label.toLowerCase()}` : "no sportsbook line"}
+          {h?.fromMarket ? <>{h.source === "sportsbook" ? "sportsbook line" : "Polymarket"} <span className="text-market">{h.source === "sportsbook" ? h.threshold : `${h.threshold}+`}</span></> : r.lineStatus ? `line: ${r.lineStatus.label.toLowerCase()}` : "no sportsbook line"}
         </p>
         {caveat ? <p className="mt-1 text-xs text-edge">{caveat}</p> : null}
         <p className="mt-1.5 text-[0.8rem] font-500 text-model">See why</p>
@@ -66,11 +66,12 @@ export function PlayerCard({ league, r, catLabel, href, listed = null }: { leagu
 
         {/* the market's number, when a market has one */}
         <div className="flex-[0_0_6.5rem]">
-          <p className="text-xs text-faint">Sportsbook line</p>
+          <p className="text-xs text-faint">{h?.fromMarket && h.source !== "sportsbook" ? "Polymarket (live)" : "Sportsbook line"}</p>
           {h?.fromMarket ? (
             <>
-              <p className="font-display text-2xl font-600 leading-none text-market">{h.threshold}</p>
+              <p className="font-display text-2xl font-600 leading-none text-market">{h.source === "sportsbook" ? h.threshold : `${h.threshold}+`}</p>
               {h.book ? <p className="mt-1 text-[0.7rem] leading-tight text-faint">{h.book.books.length === 1 ? h.book.books[0].title : `${h.book.books.length} books`} · {bookTime(h.book.lastUpdate)}</p> : null}
+              {!h.book && h.marketProb != null ? <p className="mt-1 text-[0.7rem] leading-tight text-faint">{Math.round(h.marketProb * 100)}¢ · checked {bookTime(h.marketAt)} · not a sportsbook</p> : null}
             </>
           ) : r.lineStatus ? (
             <>

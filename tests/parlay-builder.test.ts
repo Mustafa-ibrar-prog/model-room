@@ -447,7 +447,6 @@ describe("key security", () => {
 
 // ------------------------------------------------------------------------------------------------- Polymarket US
 import { contractsOf, gameContract, matchProps, sideQuote } from "@/server/parlay/polymarket";
-import { isPrivateViewer, privateToken, unlock } from "@/server/parlay/privateView";
 import { picksPack } from "@/server/ai/factpack";
 
 const PM_EVENT = {
@@ -549,20 +548,3 @@ describe("Polymarket picks and Gemini", () => {
   });
 });
 
-describe("TEST private view", () => {
-  const env = { ...process.env };
-  afterEach(() => { process.env = { ...env }; });
-  it("needs the server key; cookie is an HMAC, never the key; off in production", () => {
-    delete process.env.MODELROOM_PRIVATE_VIEW_KEY;
-    expect(unlock("anything")).toBeNull();
-    process.env.MODELROOM_PRIVATE_VIEW_KEY = "a-long-owner-key-123456";
-    process.env.VERCEL_ENV = "preview";
-    expect(unlock("wrong-key-wrong-key")).toBeNull();
-    const t = unlock("a-long-owner-key-123456")!;
-    expect(t).not.toContain("owner-key");
-    expect(isPrivateViewer(t)).toBe(true);
-    expect(isPrivateViewer(privateToken("other-key-other-key"))).toBe(false);
-    process.env.VERCEL_ENV = "production";
-    expect(isPrivateViewer(t)).toBe(false);
-  });
-});

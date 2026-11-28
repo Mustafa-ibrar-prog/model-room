@@ -7,12 +7,12 @@
 Standard library only, so the scheduler's every-few-minutes check runs in seconds without installing anything.
 
 Slots (all Pacific time):
-  lines     05:30 PT every day             NBA player points sportsbook lines -> private R2 only (no projections)
-  morning   07:00 PT every day             injury reports, questionable / doubtful / out, depth charts; game lines
-  linesretry 09:30 PT every day            player points retry, ONLY games whose 5:30 response was empty
+  morning   07:00 PT every day             FULL refresh, today's AND tomorrow's games: schedules and status, injuries,
+                                           projections, player-prop sportsbook lines (games not yet captured), game lines
   gamelines 12:00 PT every day             game lines only (spreads, totals, moneylines); no projections
-  midday    12:30 PT every day             updated designations, lineup changes (reuses the 12:00 prices)
-  afternoon 16:00 PT every day             late reports before evening games
+  midday    12:30 PT every day             FULL refresh, today AND tomorrow (reuses the 12:00 game-line prices)
+  afternoon 16:00 PT every day             FULL refresh, today AND tomorrow (late reports before evening games)
+  (until 2026-11-27: lines 05:30 player points for today only, linesretry 09:30; retired, Moose 2026-11-27)
   inactives kickoff − 90 min, each NFL kickoff time   official NFL inactive lists (when a source is connected)
   pregame   start − 30 min, each game start time (NFL and NBA)   late scratches, confirmed lineups
 
@@ -46,6 +46,10 @@ DAILY_WINDOW = timedelta(hours=3)
 # The new slots start on 2026-11-26 (Pacific): on Nov 25 the old 12:00 refresh had already fetched game lines.
 NEW_KINDS = {"lines", "linesretry", "gamelines"}
 NEW_SCHEDULE_FROM = date(2026, 11, 26)
+# From 2026-11-28 (Moose 2026-11-27) player-prop lines are checked inside each of the three full refreshes, for today's
+# and tomorrow's games, so the 5:30 AM and 9:30 AM light slots are retired.
+RETIRED_KINDS = {"lines", "linesretry"}
+RETIRED_FROM = date(2026, 11, 28)
 # How far back "missed" looks. The two daily days below, so a stale miss stops being reported and the alert clears.
 MISSED_LOOKBACK = timedelta(days=2)
 INACTIVES_BEFORE = timedelta(minutes=90)
@@ -110,6 +114,8 @@ def all_slots(now: datetime) -> list[dict]:
             at = datetime(day.year, day.month, day.day, h, m, tzinfo=PT).astimezone(UTC)
             if name in NEW_KINDS and day < NEW_SCHEDULE_FROM:
                 continue                    # today's game lines already ran under the old noon refresh: never twice
+            if name in RETIRED_KINDS and day >= RETIRED_FROM:
+                continue
             out.append({"id": f"{name}:{day.isoformat()}", "kind": name, "at": at, "until": at + DAILY_WINDOW})
     starts = upcoming_starts(now)
     for lg, ts in starts.items():

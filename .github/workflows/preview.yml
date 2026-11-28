@@ -1,6 +1,6 @@
 # Continuous deployment of the public test site (the `preview` branch on Vercel).
-# Refresh times (PT, 2026-11-25): 5:30 AM NBA player points to R2 · 7:00 AM full refresh + game lines · 9:30 AM retry
-# of empty player-points games · 12:00 PM game lines only · 12:30 PM and 4:00 PM full refreshes (injuries, lineups,
+# Refresh times (PT, from 2026-11-28): 7:00 AM, 12:30 PM and 4:00 PM full refreshes, each for today's AND tomorrow's
+# games (schedule, injuries, projections, player-prop lines not yet captured); 7:00 AM and 12:00 PM game lines (injuries, lineups,
 # projections) · NFL kickoff − 90 min · every game − 30 min.
 #
 #   push to main      → main is merged into `preview` within about a minute; Vercel rebuilds the test site.
@@ -168,6 +168,8 @@ jobs:
             # no projections); gamelines = 12:00 PM game-line fetch only (projections are rebuilt by the 12:30 refresh).
             kinds=$(python3 -c "import sys; print(' '.join(sorted({x.split(':')[0] for x in sys.argv[1].split(',') if x})))" "$left")
             props=""; echo " $kinds " | grep -q " linesretry " && props=followup; echo " $kinds " | grep -q " lines " && props=main
+            # From 2026-11-28 every full refresh (7:00 / 12:30 / 4:00 PT) also checks prop lines for today AND tomorrow.
+            for k in afternoon midday morning; do echo " $kinds " | grep -q " $k " && props=$k; done
             echo "props=$props" >> "$GITHUB_OUTPUT"
             heavy=$(python3 -c "import sys; print(' '.join(k for k in sys.argv[1].split() if k not in ('lines', 'linesretry', 'gamelines')))" "$kinds")
             if [ -z "$heavy" ]; then
@@ -375,9 +377,10 @@ jobs:
           if [ "$DATA" = "success" ]; then ST=success; elif [ "$DATA" = "skipped" ]; then ST=skipped; else ST=failed; fi
           # Player-points-only runs (5:30 / 9:30 AM): no data step; the slot's result is the R2 step's.
           if [ "$ST" = skipped ] && [ "$PROPS" != "skipped" ] && [ -n "$PROPS" ]; then ST=$( [ "$PROPS" = success ] && echo success || echo failed ); fi
-          # A full or game-lines run that also carried a player-points slot fails that slot if the R2 step failed.
-          if [ "$ST" = success ] && [ -n "$PROPS" ] && [ "$PROPS" != skipped ] && [ "$PROPS" != success ]; then ST=failed; fi
-          NOTE="${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}"
+          # Prop lines inside a full refresh (from 2026-11-28): a failed prop-lines step does NOT fail the refresh (projections,
+          # injuries and game lines are still current); it is noted, and the backup trigger retries the prop lines alone.
+          PROPS_NOTE=""; if [ "$ST" = success ] && [ -n "$PROPS" ] && [ "$PROPS" != skipped ] && [ "$PROPS" != success ]; then PROPS_NOTE="; prop lines step failed (backup retries it)"; fi
+          NOTE="${{ github.event.inputs.trigger || github.event_name }} run ${{ github.run_id }}$PROPS_NOTE"
           ALL="${SLOTS:-manual:$(date -u +%Y-%m-%dT%H:%MZ)}"
           if [ "$ST" = "success" ] && { [ "$NBA_OK" = 0 ] || [ "$NFL_OK" = 0 ]; }; then
             # One league's data wasn't ready: its own slots (and the shared ones) stay failed so the planner retries them
