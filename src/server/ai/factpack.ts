@@ -28,7 +28,7 @@ const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 export interface ParlayPack {
   task: "explain_parlay";
   legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
-    last_10_games?: string; last_10_misses?: string; recent_form?: string; cushion?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
+    last_10_games?: string; last_10_misses?: string; recent_form?: string; cushion?: string; model_vs_recent?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
     /** Set by the model's probability, never by Gemini. */
     group: "most likely to hit" | "least likely to hit"; likelihood_rank: number }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
@@ -41,12 +41,15 @@ export interface ParlayPack {
 }
 
 /** Words (from the box scores, not the model) that give Gemini something concrete for "could miss". */
-type Form = { last_10_misses?: string; recent_form?: string; cushion?: string };
+type Form = { last_10_misses?: string; recent_form?: string; cushion?: string; model_vs_recent?: string };
 function legForm(l: ParlayPrice["legs"][number]): Form {
   const r = l.last10!;
   const out: Form = { last_10_misses: `missed in ${r.misses} of last ${r.games}` };
   const rate10 = r.hits / r.games;
   const rate5 = r.last5Games ? r.last5Hits / r.last5Games : rate10;
+  // The model's chance against the plain hit rate: the most useful "why" when they disagree.
+  out.model_vs_recent = l.p < rate10 - 0.12 ? "the model is clearly less optimistic than his recent hit rate (it expects this to be harder than it looks)"
+    : l.p > rate10 + 0.12 ? "the model is more optimistic than his recent hit rate" : "the model agrees with his recent hit rate";
   out.recent_form = rate5 > rate10 + 0.15 ? "hitting more often lately" : rate5 < rate10 - 0.15 ? "cooler lately than over the last 10" : "steady";
   const m = /([\d.]+)\+/.exec(l.label) ?? /under ([\d.]+)/.exec(l.label);
   const k = m ? Number(m[1]) : null;

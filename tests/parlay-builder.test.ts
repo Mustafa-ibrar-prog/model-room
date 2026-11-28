@@ -345,6 +345,11 @@ describe("AI text validation", () => {
     expect(v.legs.map((l) => l.id)).toEqual(["L1"]);
     expect(v.watch).toEqual([]);
   });
+  it("drops sentences that leak leg ids or field names", () => {
+    const allowed = allowedNumbers(pack);
+    expect(cleanText("It hinges on L3. Davis is the swing leg.", allowed).text).toBe("Davis is the swing leg.");
+    expect(cleanText("Per model_vs_recent it is harder.", allowed).text).toBe("");
+  });
   it("most / least likely groups come from the model's probabilities", () => {
     // the screenshot's slip: 63.2%, 70.4%, 45.0%
     const g = likelihoodGroups([0.632, 0.704, 0.45]);
