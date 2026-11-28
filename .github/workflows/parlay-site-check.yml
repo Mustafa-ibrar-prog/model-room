@@ -48,7 +48,7 @@ jobs:
                       if not l["price"]: tot["no_price_text"] += bool(l.get("noPrice"))
                       tot["max_books"] = max(tot["max_books"], len(l.get("quotes") or []))
                       if l["source"] == "model_line" and l["price"]: print("PROBLEM: a model line carries a price")
-                      if l.get("polymarket"): print("PROBLEM: Polymarket data in a public response")
+                      tot["polymarket_quotes"] = tot.get("polymarket_quotes", 0) + bool(l.get("polymarket"))   # live on TEST by Moose's choice (2026-11-27)
                   if len(ids) < 6:
                       ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:1]
               print(f"{lg} (first {tot['games']} games):", json.dumps(tot))
