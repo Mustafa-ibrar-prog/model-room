@@ -1,0 +1,56 @@
+name: NBA injury-aware props evaluation (TEST research, manual)
+
+# Moose 2026-11-27: active 0.2.0 vs shadow 0.2.3b (and 0.2.3b without the injury feed), read-only research.
+#  1. Historical, out of sample: 2024-25 and 2025-26 replayed walk-forward with the NBA's official injury report as
+#     published 30 minutes before each tip (public PDFs; cached on the runner only, never committed).
+#  2. Live: the shadow ledger (Nov 2026) graded against box scores, identical player-games.
+# Nothing is activated, published or written to the repo; results are aggregate metrics in the run's artifact.
+on:
+  workflow_dispatch:
+    inputs:
+      seasons:
+        description: "hoopR seasons to replay (2025 = 2024-25, 2026 = 2025-26)"
+        default: "2025,2026"
+      sims:
+        description: "simulations per player-game"
+        default: "2000"
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Data (box scores, schedules; same public sources as the refresh)
+        working-directory: modeling
+        run: |
+          pip install -q -e .
+          python -m modelroom nba ingest > /dev/null
+      - name: Live shadow comparison (0.2.0 vs 0.2.3b), ledger from the preview branch
+        working-directory: modeling
+        continue-on-error: true
+        run: |
+          git fetch -q --depth 1 origin preview
+          mkdir -p /tmp/ledger/reports
+          for f in $(git ls-tree --name-only FETCH_HEAD modeling/preview-ledger/ | grep -E "nba_props(_shadow_0\.2\.3b_.*)?\.jsonl$"); do git show FETCH_HEAD:$f > /tmp/ledger/$(basename $f); done
+          MODELROOM_LEDGER_DIR=/tmp/ledger MODELROOM_NBA_SHADOW_REPORT=0.2.0,0.2.3b python -c "import json; from modelroom.nba.props import shadow; print(json.dumps(shadow.run(), default=str))"
+          mkdir -p /tmp/out && cp /tmp/ledger/reports/nba_props_shadow.json /tmp/out/live_shadow_0.2.0_vs_0.2.3b.json
+      - name: Historical replay with official injury reports
+        working-directory: modeling
+        run: |
+          mkdir -p /tmp/out
+          python -m modelroom.nba.props.injury_eval --seasons "${{ github.event.inputs.seasons }}" --sims "${{ github.event.inputs.sims }}" --out /tmp/out/historical_injury_eval.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nba-injury-eval
+          path: /tmp/out/
+          retention-days: 14
