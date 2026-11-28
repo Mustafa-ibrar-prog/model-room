@@ -1,0 +1,32 @@
+name: Polymarket US coverage audit (TEST, manual, read-only)
+
+# Moose 2026-11-27. Fetches public Polymarket US events for the upcoming NBA (today + tomorrow) and NFL (next 8 days)
+# games on the TEST boards and prints COUNTS ONLY: contracts per market, exact player matches, available fields, HTTP
+# behaviour. No prices, players or lines are printed, stored, uploaded or committed (PMUS participant agreement §I.22).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Boards from the preview branch
+        run: |
+          git fetch -q --depth 1 origin preview
+          mkdir -p /tmp/pv
+          for f in nba nfl nba_props nfl_props; do git show FETCH_HEAD:modeling/data/published/$f.json > /tmp/pv/$f.json; done
+      - name: Audit (counts only)
+        working-directory: modeling
+        run: |
+          pip install -q -e .
+          python -m modelroom.markets.pm_audit --nba-board /tmp/pv/nba.json --nba-props /tmp/pv/nba_props.json --nfl-board /tmp/pv/nfl.json --nfl-props /tmp/pv/nfl_props.json
