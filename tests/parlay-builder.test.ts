@@ -346,6 +346,10 @@ describe("AI text validation", () => {
     expect(v.watch).toEqual([]);
     const d = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: "Same.", miss: "Run may flatter him." }, { id: "L2", hit: "Other.", miss: "Run may flatter him." }], watch: [] }, pack)!;
     expect(d.legs[1]).toEqual({ id: "L2", hit: "Other.", miss: "" });
+    // a number from another leg is removed (pack L1 and L2 have different model probabilities)
+    const p1 = pack.legs[0].model_probability, p2 = pack.legs[1].model_probability;
+    const x = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: `Model has it at ${p2}.`, miss: `Own number ${p1}.` }], watch: [] }, pack)!;
+    expect(x.legs[0]).toEqual({ id: "L1", hit: "", miss: `Own number ${p1}.` });
   });
   it("drops sentences that leak leg ids or field names", () => {
     const allowed = allowedNumbers(pack);
