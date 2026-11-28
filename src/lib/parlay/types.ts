@@ -171,6 +171,8 @@ export interface PropCard {
   projection: number;
   /** The model's calibrated P(stat >= k) at k = k0, k0 + step, ... */
   grid: { k0: number; step: number; p: number[] };
+  /** The board's published ladder (P(stat >= K) as listed, rounded); used verbatim at those K so the card matches the listed leg. */
+  ladder: Record<string, number>;
   /** Thresholds offered (K for "K or more" / "under K"): model grid points between 3% and 97%, plus market lines. */
   thresholds: number[];
   /** Sportsbook quotes for this player and stat (each book's own main line), and the line most books posted. */

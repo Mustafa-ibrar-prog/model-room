@@ -391,6 +391,7 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
         out.props.push({
           key: `${gid}~${pl.player_id}~${mkey}`, league, gameId: gid, playerId: pl.player_id, playerName: pl.name, team: pl.team, opp: pl.opp ?? null,
           market: mkey, label: m.label, noun: m.label.toLowerCase(), projection: m.mean, grid: m.grid,
+          ladder: Object.fromEntries(m.thresholds.filter((t) => t.op === ">=" && !t.variant).map((t) => [String(t.threshold), t.model_prob])),
           thresholds: [...ks].filter((k) => gridAt(m.grid, k) && !gridAt(m.grid, k)!.interpolated).sort((a, b) => a - b),
           bookLine: bl ? mainLine(bl.books) : null,
           quotes: (bl?.books ?? []).map((b) => ({ book: b.book, title: b.title, line: b.line, over: b.over, under: b.under, lastUpdate: b.last_update })),
@@ -467,7 +468,9 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
       const g0 = gridAt(m.grid, K);
       if (!g0 || g0.interpolated) return null;                              // model grid points only: no interpolation
       const side = sd === "o" ? 1 : -1;
-      const p = side > 0 ? g0.p : 1 - g0.p;
+      const lad = m.thresholds.find((t) => t.op === ">=" && !t.variant && t.threshold === K)?.model_prob;
+      const pk = lad ?? g0.p;                                               // the published ladder value where there is one
+      const p = side > 0 ? pk : 1 - pk;
       if (p < 0.005 || p > 0.995) return null;
       const noun = m.label.toLowerCase();
       const variable: Variable = { kind: "prop", league, gameId: gid, playerId: pid, market: mkey, team: pl.team, home: pl.team === c.home, pos: pl.position ?? null };

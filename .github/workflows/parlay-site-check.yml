@@ -98,7 +98,7 @@ jobs:
                               try: leg = get(f"/api/parlay/legs?league={lg}&id={urllib.parse.quote(lid)}")["leg"]
                               except Exception: t["checked"] += 1; t["mismatch"] += 1; continue
                               lat.append(time.time() - t0)
-                              gp = grid_at(c["grid"], K)
+                              gp = c["ladder"].get(str(K), grid_at(c["grid"], K)) if "~m" in lid else grid_at(c["grid"], K)
                               want = gp if sd == "o" else 1 - gp
                               t["checked"] += 1
                               ok = abs(leg["p"] - want) < 2e-4
@@ -112,7 +112,10 @@ jobs:
                                   ok = ok and bool(leg.get("polymarket"))
                               elif leg.get("polymarket"): ok = False
                               if leg["source"] == "model_line" and leg["price"]: ok = False
-                              t["mismatch"] += not ok
+                              if not ok:
+                                  t["mismatch"] += 1
+                                  why = "p" if abs(leg["p"] - want) >= 2e-4 else "pm" if bool(q) != bool(leg.get("polymarket")) else "price"
+                                  t["why_" + why] = t.get("why_" + why, 0) + 1
               problems += t["mismatch"] + t["duplicate_cards"]
               t["markets"] = len(t["markets"])
               print(f"{lg} cards:", json.dumps(t))
