@@ -35,6 +35,7 @@ export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who
       "Explain this parlay leg by leg. The legs are already ranked and grouped by the model (likelihood_order, group, weakest_leg): keep that, never re-rank.",
       "summary: ONE sentence (max 25 words): which legs look solid and which leg the parlay hinges on (weakest_leg).",
       "legs: for EVERY leg: hit = one sentence (max 22 words) on the best reason it could hit; miss = one sentence (max 22 words) on the main way it could miss.",
+      "Each miss must cite a concrete fact from last_10_misses, recent_form, cushion, same_game_links, flags or injury_report. Never just restate the threshold (no 'could miss if he scores under 25').",
       "Use only last_10_games, recent_minutes_any_opponent, opponent, same_game_links, injury_report and flags. recent_minutes_any_opponent is his last 5 games against anyone, NOT against this opponent; never say 'against' the opponent for it.",
       "Be specific to each leg; don't repeat the same reason across legs; don't mention missing sportsbook prices.",
       "watch: at most 2 short items from injury_report or flags that could change things before tip-off; empty if none.",

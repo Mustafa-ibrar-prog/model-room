@@ -28,7 +28,7 @@ const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 export interface ParlayPack {
   task: "explain_parlay";
   legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
-    last_10_games?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
+    last_10_games?: string; last_10_misses?: string; recent_form?: string; cushion?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
     /** Set by the model's probability, never by Gemini. */
     group: "most likely to hit" | "least likely to hit"; likelihood_rank: number }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
@@ -38,6 +38,24 @@ export interface ParlayPack {
   weakest_leg: string;
   injury_report: string[];
   notes: string[];
+}
+
+/** Words (from the box scores, not the model) that give Gemini something concrete for "could miss". */
+type Form = { last_10_misses?: string; recent_form?: string; cushion?: string };
+function legForm(l: ParlayPrice["legs"][number]): Form {
+  const r = l.last10!;
+  const out: Form = { last_10_misses: `missed in ${r.misses} of last ${r.games}` };
+  const rate10 = r.hits / r.games;
+  const rate5 = r.last5Games ? r.last5Hits / r.last5Games : rate10;
+  out.recent_form = rate5 > rate10 + 0.15 ? "hitting more often lately" : rate5 < rate10 - 0.15 ? "cooler lately than over the last 10" : "steady";
+  const m = /([\d.]+)\+/.exec(l.label) ?? /under ([\d.]+)/.exec(l.label);
+  const k = m ? Number(m[1]) : null;
+  if (k !== null && l.kind === "prop") {
+    const d = (r.avg - k) / Math.max(1, k);
+    const over = sideOf(l.id) > 0;
+    out.cushion = Math.abs(d) < 0.08 ? "average sits right around the line" : (d > 0) === over ? "average is comfortably on the winning side of the line" : "average is on the losing side of the line";
+  }
+  return out;
 }
 
 export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
@@ -54,7 +72,7 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       model_probability: pctText(l.p),
       sportsbook_price: l.price ? `${odds(l.price.american)}${l.price.bookTitle ? ` (${l.price.bookTitle})` : ""}` : "not stored",
       market_probability: pctText(l.marketP),
-      ...(l.last10 ? { last_10_games: l.last10.text } : {}),
+      ...(l.last10 ? { last_10_games: l.last10.text, ...legForm(l) } : {}),
       ...(l.context?.usage ? { recent_minutes_any_opponent: l.context.usage } : {}),
       ...(l.context?.opp ? { opponent: l.context.opp } : {}),
       ...(pmToGemini() && l.polymarket?.implied != null ? { polymarket_probability: pctText(l.polymarket.implied), model_minus_polymarket: `${((l.p - l.polymarket.implied) * 100).toFixed(1)} points` } : {}),
