@@ -85,11 +85,18 @@ export function validateParlayAi(raw: unknown, pack: { legs: { id: string }[] })
   const legs = (Array.isArray(r.legs) ? r.legs : [])
     .filter((x): x is { id: string; hit: unknown; miss: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
     .filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true)))
-    .map((x) => ({ id: x.id, hit: take(x.hit, 170, 1), miss: take(x.miss, 170, 1) }))
-    .filter((x) => x.hit || x.miss);
+    .map((x) => ({ id: x.id, hit: take(x.hit, 170, 1), miss: take(x.miss, 170, 1) }));
+  // The same sentence under two legs says nothing about either: keep the first, drop the copies.
+  const said = new Set<string>();
+  for (const l of legs) for (const k of ["hit", "miss"] as const) {
+    const key = l[k].toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!key) continue;
+    if (said.has(key)) { l[k] = ""; removed++; } else said.add(key);
+  }
+  const kept = legs.filter((x) => x.hit || x.miss);
   const watch = (Array.isArray(r.watch) ? r.watch : []).slice(0, 2).map((w) => take(w, 120, 1)).filter((w) => w && !/sportsbook price/i.test(w));
-  if (!summary && !legs.length) return null;
-  return { summary, legs, watch, removed };
+  if (!summary && !kept.length) return null;
+  return { summary, legs: kept, watch, removed };
 }
 
 export interface PicksAi { overview: string; picks: { id: string; why: string; check: string }[]; removed: number }

@@ -39,7 +39,7 @@ export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who
       "Never just restate the threshold, and don't repeat the 'hit in N of last 10' line the page already shows unless it is the only fact.",
       "Refer to players by name. Never write leg ids like L1 or field names. Name the leg's own stat (rebounds, points, assists...).",
       "Plain, short words, like a sharp friend talking; no hype adjectives. Write numbers as digits copied from the fact pack.",
-      "When model_vs_recent says the model chance is well below his recent hit rate, say the recent run may flatter him. Don't give two legs the same sentence.",
+      "When model_vs_recent says well below, use its numbers: e.g. the model has him at its percentage despite his recent run, so the run may flatter him. Each leg's sentences must be specific to that player and stat.",
       "Use only last_10_games, recent_minutes_any_opponent, opponent, same_game_links, injury_report and flags. recent_minutes_any_opponent is his last 5 games against anyone, NOT against this opponent; never say 'against' the opponent for it.",
       "Be specific to each leg; don't repeat the same reason across legs; don't mention missing sportsbook prices.",
       "watch: at most 2 short items from injury_report or flags that could change things before tip-off; empty if none.",

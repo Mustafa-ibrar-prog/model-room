@@ -344,6 +344,8 @@ describe("AI text validation", () => {
       watch: ["No sportsbook price available."] }, pack)!;
     expect(v.legs.map((l) => l.id)).toEqual(["L1"]);
     expect(v.watch).toEqual([]);
+    const d = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: "Same.", miss: "Run may flatter him." }, { id: "L2", hit: "Other.", miss: "Run may flatter him." }], watch: [] }, pack)!;
+    expect(d.legs[1]).toEqual({ id: "L2", hit: "Other.", miss: "" });
   });
   it("drops sentences that leak leg ids or field names", () => {
     const allowed = allowedNumbers(pack);
