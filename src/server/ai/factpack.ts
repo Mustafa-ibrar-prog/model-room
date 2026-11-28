@@ -6,6 +6,13 @@ import type { ParlayPrice, Pick } from "@/lib/parlay/types";
  * the engine's rounded probabilities, stored prices, data flags and injury-report lines. Never model parameters,
  * features, distributions, correlation coefficients, datasets, user details or sportsbook credentials.
  */
+/**
+ * Polymarket US numbers go to Gemini only when MODELROOM_PM_TO_GEMINI=on. Off by default: sending PMUS data to a third
+ * party (Google's free tier may use prompts for training and human review) is redistribution, which the PMUS
+ * participant agreement §I.22 allows only "as PMUS expressly permits". Turn on after written permission.
+ */
+export const pmToGemini = () => process.env.MODELROOM_PM_TO_GEMINI === "on";
+
 export const pctText = (p: number | null | undefined) => (p == null ? "not available" : `${(p * 100).toFixed(1)}%`);
 /** +1 for over / home / at-least legs, -1 for under / away legs (from the leg id, which encodes the side). */
 export function sideOf(id: string): 1 | -1 {
@@ -20,7 +27,7 @@ const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 export interface ParlayPack {
   task: "explain_parlay";
   legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
-    last_10_games?: string; role?: string; opponent?: string; flags: string[] }[];
+    last_10_games?: string; role?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[] }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
   same_game_links: { legs: string[]; direction: "tend to win together" | "work against each other" }[];
   riskiest_order: string[];
@@ -44,6 +51,7 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       ...(l.last10 ? { last_10_games: l.last10.text } : {}),
       ...(l.context?.usage ? { role: l.context.usage } : {}),
       ...(l.context?.opp ? { opponent: l.context.opp } : {}),
+      ...(pmToGemini() && l.polymarket?.implied != null ? { polymarket_probability: pctText(l.polymarket.implied), model_minus_polymarket: `${((l.p - l.polymarket.implied) * 100).toFixed(1)} points` } : {}),
       flags: l.warnings.slice(0, 4),
     })),
     parlay: {
@@ -71,7 +79,7 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
 
 export interface PicksPack {
   task: "review_picks";
-  picks: { id: string; label: string; game: string; model_probability: string; market_probability: string; gap: string; sportsbook_price: string; data_quality: string; risk: string; could_invalidate: string[] }[];
+  picks: { id: string; label: string; game: string; model_probability: string; market: string; market_probability: string; gap: string; sportsbook_price: string; data_quality: string; risk: string; could_invalidate: string[] }[];
   injury_report: string[];
   history: string;
 }
@@ -84,8 +92,9 @@ export function picksPack(picks: Pick[], injuries: string[]): PicksPack {
       label: p.leg.label,
       game: p.gameLabel,
       model_probability: pctText(p.leg.p),
-      market_probability: pctText(p.leg.marketP),
-      gap: p.edge == null ? "not available" : `${(p.edge * 100).toFixed(1)} points`,
+      market_probability: p.benchmark === "polymarket" && !pmToGemini() ? "withheld" : pctText(p.marketP),
+      market: p.benchmark === "polymarket" ? (pmToGemini() ? "Polymarket US" : "exchange (withheld)") : "sportsbooks",
+      gap: p.edge == null ? "not available" : p.benchmark === "polymarket" && !pmToGemini() ? "withheld" : `${(p.edge * 100).toFixed(1)} points`,
       sportsbook_price: p.leg.price ? odds(p.leg.price.american) : "not stored",
       data_quality: p.quality,
       risk: p.risk,

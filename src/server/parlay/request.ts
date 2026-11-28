@@ -6,6 +6,7 @@ import type { League } from "@/types/domain";
 import { hash } from "@/server/ai/limits";
 import { getCatalog, type Catalog } from "./legs";
 import { MAX_LEGS } from "./price";
+import { isPrivateViewer, PRIVATE_COOKIE } from "./privateView";
 
 /** Shared plumbing for the Parlay Builder API routes (TEST only: every route answers 404 in production). */
 export const parlayEnabled = () => !isProduction();
@@ -29,10 +30,13 @@ export async function readLegIds(req: NextRequest): Promise<string[] | null> {
   return legs as string[];
 }
 
-export async function catalogsFor(ids: string[], now = new Date()): Promise<Catalog[]> {
+export async function catalogsFor(ids: string[], now = new Date(), live = false): Promise<Catalog[]> {
   const leagues = [...new Set(ids.map((i) => i.split("~")[0] as League))];
-  return Promise.all(leagues.map((l) => getCatalog(l, now)));
+  return Promise.all(leagues.map((l) => getCatalog(l, now, { live })));
 }
+
+/** TEST private view (live Polymarket US prices): see viewer.ts. */
+export const privateRequest = (req: NextRequest) => isPrivateViewer(req.cookies.get(PRIVATE_COOKIE)?.value);
 
 export const leagueParam = (v: string | null): League | null => (v === "nba" || v === "nfl" ? v : null);
 

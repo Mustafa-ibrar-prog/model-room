@@ -444,3 +444,125 @@ describe("key security", () => {
     expect(gem).not.toMatch(/\?key=/);
   });
 });
+
+// ------------------------------------------------------------------------------------------------- Polymarket US
+import { contractsOf, gameContract, matchProps, sideQuote } from "@/server/parlay/polymarket";
+import { isPrivateViewer, privateToken, unlock } from "@/server/parlay/privateView";
+import { picksPack } from "@/server/ai/factpack";
+
+const PM_EVENT = {
+  slug: "nba-mia-nyk-2026-11-27",
+  teams: [{ id: 1, abbreviation: "NYK", name: "New York Knicks" }, { id: 2, abbreviation: "MIA", name: "Miami Heat" }],
+  markets: [
+    { sportsMarketType: "basketball_player_points", line: 20, metadata: { playerName: "Jay Home", teamId: 1 }, bestBidQuote: { value: "0.46" }, bestAskQuote: { value: "0.50" }, updatedAt: "2026-11-27T19:58:00Z", status: "MARKET_STATUS_OPEN" },
+    { sportsMarketType: "basketball_player_points", line: 22, metadata: { playerName: "Jay Home", teamId: 1 }, bestBidQuote: { value: "0.36" }, bestAskQuote: { value: "0.40" }, status: "MARKET_STATUS_OPEN" },
+    { sportsMarketType: "basketball_player_points", line: 18, metadata: { playerName: "Kay Home", teamId: 2 }, bestBidQuote: { value: "0.6" }, bestAskQuote: { value: "0.64" } },
+    { sportsMarketType: "basketball_player_points", line: 10, metadata: { playerName: "Nobody Here", teamId: 1 }, bestBidQuote: { value: "0.6" }, bestAskQuote: { value: "0.64" } },
+    { sportsMarketType: "basketball_player_rebounds", line: 5, metadata: { playerName: "Jay Home", teamId: 1 }, bestAskQuote: { value: "0.40" } },
+    { marketType: "spreads", sportsMarketType: "basketball_full_game_spread", line: -2.5, marketSides: [{ long: true, team: { abbreviation: "NYK" } }], bestBidQuote: { value: "0.53" }, bestAskQuote: { value: "0.55" } },
+    { marketType: "totals", sportsMarketType: "basketball_full_game_total", line: 222, marketSides: [{ long: true, description: "Over 222" }], bestBidQuote: { value: "0.49" }, bestAskQuote: { value: "0.51" } },
+    { marketType: "moneyline", sportsMarketType: "moneyline", marketSides: [{ long: true, team: { abbreviation: "MIA" } }], bestBidQuote: { value: "0.40" }, bestAskQuote: { value: "0.42" } },
+    { marketType: "totals", sportsMarketType: "basketball_first_half_total", line: 110, marketSides: [{ long: true, description: "Over 110" }], bestBidQuote: { value: "0.5" }, bestAskQuote: { value: "0.52" } },
+  ],
+};
+const pmCatalog = () => buildCatalog("nba", board(), propsBoard(), { "2026-11-27": view() }, NOW, null,
+  { events: new Map([["g1", PM_EVENT as never]]), fetchedAt: "2026-11-27T20:00:00Z" });
+
+describe("Polymarket US: exact matching only", () => {
+  it("parses props and full-game lines; ignores partial-game markets", () => {
+    const cs = contractsOf(PM_EVENT as never);
+    expect(cs.filter((c) => c.kind === "prop")).toHaveLength(5);
+    expect(cs.filter((c) => c.kind === "total")).toHaveLength(1);
+  });
+  it("matches a player only by unique full name AND team; skips and counts everything else", () => {
+    const m = matchProps("nba", contractsOf(PM_EVENT as never), [
+      { playerId: "p1", name: "Jay Home", team: "NY" }, { playerId: "p2", name: "Kay Home", team: "NY" }]);
+    expect(m.matched).toBe(3);
+    expect(m.skipped).toEqual({ ambiguous: 0, teamMismatch: 1, notOnBoard: 1 });
+    const twins = matchProps("nba", contractsOf(PM_EVENT as never), [{ playerId: "a", name: "Jay Home", team: "NY" }, { playerId: "b", name: "Jay Home", team: "NY" }]);
+    expect(twins.matched).toBe(0);
+    expect(twins.skipped.ambiguous).toBe(3);
+  });
+  it("'20+' equals over 19.5 and the model's 20+; the NO side prices the unders", () => {
+    const c = pmCatalog();
+    const over = c.legs.get("nba~g1~prop~p1~points~b19.5~o")!.option.polymarket!;
+    expect(over).toMatchObject({ bid: 0.46, ask: 0.5, implied: 0.48, spread: 0.04, updatedAt: "2026-11-27T19:58:00Z", liquidity: null });
+    expect(c.legs.get("nba~g1~prop~p1~points~b19.5~u")!.option.polymarket).toMatchObject({ bid: 0.5, ask: 0.54, implied: 0.52 });
+    expect(c.legs.get("nba~g1~prop~p1~points~m20~o")!.option.polymarket!.implied).toBe(0.48);
+  });
+  it("a Polymarket line the model ladder lacks becomes its own leg, priced by the model's grid", () => {
+    const c = pmCatalog();
+    const o = c.legs.get("nba~g1~prop~p1~points~p22~o")!.option;
+    expect(o.source).toBe("exchange_line");
+    expect(o.p).toBe(0.4);                                                    // grid at 22
+    expect(o.price).toBeNull();
+    expect(o.polymarket!.implied).toBe(0.38);
+  });
+  it("one-sided books give no implied probability", () => {
+    const o = pmCatalog().legs.get("nba~g1~prop~p1~rebounds~m5~o")!.option.polymarket!;
+    expect(o.implied).toBeNull();
+    expect(o.ask).toBe(0.4);
+  });
+  it("game lines: same team and line only; NO side only on half-point lines; moneyline never from the opponent's NO", () => {
+    const c = pmCatalog();
+    expect(c.legs.get("nba~g1~spread~home~-2.5")!.option.polymarket!.implied).toBe(0.54);
+    expect(c.legs.get("nba~g1~spread~away~-2.5")!.option.polymarket!.implied).toBe(0.46);
+    expect(c.legs.get("nba~g1~total~over~222")!.option.polymarket!.implied).toBe(0.5);
+    expect(c.legs.get("nba~g1~total~under~222")!.option.polymarket).toBeUndefined();   // whole line can push
+    expect(c.legs.get("nba~g1~ml~away")!.option.polymarket!.implied).toBe(0.41);
+    expect(c.legs.get("nba~g1~ml~home")!.option.polymarket).toBeUndefined();
+    expect(gameContract("nba", contractsOf(PM_EVENT as never), "spread", "NY", "MIA", -3.5, true)).toBeNull();
+    expect(c.pm).toMatchObject({ eventsFound: 1, games: 2 });
+  });
+  it("no Polymarket data without the private view: the public catalog is unchanged", () => {
+    const c = catalog();
+    expect([...c.legs.values()].some((l) => l.option.polymarket)).toBe(false);
+    expect(c.pm).toBeUndefined();
+  });
+  it("sideQuote: closed or crossed books are not priced", () => {
+    const base = { kind: "prop" as const, line: 20, bid: 0.6, ask: 0.5, fee: null, status: "open", updatedAt: null, title: "x" };
+    expect(sideQuote(base, true, "t", "x").implied).toBeNull();
+    expect(sideQuote({ ...base, bid: 0.4, status: "closed" }, true, "t", "x").implied).toBeNull();
+  });
+});
+
+describe("Polymarket picks and Gemini", () => {
+  const env = { ...process.env };
+  afterEach(() => { process.env = { ...env }; });
+  it("picks compare the model with Polymarket separately from sportsbooks", () => {
+    const picks = discoverPicks([pmCatalog()], NOW, 50);
+    const pm = picks.filter((p) => p.benchmark === "polymarket");
+    expect(pm.length).toBeGreaterThan(0);
+    for (const p of pm) expect(p.edge).toBeCloseTo(p.leg.p - p.leg.polymarket!.implied!, 4);
+  });
+  it("Polymarket numbers are withheld from Gemini unless MODELROOM_PM_TO_GEMINI=on", () => {
+    const picks = discoverPicks([pmCatalog()], NOW, 50).filter((p) => p.benchmark === "polymarket");
+    delete process.env.MODELROOM_PM_TO_GEMINI;
+    const off = picksPack(picks, []);
+    for (const p of off.picks) {
+      expect(p.market_probability).toBe("withheld");
+      expect(p.gap).toBe("withheld");
+      expect(p.market).not.toContain("Polymarket");
+    }
+    process.env.MODELROOM_PM_TO_GEMINI = "on";
+    expect(JSON.stringify(picksPack(picks, []))).toContain("Polymarket US");
+  });
+});
+
+describe("TEST private view", () => {
+  const env = { ...process.env };
+  afterEach(() => { process.env = { ...env }; });
+  it("needs the server key; cookie is an HMAC, never the key; off in production", () => {
+    delete process.env.MODELROOM_PRIVATE_VIEW_KEY;
+    expect(unlock("anything")).toBeNull();
+    process.env.MODELROOM_PRIVATE_VIEW_KEY = "a-long-owner-key-123456";
+    process.env.VERCEL_ENV = "preview";
+    expect(unlock("wrong-key-wrong-key")).toBeNull();
+    const t = unlock("a-long-owner-key-123456")!;
+    expect(t).not.toContain("owner-key");
+    expect(isPrivateViewer(t)).toBe(true);
+    expect(isPrivateViewer(privateToken("other-key-other-key"))).toBe(false);
+    process.env.VERCEL_ENV = "production";
+    expect(isPrivateViewer(t)).toBe(false);
+  });
+});

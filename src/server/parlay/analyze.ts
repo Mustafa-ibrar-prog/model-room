@@ -52,7 +52,7 @@ export async function reviewPicks(picks: Pick[], catalogs: Catalog[], who: { id:
   if (!cap.ok) return { status: "unavailable", reason: cap.scope, message: cap.message };
   const out = await generateJson({
     system: SYSTEM_RULES,
-    user: `For each pick: why = one sentence (max 20 words) from the facts; check = one sentence (max 20 words) from could_invalidate and the injury report. Keep the list order. overview: one sentence that repeats the history note. Fact pack:\n${JSON.stringify(pack)}`,
+    user: `Each pick is a disagreement between Model Room and a market. For each pick: why = one sentence (max 20 words) on what the disagreement might reflect, from the facts only; check = one sentence (max 20 words) from could_invalidate and the injury report. Keep the list order. overview: one sentence that repeats the history note. Fact pack:\n${JSON.stringify(pack)}`,
     schema: PICKS_SCHEMA, maxOutputTokens: MAX_OUT, fetchImpl,
   });
   if (!out.ok) return { status: "unavailable", reason: out.reason, message: out.message };
