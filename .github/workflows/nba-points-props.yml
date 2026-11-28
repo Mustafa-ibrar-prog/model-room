@@ -9,17 +9,21 @@ name: NBA player points lines (TEST)
 # (modeling/modelroom/sources/odds_props.py). Logs show counts only: no lines, prices, sportsbook names or players.
 on:
   schedule:
-    - cron: "30 12 * * *"   # 5:30 AM PDT
-    - cron: "30 13 * * *"   # 5:30 AM PST
-    - cron: "30 16 * * *"   # 9:30 AM PDT
-    - cron: "30 17 * * *"   # 9:30 AM PST
+    # From 2026-11-28 (Moose 2026-11-27): backups for the three full refreshes' prop-line checks (today AND tomorrow),
+    # 40 minutes after each slot; only inside the Pacific window, and a slot already done is skipped.
+    - cron: "40 14 * * *"   # 7:40 AM PDT
+    - cron: "40 15 * * *"   # 7:40 AM PST
+    - cron: "40 19 * * *"   # 12:40 PM PDT
+    - cron: "40 20 * * *"   # 12:40 PM PST
+    - cron: "40 23 * * *"   # 4:40 PM PDT
+    - cron: "40 0 * * *"    # 4:40 PM PST
   workflow_dispatch:
     inputs:
       mode:
-        description: "main (games not yet requested today) or followup (only games whose one request was empty)"
-        default: main
+        description: "morning | midday | afternoon (today AND tomorrow, games not yet captured); main | followup are the retired 5:30 / 9:30 modes"
+        default: morning
         type: choice
-        options: [main, followup]
+        options: [morning, midday, afternoon, main, followup]
 
 permissions:
   contents: read
@@ -64,7 +68,7 @@ jobs:
         run: |
           mode="${{ github.event.inputs.mode || '' }}"; win=""
           if [ -z "$mode" ]; then
-            case "${{ github.event.schedule }}" in "30 16 * * *"|"30 17 * * *") mode=followup;; *) mode=main;; esac
+            case "${{ github.event.schedule }}" in "40 14 * * *"|"40 15 * * *") mode=morning;; "40 19 * * *"|"40 20 * * *") mode=midday;; *) mode=afternoon;; esac
             win="--only-in-window"
           fi
           rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" $win --board /tmp/pv/nba_props.json --nfl-board /tmp/pv/nfl_props.json > /tmp/out.json || rc=$?

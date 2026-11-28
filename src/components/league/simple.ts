@@ -25,6 +25,10 @@ export interface Headline {
   fromMarket: boolean;
   /** The market's own implied probability, when there is one. */
   marketProb: number | null;
+  /** Where the line comes from: a stored sportsbook line, or a live Polymarket US contract (an exchange, not a book). */
+  source: "sportsbook" | "polymarket" | "exchange" | null;
+  /** When the market's price was captured (live fetch time for Polymarket). */
+  marketAt: string | null;
   /** Stored sportsbook lines behind this headline (NBA points, TEST), when the threshold is a sportsbook line. */
   book: { line: number; books: { title: string; line: number; over: number | null; under: number | null; lastUpdate: string | null }[];
     alternates: number; lastUpdate: string | null; capturedAt: string } | null;
@@ -61,7 +65,7 @@ export function headlineFor(r: ExplorerRow): Headline | null {
       const n = nice(L);
       return {
         threshold: L, thresholdText: `more than ${n}`, prob, belowProb: 1 - prob, belowText: `${n} or less`, fromMarket: true,
-        marketProb: bl.consensus_over_novig,
+        marketProb: bl.consensus_over_novig, source: "sportsbook", marketAt: bl.last_update,
         book: { line: L, alternates: bl.alternates, lastUpdate: bl.last_update, capturedAt: bl.capturedAt,
           books: bl.books.map((b) => ({ title: b.title, line: b.line, over: b.over, under: b.under, lastUpdate: b.last_update })) },
       };
@@ -82,6 +86,8 @@ export function headlineFor(r: ExplorerRow): Headline | null {
     belowText: line.op === ">=" ? `below ${n}` : `${n} or less`,
     fromMarket: Boolean(quoted),
     marketProb: quoted ? marketMid(quoted) : null,
+    source: quoted ? (quoted.quotes.some((q) => q.provider === "polymarket_us") ? "polymarket" : "exchange") : null,
+    marketAt: quoted ? quoted.market?.capturedAt ?? quoted.quotes[0]?.capturedAt ?? null : null,
     book: null,
   };
 }

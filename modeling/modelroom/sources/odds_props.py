@@ -343,6 +343,169 @@ def run(mode: str, key: str, board: dict, store, reader, now: datetime | None = 
     return out
 
 
+# ------------------------------------------------------------------ three full refreshes, today AND tomorrow (Moose, 2026-11-27)
+REFRESH_SLOTS = ("morning", "midday", "afternoon")       # 7:00 AM, 12:30 PM, 4:00 PM PT (modelroom/refresh_plan.py)
+MAX_ATTEMPTS = 3                                         # per game, across the three slots; captured games never again
+
+
+def _pt_date(commence: str) -> str:
+    return datetime.fromisoformat(commence.replace("Z", "+00:00")).astimezone(PT).date().isoformat()
+
+
+def window_events(events: list[dict], now: datetime) -> list[dict]:
+    """Games starting more than 10 minutes from now whose Pacific date is today or tomorrow."""
+    d0 = now.astimezone(PT).date()
+    keep = {d0.isoformat(), (d0 + timedelta(days=1)).isoformat()}
+    out = [e for e in events if datetime.fromisoformat(e["commence_time"].replace("Z", "+00:00")) > now + START_BUFFER
+           and _pt_date(e["commence_time"]) in keep]
+    return sorted(out, key=lambda e: (e["commence_time"], e["id"]))
+
+
+def run_refresh(slot: str, key: str, board: dict, store, reader, now: datetime | None = None, reset_day: int = 10,
+                aliases_path: Path | None = None, http=_http, sleep=time.sleep, sport: Sport = NBA, cap: int | None = None,
+                other_billed: int = 0) -> dict:
+    """One of the three daily refreshes. Covers today's AND tomorrow's games. Requests only games with no captured
+    lines yet (a captured game is never requested again), at most MAX_ATTEMPTS times per game, today's games first,
+    within the same daily allowance as before (game-line reserve, 30-credit margin, 15 floor, 15-a-day cap).
+
+    Storage: each game's data, manifest and view go to its own game-date folder (the site reads lines by game date);
+    the paid-attempt marker goes to TODAY's folder too, so today's billed credits are always counted in one place."""
+    from modelroom.archive.store import ArchiveError
+    now = now or datetime.now(timezone.utc)
+    P = sport.prefix
+    today = now.astimezone(PT).date()
+    t = today.isoformat()
+    tomorrow = (today + timedelta(days=1)).isoformat()
+    run_ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    done_key = f"{MS.day_prefix(t, P)}/locks/done-{slot}.json"
+    try:
+        reader.get(done_key)
+        return {"league": sport.name, "mode": slot, "date": t, "skipped": f"{slot} refresh already completed today", "requested": 0}
+    except Exception:  # noqa: BLE001  not done yet
+        pass
+    ok, why = acquire_lock(store, reader, t, slot, now, run_ts, P)
+    if not ok:
+        return {"league": sport.name, "mode": slot, "date": t, "skipped": why, "requested": 0}
+    end = datetime.combine(today + timedelta(days=2), datetime.min.time(), PT).astimezone(timezone.utc)
+    ev = get(f"{sport.base}/events?apiKey={key}&dateFormat=iso&commenceTimeFrom={now.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+             f"&commenceTimeTo={end.strftime('%Y-%m-%dT%H:%M:%SZ')}", key, http, sleep)
+    remaining, cost = _credits(ev["headers"])
+    if cost != 0:
+        raise StopRun(f"the events list cost {cost} credits (expected 0)")
+    events = window_events(json.loads(ev["body"]), now)
+    h_today = day_history(reader, t, P)                     # billing for requests made today, and today's games
+    h_tom = day_history(reader, tomorrow, P)                # tomorrow's games (captured / tried earlier today)
+    status = {**h_tom["status"], **h_today["status"]}
+    for eid, st in h_tom["status"].items():                 # "captured" anywhere wins
+        if st == "captured":
+            status[eid] = "captured"
+    attempts = {e: h_today["attempts"].get(e, 0) + h_tom["attempts"].get(e, 0) for e in set(h_today["attempts"]) | set(h_tom["attempts"])}
+    b = budget(remaining, today, reset_day, False, h_today["billed"] + other_billed)
+    limit = b["allowance"] if cap is None else min(b["allowance"], cap)
+    todo = [e for e in events if status.get(e["id"]) != "captured" and attempts.get(e["id"], 0) < MAX_ATTEMPTS]
+    # Today's games first (lines are most likely posted), each date in the fair rotation order.
+    groups = []
+    for d in (t, tomorrow):
+        day_ev = [e for e in events if _pt_date(e["commence_time"]) == d]
+        pos = {e["id"]: i for i, e in enumerate(rotation(day_ev, date.fromisoformat(d))["order"])}
+        groups += sorted([e for e in todo if _pt_date(e["commence_time"]) == d], key=lambda e: pos[e["id"]])
+    todo = groups
+    aliases = PM.load_aliases(aliases_path)
+    games = board.get("games") or []
+    per_date: dict[str, dict] = {}
+    billed, skipped_cap, stop = 0, 0, None
+
+    def bucket(d):
+        return per_date.setdefault(d, {"requests": [], "objects": [], "views": []})
+
+    for e in todo:
+        d = _pt_date(e["commence_time"])
+        g0 = PM.match_game(e, games)
+        gid = g0["game_id"] if g0 else None
+        if billed >= limit or not may_request(remaining, b["reserve"]):
+            skipped_cap += 1
+            bucket(d)["requests"].append({"event_id": e["id"], "status": "skipped_cap", "game_id": gid})
+            continue
+        try:
+            res = get(f"{sport.base}/events/{e['id']}/odds?apiKey={key}&regions=us&markets={sport.market}&oddsFormat=american&dateFormat=iso",
+                      key, http, sleep)
+            remaining, cost = _credits(res["headers"])
+        except StopRun as s_:
+            stop = scrub(str(s_), key)
+            break
+        except Exception as x:  # noqa: BLE001
+            bucket(d)["requests"].append({"event_id": e["id"], "status": "error", "game_id": gid, "error": scrub(str(x), key)[:120]})
+            continue
+        billed += cost
+        if cost > 1:
+            stop = f"a request cost {cost} credits (cap is 1)"
+        body = res["body"]
+        data = json.loads(body)
+        n_out = sum(len(m.get("outcomes") or []) for bk in data.get("bookmakers") or [] for m in bk.get("markets") or [] if m.get("key") == sport.market)
+        marker = json.dumps({"mode": slot, "status": "captured" if n_out else "empty", "cost": cost, "game_date": d,
+                             "at": datetime.now(timezone.utc).isoformat(timespec="seconds")}).encode()
+        try:
+            MS.put_verified(store, reader, f"{MS.day_prefix(t, P)}/{e['id']}/attempt-{run_ts}.json", marker)   # billing: request day
+            if d != t:
+                # a copy in the game's own folder (named seen-, so it never counts as a second attempt or a second credit)
+                MS.put_verified(store, reader, f"{MS.day_prefix(d, P)}/{e['id']}/seen-{run_ts}.json", json.dumps({**json.loads(marker), "billed_on": t}).encode())
+        except Exception:  # noqa: BLE001
+            stop = "could not record a request in R2: stopping before any further request"
+        if n_out == 0:
+            bucket(d)["requests"].append({"event_id": e["id"], "status": "empty", "cost": cost, "game_id": gid})
+            if stop:
+                break
+            continue
+        fetched = datetime.now(timezone.utc).isoformat(timespec="seconds")
+        base = f"{MS.day_prefix(d, P)}/{e['id']}/{MS.stamp()}"
+        try:
+            raw = MS.put_verified(store, reader, f"{base}.raw.json", body)
+            rows = PM.rows_from_response(data, g0, aliases, fetched, sha256(body), sport.market)
+            rbody = "".join(json.dumps(r, sort_keys=True) + "\n" for r in rows).encode()
+            rput = MS.put_verified(store, reader, f"{base}.rows.jsonl", rbody)
+        except Exception as x:  # noqa: BLE001
+            bucket(d)["requests"].append({"event_id": e["id"], "status": "error", "cost": cost, "game_id": gid, "error": f"upload failed: {type(x).__name__}"})
+            if stop:
+                break
+            continue
+        bk = bucket(d)
+        bk["objects"] += [{"key": raw["key"], "bytes": raw["bytes"], "sha256": raw["sha256"], "kind": "raw", "event_id": e["id"]},
+                          {"key": rput["key"], "bytes": rput["bytes"], "sha256": rput["sha256"], "kind": "rows", "event_id": e["id"]}]
+        bk["views"].append(PM.view_for_game(rows, g0, fetched))
+        bk["requests"].append({"event_id": e["id"], "status": "captured", "cost": cost, "game_id": gid, "books": len(data.get("bookmakers") or []),
+                               "players": len({r["player_name"] for r in rows}), "matched_players": len({r["player_id"] for r in rows if r["player_id"]})})
+        if stop:
+            break
+    finished = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    for d, bk in per_date.items():
+        if not bk["requests"]:
+            continue
+        meta = {"mode": slot, "started_at": now.isoformat(timespec="seconds"), "finished_at": finished, "budget": b, "requests": bk["requests"],
+                "credits_billed_run": billed, "credits_remaining_after": remaining, "stopped": stop, "source": "the_odds_api",
+                "endpoint": f"{sport.base.split('/v4')[1]}/events/{{event_id}}/odds", "params": {"regions": "us", "markets": sport.market, "oddsFormat": "american"},
+                "window": [t, tomorrow]}
+        MS.write_run(store, reader, d, f"{run_ts}-{slot}", bk["objects"], bk["views"], meta, P, sport.market)
+    reqs = [r for bk in per_date.values() for r in bk["requests"]]
+    usage = {"mode": slot, "started_at": now.isoformat(timespec="seconds"), "finished_at": finished, "budget": b, "credits_billed": billed,
+             "credits_remaining_after": remaining, "stopped": stop, "window": [t, tomorrow], "requested": sum(1 for r in reqs if "cost" in r),
+             "credit_limited": skipped_cap}
+    if reqs:
+        MS.put_verified(store, reader, f"{P}/_usage/{today.strftime('%Y-%m')}/{run_ts}.json", json.dumps(usage, sort_keys=True).encode())
+    if not stop:
+        try:
+            store.put_once(done_key, json.dumps({"at": finished, "run_ts": run_ts}).encode())
+        except ArchiveError:
+            pass
+    by_date = {d: {"captured": sum(r["status"] == "captured" for r in bk["requests"]), "empty": sum(r["status"] == "empty" for r in bk["requests"]),
+                   "skipped_cap": sum(r["status"] == "skipped_cap" for r in bk["requests"]), "errors": sum(r["status"] == "error" for r in bk["requests"])}
+               for d, bk in per_date.items()}
+    return {"league": sport.name, "mode": slot, "date": t, "window": [t, tomorrow], "budget": b, "share": cap, "games_in_window": len(events),
+            "already_captured": sum(1 for e in events if status.get(e["id"]) == "captured"), "to_request": len(todo), "by_date": by_date,
+            "captured": sum(v["captured"] for v in by_date.values()), "empty": sum(v["empty"] for v in by_date.values()),
+            "errors": sum(v["errors"] for v in by_date.values()), "skipped_cap": skipped_cap, "credits_billed": billed,
+            "credits_remaining_after": remaining, "stopped": stop}
+
+
 # ------------------------------------------------------------------ both leagues, one allowance (Moose, 2026-11-27)
 def split_allowance(allowance: int, counts: dict[str, int]) -> dict[str, int]:
     """Share one day's prop allowance between leagues in proportion to the games each still needs (largest
@@ -382,6 +545,32 @@ def _events_today(sport: Sport, key: str, now: datetime, http, sleep) -> tuple[l
     return today_events(json.loads(ev["body"]), now), remaining
 
 
+def _league_need(sp: Sport, mode: str, refresh: bool, key: str, now: datetime, day: str, reader, http, sleep) -> tuple[int, int, int]:
+    """(remaining credits, games still needing lines, credits billed today) for one league. Events lists are free."""
+    if refresh:
+        end = datetime.combine(now.astimezone(PT).date() + timedelta(days=2), datetime.min.time(), PT).astimezone(timezone.utc)
+        ev = get(f"{sp.base}/events?apiKey={key}&dateFormat=iso&commenceTimeFrom={now.strftime('%Y-%m-%dT%H:%M:%SZ')}"
+                 f"&commenceTimeTo={end.strftime('%Y-%m-%dT%H:%M:%SZ')}", key, http, sleep)
+        remaining, cost = _credits(ev["headers"])
+        if cost != 0:
+            raise StopRun(f"the events list cost {cost} credits (expected 0)")
+        events = window_events(json.loads(ev["body"]), now)
+        h = day_history(reader, day, sp.prefix)
+        h2 = day_history(reader, (now.astimezone(PT).date() + timedelta(days=1)).isoformat(), sp.prefix)
+        cap_ = lambda e: "captured" in (h["status"].get(e), h2["status"].get(e))    # noqa: E731
+        att = lambda e: h["attempts"].get(e, 0) + h2["attempts"].get(e, 0)          # noqa: E731
+        return remaining, sum(1 for e in events if not cap_(e["id"]) and att(e["id"]) < MAX_ATTEMPTS), h["billed"]
+    events, remaining = _events_today(sp, key, now, http, sleep)
+    h = day_history(reader, day, sp.prefix)
+    if mode in h["modes"]:
+        n = 0
+    elif mode == "followup":
+        n = sum(1 for e in events if h["status"].get(e["id"]) == "empty" and h["attempts"].get(e["id"], 0) == 1)
+    else:
+        n = sum(1 for e in events if e["id"] not in h["status"])
+    return remaining, n, h["billed"]
+
+
 def run_day(mode: str, key: str, boards: dict[str, dict], store, reader, now: datetime | None = None, reset_day: int = 10,
             aliases_path: Path | None = None, http=_http, sleep=time.sleep) -> dict:
     """NBA player points and NFL receiving yards from ONE daily allowance (the existing budget: game-line reserve,
@@ -391,35 +580,56 @@ def run_day(mode: str, key: str, boards: dict[str, dict], store, reader, now: da
     skipped_cap in that league's manifest, so the site can say so."""
     now = now or datetime.now(timezone.utc)
     day = now.astimezone(PT).date().isoformat()
+    refresh = mode in REFRESH_SLOTS
     need, billed, remaining = {}, {}, None
+    failed: dict[str, str] = {}
     for sp in (NBA, NFL):
         if sp.name not in boards:
             continue
-        events, remaining = _events_today(sp, key, now, http, sleep)
-        h = day_history(reader, day, sp.prefix)
-        billed[sp.name] = h["billed"]
-        if mode in h["modes"]:
-            need[sp.name] = 0
-        elif mode == "followup":
-            need[sp.name] = sum(1 for e in events if h["status"].get(e["id"]) == "empty" and h["attempts"].get(e["id"], 0) == 1)
-        else:
-            need[sp.name] = sum(1 for e in events if e["id"] not in h["status"])
+        try:
+            remaining_, need_, billed_ = _league_need(sp, mode, refresh, key, now, day, reader, http, sleep)
+        except Exception as x:  # noqa: BLE001  one league's provider trouble never stops the other league
+            failed[sp.name] = scrub(f"{type(x).__name__}: {x}", key)[:160]
+            continue
+        remaining = remaining_ if remaining_ is not None else remaining
+        need[sp.name], billed[sp.name] = need_, billed_
     b = budget(remaining or 0, now.astimezone(PT).date(), reset_day, False, sum(billed.values()))
     shares = split_allowance(b["allowance"], need)
     out = {"mode": mode, "date": day, "budget": b, "games_needing_lines": need, "shares": shares, "leagues": {}}
+    def fn(m, key_, board, st, rd, now_, reset_, lines_done, aliases, http_, sleep_, **k):
+        if refresh:
+            return run_refresh(m, key_, board, st, rd, now_, reset_, aliases, http_, sleep_, **k)
+        return run(m, key_, board, st, rd, now_, reset_, lines_done, aliases, http_, sleep_, **k)
+
+    def guarded(name, call):
+        if name in failed:
+            return {"league": name, "mode": mode, "stopped": f"events list failed: {failed[name]}", "credits_billed": 0}
+        try:
+            return call()
+        except StopRun as x:
+            return {"league": name, "mode": mode, "stopped": scrub(str(x), key), "credits_billed": 0}
+        except Exception as x:  # noqa: BLE001  one league failing never stops the other
+            return {"league": name, "mode": mode, "stopped": f"unexpected error: {type(x).__name__}: {scrub(str(x), key)[:160]}", "credits_billed": 0}
+
+    if remaining is None:
+        out["stopped"] = "no league's events list could be read"
+        out["leagues"] = {k: {"league": k, "stopped": v} for k, v in failed.items()}
+        out["credits_billed"] = 0
+        return out
     if "nba" in boards:
-        out["leagues"]["nba"] = run(mode, key, boards["nba"], store, reader, now, reset_day, False, aliases_path, http, sleep,
-                                    sport=NBA, cap=shares.get("nba", 0), other_billed=billed.get("nfl", 0))
+        out["leagues"]["nba"] = guarded("nba", lambda: fn(mode, key, boards["nba"], store, reader, now, reset_day, False, aliases_path, http, sleep,
+                                                          sport=NBA, cap=shares.get("nba", 0), other_billed=billed.get("nfl", 0)))
     if "nfl" in boards:
         nba_now = day_history(reader, day, NBA.prefix)["billed"] if "nba" in boards else 0
-        out["leagues"]["nfl"] = run(mode, key, boards["nfl"], store, reader, now, reset_day, False, None, http, sleep,
-                                    sport=NFL, cap=None, other_billed=nba_now)
+        out["leagues"]["nfl"] = guarded("nfl", lambda: fn(mode, key, boards["nfl"], store, reader, now, reset_day, False, None, http, sleep,
+                                                          sport=NFL, cap=None, other_billed=nba_now))
     out["credits_billed"] = sum(v.get("credits_billed", 0) for v in out["leagues"].values())
     out["stopped"] = next((v["stopped"] for v in out["leagues"].values() if v.get("stopped")), None)
     return out
 
 
-WINDOWS = {"main": ((5, 30), (8, 30)), "followup": ((9, 30), (12, 30))}     # Pacific time
+WINDOWS = {"main": ((5, 30), (8, 30)), "followup": ((9, 30), (12, 30)),           # Pacific time (retired 2026-11-28)
+           "morning": ((7, 0), (9, 30)), "midday": ((12, 30), (15, 0)), "afternoon": ((16, 0), (18, 30))}
 
 
 def in_window(mode: str, now: datetime) -> bool:
@@ -443,7 +653,7 @@ def main(argv=None) -> int:
     from modelroom.archive.store import from_env, reader_from_env
     ap = argparse.ArgumentParser()
     ap.add_argument("action", choices=["plan", "fetch", "verify", "probe-nfl-receiving-yards"])
-    ap.add_argument("--mode", choices=["main", "followup"], default="main")
+    ap.add_argument("--mode", choices=["main", "followup", *REFRESH_SLOTS], default="main")
     ap.add_argument("--board", default="data/published/nba_props.json")
     ap.add_argument("--nfl-board", default="data/published/nfl_props.json", help="'' = NBA only")
     ap.add_argument("--refresh-log", default="preview-ledger/refresh_log.jsonl")

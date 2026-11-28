@@ -1,0 +1,51 @@
+name: NBA Props coverage check (TEST, manual, read-only)
+
+# Moose 2026-11-27. Loads the TEST NBA Props pages for every upcoming game today and tomorrow (Pacific) in all seven
+# categories and prints counts and labels only: no lines, prices, sportsbook names or player-line pairs.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE: https://model-room-git-preview-computer-citi.vercel.app
+    steps:
+      - name: Board from the preview branch
+        run: git clone -q --depth 1 --branch preview https://github.com/${{ github.repository }} pv
+      - name: Pages
+        run: |
+          python3 - <<'PY'
+          import re, json, html, os, urllib.request
+          from datetime import datetime, timezone
+          from zoneinfo import ZoneInfo
+          site = os.environ["SITE"]; PT = ZoneInfo("America/Los_Angeles")
+          get = lambda u: urllib.request.urlopen(site + u, timeout=60).read().decode()
+          text = lambda h: html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<script.*?</script>", " ", h, flags=re.S)))
+          b = json.load(open("pv/modeling/data/published/nba_props.json"))
+          now = datetime.now(timezone.utc); today = now.astimezone(PT).date()
+          d = lambda t: datetime.fromisoformat(t.replace("Z", "+00:00")).astimezone(PT).date()
+          sched = json.load(open("pv/modeling/data/published/nba.json"))
+          want = [g for g in sched["upcoming"] if g.get("start_time") and datetime.fromisoformat(g["start_time"].replace("Z","+00:00")) > now and (d(g["start_time"]) - today).days in (0, 1)]
+          print(f"Board generated {b['generated_at']}; NBA games scheduled today+tomorrow and not started: {len(want)}")
+          on_board = {g["game_id"] for g in b["games"]}
+          labels = {}
+          for g in want:
+              if g["game_id"] not in on_board:
+                  print(f"{d(g['start_time'])} {g['away']['abbr']} @ {g['home']['abbr']}: NOT on the props board"); continue
+              counts = {}
+              for cat in ["points", "rebounds", "assists", "pra", "threes", "steals", "blocks"]:
+                  t = text(get(f"/nba-props?game={g['game_id']}&cat={cat}"))
+                  counts[cat] = len(re.findall(r"See why", t)) // 2
+                  for lab in ("Polymarket (live)", "Sportsbook line", "No line: sportsbook lines are collected", "Checked at", "Captured from US sportsbooks"):
+                      labels[(cat, lab)] = labels.get((cat, lab), 0) + t.count(lab)
+                  if cat == "assists" and g is want[0]:
+                      i = t.find("Projections"); print("status strip:", re.sub(r"\s+", " ", t[i:i+200]))
+              print(f"{d(g['start_time'])} {g['away']['abbr']} @ {g['home']['abbr']}: players per category {counts}")
+          for (cat, lab), n in sorted(labels.items()):
+              if n: print(f"label counts {cat}: '{lab}' x{n}")
+          PY

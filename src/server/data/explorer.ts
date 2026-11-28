@@ -1,4 +1,4 @@
-import { loadPropLines, propLinesEnabled, ptDate, type GameBookLines, type PlayerBookLines } from "@/server/markets/propLines";
+import { NFL_PREFIX, loadPropLines, propLinesEnabled, ptDate, type GameBookLines, type PlayerBookLines } from "@/server/markets/propLines";
 import { lineStatus as lineStatusFor, type GameFetchStatus, type LineStatus } from "@/lib/lineStatus";
 import "server-only";
 import { canAccess, gate } from "@/lib/entitlements";
@@ -372,9 +372,10 @@ function sortRows(rows: ExplorerRow[], sort: SortKey): ExplorerRow[] {
 async function withBookLines(rows: ExplorerRow[], games: { game_id: string; start_time: string | null }[], league: League, category: string): Promise<ExplorerRow[]> {
   const start = new Map(games.map((g) => [g.game_id, g.start_time]));
   const now = new Date();
-  const collect = league === "nba" && category === "points";
+  // Stored sportsbook lines: NBA points and NFL receiving yards (one market per game: the free Odds API budget).
+  const collect = (league === "nba" && category === "points") || (league === "nfl" && category === "receiving_yards");
   const dates = collect ? [...new Set(games.filter((g) => g.start_time).map((g) => ptDate(g.start_time!)))] : [];
-  const views = await Promise.all(dates.map((d) => loadPropLines(d)));
+  const views = await Promise.all(dates.map((d) => loadPropLines(d, league === "nfl" ? NFL_PREFIX : undefined)));
   const byGame = new Map<string, GameBookLines>();
   const status = new Map<string, GameFetchStatus>();
   for (const v of views) {
@@ -388,6 +389,7 @@ async function withBookLines(rows: ExplorerRow[], games: { game_id: string; star
     const st = start.get(r.gameId) ?? null;
     const lineStatus = lineStatusFor({
       league: league === "nfl" ? "nfl" : "nba", category, hasLine: has, gameDate: st ? ptDate(st) : "",
+      hasExchange: r.lines.some((l) => l.quotes.some((q) => q.provider === "polymarket_us")),
       gameStarted: st ? Date.parse(st) <= now.getTime() : false,
       // a game with stored lines was captured even if its view predates per-game statuses (2026-11-27)
       fetch: status.get(r.gameId) ?? (gv ? { status: "captured" } : null), now,

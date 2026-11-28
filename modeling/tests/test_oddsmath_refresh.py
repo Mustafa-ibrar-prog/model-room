@@ -92,7 +92,6 @@ def test_new_daily_slots_and_daylight_saving(tmp_path, monkeypatch):
     monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
     t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
     assert [s["kind"] for s in R.due(t("2026-11-26T13:31:00"))] == ["lines"]            # 5:31 AM PST
-    assert [s["kind"] for s in R.due(t("2027-06-02T12:31:00"))] == ["lines"]            # 5:31 AM PDT
     assert not R.due(t("2026-11-26T13:29:00"))                                           # 5:29 AM: nothing yet
     R.record(["lines:2026-11-26"], "success")
     R.record(["morning:2026-11-26"], "success")
@@ -104,6 +103,24 @@ def test_new_daily_slots_and_daylight_saving(tmp_path, monkeypatch):
     assert [s["kind"] for s in R.due(t("2026-11-26T20:31:00"))] == ["midday"]           # 12:31 PM full refresh
     R.record(["midday:2026-11-26"], "success")
     assert [s["kind"] for s in R.due(t("2026-11-27T00:01:00"))] == ["afternoon"]        # 4:01 PM
+
+
+def test_three_full_refreshes_from_nov_28_with_daylight_saving(tmp_path, monkeypatch):
+    """Moose 2026-11-27: from Nov 28 no 5:30 / 9:30 light slots; full refreshes at 7:00, 12:30 and 4:00 PT (game lines
+    alone at 12:00), at the right UTC time in both standard and daylight time."""
+    pub = tmp_path / "published"
+    pub.mkdir()
+    monkeypatch.setattr(R, "PUBLISHED", pub)
+    monkeypatch.setattr(R, "LOG", tmp_path / "log.jsonl")
+    t = lambda s: datetime.fromisoformat(s).replace(tzinfo=timezone.utc)  # noqa: E731
+    kinds = {s["id"] for s in R.all_slots(t("2026-11-28T20:00:00"))}
+    assert "lines:2026-11-28" not in kinds and "linesretry:2026-11-28" not in kinds
+    assert {"morning:2026-11-28", "midday:2026-11-28", "afternoon:2026-11-28", "gamelines:2026-11-28"} <= kinds
+    assert not R.due(t("2026-11-28T13:31:00"))                                            # 5:31 AM PST: nothing now
+    assert [s["kind"] for s in R.due(t("2026-11-28T15:01:00"))] == ["morning"]            # 7:01 AM PST
+    assert [s["kind"] for s in R.due(t("2027-06-02T14:01:00"))] == ["morning"]            # 7:01 AM PDT
+    assert [s["kind"] for s in R.due(t("2027-06-02T19:31:00"))] == ["gamelines", "midday"]  # 12:31 PM PDT (noon lines not yet logged)
+    assert [s["kind"] for s in R.due(t("2027-06-02T23:01:00"))] == ["afternoon"]          # 4:01 PM PDT
 
 
 def test_pregame_slots_that_never_started_are_missed(tmp_path, monkeypatch):

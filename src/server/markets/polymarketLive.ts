@@ -1,19 +1,16 @@
 import "server-only";
-import { isProduction, isTestAccount } from "@/lib/auth-config";
-import { getSessionUser } from "@/server/session";
+import { isProduction } from "@/lib/auth-config";
 import type { League } from "@/types/domain";
 import type { EngineBestSide, EnginePropsBoard, EngineQuoteView, EngineThreshold } from "@/types/props";
 
 /**
- * Owner-only live Polymarket US prices on the TEST SITE.
+ * Live Polymarket US prices on the TEST SITE (Moose 2026-11-27: "I am the only person using this TEST site"; shown to
+ * anyone with the TEST link, at his choice).
  *
- * Polymarket's prices aren't cleared for publication yet, so they are never written to the repo, a
- * board file or a database. This module fetches the public, read-only gateway at request time (server
- * side) and only for the site owner's login, and only outside production. Everyone else, and every
- * production request, gets the board exactly as published.
- *
- * Who counts as the owner: an address in OWNER_EMAILS (comma-separated, server env), or, when that
- * isn't set, the @modelroom.test accounts. MODELROOM_OWNER_LIVE_MARKETS=off switches it off entirely.
+ * Polymarket's prices aren't cleared for storage or republication, so they are never written to the repo, a board
+ * file, R2 or a database: the public, read-only gateway is fetched at request time (server side, cached in memory for
+ * a minute) and the numbers live only in that response. Production never fetches them. MODELROOM_OWNER_LIVE_MARKETS=off
+ * switches them off on TEST too.
  */
 
 const BASE = "https://gateway.polymarket.us";
@@ -26,19 +23,19 @@ const MIN_EV = 0.02;
 
 /**
  * Local design work only (`next dev` on a laptop, never a deployment): MODELROOM_PM_FIXTURE points at a
- * recorded event file, which stands in for the gateway and turns the owner view on.
+ * recorded event file, which stands in for the gateway.
  */
 const devFixture = (): string | null =>
   process.env.NODE_ENV === "development" && !process.env.VERCEL && process.env.MODELROOM_PM_FIXTURE ? process.env.MODELROOM_PM_FIXTURE : null;
 
+/** Live Polymarket on this request: TEST only (never production), unless switched off. */
+export function liveMarketsOn(): boolean {
+  return !isProduction() && process.env.MODELROOM_OWNER_LIVE_MARKETS !== "off";
+}
+
+/** Kept for existing callers: on TEST every viewer gets the live view now (no login on TEST). */
 export async function ownerLiveMarkets(): Promise<boolean> {
-  if (isProduction() || process.env.MODELROOM_OWNER_LIVE_MARKETS === "off") return false;
-  if (devFixture()) return true;
-  const user = await getSessionUser();
-  const email = user?.email?.toLowerCase();
-  if (!email) return false;
-  const list = (process.env.OWNER_EMAILS ?? "").split(",").map((s) => s.trim().toLowerCase()).filter(Boolean);
-  return list.length ? list.includes(email) : isTestAccount(email);
+  return liveMarketsOn() || Boolean(devFixture());
 }
 
 // ------------------------------------------------------------------ fetching

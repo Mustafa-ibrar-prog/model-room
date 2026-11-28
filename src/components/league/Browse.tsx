@@ -127,6 +127,7 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
             {formatKickoff(game.startTime)}
             {x.totalPlayers ? ` · ${x.totalPlayers} players projected` : ""}
           </p>
+          <DataStatusLine x={x} rows={rows} />
         </div>
       ) : (
         <h1 className="font-display text-3xl font-600 text-ink">Search results</h1>
@@ -213,5 +214,35 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
         </>
       )}
     </div>
+  );
+}
+
+
+const STALE_H = 16; // three refreshes a day (7:00, 12:30, 4:00 PT): the longest normal gap is overnight, about 15 hours
+function ago(iso: string | null | undefined, now: number) {
+  if (!iso) return { text: "not available", stale: true };
+  const t = Date.parse(iso);
+  const text = new Date(t).toLocaleString("en-US", { timeZone: "America/Los_Angeles", weekday: "short", hour: "numeric", minute: "2-digit" }) + " PT";
+  return { text, stale: now - t > STALE_H * 3600_000 };
+}
+
+/** What the page is built from and how fresh each part is. Stale parts are marked, never shown as current. */
+function DataStatusLine({ x, rows }: { x: Extract<Awaited<ReturnType<typeof getExplorer>>, { ok: true }>; rows: ExplorerRow[] }) {
+  const proj = ago(x.generatedAt, x.now);
+  const inj = ago(x.injuryFeedAt, x.now);
+  const books = rows.filter((r) => r.bookLines).length;
+  const pm = rows.filter((r) => r.lines.some((l) => l.quotes.some((q) => q.provider === "polymarket_us"))).length;
+  const part = (label: string, v: { text: string; stale: boolean }) => (
+    <span>{label} <span className={v.stale ? "text-pending" : "text-ink"}>{v.text}{v.stale ? " (stale)" : ""}</span></span>
+  );
+  return (
+    <p className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-faint">
+      {part("Projections", proj)}
+      {part("Injury report", inj)}
+      <span>Sportsbook lines <span className="text-ink">{books} player{books === 1 ? "" : "s"}</span>{x.category.key === "points" || x.category.key === "receiving_yards" ? "" : " (collected for " + (x.league === "nba" ? "points" : "receiving yards") + " only)"}</span>
+      {x.live ? (
+        <span>Polymarket <span className={x.live.errors ? "text-pending" : "text-ink"}>{x.live.found ? `${pm} player${pm === 1 ? "" : "s"}, checked ${ago(x.live.fetchedAt, x.now).text}` : x.live.errors ? "unavailable right now" : "not listed for this game"}</span></span>
+      ) : null}
+    </p>
   );
 }
