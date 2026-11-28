@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameCard, GameOption, LegOption, ParlayPrice, Pick, PropCard } from "@/lib/parlay/types";
 import { gameSelection } from "@/lib/parlay/cardMath";
+import { likelihoodGroups } from "@/lib/parlay/likelihood";
 import { Gap, Market, PropRow, SideToggle, useAdd } from "./Picker";
 import type { Validation } from "@/server/parlay/validation";
 
 type League = "nba" | "nfl";
 type AiState<T> = { status: "ok"; model: string; cached: boolean; text: T } | { status: "unavailable"; reason: string; message: string };
-type ParlayAi = { summary: string; legs: { id: string; note: string }[]; riskiest: { id: string; reason: string }[]; watch: string[]; removed: number };
+type ParlayAi = { summary: string; legs: { id: string; hit: string; miss: string }[]; watch: string[]; removed: number };
 type PicksAi = { overview: string; picks: { id: string; why: string; check: string }[]; removed: number };
 
 import { SLIP_STORE as STORE } from "./Picker";
@@ -362,19 +363,42 @@ function Numbers({ price, pricing }: { price: ParlayPrice; pricing: boolean }) {
 
 function Analysis({ a, price }: { a: AiState<ParlayAi>; price: ParlayPrice | null }) {
   if (a.status !== "ok") return <p className="mt-3 rounded-lg border border-navy-700 bg-navy-850 p-3 text-sm text-mute">{a.message}</p>;
-  const label = (id: string) => price?.legs[Number(id.slice(1)) - 1]?.label ?? id;
+  const legs = price?.legs ?? [];
+  // Grouping and order come from the model's probabilities (same rule as the fact pack), not from the AI.
+  const { order, least } = likelihoodGroups(legs.map((l) => l.p));
+  const notes = new Map(a.text.legs.map((l) => [l.id, l]));
+  const row = (i: number) => {
+    const l = legs[i];
+    const n = notes.get(`L${i + 1}`);
+    return (
+      <li key={l.id} className="rounded-md bg-navy-900 px-2.5 py-2">
+        <p className="flex justify-between gap-3"><span className="text-ink">{l.label}</span><span className="font-mono text-model">{pct(l.p)}</span></p>
+        {n?.hit ? <p className="mt-0.5 text-mute"><span className="font-600 text-good">Could hit: </span>{n.hit}</p> : null}
+        {n?.miss ? <p className="mt-0.5 text-mute"><span className="font-600 text-edge">Could miss: </span>{n.miss}</p> : null}
+      </li>
+    );
+  };
+  const most = order.filter((i) => !least.has(i));
+  const low = order.filter((i) => least.has(i));
+  const weakest = legs[order[order.length - 1]];
   return (
     <div className="mt-3 space-y-3 rounded-lg border border-navy-700 bg-navy-850 p-3 text-sm">
-      <p className="text-[0.72rem] text-faint">AI explanation · {a.model}{a.cached ? " · saved answer" : ""} · words only, the numbers come from the model</p>
+      <p className="text-[0.72rem] text-faint">AI explanation · {a.model}{a.cached ? " · saved answer" : ""} · ranking and numbers come from the model; the AI writes the reasons</p>
       {a.text.summary ? <p className="text-ink">{a.text.summary}</p> : null}
-      {a.text.riskiest.length ? (
+      {most.length ? (
         <div>
-          <p className="font-600 text-edge">Riskiest legs</p>
-          <ul className="mt-1 space-y-1">{a.text.riskiest.map((r) => <li key={r.id}><span className="text-ink">{label(r.id)}:</span> <span className="text-mute">{r.reason}</span></li>)}</ul>
+          <p className="font-600 text-good">Most likely to hit</p>
+          <ul className="mt-1 space-y-1.5">{most.map(row)}</ul>
         </div>
       ) : null}
-      {a.text.legs.length ? (
-        <ul className="space-y-1">{a.text.legs.map((l) => <li key={l.id}><span className="text-ink">{label(l.id)}:</span> <span className="text-mute">{l.note}</span></li>)}</ul>
+      {low.length ? (
+        <div>
+          <p className="font-600 text-edge">Least likely to hit</p>
+          <ul className="mt-1 space-y-1.5">{low.map(row)}</ul>
+        </div>
+      ) : null}
+      {legs.length > 1 && weakest ? (
+        <p className="text-[0.78rem] text-mute">The parlay can&apos;t be more likely than its weakest leg: {weakest.label} at {pct(weakest.p)}.</p>
       ) : null}
       {a.text.watch.length ? (
         <div>

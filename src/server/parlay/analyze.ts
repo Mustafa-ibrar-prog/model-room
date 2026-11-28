@@ -14,7 +14,7 @@ export type AiStatus<T> =
   | { status: "ok"; model: string; cached: boolean; text: T }
   | { status: "unavailable"; reason: string; message: string };
 
-const MAX_OUT = 450;
+const MAX_OUT = 700;
 
 function injuriesFor(catalogs: Catalog[], gameIds: Set<string>): string[] {
   return catalogs.flatMap((c) => [...c.injuries.entries()].filter(([g]) => gameIds.has(g)).flatMap(([, v]) => v));
@@ -31,7 +31,15 @@ export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who
   if (!cap.ok) return { status: "unavailable", reason: cap.scope, message: cap.message };
   const out = await generateJson({
     system: SYSTEM_RULES,
-    user: `Short notes on this parlay. summary: ONE sentence (max 25 words) on what it depends on. legs: for EVERY leg, one or two sentences (max 35 words total) on why it could win or fail, using only last_10_games, role, opponent, injury_report and flags when present. riskiest: at most 2 legs, one short sentence each. watch: at most 2 short items. Fact pack:\n${JSON.stringify(pack)}`,
+    user: [
+      "Explain this parlay leg by leg. The legs are already ranked and grouped by the model (likelihood_order, group, weakest_leg): keep that, never re-rank.",
+      "summary: ONE sentence (max 25 words): which legs look solid and which leg the parlay hinges on (weakest_leg).",
+      "legs: for EVERY leg: hit = one sentence (max 22 words) on the best reason it could hit; miss = one sentence (max 22 words) on the main way it could miss.",
+      "Use only last_10_games, recent_minutes_any_opponent, opponent, same_game_links, injury_report and flags. recent_minutes_any_opponent is his last 5 games against anyone, NOT against this opponent; never say 'against' the opponent for it.",
+      "Be specific to each leg; don't repeat the same reason across legs; don't mention missing sportsbook prices.",
+      "watch: at most 2 short items from injury_report or flags that could change things before tip-off; empty if none.",
+      `Fact pack:\n${JSON.stringify(pack)}`,
+    ].join(" "),
     schema: PARLAY_SCHEMA, maxOutputTokens: MAX_OUT, fetchImpl,
   });
   if (!out.ok) return { status: "unavailable", reason: out.reason, message: `${out.message} The numbers above are complete.` };

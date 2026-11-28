@@ -1,5 +1,6 @@
 import "server-only";
 import type { ParlayPrice, Pick } from "@/lib/parlay/types";
+import { likelihoodGroups } from "@/lib/parlay/likelihood";
 
 /**
  * Minimal fact packs for Gemini (TEST, Moose 2026-11-27). Only what a reader of the page already sees: leg labels,
@@ -27,10 +28,14 @@ const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 export interface ParlayPack {
   task: "explain_parlay";
   legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
-    last_10_games?: string; role?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[] }[];
+    last_10_games?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
+    /** Set by the model's probability, never by Gemini. */
+    group: "most likely to hit" | "least likely to hit"; likelihood_rank: number }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
   same_game_links: { legs: string[]; direction: "tend to win together" | "work against each other" }[];
-  riskiest_order: string[];
+  /** Leg ids from most to least likely to win (the model's probabilities). */
+  likelihood_order: string[];
+  weakest_leg: string;
   injury_report: string[];
   notes: string[];
 }
@@ -38,6 +43,7 @@ export interface ParlayPack {
 export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
   const ids = price.legs.map((_, i) => `L${i + 1}`);
   const eff = price.correlationEffect;
+  const { order, least } = likelihoodGroups(price.legs.map((l) => l.p));
   return {
     task: "explain_parlay",
     legs: price.legs.map((l, i) => ({
@@ -49,10 +55,12 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       sportsbook_price: l.price ? `${odds(l.price.american)}${l.price.bookTitle ? ` (${l.price.bookTitle})` : ""}` : "not stored",
       market_probability: pctText(l.marketP),
       ...(l.last10 ? { last_10_games: l.last10.text } : {}),
-      ...(l.context?.usage ? { role: l.context.usage } : {}),
+      ...(l.context?.usage ? { recent_minutes_any_opponent: l.context.usage } : {}),
       ...(l.context?.opp ? { opponent: l.context.opp } : {}),
       ...(pmToGemini() && l.polymarket?.implied != null ? { polymarket_probability: pctText(l.polymarket.implied), model_minus_polymarket: `${((l.p - l.polymarket.implied) * 100).toFixed(1)} points` } : {}),
-      flags: l.warnings.slice(0, 4),
+      flags: l.warnings.filter((w) => !/sportsbook price/i.test(w)).slice(0, 4),
+      group: least.has(i) ? "least likely to hit" as const : "most likely to hit" as const,
+      likelihood_rank: order.indexOf(i) + 1,
     })),
     parlay: {
       model_probability: price.p === null ? "no single number (not enough history for some links)" : pctText(price.p),
@@ -71,7 +79,8 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
       .slice(0, 8),
-    riskiest_order: price.legs.map((l, i) => ({ id: ids[i], p: l.p })).sort((a, b) => a.p - b.p).map((x) => x.id),
+    likelihood_order: order.map((i) => ids[i]),
+    weakest_leg: ids[order[order.length - 1]],
     injury_report: injuries.slice(0, 10),
     notes: price.warnings.filter((w) => w.level !== "info").map((w) => w.text).slice(0, 6),
   };
@@ -117,12 +126,11 @@ export const SYSTEM_RULES = [
 export const PARLAY_SCHEMA = {
   type: "OBJECT",
   properties: {
-    summary: { type: "STRING", description: "Two or three sentences on what this parlay depends on." },
-    legs: { type: "ARRAY", items: { type: "OBJECT", properties: { id: { type: "STRING" }, note: { type: "STRING" } }, required: ["id", "note"] } },
-    riskiest: { type: "ARRAY", items: { type: "OBJECT", properties: { id: { type: "STRING" }, reason: { type: "STRING" } }, required: ["id", "reason"] } },
+    summary: { type: "STRING", description: "One sentence: where this parlay is solid and which leg it hinges on." },
+    legs: { type: "ARRAY", items: { type: "OBJECT", properties: { id: { type: "STRING" }, hit: { type: "STRING" }, miss: { type: "STRING" } }, required: ["id", "hit", "miss"] } },
     watch: { type: "ARRAY", items: { type: "STRING" } },
   },
-  required: ["summary", "legs", "riskiest", "watch"],
+  required: ["summary", "legs", "watch"],
 };
 
 export const PICKS_SCHEMA = {
