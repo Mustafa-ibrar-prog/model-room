@@ -288,6 +288,13 @@ jobs:
           # NBA Pick of the Day (TEST, NBA player props only): one decision per Pacific date from the active NBA props
           # model; nothing is recorded without an approved line source; never fails the refresh.
           if [ $NBA_OK = 1 ]; then python -m modelroom potd --league nba > /tmp/potd.json || echo "::warning::Pick of the Day not built"; python3 -c "import json; d=json.load(open('/tmp/potd.json')); print('potd:', json.dumps({k: d.get(k) for k in ('new', 'graded', 'today', 'context')}))" 2>/dev/null || true; fi
+          # Evidence for the AI analysis (TEST, 2026-11-28): recent games, splits, defense vs position, NFL wind, all from
+          # data collected above. Read-only toward every model; a failure never fails the refresh.
+          python -m modelroom.evidence --league "$( { [ $NFL_OK = 1 ] && echo nfl; [ $NBA_OK = 1 ] && echo nba; } | paste -sd, -)" || echo "::warning::evidence files not rebuilt"
+          # Shadow hybrid record (TEST research, 2026-11-28): original 0.2.0 probability, the pre-game evidence numbers and,
+          # once coefficients are fitted (modelroom/nba/props/hybrid_coef.json), the hybrid probability, in
+          # preview-ledger/nba_props_hybrid_shadow_week_*.jsonl. Never published or read by the site; never fails the refresh.
+          run nba python -m modelroom.nba.props.hybrid_shadow || echo "::warning::hybrid shadow not recorded"
           run nba python -m modelroom nba props-monitor
           run nfl python -m modelroom nfl props-monitor
           run nba python -m modelroom nba props-shadow || echo "::warning::NBA shadow report failed; predictions are still recorded"
@@ -402,6 +409,7 @@ jobs:
           if [ "$DATA" = "success" ]; then
             git add -f modeling/data/published/nba.json modeling/data/published/nfl.json \
                        modeling/data/published/nfl_props.json modeling/data/published/nba_props.json \
+                       $(ls modeling/data/published/evidence_*.json 2>/dev/null) \
                        modeling/data/published/performance_nfl.json modeling/data/published/performance_nba.json \
                        modeling/data/published/market_results_nfl.json modeling/data/published/market_results_nba.json \
                        modeling/data/published/props_monitor_nba.json modeling/data/published/props_monitor_nfl.json \

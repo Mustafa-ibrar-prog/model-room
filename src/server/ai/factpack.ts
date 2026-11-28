@@ -1,6 +1,7 @@
 import "server-only";
 import type { ParlayPrice, Pick } from "@/lib/parlay/types";
 import { likelihoodGroups } from "@/lib/parlay/likelihood";
+import type { LegEvidence } from "@/lib/parlay/evidence";
 
 /**
  * Minimal fact packs for Gemini (TEST, Moose 2026-11-27). Only what a reader of the page already sees: leg labels,
@@ -25,43 +26,26 @@ export function sideOf(id: string): 1 | -1 {
 }
 const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 
+export interface PackEvidence { id: string; kind: string; text: string; lean: "supports" | "against" | "neutral" }
 export interface ParlayPack {
   task: "explain_parlay";
   legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
-    last_10_games?: string; last_10_misses?: string; recent_form?: string; cushion?: string; model_vs_recent?: string; recent_minutes_any_opponent?: string; opponent?: string; polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
+    polymarket_probability?: string; model_minus_polymarket?: string; flags: string[];
     /** Set by the model's probability, never by Gemini. */
-    group: "most likely to hit" | "least likely to hit"; likelihood_rank: number }[];
+    group: "most likely to hit" | "least likely to hit"; likelihood_rank: number;
+    /** Timestamped facts for this leg (built by Model Room); the only facts the AI may use about it. */
+    evidence: PackEvidence[];
+    /** What Model Room doesn't have for this leg. */
+    missing: string[] }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
   same_game_links: { legs: string[]; direction: "tend to win together" | "work against each other" }[];
   /** Leg ids from most to least likely to win (the model's probabilities). */
   likelihood_order: string[];
   weakest_leg: string;
-  injury_report: string[];
   notes: string[];
 }
 
-/** Words (from the box scores, not the model) that give Gemini something concrete for "could miss". */
-type Form = { last_10_misses?: string; recent_form?: string; cushion?: string; model_vs_recent?: string };
-function legForm(l: ParlayPrice["legs"][number]): Form {
-  const r = l.last10!;
-  const out: Form = { last_10_misses: `missed in ${r.misses} of last ${r.games}` };
-  const rate10 = r.hits / r.games;
-  const rate5 = r.last5Games ? r.last5Hits / r.last5Games : rate10;
-  // The model's chance against the plain hit rate: the most useful "why" when they disagree.
-  const gap = l.p < rate10 - 0.12 ? "well below" : l.p > rate10 + 0.12 ? "well above" : "close to";
-  out.model_vs_recent = `model ${pctText(l.p)} is ${gap} his recent ${r.hits} of ${r.games}`;
-  out.recent_form = rate5 > rate10 + 0.15 ? "hitting more often lately" : rate5 < rate10 - 0.15 ? "cooler lately than over the last 10" : "steady";
-  const m = /([\d.]+)\+/.exec(l.label) ?? /under ([\d.]+)/.exec(l.label);
-  const k = m ? Number(m[1]) : null;
-  if (k !== null && l.kind === "prop") {
-    const d = (r.avg - k) / Math.max(1, k);
-    const over = sideOf(l.id) > 0;
-    out.cushion = Math.abs(d) < 0.08 ? "average sits right around the line" : (d > 0) === over ? "average is comfortably on the winning side of the line" : "average is on the losing side of the line";
-  }
-  return out;
-}
-
-export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
+export function parlayPack(price: ParlayPrice, evidence: Record<string, LegEvidence>): ParlayPack {
   const ids = price.legs.map((_, i) => `L${i + 1}`);
   const eff = price.correlationEffect;
   const { order, least } = likelihoodGroups(price.legs.map((l) => l.p));
@@ -75,13 +59,12 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       model_probability: pctText(l.p),
       sportsbook_price: l.price ? `${odds(l.price.american)}${l.price.bookTitle ? ` (${l.price.bookTitle})` : ""}` : "not stored",
       market_probability: pctText(l.marketP),
-      ...(l.last10 ? { last_10_games: l.last10.text, ...legForm(l) } : {}),
-      ...(l.context?.usage ? { recent_minutes_any_opponent: l.context.usage } : {}),
-      ...(l.context?.opp ? { opponent: l.context.opp } : {}),
       ...(pmToGemini() && l.polymarket?.implied != null ? { polymarket_probability: pctText(l.polymarket.implied), model_minus_polymarket: `${((l.p - l.polymarket.implied) * 100).toFixed(1)} points` } : {}),
-      flags: l.warnings.filter((w) => !/sportsbook price/i.test(w)).slice(0, 4),
+      flags: l.warnings.filter((w) => !/sportsbook price|Listed /i.test(w)).slice(0, 3),
       group: least.has(i) ? "least likely to hit" as const : "most likely to hit" as const,
       likelihood_rank: order.indexOf(i) + 1,
+      evidence: (evidence[l.id]?.items ?? []).map((e) => ({ id: e.id, kind: e.kind, text: e.text, lean: e.lean })),
+      missing: (evidence[l.id]?.missing ?? []).slice(0, 6),
     })),
     parlay: {
       model_probability: price.p === null ? "no single number (not enough history for some links)" : pctText(price.p),
@@ -102,7 +85,6 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       .slice(0, 8),
     likelihood_order: order.map((i) => ids[i]),
     weakest_leg: ids[order[order.length - 1]],
-    injury_report: injuries.slice(0, 10),
     notes: price.warnings.filter((w) => w.level !== "info").map((w) => w.text).slice(0, 6),
   };
 }
@@ -144,11 +126,16 @@ export const SYSTEM_RULES = [
   "Be brief: no background, no generic advice, no restating the numbers unless they matter.",
 ].join(" ");
 
+const CLAIM = { type: "OBJECT", properties: { text: { type: "STRING" }, cites: { type: "ARRAY", items: { type: "STRING" } } }, required: ["text", "cites"] };
 export const PARLAY_SCHEMA = {
   type: "OBJECT",
   properties: {
     summary: { type: "STRING", description: "One sentence: where this parlay is solid and which leg it hinges on." },
-    legs: { type: "ARRAY", items: { type: "OBJECT", properties: { id: { type: "STRING" }, hit: { type: "STRING" }, miss: { type: "STRING" } }, required: ["id", "hit", "miss"] } },
+    legs: { type: "ARRAY", items: { type: "OBJECT", properties: {
+      id: { type: "STRING" }, hit: CLAIM, miss: CLAIM,
+      assessment: { type: "STRING", enum: ["evidence backs the model", "evidence is mixed", "evidence cuts against the model", "too little evidence"] },
+      gap: { type: "STRING", description: "The one missing piece of information that matters most for this leg, from its missing list, or empty." },
+    }, required: ["id", "hit", "miss", "assessment"] } },
     watch: { type: "ARRAY", items: { type: "STRING" } },
   },
   required: ["summary", "legs", "watch"],

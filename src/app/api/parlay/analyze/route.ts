@@ -1,6 +1,7 @@
 import { liveMarketsOn } from "@/server/markets/polymarketLive";
 import { NextResponse, type NextRequest } from "next/server";
 import { explainParlay } from "@/server/parlay/analyze";
+import { buildEvidence, loadSources } from "@/server/ai/evidence";
 import { loadTable } from "@/server/parlay/correlations";
 import { priceParlay } from "@/server/parlay/price";
 import { catalogsFor, noStore, notFound, parlayEnabled, readLegIds, visitor, withVisitor } from "@/server/parlay/request";
@@ -16,6 +17,8 @@ export async function POST(req: NextRequest) {
   const catalogs = await catalogsFor(ids, new Date(), liveMarketsOn());
   const price = priceParlay(ids, catalogs, loadTable());
   const v = visitor(req);
-  const ai = await explainParlay(price, catalogs, v);
-  return withVisitor(NextResponse.json({ price, ai }, { headers: noStore }), v);
+  // Evidence is built for every leg whether or not the AI runs (it's Model Room's own data, shown as is).
+  const evidence = price.ok ? buildEvidence(price.legs, await loadSources([...new Set(price.legs.map((l) => l.league))])) : {};
+  const ai = await explainParlay(price, evidence, v);
+  return withVisitor(NextResponse.json({ price, ai, evidence }, { headers: noStore }), v);
 }
