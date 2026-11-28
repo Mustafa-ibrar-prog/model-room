@@ -10,7 +10,7 @@ import "server-only";
  *   - lengths are capped
  * The page always shows the engine's numbers from the pricing step, never numbers from this text.
  */
-const BANNED = /\b(lock|locks|guarantee[ds]?|can'?t lose|sure thing|free money|bet the house|max bet|hammer)\b/i;
+const BANNED = /\b(lock|locks|guarantee[ds]?|can'?t lose|sure thing|free money|bet the house|max bet|hammer|L\d{1,2}|[a-z]+_[a-z_]+)\b/i;
 const NUM = /[+-]?\d+(?:[.,]\d+)?\s*%?/g;
 
 /** All number tokens that appear anywhere in the fact pack, normalised. */
