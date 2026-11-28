@@ -1,0 +1,73 @@
+name: AI evidence check (TEST, manual)
+
+# Checks the evidence-based AI analysis on the TEST site: one Analyze call and one board review (2 Gemini requests at
+# most; answers are cached). Prints counts and yes/no checks only: no text, lines, prices or player-line pairs.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://model-room-git-preview-computer-citi.vercel.app
+    steps:
+      - name: Analyze and review
+        run: |
+          python3 - <<'PY'
+          import json, os, re, urllib.request
+          site = os.environ["SITE"]
+          get = lambda u: json.load(urllib.request.urlopen(site + u, timeout=90))
+          def post(u, body=None):
+              r = urllib.request.Request(site + u, data=json.dumps(body or {}).encode(), headers={"content-type": "application/json"}, method="POST")
+              return json.load(urllib.request.urlopen(r, timeout=120))
+          ids = []
+          for lg, mks in (("nba", ["points", "rebounds", "assists"]), ("nfl", ["receiving_yards"])):
+              gs = [g for g in get(f"/api/parlay/games?league={lg}")["games"] if g["props"]]
+              if not gs: continue
+              d = get(f"/api/parlay/legs?league={lg}&game={gs[0]['gameId']}")
+              for mk in mks:
+                  c = next((c for c in d["cards"]["props"] if c["market"] == mk and c["thresholds"]), None)
+                  if c: ids.append(f"{lg}~{c['gameId']}~prop~{c['playerId']}~{mk}~m{c['thresholds'][len(c['thresholds'])//2]}~o")
+              sp = [l["id"] for l in d["legs"] if l["kind"] in ("spread", "total")][:1]
+              ids += sp
+          r = post("/api/parlay/analyze", {"legs": ids})
+          ev = r.get("evidence", {})
+          print("legs sent:", len(ids), "| priced:", r["price"]["ok"], "| evidence for", len(ev), "legs")
+          kinds = {}
+          for e in ev.values():
+              for x in e["items"]:
+                  kinds[x["kind"]] = kinds.get(x["kind"], 0) + 1
+              assert all(x["source"] for x in e["items"]), "item without a source"
+          print("evidence items by kind:", json.dumps(kinds), "| with as-of time:", sum(1 for e in ev.values() for x in e["items"] if x["asOf"]), "of", sum(len(e["items"]) for e in ev.values()))
+          print("missing-data lines per leg:", [len(e["missing"]) for e in ev.values()])
+          ai = r["ai"]
+          print("AI status:", ai["status"], ai.get("reason", ""), "| cached:", ai.get("cached"))
+          if ai["status"] == "ok":
+              t = ai["text"]
+              print("legs explained:", len(t["legs"]), "| hit:", sum(bool(l["hit"]["text"]) for l in t["legs"]), "| miss:", sum(bool(l["miss"]["text"]) for l in t["legs"]),
+                    "| claims citing evidence:", sum(bool(l[k]["cites"]) for l in t["legs"] for k in ("hit", "miss")),
+                    "| assessments:", json.dumps({a: sum(l["assessment"] == a for l in t["legs"]) for a in {l["assessment"] for l in t["legs"]}}),
+                    "| gaps named:", sum(bool(l["gap"]) for l in t["legs"]), "| sentences removed by checks:", t["removed"])
+              leg_ids = {f"L{i+1}": l["id"] for i, l in enumerate(r["price"]["legs"])}
+              bad = 0
+              for l in t["legs"]:
+                  own = {x["id"] for x in ev[leg_ids[l["id"]]]["items"]}
+                  bad += sum(1 for k in ("hit", "miss") for c in l[k]["cites"] if c not in own)
+              print("citations outside the leg's own evidence:", bad)
+              txt = " ".join(l[k]["text"] for l in t["legs"] for k in ("hit", "miss"))
+              print("duplicate sentences:", len(txt.split(". ")) - len(set(txt.split(". "))))
+          g = get("/api/parlay/review")
+          print("review: scanned", g["scanned"], "| candidates", len(g["items"]), "| lists", json.dumps({k: sum(x["list"] == k for x in g["items"]) for k in ("closer look", "possible weakness")}),
+                "| with a market:", sum(bool(x["market"]) for x in g["items"]))
+          rv = post("/api/parlay/review")
+          a2 = rv["ai"]
+          print("review AI:", a2["status"], a2.get("reason", ""))
+          if a2["status"] == "ok":
+              c = a2["text"]["candidates"]
+              print("candidates reviewed:", len(c), "| verdicts:", json.dumps({v: sum(x["verdict"] == v for x in c) for v in {x["verdict"] for x in c}}),
+                    "| why with cites:", sum(bool(x["why"]["cites"]) for x in c), "| removed:", a2["text"]["removed"])
+          PY
