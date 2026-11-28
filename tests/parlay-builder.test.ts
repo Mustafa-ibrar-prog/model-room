@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { buildCatalog, gridP, linePs, type Catalog } from "@/server/parlay/legs";
+import { buildCatalog, gridP, last10, linePs, mainLine, NO_PRICE, type Catalog } from "@/server/parlay/legs";
 import { priceParlay } from "@/server/parlay/price";
 import { relate, type Table, type Variable } from "@/server/parlay/correlations";
 import { discoverPicks } from "@/server/parlay/discover";
@@ -94,7 +94,7 @@ describe("parlay legs", () => {
     const over = c.legs.get("nba~g1~prop~p1~points~b19.5~o")!;
     expect(over.option.source).toBe("book_line");
     expect(over.option.price).toMatchObject({ american: 105, book: "fanduel", books: 2 });
-    expect(over.option.marketP).toBe(0.49);
+    expect(over.option.marketP).toBeCloseTo((0.5 + (1 / 2.05) / (1 / 2.05 + 1.25 / 2.25)) / 2, 3); // no-vig median of books at 19.5
     const model = c.legs.get("nba~g1~prop~p2~points~m20~o")!;
     expect(model.option.source).toBe("model_line");
     expect(model.option.price).toBeNull();
@@ -112,6 +112,79 @@ describe("parlay legs", () => {
     expect([...c.legs.keys()].some((k) => k.includes("~g0~"))).toBe(false);
     expect(c.legs.has("nba~g1~prop~p1~points~m40~o")).toBe(false); // 1%: outside 3%-97%
     expect(c.injuries.get("g1")?.some((x) => x.includes("Q Guy"))).toBe(true);
+  });
+});
+
+describe("sportsbook odds on legs", () => {
+  it("offers the line most books posted, never a median that no book offers", () => {
+    expect(mainLine([{ line: 27.5 }, { line: 28.5 }, { line: 28.5 }])).toBe(28.5);
+    expect(mainLine([{ line: 27.5 }, { line: 28.5 }])).toBe(27.5);                // tie: lower (both equally near the median 28)
+    expect([27.5, 28.5]).toContain(mainLine([{ line: 27.5 }, { line: 28.5 }]));
+  });
+  it("keeps every book's quote and when it was updated; prices only count at the leg's exact line", () => {
+    const o = catalog().legs.get("nba~g1~prop~p1~points~b19.5~o")!.option;
+    expect(o.quotes!.map((q) => q.title).sort()).toEqual(["BetMGM", "DraftKings", "FanDuel"]);
+    expect(o.quotes!.find((q) => q.book === "betmgm")).toMatchObject({ line: 20.5, price: 120 });
+    expect(o.price!.books).toBe(2);                                               // BetMGM's 20.5 doesn't price the 19.5 leg
+    expect(o.updatedAt).toBe("2026-11-27T13:42:00Z");
+    expect(o.line).toBe(19.5);
+  });
+  it("model thresholds say there is no sportsbook price, in words", () => {
+    const o = catalog().legs.get("nba~g1~prop~p2~points~m20~o")!.option;
+    expect(o.source).toBe("model_line");
+    expect(o.price).toBeNull();
+    expect(o.noPrice).toContain(NO_PRICE);
+    expect(o.noPrice).toContain("not a sportsbook line");
+  });
+  it("game lines: each book's spread, total and moneyline from R2; best price; no-vig; missing exact line explained", () => {
+    const gl = { league: "nba", generated_at: "2026-11-27T19:45:00Z", games: { g1: { commence_time: "2026-11-28T00:30:00Z", collected_at: "2026-11-27T19:45:00Z", books: {
+      draftkings: { title: "DraftKings", spread: { line: -2.5, home: -110, away: -110, last_update: "2026-11-27T19:00:00Z" }, total: { line: 222, over: -105, under: -115, last_update: "2026-11-27T19:00:00Z" }, moneyline: { home: -145, away: 125, last_update: "2026-11-27T19:00:00Z" } },
+      fanduel: { title: "FanDuel", spread: { line: -3, home: -102, away: -118, last_update: "2026-11-27T19:10:00Z" }, moneyline: { home: -150, away: 130, last_update: "2026-11-27T19:10:00Z" } },
+    } } } };
+    const c = buildCatalog("nba", board(), propsBoard(), {}, NOW, gl);
+    const home = c.legs.get("nba~g1~spread~home~-2.5")!.option;
+    expect(home.price).toMatchObject({ american: -110, book: "draftkings", books: 1 });
+    expect(home.quotes!.find((q) => q.book === "fanduel")!.line).toBe(-3);
+    const away = c.legs.get("nba~g1~spread~away~-2.5")!.option;
+    expect(away.quotes!.find((q) => q.book === "draftkings")).toMatchObject({ line: 2.5, price: -110 });
+    expect(c.legs.get("nba~g1~ml~away")!.option.price).toMatchObject({ american: 130, book: "fanduel" });
+    expect(c.legs.get("nba~g1~total~over~222")!.option.price!.american).toBe(-105);
+    const g2 = c.legs.get("nba~g2~spread~home~-2.5")!.option;                     // no book data stored for g2
+    expect(g2.price).toBeNull();
+    expect(g2.noPrice).toBe(NO_PRICE);
+  });
+});
+
+describe("last 10 games", () => {
+  const pts = [30, 25, 24, 18, 27, 25, 31, 22, 26, 29, 40];
+  it("uses the 10 most recent played games and the exact line; whole-number lines push", () => {
+    const r = last10(pts, 24.5, 1, "line", "points", "Points Over 24.5")!;
+    expect(r.games).toBe(10);
+    expect(r.hits).toBe(7);
+    expect(r.misses).toBe(3);
+    expect(r.avg).toBeCloseTo(25.7, 1);
+    expect(r.last5Hits).toBe(3);
+    expect(r.text).toBe("Points Over 24.5: hit in 7 of last 10. Averaging 25.7 points. 3 of the last 5 hit.");
+    const w = last10(pts, 25, 1, "line", "points", "Points Over 25")!;
+    expect(w.pushes).toBe(2);
+    expect(w.hits + w.misses + w.pushes).toBe(10);
+    const u = last10(pts, 24.5, -1, "line", "points", "Points Under 24.5")!;
+    expect(u.hits).toBe(3);
+  });
+  it("model thresholds count 'at least K' with no pushes; no game log means no record", () => {
+    const r = last10(pts, 25, 1, "atleast", "points", "Points 25+")!;
+    expect(r.hits).toBe(7);
+    expect(r.pushes).toBe(0);
+    expect(last10([], 25, 1, "atleast", "points", "x")).toBeNull();
+    expect(last10(undefined, 25, 1, "atleast", "points", "x")).toBeNull();
+    expect(last10([null, 12, null], 10, 1, "atleast", "points", "x")!.games).toBe(1);
+  });
+  it("every prop leg in the catalog carries its record when the board has a log", () => {
+    const c = buildCatalog("nba", board(), { ...propsBoard(), games: propsBoard().games.map((g) => ({ ...g, players: g.players.map((p) => ({ ...p, recent: { games: [{ date: "2026-11-25", opp: "BOS", minutes: 34 }], values: { points: [22, 18, 30] } } })) })) } as never, { "2026-11-27": view() }, NOW);
+    const o = c.legs.get("nba~g1~prop~p1~points~b19.5~o")!.option;
+    expect(o.last10).toMatchObject({ games: 3, hits: 2 });
+    expect(o.context?.usage).toBe("34.0 minutes a game over his last 1");
+    expect(c.legs.get("nba~g1~prop~p1~rebounds~m5~o")!.option.last10).toBeNull();  // no rebounds log: none invented
   });
 });
 
@@ -257,6 +330,15 @@ describe("AI text validation", () => {
     expect(c.removed).toBe(2);
     expect(cleanText("Rounded to 57%.", allowed).removed).toBe(1);
     expect(cleanText("Fair odds would be +250.", allowed).removed).toBe(1);
+  });
+  it("keeps AI text short: one-sentence summary, at most two sentences per leg, two risks, two watch items", () => {
+    const v = validateParlayAi({ summary: "One. Two. Three.", legs: [{ id: "L1", note: "A. B. C. D." }],
+      riskiest: [{ id: "L1", reason: "x. y." }, { id: "L2", reason: "z." }, { id: "L1", reason: "w." }], watch: ["a.", "b.", "c."] }, pack)!;
+    expect(v.summary).toBe("One.");
+    expect(v.legs[0].note).toBe("A. B.");
+    expect(v.riskiest).toHaveLength(2);
+    expect(v.riskiest[0].reason).toBe("x.");
+    expect(v.watch).toHaveLength(2);
   });
   it("drops ids Gemini invented", () => {
     const v = validateParlayAi({ summary: "Two separate games.", legs: [{ id: "L1", note: "Home side." }, { id: "L9", note: "Made up." }], riskiest: [{ id: "L7", reason: "x" }], watch: [] }, pack)!;

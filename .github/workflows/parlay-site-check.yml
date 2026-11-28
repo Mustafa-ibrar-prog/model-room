@@ -32,13 +32,24 @@ jobs:
               g = json.load(open(f"/tmp/games_{lg}.json"))["games"]
               withlegs = [x for x in g if x["props"] or x["lines"]]
               print(f"{lg}: games {len(g)}, with legs {len(withlegs)}")
-              if withlegs:
-                  gid = withlegs[0]["gameId"]
-                  legs = json.load(urllib.request.urlopen(f"{site}/api/parlay/legs?league={lg}&game={gid}"))["legs"]
-                  src = {}
-                  for l in legs: src[l["source"]] = src.get(l["source"], 0) + 1
-                  print(f"{lg}: first game legs {len(legs)} by source {src}")
-                  ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:2]
+              tot = {"games": 0, "game_lines": 0, "game_lines_priced": 0, "game_lines_with_books": 0, "book_props": 0, "book_props_priced": 0, "model_props": 0, "props_with_last10": 0, "no_price_text": 0, "max_books": 0}
+              for x in withlegs[:16]:
+                  legs = json.load(urllib.request.urlopen(f"{site}/api/parlay/legs?league={lg}&game={x['gameId']}"))["legs"]
+                  tot["games"] += 1
+                  for l in legs:
+                      if l["kind"] != "prop":
+                          tot["game_lines"] += 1; tot["game_lines_priced"] += bool(l["price"]); tot["game_lines_with_books"] += bool(l.get("quotes"))
+                      elif l["source"] == "book_line":
+                          tot["book_props"] += 1; tot["book_props_priced"] += bool(l["price"])
+                      else:
+                          tot["model_props"] += 1
+                      if l["kind"] == "prop": tot["props_with_last10"] += bool(l.get("last10"))
+                      if not l["price"]: tot["no_price_text"] += bool(l.get("noPrice"))
+                      tot["max_books"] = max(tot["max_books"], len(l.get("quotes") or []))
+                      if l["source"] == "model_line" and l["price"]: print("PROBLEM: a model line carries a price")
+                  if len(ids) < 6:
+                      ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:1]
+              print(f"{lg} (first {tot['games']} games):", json.dumps(tot))
           req = urllib.request.Request(f"{site}/api/parlay/price", data=json.dumps({"legs": ids}).encode(), headers={"content-type": "application/json"})
           p = json.load(urllib.request.urlopen(req))
           print("price ok:", p["ok"], "| legs", len(p["legs"]), "| single number:", p["p"] is not None, "| range present:", p["range"] is not None, "| warnings", len(p["warnings"]))

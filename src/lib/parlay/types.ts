@@ -13,6 +13,33 @@ export interface BookPrice {
   capturedAt: string | null;
 }
 
+/** One sportsbook's quote for a leg's market (its own line, which may differ from the leg's line). */
+export interface BookQuote {
+  book: string;
+  title: string;
+  line: number | null;
+  /** Price for this leg's side at the book's line. */
+  price: number | null;
+  /** Price for the other side. */
+  other: number | null;
+  lastUpdate: string | null;
+}
+
+/** The player's last 10 played games against this leg's exact line (box scores; not the model's probability). */
+export interface Last10 {
+  games: number;
+  hits: number;
+  misses: number;
+  pushes: number;
+  avg: number;
+  last5Hits: number;
+  last5Games: number;
+  values: number[];
+  /** Per game, newest first: 1 hit, 0 push, -1 miss. */
+  marks: number[];
+  text: string;
+}
+
 /** One selectable leg. Every number here is computed on the server from stored data; the page never sends numbers back. */
 export interface LegOption {
   id: string;
@@ -36,6 +63,17 @@ export interface LegOption {
   support?: string | null;
   injury?: string | null;
   interpolated?: boolean;
+  /** Every stored sportsbook quote for this market (book lines and game lines only). */
+  quotes?: BookQuote[];
+  /** The leg's line from this side's point of view (null for moneylines and model thresholds). */
+  line?: number | null;
+  /** When the newest stored quote was updated by its book. */
+  updatedAt?: string | null;
+  /** Why there is no price, in words (shown instead of a dash). */
+  noPrice?: string | null;
+  last10?: Last10 | null;
+  /** Opponent and recent minutes / snaps, for the short AI note (from the board, never estimated). */
+  context?: { opp?: string; usage?: string } | null;
 }
 
 export interface GameOption {

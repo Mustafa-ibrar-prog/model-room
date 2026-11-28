@@ -79,18 +79,19 @@ def implied(american) -> float | None:
     return 100 / (o + 100) if o > 0 else -o / (-o + 100)
 
 
-def rows_from_response(resp: dict, game: dict | None, aliases: dict[str, str], fetched_at: str, raw_sha256: str) -> list[dict]:
+def rows_from_response(resp: dict, game: dict | None, aliases: dict[str, str], fetched_at: str, raw_sha256: str,
+                       market: str = "player_points") -> list[dict]:
     """One row per book x player x line, with Over and Under prices side by side, as the provider gave them."""
     pairs: dict[tuple, dict] = {}
     for b in resp.get("bookmakers") or []:
         for m in b.get("markets") or []:
-            if m.get("key") != "player_points":
+            if m.get("key") != market:
                 continue
             for o in m.get("outcomes") or []:
                 k = (b.get("key"), o.get("description"), o.get("point"))
                 r = pairs.setdefault(k, {"event_id": resp.get("id"), "commence_time": resp.get("commence_time"), "home_team": resp.get("home_team"),
                                          "away_team": resp.get("away_team"), "book_key": b.get("key"), "book_title": b.get("title"),
-                                         "market": "player_points", "book_last_update": m.get("last_update"), "player_name": o.get("description"),
+                                         "market": market, "book_last_update": m.get("last_update"), "player_name": o.get("description"),
                                          "line": o.get("point"), "over_price": None, "under_price": None})
                 side = str(o.get("name", "")).lower()
                 if side in ("over", "under"):

@@ -1,8 +1,8 @@
 import "server-only";
 import { loadBoard, loadPropsBoard } from "@/server/engine/board";
-import { loadPropLines, propLinesEnabled, ptDate, type DayView } from "@/server/markets/propLines";
+import { NFL_PREFIX, loadGameLines, loadPropLines, propLinesEnabled, ptDate, type DayView, type GameLinesView, type PlayerBookLines } from "@/server/markets/propLines";
 import { americanToDecimal } from "@/lib/parlay/joint";
-import type { BookPrice, GameOption, LegOption } from "@/lib/parlay/types";
+import type { BookPrice, BookQuote, GameOption, Last10, LegOption } from "@/lib/parlay/types";
 import type { League } from "@/types/domain";
 import type { EngineBoard, EngineGame } from "@/types/engine";
 import type { EnginePropMarket, EnginePropPlayer, EnginePropsBoard } from "@/types/props";
@@ -10,12 +10,13 @@ import type { Variable } from "./correlations";
 
 /**
  * Every leg the Parlay Builder can offer, built from what is already stored (TEST, Moose 2026-11-27):
- *   game lines  the consensus spread, total and moneyline on the league board, priced with the model's probabilities
- *               at those exact lines; moneyline prices as stored.
- *   NBA points  sportsbook lines captured to private R2 (TEST only), priced from the model's calibrated distribution.
- *   props       the model's own "at least K" thresholds (no sportsbook line; labelled as such).
- * Games that have started are not offered. Nothing here is estimated: a leg without data is left out.
- * Leg ids carry everything needed to re-derive the leg on the server, including the line, so a moved line is caught.
+ *   game lines  the consensus spread / total / moneyline on the league board, priced with the model's probabilities at
+ *               those exact lines; each sportsbook's own line and prices from private R2 (sources/gamelines_r2.py).
+ *   book props  NBA points and NFL receiving yards at the line most books posted (private R2), every book's quote kept.
+ *   model props the model's own "at least K" thresholds: never shown as a sportsbook line.
+ * Every prop leg carries the player's last 10 played games against its exact line (box scores from the board).
+ * Games that have started are not offered. Nothing is estimated: a leg without data is left out; a leg without a
+ * price says so in words.
  */
 export interface CatalogLeg { option: LegOption; variable: Variable; side: 1 | -1 }
 export interface Catalog {
@@ -28,9 +29,22 @@ export interface Catalog {
   asOf: { label: string; at: string | null }[];
 }
 
+/** The prop market each league's stored sportsbook lines cover (one market per game: the free-plan budget). */
+export const BOOK_MARKET: Record<League, { market: string; noun: string }> = {
+  nba: { market: "points", noun: "points" },
+  nfl: { market: "receiving_yards", noun: "receiving yards" },
+};
+export const NO_PRICE = "No sportsbook price available";
+
 const MIN_P = 0.03;
 const MAX_P = 0.97;
 const r4 = (x: number) => Math.round(x * 10000) / 10000;
+const median = (xs: number[]) => {
+  if (!xs.length) return null;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
 
 export function legId(parts: (string | number)[]): string {
   return parts.map(String).join("~");
@@ -60,104 +74,188 @@ export function linePs(m: EnginePropMarket, line: number) {
   return { over: over.p, under: Math.max(0, 1 - atLeastLine.p), push, interpolated: over.interpolated || atLeastLine.interpolated };
 }
 
-const started = (start: string | null, now: Date) => !start || new Date(start).getTime() <= now.getTime();
-const gameText = (g: { away: { abbr: string }; home: { abbr: string } }) => `${g.away.abbr} @ ${g.home.abbr}`;
-
-function bestPrice(books: { book: string; title: string; line: number; over: number | null; under: number | null; last_update: string | null }[], line: number, side: "over" | "under"): BookPrice | null {
-  const at = books.filter((b) => Math.abs(b.line - line) < 1e-9 && b[side] !== null);
-  if (!at.length) return null;
-  const best = at.reduce((a, b) => (americanToDecimal(b[side]!) > americanToDecimal(a[side]!) ? b : a));
-  return { american: best[side]!, book: best.book, bookTitle: best.title, books: at.length, capturedAt: best.last_update };
+/** The line the most books posted (ties: nearest the median line, then the lower). A real posted line, never a median. */
+export function mainLine(books: { line: number }[]): number | null {
+  if (!books.length) return null;
+  const count = new Map<number, number>();
+  for (const b of books) count.set(b.line, (count.get(b.line) ?? 0) + 1);
+  const med = median(books.map((b) => b.line))!;
+  return [...count.entries()].sort((a, b) => b[1] - a[1] || Math.abs(a[0] - med) - Math.abs(b[0] - med) || a[0] - b[0])[0][0];
 }
 
-function gameLines(league: League, g: EngineGame, out: CatalogLeg[]) {
+function best(quotes: BookQuote[], line: number | null): BookPrice | null {
+  const at = quotes.filter((q) => q.price !== null && (line === null || (q.line !== null && Math.abs(q.line - line) < 1e-9)));
+  if (!at.length) return null;
+  const b = at.reduce((x, y) => (americanToDecimal(y.price!) > americanToDecimal(x.price!) ? y : x));
+  return { american: b.price!, book: b.book, bookTitle: b.title, books: at.length, capturedAt: b.lastUpdate };
+}
+
+/** Median no-vig probability for this side across books quoting this exact line with both prices. */
+function noVig(quotes: BookQuote[], line: number | null): number | null {
+  const ps = quotes
+    .filter((q) => q.price !== null && q.other !== null && (line === null || (q.line !== null && Math.abs(q.line - line) < 1e-9)))
+    .map((q) => { const a = 1 / americanToDecimal(q.price!); const b = 1 / americanToDecimal(q.other!); return a / (a + b); });
+  const m = median(ps);
+  return m === null ? null : r4(m);
+}
+const newest = (quotes: BookQuote[]) => quotes.reduce<string | null>((a, q) => (q.lastUpdate && (!a || q.lastUpdate > a) ? q.lastUpdate : a), null);
+
+// ------------------------------------------------------------------------------------------------- last 10
+const fmt1 = (x: number) => (Math.round(x * 10) / 10).toFixed(1);
+
+/**
+ * The player's last 10 played games (newest first, from the board's box scores) against this exact line.
+ *   book line L, over:  win above L, push at exactly L (whole-number lines only), loss below
+ *   model "K+":        win at K or more; "under K": win below K (no pushes)
+ * null when the board has no game log for this stat (never invented).
+ */
+export function last10(values: (number | null)[] | undefined, line: number, side: 1 | -1, kind: "line" | "atleast", noun: string, label: string): Last10 | null {
+  const v = (values ?? []).filter((x): x is number => typeof x === "number" && Number.isFinite(x)).slice(0, 10);
+  if (!v.length) return null;
+  const res = v.map((x) => {
+    if (kind === "atleast") return (side > 0 ? x >= line : x < line) ? 1 : -1;
+    if (x === line) return 0;
+    return (side > 0 ? x > line : x < line) ? 1 : -1;
+  });
+  const hits = res.filter((r) => r === 1).length;
+  const pushes = res.filter((r) => r === 0).length;
+  const five = res.slice(0, 5);
+  const avg = v.reduce((a, b) => a + b, 0) / v.length;
+  const l5 = five.filter((r) => r === 1).length;
+  const text = `${label}: hit in ${hits} of last ${v.length}${pushes ? ` (${pushes} push${pushes > 1 ? "es" : ""})` : ""}. Averaging ${fmt1(avg)} ${noun}. ${l5} of the last ${five.length} hit.`;
+  return { games: v.length, hits, misses: v.length - hits - pushes, pushes, avg: Math.round(avg * 10) / 10, last5Hits: l5, last5Games: five.length, values: v, marks: res, text };
+}
+
+function usageOf(league: League, pl: EnginePropPlayer): string | undefined {
+  const g = (pl.recent?.games ?? []).slice(0, 5);
+  if (!g.length) return undefined;
+  const avg = (k: string) => {
+    const xs = g.map((x) => x[k]).filter((x): x is number => typeof x === "number");
+    return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+  };
+  if (league === "nba") {
+    const m = avg("minutes");
+    return m === null ? undefined : `${fmt1(m)} minutes a game over his last ${g.length}`;
+  }
+  const snaps = avg("snap_pct");
+  const t = avg("targets");
+  const parts = [snaps !== null ? `${Math.round(snaps)}% of snaps` : null, t !== null && t > 0 ? `${fmt1(t)} targets` : null].filter(Boolean);
+  return parts.length ? `${parts.join(", ")} a game over his last ${g.length}` : undefined;
+}
+
+// ------------------------------------------------------------------------------------------------- builders
+const started = (start: string | null, now: Date) => !start || new Date(start).getTime() <= now.getTime();
+const gameText = (g: { away: { abbr: string }; home: { abbr: string } }) => `${g.away.abbr} @ ${g.home.abbr}`;
+const fmt = (x: number) => (x > 0 ? `+${x}` : `${x}`);
+
+function gameLines(league: League, g: EngineGame, gl: GameLinesView | null, out: CatalogLeg[]) {
   const m = g.market;
   const e = g.edges;
   if (!m || !e) return;
   const base = { league, gameId: g.game_id };
   const margin: Variable = { kind: "margin", league, gameId: g.game_id };
   const total: Variable = { kind: "total", league, gameId: g.game_id };
-  const fmt = (x: number) => (x > 0 ? `+${x}` : `${x}`);
-  const priceOf = (american: number | null | undefined): BookPrice | null =>
-    american == null ? null : { american, book: null, bookTitle: "Consensus", books: m.books, capturedAt: m.captured_at };
+  const books = Object.entries(gl?.games[g.game_id]?.books ?? {});
+  const withQuotes = (quotes: BookQuote[], line: number | null, fallback: number | null | undefined) => {
+    const price = best(quotes, line) ?? (fallback == null ? null : { american: fallback, book: null, bookTitle: "Consensus", books: m.books, capturedAt: m.captured_at });
+    const sameLine = line === null || quotes.some((q) => q.line !== null && Math.abs(q.line - line) < 1e-9);
+    return {
+      price, quotes, updatedAt: newest(quotes) ?? m.captured_at, marketP: noVig(quotes, line),
+      noPrice: price ? null : quotes.length && !sameLine ? `${NO_PRICE} at exactly this line (it's the median of ${m.books} books); see each book's own line` : NO_PRICE,
+    };
+  };
   if (m.spread != null && e.at_spread && Math.abs(e.at_spread.line - m.spread) < 1e-9) {
     for (const side of ["home", "away"] as const) {
       const s = e.at_spread[side];
       const line = side === "home" ? m.spread : -m.spread;
-      out.push({
-        variable: margin, side: side === "home" ? 1 : -1,
-        option: { ...base, id: legId([league, g.game_id, "spread", side, m.spread]), kind: "spread", group: "Game lines",
-          label: `${g[side].abbr} ${fmt(line)}`, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0,
-          price: priceOf(s.market_price), marketP: s.market_implied ?? null, source: "market_line", team: g[side].abbr },
-      });
+      const quotes: BookQuote[] = books.filter(([, b]) => b.spread).map(([k, b]) => ({
+        book: k, title: b.title, line: side === "home" ? b.spread!.line : -b.spread!.line,
+        price: b.spread![side], other: b.spread![side === "home" ? "away" : "home"], lastUpdate: b.spread!.last_update }));
+      out.push({ variable: margin, side: side === "home" ? 1 : -1, option: { ...base, id: legId([league, g.game_id, "spread", side, m.spread]), kind: "spread",
+        group: "Game lines", label: `${g[side].abbr} ${fmt(line)}`, line, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0, source: "market_line",
+        team: g[side].abbr, ...withQuotes(quotes, line, s.market_price) } });
     }
   }
   if (m.total != null && e.at_total && Math.abs(e.at_total.line - m.total) < 1e-9) {
     for (const side of ["over", "under"] as const) {
       const s = e.at_total[side];
-      out.push({
-        variable: total, side: side === "over" ? 1 : -1,
-        option: { ...base, id: legId([league, g.game_id, "total", side, m.total]), kind: "total", group: "Game lines",
-          label: `${side === "over" ? "Over" : "Under"} ${m.total} total points`, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0,
-          price: priceOf(s.market_price), marketP: s.market_implied ?? null, source: "market_line" },
-      });
+      const quotes: BookQuote[] = books.filter(([, b]) => b.total).map(([k, b]) => ({
+        book: k, title: b.title, line: b.total!.line, price: b.total![side], other: b.total![side === "over" ? "under" : "over"], lastUpdate: b.total!.last_update }));
+      out.push({ variable: total, side: side === "over" ? 1 : -1, option: { ...base, id: legId([league, g.game_id, "total", side, m.total]), kind: "total",
+        group: "Game lines", label: `${side === "over" ? "Over" : "Under"} ${m.total} total points`, line: m.total, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0,
+        source: "market_line", ...withQuotes(quotes, m.total, s.market_price) } });
     }
   }
-  if (e.moneyline && (m.home_ml != null || m.away_ml != null)) {
-    const novig = m.home_ml != null && m.away_ml != null
-      ? (() => { const h = 1 / americanToDecimal(m.home_ml!); const a = 1 / americanToDecimal(m.away_ml!); return { home: h / (h + a), away: a / (h + a) }; })()
-      : null;
+  if (e.moneyline) {
     for (const side of ["home", "away"] as const) {
       const s = e.moneyline[side];
-      out.push({
-        variable: margin, side: side === "home" ? 1 : -1,
-        option: { ...base, id: legId([league, g.game_id, "ml", side]), kind: "moneyline", group: "Game lines",
-          label: `${g[side].abbr} to win`, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0,
-          price: priceOf(side === "home" ? m.home_ml : m.away_ml), marketP: novig ? r4(novig[side]) : null, source: "market_line", team: g[side].abbr },
-      });
+      const quotes: BookQuote[] = books.filter(([, b]) => b.moneyline).map(([k, b]) => ({
+        book: k, title: b.title, line: null, price: b.moneyline![side], other: b.moneyline![side === "home" ? "away" : "home"], lastUpdate: b.moneyline!.last_update }));
+      const consensus = side === "home" ? m.home_ml : m.away_ml;
+      const w = withQuotes(quotes, null, consensus);
+      if (w.marketP === null && m.home_ml != null && m.away_ml != null) {
+        const h = 1 / americanToDecimal(m.home_ml), a = 1 / americanToDecimal(m.away_ml);
+        w.marketP = r4((side === "home" ? h : a) / (h + a));
+      }
+      out.push({ variable: margin, side: side === "home" ? 1 : -1, option: { ...base, id: legId([league, g.game_id, "ml", side]), kind: "moneyline",
+        group: "Game lines", label: `${g[side].abbr} to win`, p: r4(s.model_prob), push: s.push_prob ? r4(s.push_prob) : 0, source: "market_line",
+        team: g[side].abbr, ...w } });
     }
   }
 }
 
+function bookQuotes(bl: PlayerBookLines, side: "over" | "under"): BookQuote[] {
+  return bl.books.map((b) => ({ book: b.book, title: b.title, line: b.line, price: b[side], other: b[side === "over" ? "under" : "over"], lastUpdate: b.last_update }));
+}
+
 function playerLegs(league: League, gameId: string, homeAbbr: string, pl: EnginePropPlayer, view: DayView | null, out: CatalogLeg[]) {
   if (/^out$/i.test(pl.injury_status ?? "")) return;
+  const context = { opp: pl.opp, usage: usageOf(league, pl) };
   for (const [mkey, m] of Object.entries(pl.markets)) {
     if (m.support === "insufficient") continue;
     const variable: Variable = { kind: "prop", league, gameId, playerId: pl.player_id, market: mkey, team: pl.team, home: pl.team === homeAbbr, pos: pl.position ?? null };
     const common = { league, gameId, kind: "prop" as const, group: m.label, playerId: pl.player_id, playerName: pl.name, team: pl.team,
-      support: m.support, injury: pl.injury_status };
-    // Posted sportsbook line (NBA points, TEST only)
-    const bl = league === "nba" && mkey === "points" ? view?.games[gameId]?.players[pl.player_id] : undefined;
-    if (bl && bl.consensus_line != null) {
-      const ps = linePs(m, bl.consensus_line);
+      support: m.support, injury: pl.injury_status, context };
+    const noun = m.label.toLowerCase();
+    const values = pl.recent?.values?.[mkey];
+    // Posted sportsbook line (NBA points / NFL receiving yards, TEST only)
+    const bl = mkey === BOOK_MARKET[league].market ? view?.games[gameId]?.players[pl.player_id] : undefined;
+    const line = bl ? mainLine(bl.books) : null;
+    if (bl && line !== null) {
+      const ps = linePs(m, line);
       if (ps) {
         for (const side of ["over", "under"] as const) {
           const p = side === "over" ? ps.over : ps.under;
           if (p < MIN_P || p > MAX_P) continue;
-          const mp = bl.consensus_over_novig == null ? null : side === "over" ? bl.consensus_over_novig : 1 - bl.consensus_over_novig;
+          const quotes = bookQuotes(bl, side);
+          const price = best(quotes, line);
+          const label = `${pl.name} ${side} ${line} ${noun}`;
           out.push({ variable, side: side === "over" ? 1 : -1, option: { ...common,
-            id: legId([league, gameId, "prop", pl.player_id, mkey, `b${bl.consensus_line}`, side === "over" ? "o" : "u"]),
-            label: `${pl.name} ${side} ${bl.consensus_line} points`, p: r4(p), push: ps.push ? r4(ps.push) : 0,
-            price: bestPrice(bl.books, bl.consensus_line, side), marketP: mp == null ? null : r4(mp), source: "book_line", interpolated: ps.interpolated } });
+            id: legId([league, gameId, "prop", pl.player_id, mkey, `b${line}`, side === "over" ? "o" : "u"]),
+            label, line, p: r4(p), push: ps.push ? r4(ps.push) : 0, price, quotes, updatedAt: newest(quotes), marketP: noVig(quotes, line),
+            noPrice: price ? null : NO_PRICE, source: "book_line", interpolated: ps.interpolated,
+            last10: last10(values, line, side === "over" ? 1 : -1, "line", noun, `${m.label} ${side === "over" ? "Over" : "Under"} ${line}`) } });
         }
       }
     }
-    // Model thresholds (no posted line)
+    // Model thresholds: never a sportsbook line
     for (const t of m.thresholds) {
       if (t.op !== ">=" || t.variant) continue;
       for (const side of [1, -1] as const) {
         const p = side > 0 ? t.model_prob : 1 - t.model_prob;
         if (p < MIN_P || p > MAX_P) continue;
-        const label = side > 0 ? `${pl.name} ${t.threshold}+ ${m.label.toLowerCase()}` : `${pl.name} under ${t.threshold} ${m.label.toLowerCase()}`;
+        const label = side > 0 ? `${pl.name} ${t.threshold}+ ${noun}` : `${pl.name} under ${t.threshold} ${noun}`;
         out.push({ variable, side, option: { ...common, id: legId([league, gameId, "prop", pl.player_id, mkey, `m${t.threshold}`, side > 0 ? "o" : "u"]),
-          label, p: r4(p), push: 0, price: null, marketP: null, source: "model_line" } });
+          label, p: r4(p), push: 0, price: null, marketP: null, source: "model_line", noPrice: `${NO_PRICE}: model line, not a sportsbook line`,
+          last10: last10(values, t.threshold, side, "atleast", noun, side > 0 ? `${m.label} ${t.threshold}+` : `${m.label} under ${t.threshold}`) } });
       }
     }
   }
 }
 
 /** Pure: the catalog from already-loaded inputs (tests call this directly). */
-export function buildCatalog(league: League, board: EngineBoard | null, props: EnginePropsBoard | null, views: Record<string, DayView | null>, now: Date): Catalog {
+export function buildCatalog(league: League, board: EngineBoard | null, props: EnginePropsBoard | null, views: Record<string, DayView | null>, now: Date,
+  gl: GameLinesView | null = null): Catalog {
   const legs = new Map<string, CatalogLeg>();
   const byGame = new Map<string, LegOption[]>();
   const games: GameOption[] = [];
@@ -172,11 +270,12 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
       (byGame.get(gid) ?? byGame.set(gid, []).get(gid)!).push(l.option);
     }
   };
+  const viewFor = (start: string | null) => (start ? views[ptDate(start)] ?? null : null);
   for (const g of upcoming) {
     const list: CatalogLeg[] = [];
-    gameLines(league, g, list);
+    gameLines(league, g, gl, list);
     const pg = propGames.get(g.game_id);
-    if (pg) for (const pl of pg.players) playerLegs(league, g.game_id, pg.home.abbr, pl, views[pg.start_time ? ptDate(pg.start_time) : ""] ?? null, list);
+    if (pg) for (const pl of pg.players) playerLegs(league, g.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list);
     add(g.game_id, list);
     seen.add(g.game_id);
     const lab = gameText(g);
@@ -184,11 +283,10 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     games.push({ league, gameId: g.game_id, start: g.start_time, home: g.home.abbr, away: g.away.abbr, label: lab,
       props: Boolean(pg?.players.length), lines: list.some((l) => l.option.kind !== "prop") });
   }
-  // Prop games the league board doesn't list yet
   for (const pg of props?.games ?? []) {
     if (seen.has(pg.game_id) || started(pg.start_time, now)) continue;
     const list: CatalogLeg[] = [];
-    for (const pl of pg.players) playerLegs(league, pg.game_id, pg.home.abbr, pl, views[pg.start_time ? ptDate(pg.start_time) : ""] ?? null, list);
+    for (const pl of pg.players) playerLegs(league, pg.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list);
     add(pg.game_id, list);
     const lab = gameText(pg);
     gameLabel.set(pg.game_id, lab);
@@ -200,22 +298,26 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
   }
   games.sort((a, b) => (a.start ?? "").localeCompare(b.start ?? ""));
   const asOf = [
-    { label: `${league.toUpperCase()} game model and consensus lines`, at: board?.generated_at ?? null },
+    { label: `${league.toUpperCase()} game model`, at: board?.generated_at ?? null },
+    { label: `${league.toUpperCase()} sportsbook game lines`, at: gl?.generated_at ?? null },
     { label: `${league.toUpperCase()} player model`, at: props?.generated_at ?? null },
-    ...Object.entries(views).filter(([, v]) => v).map(([d, v]) => ({ label: `NBA points lines for ${d}`, at: v!.updated_at })),
+    ...Object.entries(views).filter(([, v]) => v).map(([d, v]) => ({ label: `${league.toUpperCase()} ${BOOK_MARKET[league].noun} lines for ${d}`, at: v!.updated_at })),
   ];
   return { league, games, legs, byGame, gameLabel, injuries, asOf };
 }
 
-/** Loads the stored boards (and, on TEST, the stored NBA points lines) and builds the catalog. */
+/** Loads the stored boards and, on TEST, the stored sportsbook lines (private R2), and builds the catalog. */
 export async function getCatalog(league: League, now = new Date()): Promise<Catalog> {
   const [b, p] = await Promise.all([loadBoard(league), loadPropsBoard(league)]);
   const board = b.ok ? b.board : null;
   const props = p.ok ? p.board : null;
   const views: Record<string, DayView | null> = {};
-  if (league === "nba" && propLinesEnabled()) {
-    const dates = new Set((props?.games ?? []).filter((g) => !started(g.start_time, now)).filter((g) => g.start_time).map((g) => ptDate(g.start_time!)));
-    for (const d of dates) views[d] = await loadPropLines(d);
+  let gl: GameLinesView | null = null;
+  if (propLinesEnabled()) {
+    const dates = new Set((props?.games ?? []).filter((g) => g.start_time && !started(g.start_time, now)).map((g) => ptDate(g.start_time!)));
+    const prefix = league === "nba" ? undefined : NFL_PREFIX;
+    await Promise.all([...dates].map(async (d) => { views[d] = await loadPropLines(d, prefix); }));
+    gl = await loadGameLines(league);
   }
-  return buildCatalog(league, board, props, views, now);
+  return buildCatalog(league, board, props, views, now, gl);
 }

@@ -23,8 +23,11 @@ from .store import ArchiveError, sha256
 PREFIX = "v1/market-snapshots/nba/player-points"
 
 
-def day_prefix(date: str) -> str:
-    return f"{PREFIX}/{date}"
+NFL_PREFIX = "v1/market-snapshots/nfl/player-reception-yds"     # NFL receiving yards (Moose 2026-11-27: game days)
+
+
+def day_prefix(date: str, prefix: str = PREFIX) -> str:
+    return f"{prefix}/{date}"
 
 
 def stamp(t: datetime | None = None) -> str:
@@ -54,17 +57,18 @@ def put_verified(store, reader, key: str, body: bytes, retries: int = 3) -> dict
     raise ArchiveError(f"upload failed after {retries} attempts: {type(last).__name__}")
 
 
-def read_latest(reader, date: str) -> dict | None:
-    k = f"{day_prefix(date)}/latest.json"
+def read_latest(reader, date: str, prefix: str = PREFIX) -> dict | None:
+    k = f"{day_prefix(date, prefix)}/latest.json"
     try:
         return json.loads(reader.get(k))
     except Exception:  # noqa: BLE001  first run of the day
         return None
 
 
-def write_run(store, reader, date: str, run_ts: str, objects: list[dict], game_views: list[dict], meta: dict) -> dict:
+def write_run(store, reader, date: str, run_ts: str, objects: list[dict], game_views: list[dict], meta: dict,
+              prefix: str = PREFIX, market: str = "player_points") -> dict:
     """Manifest (chained to the day's previous one) + merged view + latest pointer, after every capture is verified."""
-    latest = read_latest(reader, date)
+    latest = read_latest(reader, date, prefix)
     prev_view = json.loads(reader.get(latest["view"])) if latest else {"date": date, "games": {}}
     games = dict(prev_view.get("games", {}))
     for v in game_views:
@@ -77,25 +81,25 @@ def write_run(store, reader, date: str, run_ts: str, objects: list[dict], game_v
         gid = r.get("game_id")
         if gid and status.get(gid, {}).get("status") != "captured":
             status[gid] = {"status": r["status"], "mode": meta.get("mode"), "at": meta.get("finished_at")}
-    view = {"date": date, "updated_at": meta.get("finished_at"), "source": "the_odds_api", "market": "player_points",
+    view = {"date": date, "updated_at": meta.get("finished_at"), "source": "the_odds_api", "market": market,
             "regions": "us", "games": games, "game_status": status}
-    vkey = f"{day_prefix(date)}/view-{run_ts}.json"
+    vkey = f"{day_prefix(date, prefix)}/view-{run_ts}.json"
     vput = put_verified(store, reader, vkey, json.dumps(view, sort_keys=True, separators=(",", ":")).encode())
     manifest = {"date": date, "run_ts": run_ts, **meta, "objects": objects + [{"key": vkey, "bytes": vput["bytes"], "sha256": vput["sha256"], "kind": "view"}],
                 "prev_manifest": latest["manifest"] if latest else None, "prev_manifest_sha256": latest["manifest_sha256"] if latest else None}
-    mkey = f"{day_prefix(date)}/manifest-{run_ts}.json"
+    mkey = f"{day_prefix(date, prefix)}/manifest-{run_ts}.json"
     mbody = json.dumps(manifest, sort_keys=True, indent=1).encode()
     mput = put_verified(store, reader, mkey, mbody)
     pointer = {"date": date, "manifest": mkey, "manifest_sha256": mput["sha256"], "view": vkey, "view_sha256": vput["sha256"], "updated_at": meta.get("finished_at")}
-    store.put(f"{day_prefix(date)}/latest.json", json.dumps(pointer, sort_keys=True).encode())
-    if json.loads(reader.get(f"{day_prefix(date)}/latest.json")) != pointer:
+    store.put(f"{day_prefix(date, prefix)}/latest.json", json.dumps(pointer, sort_keys=True).encode())
+    if json.loads(reader.get(f"{day_prefix(date, prefix)}/latest.json")) != pointer:
         raise ArchiveError("latest.json read-back differs")
     return {"manifest": mkey, "view": vkey, "games_in_view": len(games)}
 
 
-def verify_day(reader, date: str) -> dict:
+def verify_day(reader, date: str, prefix: str = PREFIX) -> dict:
     """Walk the day's manifest chain from latest.json back to the first run; re-hash every object it lists."""
-    latest = read_latest(reader, date)
+    latest = read_latest(reader, date, prefix)
     if not latest:
         return {"date": date, "ok": True, "runs": 0, "objects": 0, "problems": []}
     problems, runs, objs = [], 0, 0

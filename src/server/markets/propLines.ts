@@ -16,6 +16,8 @@ export type DayView = { date: string; updated_at: string | null; games: Record<s
   game_status?: Record<string, { status: "captured" | "empty" | "skipped_cap" | "error"; mode?: string; at?: string | null }> };
 
 const PREFIX = "v1/market-snapshots/nba/player-points";
+/** NFL receiving yards (TEST, Moose 2026-11-27): same layout, own prefix. */
+export const NFL_PREFIX = "v1/market-snapshots/nfl/player-reception-yds";
 const TTL_MS = 10 * 60 * 1000;
 const cache = new Map<string, { at: number; view: DayView | null }>();
 
@@ -62,14 +64,15 @@ async function getObject(s: NonNullable<ReturnType<typeof settings>>, key: strin
 }
 
 /** The day's view (Pacific game date), verified against the SHA-256 in latest.json; null when unavailable. */
-export async function loadPropLines(date: string): Promise<DayView | null> {
+export async function loadPropLines(date: string, prefix: string = PREFIX): Promise<DayView | null> {
   const s = settings();
   if (!s || isProduction()) return null;
-  const hit = cache.get(date);
+  const ck = `${prefix}|${date}`;
+  const hit = cache.get(ck);
   if (hit && Date.now() - hit.at < TTL_MS) return hit.view;
   let view: DayView | null = null;
   try {
-    const p = await getObject(s, `${PREFIX}/${date}/latest.json`);
+    const p = await getObject(s, `${prefix}/${date}/latest.json`);
     if (p) {
       const ptr = JSON.parse(p.toString("utf8")) as { view: string; view_sha256: string };
       const v = await getObject(s, ptr.view);
@@ -78,7 +81,37 @@ export async function loadPropLines(date: string): Promise<DayView | null> {
   } catch {
     view = null;
   }
-  cache.set(date, { at: Date.now(), view });
+  cache.set(ck, { at: Date.now(), view });
+  return view;
+}
+
+/** Each sportsbook's own game lines (modelroom/sources/gamelines_r2.py): no API call on read; null when unavailable. */
+export type BookGameLines = {
+  title: string;
+  spread?: { line: number; home: number | null; away: number | null; last_update: string | null };
+  total?: { line: number; over: number | null; under: number | null; last_update: string | null };
+  moneyline?: { home: number | null; away: number | null; last_update: string | null };
+};
+export type GameLinesView = { league: string; generated_at: string; games: Record<string, { commence_time: string; collected_at: string | null; books: Record<string, BookGameLines> }> };
+const glCache = new Map<string, { at: number; view: GameLinesView | null }>();
+
+export async function loadGameLines(league: "nba" | "nfl"): Promise<GameLinesView | null> {
+  const s = settings();
+  if (!s || isProduction()) return null;
+  const hit = glCache.get(league);
+  if (hit && Date.now() - hit.at < TTL_MS) return hit.view;
+  let view: GameLinesView | null = null;
+  try {
+    const p = await getObject(s, `v1/market-snapshots/${league}/game-lines/latest.json`);
+    if (p) {
+      const ptr = JSON.parse(p.toString("utf8")) as { view: string; view_sha256: string };
+      const v = await getObject(s, ptr.view);
+      if (v && sha(v) === ptr.view_sha256) view = JSON.parse(v.toString("utf8")) as GameLinesView;
+    }
+  } catch {
+    view = null;
+  }
+  glCache.set(league, { at: Date.now(), view });
   return view;
 }
 

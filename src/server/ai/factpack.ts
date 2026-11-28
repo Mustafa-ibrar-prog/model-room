@@ -19,7 +19,8 @@ const odds = (a: number) => (a > 0 ? `+${a}` : `${a}`);
 
 export interface ParlayPack {
   task: "explain_parlay";
-  legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string; flags: string[] }[];
+  legs: { id: string; label: string; game: string; type: string; model_probability: string; sportsbook_price: string; market_probability: string;
+    last_10_games?: string; role?: string; opponent?: string; flags: string[] }[];
   parlay: { model_probability: string; range: string; if_unrelated: string; link_between_legs: string; fair_odds: string };
   same_game_links: { legs: string[]; direction: "tend to win together" | "work against each other" }[];
   riskiest_order: string[];
@@ -40,6 +41,9 @@ export function parlayPack(price: ParlayPrice, injuries: string[]): ParlayPack {
       model_probability: pctText(l.p),
       sportsbook_price: l.price ? `${odds(l.price.american)}${l.price.bookTitle ? ` (${l.price.bookTitle})` : ""}` : "not stored",
       market_probability: pctText(l.marketP),
+      ...(l.last10 ? { last_10_games: l.last10.text } : {}),
+      ...(l.context?.usage ? { role: l.context.usage } : {}),
+      ...(l.context?.opp ? { opponent: l.context.opp } : {}),
       flags: l.warnings.slice(0, 4),
     })),
     parlay: {
@@ -98,6 +102,7 @@ export const SYSTEM_RULES = [
   "Never invent injuries, lineups, news, matchups, trends or statistics. You have no news access: if the fact pack has no injury report line for something, say the stored report doesn't mention it.",
   "Do not suggest new legs, picks, lines or prices. Do not change the order of anything. Refer to legs and picks by their label.",
   "No bet sizing, no promises, no words like lock, guaranteed or sure thing. Plain, short, confident sentences.",
+  "Be brief: no background, no generic advice, no restating the numbers unless they matter.",
 ].join(" ");
 
 export const PARLAY_SCHEMA = {

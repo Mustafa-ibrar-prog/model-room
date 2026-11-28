@@ -59,6 +59,7 @@ jobs:
           git fetch -q --depth 1 origin preview
           mkdir -p /tmp/pv
           git show FETCH_HEAD:modeling/data/published/nba_props.json > /tmp/pv/nba_props.json
+          git show FETCH_HEAD:modeling/data/published/nfl_props.json > /tmp/pv/nfl_props.json || rm -f /tmp/pv/nfl_props.json
       - name: Fetch and store (counts only in the log)
         run: |
           mode="${{ github.event.inputs.mode || '' }}"; win=""
@@ -66,7 +67,7 @@ jobs:
             case "${{ github.event.schedule }}" in "30 16 * * *"|"30 17 * * *") mode=followup;; *) mode=main;; esac
             win="--only-in-window"
           fi
-          rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" $win --board /tmp/pv/nba_props.json > /tmp/out.json || rc=$?
+          rc=0; python -m modelroom.sources.odds_props fetch --mode "$mode" $win --board /tmp/pv/nba_props.json --nfl-board /tmp/pv/nfl_props.json > /tmp/out.json || rc=$?
           python3 -c "import json; d=json.load(open('/tmp/out.json')); print(json.dumps(d, indent=1))"
           exit $rc
       - name: Verify today's snapshots with the read-only token

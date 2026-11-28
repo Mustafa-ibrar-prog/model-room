@@ -309,7 +309,7 @@ jobs:
       # NBA player points lines (5:30 AM main, 9:30 AM retry of empty games only): The Odds API -> private R2. No
       # Supabase access in this step (the scheduler only sent the wake-up). Credit cap, once-per-mode lock and
       # attempt markers: modeling/modelroom/sources/odds_props.py. Counts only in the log.
-      - name: NBA player points lines to private R2
+      - name: Player prop lines to private R2 (NBA points + NFL receiving yards, one shared allowance)
         id: props
         if: steps.plan.outputs.props != ''
         continue-on-error: true
@@ -326,10 +326,27 @@ jobs:
           MODELROOM_ODDS_DB_URL: ""
         run: |
           pip install -q -e . boto3
-          rc=0; python -m modelroom.sources.odds_props fetch --mode "${{ steps.plan.outputs.props }}" --board data/published/nba_props.json > /tmp/props.json || rc=$?
+          rc=0; python -m modelroom.sources.odds_props fetch --mode "${{ steps.plan.outputs.props }}" --board data/published/nba_props.json --nfl-board data/published/nfl_props.json > /tmp/props.json || rc=$?
           cat /tmp/props.json
           python -m modelroom.sources.odds_props verify || rc=1
           exit $rc
+
+      # Each sportsbook's own spread, total and moneyline (already fetched by the 7 AM / noon game-line calls; no API
+      # request here, no credits) to the private R2 bucket for the TEST Parlay Builder. Counts only in the log.
+      - name: Game-line book prices to private R2 (no API call)
+        if: steps.data.outcome == 'success'
+        continue-on-error: true
+        working-directory: modeling
+        env:
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_READ_ACCESS_KEY_ID: ${{ secrets.R2_READ_ACCESS_KEY_ID }}
+          R2_READ_SECRET_ACCESS_KEY: ${{ secrets.R2_READ_SECRET_ACCESS_KEY }}
+        run: |
+          pip install -q -e . boto3
+          python -m modelroom.sources.gamelines_r2 --league nba,nfl
 
       - name: Keep the last good projections if anything failed
         if: steps.data.outcome == 'failure'
