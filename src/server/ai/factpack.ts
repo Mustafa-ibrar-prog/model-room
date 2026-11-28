@@ -48,8 +48,8 @@ function legForm(l: ParlayPrice["legs"][number]): Form {
   const rate10 = r.hits / r.games;
   const rate5 = r.last5Games ? r.last5Hits / r.last5Games : rate10;
   // The model's chance against the plain hit rate: the most useful "why" when they disagree.
-  out.model_vs_recent = l.p < rate10 - 0.12 ? "the model is clearly less optimistic than his recent hit rate (it expects this to be harder than it looks)"
-    : l.p > rate10 + 0.12 ? "the model is more optimistic than his recent hit rate" : "the model agrees with his recent hit rate";
+  out.model_vs_recent = l.p < rate10 - 0.12 ? "model chance well below his recent hit rate"
+    : l.p > rate10 + 0.12 ? "model chance well above his recent hit rate" : "model chance close to his recent hit rate";
   out.recent_form = rate5 > rate10 + 0.15 ? "hitting more often lately" : rate5 < rate10 - 0.15 ? "cooler lately than over the last 10" : "steady";
   const m = /([\d.]+)\+/.exec(l.label) ?? /under ([\d.]+)/.exec(l.label);
   const k = m ? Number(m[1]) : null;
