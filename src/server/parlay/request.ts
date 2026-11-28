@@ -31,7 +31,7 @@ export async function readLegIds(req: NextRequest): Promise<string[] | null> {
 
 export async function catalogsFor(ids: string[], now = new Date(), live = false): Promise<Catalog[]> {
   const leagues = [...new Set(ids.map((i) => i.split("~")[0] as League))];
-  return Promise.all(leagues.map((l) => getCatalog(l, now, { live })));
+  return Promise.all(leagues.map((l) => getCatalog(l, now, { live, games: ids.filter((i) => i.startsWith(`${l}~`)).map((i) => i.split("~")[1]) })));
 }
 
 export const leagueParam = (v: string | null): League | null => (v === "nba" || v === "nfl" ? v : null);

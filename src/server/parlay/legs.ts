@@ -528,7 +528,16 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
 }
 
 /** Loads the stored boards and, on TEST, the stored sportsbook lines (private R2), and builds the catalog. */
-export async function getCatalog(league: League, now = new Date(), opts: { live?: boolean } = {}): Promise<Catalog> {
+/** Games to fetch live Polymarket events for: requested games first, then every not-started game through tomorrow
+ *  (Pacific; NBA) or 8 days ahead (NFL); at most 40. */
+export function pmTargets<G extends { game_id: string; start_time: string | null }>(league: League, upcoming: G[], now: Date, asked: string[] = []): G[] {
+  const lastDay = ptDate(new Date(now.getTime() + (league === "nba" ? 1 : 8) * 86400_000).toISOString());
+  const a = new Set(asked);
+  const open = upcoming.filter((g) => g.start_time && !started(g.start_time, now));
+  return [...open.filter((g) => a.has(g.game_id)), ...open.filter((g) => !a.has(g.game_id) && ptDate(g.start_time!) <= lastDay)].slice(0, 40);
+}
+
+export async function getCatalog(league: League, now = new Date(), opts: { live?: boolean; games?: string[] } = {}): Promise<Catalog> {
   const [b, p] = await Promise.all([loadBoard(league), loadPropsBoard(league)]);
   const board = b.ok ? b.board : null;
   const props = p.ok ? p.board : null;
@@ -542,9 +551,11 @@ export async function getCatalog(league: League, now = new Date(), opts: { live?
   }
   let pmIn: PmInput | null = null;
   if (opts.live && !isProduction()) {
-    // Private view: games in the next day (NBA) or 8 days (NFL); a few requests at a time; 60 s cache per event.
-    const horizon = now.getTime() + (league === "nba" ? 36 : 8 * 24) * 3600_000;
-    const want = (board?.upcoming ?? []).filter((g) => g.start_time && !started(g.start_time, now) && new Date(g.start_time).getTime() <= horizon).slice(0, 20);
+    // Live prices for every game today and tomorrow (Pacific dates; NBA) or the next 8 days (NFL), plus any game the
+    // request names (a game the visitor opened, or a leg's game), whatever its date. A few requests at a time; each
+    // event is cached for 60 s in memory (never stored). Before 2026-11-27 this was "the next 36 hours, first 20
+    // games", which dropped tomorrow's NBA games on busy days and late in the evening.
+    const want = pmTargets(league, board?.upcoming ?? [], now, opts.games ?? []);
     const events = new Map<string, PmEvent>();
     for (let i = 0; i < want.length; i += 4) {
       const part = want.slice(i, i + 4);

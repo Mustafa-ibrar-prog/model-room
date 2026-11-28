@@ -17,13 +17,13 @@ export async function GET(req: NextRequest) {
   if (!league) return NextResponse.json({ error: "Set league." }, { status: 400 });
   if (id !== null) {
     if (!/^[A-Za-z0-9_.~\-]{1,160}$/.test(id)) return NextResponse.json({ error: "Bad leg." }, { status: 400 });
-    const c = await getCatalog(league, new Date(), { live: liveMarketsOn() });
+    const c = await getCatalog(league, new Date(), { live: liveMarketsOn(), games: [id.split("~")[1] ?? ""] });
     const leg = c.resolve(id);
     if (!leg) return NextResponse.json({ error: "That selection isn't available." }, { status: 404, headers: noStore });
     return NextResponse.json({ leg: leg.option }, { headers: noStore });
   }
   if (!/^[A-Za-z0-9_]{1,40}$/.test(game)) return NextResponse.json({ error: "Set league and game." }, { status: 400 });
-  const c = await getCatalog(league, new Date(), { live: liveMarketsOn() });
+  const c = await getCatalog(league, new Date(), { live: liveMarketsOn(), games: [game] });
   const legs = c.byGame.get(game);
   if (!legs) return NextResponse.json({ error: "That game isn't available (it may have started)." }, { status: 404, headers: noStore });
   return NextResponse.json({ game: c.games.find((g) => g.gameId === game), legs, cards: c.cards.get(game) ?? { props: [], games: [] },

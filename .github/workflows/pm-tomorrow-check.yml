@@ -49,9 +49,11 @@ jobs:
           games = get(f"{site}/api/parlay/games?league=nba")["games"]
           board = json.load(urllib.request.urlopen(f"https://raw.githubusercontent.com/Mustafa-ibrar-prog/model-room/preview/modeling/data/published/nba.json"))
           up = {g["game_id"]: g for g in board["upcoming"]}
+          pb = json.load(urllib.request.urlopen("https://raw.githubusercontent.com/Mustafa-ibrar-prog/model-room/preview/modeling/data/published/nba_props.json"))
+          pplayers = {g["game_id"]: {norm(p["name"]): p for p in g["players"]} for g in pb["games"]}
           print("board upcoming:", len(board["upcoming"]), "| site games:", len(games))
-          for day in (today, today + timedelta(days=1)):
-              tag = "today" if day == today else "tomorrow"
+          for day in (today, today + timedelta(days=1), today + timedelta(days=2)):
+              tag = {0: "today", 1: "tomorrow", 2: "day after (tomorrow in Eastern time late at night)"}[(day - today).days]
               gs = [g for g in games if g["start"] and datetime.fromisoformat(g["start"].replace("Z", "+00:00")).astimezone(PT).date() == day]
               T = Counter(); why = Counter(); slugdate = Counter()
               for g in gs:
@@ -92,7 +94,11 @@ jobs:
                       line = mk.get("line")
                       try: line = float(line)
                       except Exception: line = None
-                      if not byname.get(norm(md.get("playerName") or "")): why["player has no card (not on board, ruled out, or name differs)"] += 1
+                      bp = pplayers.get(g["gameId"], {}).get(norm(md.get("playerName") or ""))
+                      if not byname.get(norm(md.get("playerName") or "")):
+                          if not bp: why["player not on Model Room props board for this game"] += 1
+                          elif (bp.get("injury_status") or "").lower() == "out": why["player ruled out (no card by design)"] += 1
+                          else: why["on board but no card (stat unsupported or limited)"] += 1
                       elif not cs: why["player has no card for this stat"] += 1
                       elif len({c["playerId"] for c in cs}) > 1: why["ambiguous name"] += 1
                       elif not team or team not in sc(cs[0]["team"]): why["team mismatch"] += 1
