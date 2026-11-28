@@ -1,0 +1,49 @@
+name: NBA props shadow hybrid evaluation (TEST research, manual)
+
+# Moose 2026-11-28: does the evidence the AI analysis shows add anything the active NBA props model (0.2.0) hasn't
+# used? Replays 0.2.0 walk-forward, computes the same evidence from pre-game data, fits a capped adjustment on earlier
+# months only and compares on later months. Read-only: nothing activated, published or written to the repo.
+# Logs print aggregate metrics and coefficients only (no player names, lines or prices).
+on:
+  workflow_dispatch:
+    inputs:
+      seasons:
+        description: "hoopR seasons (2025 = 2024-25, 2026 = 2025-26, 2027 = 2026-27 so far)"
+        default: "2025,2026,2027"
+      sims:
+        description: "simulations per player-game"
+        default: "1000"
+
+permissions:
+  contents: read
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Data (box scores, schedules; same public sources as the refresh)
+        working-directory: modeling
+        run: |
+          pip install -q -e .
+          python -m modelroom nba ingest > /dev/null
+      - name: Replay and chronological comparison
+        working-directory: modeling
+        run: |
+          mkdir -p /tmp/out
+          python -m modelroom.nba.props.hybrid_eval --seasons "${{ github.event.inputs.seasons }}" --sims "${{ github.event.inputs.sims }}" --out /tmp/out/nba_hybrid_eval.json
+          python3 -c "
+          import json; d=json.load(open('/tmp/out/nba_hybrid_eval.json'))
+          print('RESULT', json.dumps({k: d.get(k) for k in ('rows','test_rows','test_months','overall','by_market','by_season','adjustment_size','single_feature_ll_gain','final_coefficients','verdict')}))"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: nba-hybrid-eval
+          path: /tmp/out/
+          retention-days: 30
