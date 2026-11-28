@@ -1,60 +1,68 @@
 name: Parlay Builder site check (TEST, manual, read-only)
 
-# Loads the TEST Parlay Builder page and its read-only APIs (Moose, 2026-11-27). Prints counts and yes/no checks only:
-# no lines, prices, sportsbook names or player-line pairs. Does not call Analyze (no Gemini request).
+# One-off verification branch (Moose 2026-11-27): after the Preview redeploy, confirm the TEST server sees
+# GEMINI_API_KEY and MODELROOM_PRIVATE_VIEW_KEY without printing either, and make ONE Gemini request through
+# "Analyze My Parlay". Prints statuses and counts only.
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
+  statuses: read
 
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     env:
       SITE: https://model-room-git-preview-computer-citi.vercel.app
+      SHA: 2518b01a
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Page and APIs
+      - name: Wait for the Preview redeploy
         run: |
-          curl -sS -L --max-time 60 -o /tmp/page.html -w "page HTTP %{http_code}\n" "$SITE/parlay"
-          for lg in nba nfl; do curl -sS --max-time 60 -o /tmp/games_$lg.json -w "games $lg HTTP %{http_code}\n" "$SITE/api/parlay/games?league=$lg"; done
+          full=$(gh api repos/${{ github.repository }}/commits/$SHA -q .sha)
+          for i in $(seq 1 60); do
+            state=$(gh api repos/${{ github.repository }}/commits/$full/status -q '[.statuses[] | select(.context=="Vercel")][0].state // "none"')
+            echo "Vercel: $state"; [ "$state" = success ] && exit 0
+            { [ "$state" = failure ] || [ "$state" = error ]; } && { echo "::error::Vercel deploy failed"; exit 1; }
+            sleep 15
+          done
+          exit 1
+      - name: Check variables and Gemini (statuses only)
+        run: |
+          sleep 20
           python3 - <<'PY'
-          import json, re, urllib.request, os
+          import json, os, urllib.request, urllib.error
           site = os.environ["SITE"]
-          page = open("/tmp/page.html", encoding="utf-8", errors="replace").read()
-          print("page has builder heading:", "Build a parlay" in page)
-          print("GEMINI_API_KEY visible to the TEST server (AI switched on):", "isn't switched on yet" not in page and "it isn" not in page)
-          print("private view key configured (unlock form shown):", "Private view (live Polymarket prices)" in page)
-          for s in ("GEMINI", "AIza", "generativelanguage", "x-goog-api-key", "R2_", "r2.cloudflarestorage.com"):
-              print(f"secret marker {s!r} in page:", s in page)
-          ids = []
-          for lg in ("nba", "nfl"):
-              g = json.load(open(f"/tmp/games_{lg}.json"))["games"]
-              withlegs = [x for x in g if x["props"] or x["lines"]]
-              print(f"{lg}: games {len(g)}, with legs {len(withlegs)}")
-              tot = {"games": 0, "game_lines": 0, "game_lines_priced": 0, "game_lines_with_books": 0, "book_props": 0, "book_props_priced": 0, "model_props": 0, "props_with_last10": 0, "no_price_text": 0, "max_books": 0}
-              for x in withlegs[:16]:
-                  legs = json.load(urllib.request.urlopen(f"{site}/api/parlay/legs?league={lg}&game={x['gameId']}"))["legs"]
-                  tot["games"] += 1
-                  for l in legs:
-                      if l["kind"] != "prop":
-                          tot["game_lines"] += 1; tot["game_lines_priced"] += bool(l["price"]); tot["game_lines_with_books"] += bool(l.get("quotes"))
-                      elif l["source"] == "book_line":
-                          tot["book_props"] += 1; tot["book_props_priced"] += bool(l["price"])
-                      else:
-                          tot["model_props"] += 1
-                      if l["kind"] == "prop": tot["props_with_last10"] += bool(l.get("last10"))
-                      if not l["price"]: tot["no_price_text"] += bool(l.get("noPrice"))
-                      tot["max_books"] = max(tot["max_books"], len(l.get("quotes") or []))
-                      if l["source"] == "model_line" and l["price"]: print("PROBLEM: a model line carries a price")
-                      if l.get("polymarket"): print("PROBLEM: Polymarket data in a public response")
-                  if len(ids) < 6:
-                      ids += [l["id"] for l in legs if l["kind"] != "prop"][:1] + [l["id"] for l in legs if l["kind"] == "prop"][:1]
-              print(f"{lg} (first {tot['games']} games):", json.dumps(tot))
-          req = urllib.request.Request(f"{site}/api/parlay/price", data=json.dumps({"legs": ids}).encode(), headers={"content-type": "application/json"})
-          p = json.load(urllib.request.urlopen(req))
-          print("price ok:", p["ok"], "| legs", len(p["legs"]), "| single number:", p["p"] is not None, "| range present:", p["range"] is not None, "| warnings", len(p["warnings"]))
-          pk = json.load(urllib.request.urlopen(f"{site}/api/parlay/picks"))
-          print("picks:", len(pk["picks"]), "| history note present:", pk["history"] is not None)
+          def req(path, body=None, method=None):
+              r = urllib.request.Request(site + path, data=None if body is None else json.dumps(body).encode(), method=method,
+                                         headers={"content-type": "application/json"})
+              try:
+                  with urllib.request.urlopen(r, timeout=60) as x:
+                      return x.status, x.read().decode()
+              except urllib.error.HTTPError as e:
+                  return e.code, e.read().decode()
+          s, page = req("/parlay")
+          print("page HTTP", s)
+          print("GEMINI_API_KEY read by the TEST server (AI switched on):", "it isn" not in page)
+          print("MODELROOM_PRIVATE_VIEW_KEY read by the TEST server (unlock form shown):", "Private view (live Polymarket prices)" in page)
+          s, b = req("/api/parlay/unlock", {"key": "definitely-not-the-key-000"}, "POST")
+          print("unlock with a wrong key -> HTTP", s, "(403 = key configured and rejected; 404 = not configured)")
+          for marker in ("AIza", "x-goog-api-key", "MODELROOM_PRIVATE_VIEW_KEY", "GEMINI_API_KEY"):
+              print(f"secret marker {marker!r} in page or unlock reply:", marker in page or marker in b)
+          s, g = req("/api/parlay/games?league=nba")
+          games = [x for x in json.loads(g)["games"] if x["lines"]]
+          s, l = req(f"/api/parlay/legs?league=nba&game={games[0]['gameId']}")
+          leg = [x["id"] for x in json.loads(l)["legs"] if x["kind"] == "moneyline"][:1]
+          s, a = req("/api/parlay/analyze", {"legs": leg}, "POST")
+          d = json.loads(a)
+          ai = d.get("ai", {})
+          print("analyze HTTP", s, "| numbers ok:", d.get("price", {}).get("ok"), "| AI status:", ai.get("status"), "| reason:", ai.get("reason"),
+                "| model:", ai.get("model"), "| cached:", ai.get("cached"))
+          if ai.get("status") == "ok":
+              t = ai["text"]
+              print("AI text: summary chars", len(t.get("summary", "")), "| leg notes", len(t.get("legs", [])), "| sentences removed by validator", t.get("removed"))
+          else:
+              print("AI message:", ai.get("message"))
           PY
