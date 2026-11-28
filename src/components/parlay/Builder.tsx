@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GameOption, LegOption, ParlayPrice, Pick } from "@/lib/parlay/types";
+import type { GameCard, GameOption, LegOption, ParlayPrice, Pick, PropCard } from "@/lib/parlay/types";
+import { gameSelection } from "@/lib/parlay/cardMath";
+import { Gap, Market, PropRow, SideToggle, useAdd } from "./Picker";
 import type { Validation } from "@/server/parlay/validation";
 
 type League = "nba" | "nfl";
@@ -9,7 +11,7 @@ type AiState<T> = { status: "ok"; model: string; cached: boolean; text: T } | { 
 type ParlayAi = { summary: string; legs: { id: string; note: string }[]; riskiest: { id: string; reason: string }[]; watch: string[]; removed: number };
 type PicksAi = { overview: string; picks: { id: string; why: string; check: string }[]; removed: number };
 
-const STORE = "mr_parlay_slip_v1";
+import { SLIP_STORE as STORE } from "./Picker";
 const pct = (p: number | null | undefined, d = 1) => (p == null ? "–" : `${(p * 100).toFixed(d)}%`);
 const odds = (a: number | null | undefined) => (a == null ? "–" : a > 0 ? `+${a}` : `${a}`);
 const time = (iso: string | null) =>
@@ -142,8 +144,11 @@ export function ParlayBuilder({ games, asOf, validation, ai, live }: {
 }
 
 // ------------------------------------------------------------------------------------------------- game legs
+type Cards = { props: PropCard[]; games: GameCard[] };
+type LegData = { legs: LegOption[]; cards: Cards; injuries: string[]; game?: GameOption };
+
 function GameLegs({ league, gameId, slip, onAdd }: { league: League; gameId: string; slip: LegOption[]; onAdd: (l: LegOption) => void }) {
-  const [data, setData] = useState<{ legs: LegOption[]; injuries: string[]; game?: GameOption } | null>(null);
+  const [data, setData] = useState<LegData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [market, setMarket] = useState<string>("Game lines");
   const [q, setQ] = useState("");
@@ -153,14 +158,18 @@ function GameLegs({ league, gameId, slip, onAdd }: { league: League; gameId: str
       .then((d) => setData(d))
       .catch((e) => setError(typeof e === "string" ? e : "Couldn't load this game."));
   }, [league, gameId]);
-  const groups = useMemo(() => [...new Set((data?.legs ?? []).map((l) => l.group))], [data]);
+  const groups = useMemo(() => {
+    const g = data?.cards.games.length ? ["Game lines"] : [];
+    return [...g, ...new Set((data?.cards.props ?? []).map((c) => c.label))];
+  }, [data]);
   const active = groups.includes(market) ? market : groups[0] ?? market;
   if (error) return <p className="rounded-xl border border-navy-700 bg-navy-900 p-5 text-sm text-mute">{error}</p>;
-  if (!data) return <p className="rounded-xl border border-navy-700 bg-navy-900 p-5 text-sm text-mute">Loading legs…</p>;
+  if (!data) return <p className="rounded-xl border border-navy-700 bg-navy-900 p-5 text-sm text-mute">Loading…</p>;
   const inSlip = new Set(slip.map((l) => l.id));
-  const shown = data.legs.filter((l) => l.group === active && (!q || (l.playerName ?? l.label).toLowerCase().includes(q.toLowerCase())));
-  // book lines first, then by player, then by line
-  shown.sort((a, b) => (a.source === "book_line" ? 0 : 1) - (b.source === "book_line" ? 0 : 1) || (a.playerName ?? "").localeCompare(b.playerName ?? "") || b.p - a.p);
+  const props = data.cards.props
+    .filter((c) => c.label === active && (!q || c.playerName.toLowerCase().includes(q.toLowerCase())))
+    .sort((a, b) => (b.quotes.length ? 1 : 0) - (a.quotes.length ? 1 : 0) || b.projection - a.projection);
+  const add = (l: LegOption) => onAdd(l);
   return (
     <section aria-label="Legs" className="rounded-xl border border-navy-700 bg-navy-900">
       <div className="flex flex-wrap items-center gap-2 border-b border-navy-700 p-3">
@@ -176,96 +185,68 @@ function GameLegs({ league, gameId, slip, onAdd }: { league: League; gameId: str
         ) : null}
       </div>
       {data.injuries.length ? <p className="border-b border-navy-700 px-3 py-2 text-xs text-pending">Injury report: {data.injuries.slice(0, 6).join(" · ")}</p> : null}
-      {shown.length === 0 ? (
-        <p className="p-4 text-sm text-mute">Nothing stored for this market yet.</p>
+      {active === "Game lines" ? (
+        <ul className="divide-y divide-navy-700">
+          {data.cards.games.map((c) => <GameRow key={c.kind} c={c} league={league} inSlip={inSlip} onAdd={add} />)}
+        </ul>
+      ) : props.length === 0 ? (
+        <p className="p-4 text-sm text-mute">{q ? "No player by that name in this market." : "Nothing stored for this market yet."}</p>
       ) : (
-        <ul className="max-h-[32rem] divide-y divide-navy-700 overflow-y-auto">
-          {shown.map((l) => <LegRow key={l.id} l={l} added={inSlip.has(l.id)} onAdd={onAdd} />)}
+        <ul className="max-h-[36rem] divide-y divide-navy-700 overflow-y-auto">
+          {props.map((c) => <PropRow key={c.key} c={c} league={league} inSlip={inSlip} onAdd={add} />)}
         </ul>
       )}
     </section>
   );
 }
 
-const SOURCE = { book_line: "Sportsbook line", market_line: "Game line (consensus of books)", model_line: "Model line, not a sportsbook line", exchange_line: "Polymarket contract line" } as const;
+/** A market quotes this exact line (a book's own line, or a Polymarket contract, from either team's side). */
+const marketAt = (c: GameCard, x: number) =>
+  c.books.some((b) => b.line === x) || c.pm.some((p) => p.line !== null && (c.kind === "total" ? p.line === x : (p.team === "home" ? p.line : -p.line) === x));
 
-function Record10({ r }: { r: NonNullable<LegOption["last10"]> }) {
+function GameRow({ c, league, inSlip, onAdd }: { c: GameCard; league: League; inSlip: Set<string>; onAdd: (l: LegOption) => void }) {
+  const [side, setSide] = useState<1 | -1>(1);
+  const [L, setL] = useState<number | null>(c.consensus);
+  const s = useMemo(() => gameSelection(c, L, side), [c, L, side]);
+  const added = inSlip.has(s.ids[0]);
+  const { busy, err, go } = useAdd(league, onAdd);
+  const title = c.kind === "spread" ? "Spread" : c.kind === "total" ? "Total points" : "Moneyline";
+  const labels: [string, string] = c.kind === "total" ? ["Over", "Under"] : [c.home, c.away];
+  const show = (x: number) => (c.kind === "spread" ? (side > 0 ? x : -x) : x);
+  const signed = (x: number) => (c.kind === "spread" && x > 0 ? `+${x}` : `${x}`);
   return (
-    <span className="inline-flex items-center gap-1.5" title={r.text}>
-      <span className="flex gap-px" aria-hidden="true">
-        {[...r.marks].reverse().map((m, i) => (
-          <span key={i} className={`h-2.5 w-1 rounded-sm ${m > 0 ? "bg-good" : m === 0 ? "bg-pending" : "bg-navy-600"}`} />
-        ))}
-      </span>
-      <span className="font-mono text-ink">{r.hits}/{r.games}</span>
-      <span className="text-faint">last {r.games}{r.pushes ? `, ${r.pushes} push` : ""} · avg {r.avg}</span>
-    </span>
-  );
-}
-
-function LegRow({ l, added, onAdd }: { l: LegOption; added: boolean; onAdd: (l: LegOption) => void }) {
-  const [open, setOpen] = useState(false);
-  const quotes = l.quotes ?? [];
-  return (
-    <li className="px-3 py-2">
-      <div className="flex items-center gap-3">
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm text-ink">{l.label}</p>
-          <p className="text-xs text-faint">
-            {SOURCE[l.source]}
-            {l.injury && !/^available$/i.test(l.injury) ? <span className="text-pending"> · {l.injury}</span> : null}
-          </p>
-          {l.kind === "prop" ? (
-            <p className="mt-0.5 text-[0.72rem]">{l.last10 ? <Record10 r={l.last10} /> : <span className="text-faint">No game log for this stat</span>}</p>
-          ) : null}
-          {l.polymarket ? <PmChip l={l} /> : null}
+    <li className="px-3 py-2.5" data-card={`game-${c.kind}`}>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="min-w-[9rem] flex-1">
+          <p className="text-sm font-600 text-ink">{title}</p>
+          <p className="text-xs text-faint">{c.away} @ {c.home}{c.consensus !== null ? ` · consensus ${c.kind === "spread" ? `${c.home} ${signed(c.consensus)}` : c.consensus}` : ""}</p>
         </div>
-        <div className="w-16 text-right">
-          <p className="font-mono text-sm text-model">{pct(l.p)}</p>
-          <p className="text-[0.7rem] text-faint">model</p>
+        <SideToggle value={side} onChange={setSide} labels={labels} name={`${title} side`} />
+        {c.kind !== "moneyline" ? (
+          <select value={L ?? ""} onChange={(e) => setL(Number(e.target.value))} aria-label={`${title} line`}
+            className="rounded-md border border-navy-600 bg-navy-950 px-2 py-1 font-mono text-xs text-ink">
+            {c.lines.map((x) => <option key={x} value={x}>{signed(show(x))}{x === c.consensus ? " · consensus" : marketAt(c, x) ? " · market" : " · model"}</option>)}
+          </select>
+        ) : null}
+        <div className="w-14 text-right">
+          <p className="font-mono text-sm text-model">{pct(s.p)}</p>
+          <p className="text-[0.68rem] text-faint">model</p>
         </div>
-        <div className="w-28 text-right">
-          {l.price ? (
-            <>
-              <p className="font-mono text-sm text-market">{odds(l.price.american)}</p>
-              <p className="truncate text-[0.7rem] text-faint">best · {l.price.bookTitle ?? "book"}</p>
-            </>
-          ) : (
-            <p className="text-[0.7rem] leading-tight text-faint">{l.source === "model_line" ? "No sportsbook price available (model line)" : "No sportsbook price available"}</p>
-          )}
+        <div className="w-12 text-right">
+          <p className="text-sm"><Gap s={s} /></p>
+          <p className="text-[0.68rem] text-faint">gap</p>
         </div>
-        <button onClick={() => onAdd(l)} disabled={added} aria-label={`Add ${l.label}`}
+        <button onClick={() => go(s.ids[0])} disabled={added || busy || s.p === null} aria-label={`Add ${s.label}`}
           className="rounded-md border border-navy-600 px-2.5 py-1 text-sm font-600 text-ink hover:border-model disabled:border-navy-700 disabled:text-faint">
-          {added ? "Added" : "Add"}
+          {added ? "Added" : busy ? "…" : "Add"}
         </button>
       </div>
-      {quotes.length ? (
-        <button onClick={() => setOpen((o) => !o)} aria-expanded={open} className="mt-1 text-[0.72rem] text-mute hover:text-ink">
-          {open ? "Hide" : "Show"} {quotes.length} sportsbook{quotes.length > 1 ? "s" : ""}{l.updatedAt ? ` · updated ${time(l.updatedAt)}` : ""}
-        </button>
-      ) : null}
-      {open ? <Quotes l={l} /> : null}
+      <div className="mt-1.5 space-y-1">
+        <p className="text-[0.75rem] text-mute">{s.label}{s.push ? ` · push ${pct(s.push)}` : ""}</p>
+        <Market s={s} pmOn={c.pmFetchedAt !== null} />
+        {err ? <p className="text-[0.72rem] text-edge">{err}</p> : null}
+      </div>
     </li>
-  );
-}
-
-function PmChip({ l }: { l: LegOption }) {
-  const q = l.polymarket!;
-  const c = (x: number | null) => (x === null ? "–" : `${Math.round(x * 100)}¢`);
-  const gap = q.implied === null ? null : (l.p - q.implied) * 100;
-  return (
-    <p className="mt-0.5 text-[0.72rem] text-mute">
-      <span className="font-600 text-ink">Polymarket</span>{" "}
-      {q.implied === null ? (
-        <span className="text-faint">no two-sided price (bid {c(q.bid)}, ask {c(q.ask)})</span>
-      ) : (
-        <>
-          <span className="font-mono text-market">{pct(q.implied)}</span> <span className="text-faint">(bid {c(q.bid)} / ask {c(q.ask)})</span> · model{" "}
-          <span className={`font-mono ${gap! > 0 ? "text-good" : gap! < 0 ? "text-edge" : "text-ink"}`}>{gap! > 0 ? "+" : ""}{gap!.toFixed(1)} pts</span>
-        </>
-      )}
-      <span className="text-faint"> · {q.updatedAt ? `updated ${time(q.updatedAt)}` : `checked ${time(q.fetchedAt)}`} · size not listed</span>
-    </p>
   );
 }
 
@@ -275,38 +256,6 @@ function LiveBar({ live }: { live: { on: boolean; pm?: string | null } }) {
     <p className="rounded-xl border border-navy-700 bg-navy-900 px-4 py-2.5 text-sm text-mute">
       <span className="font-600 text-ink">Live Polymarket US prices</span> next to the model, fetched when the page loads. Not stored.{live.pm ? ` ${live.pm}` : ""}
     </p>
-  );
-}
-
-function Quotes({ l }: { l: LegOption }) {
-  const qs = [...(l.quotes ?? [])].sort((a, b) => a.title.localeCompare(b.title));
-  const showLine = l.kind !== "moneyline";
-  return (
-    <div className="mt-1.5 overflow-x-auto">
-      <table className="w-full min-w-[18rem] text-left text-[0.75rem]">
-        <thead>
-          <tr className="text-faint">
-            <th className="py-0.5 font-500">Sportsbook</th>
-            {showLine ? <th className="font-500">Line</th> : null}
-            <th className="font-500">This side</th>
-            <th className="font-500">Other side</th>
-            <th className="font-500">Updated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {qs.map((q) => (
-            <tr key={q.book} className="border-t border-navy-700">
-              <td className="py-1 text-ink">{q.title}</td>
-              {showLine ? <td className={`font-mono ${q.line !== null && l.line != null && Math.abs(q.line - l.line) < 1e-9 ? "text-ink" : "text-pending"}`}>{q.line ?? "–"}</td> : null}
-              <td className="font-mono text-market">{q.price === null ? "no price" : odds(q.price)}</td>
-              <td className="font-mono text-mute">{q.other === null ? "no price" : odds(q.other)}</td>
-              <td className="text-faint">{q.lastUpdate ? time(q.lastUpdate) : "–"}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="mt-1 text-[0.7rem] text-faint">Lines in yellow differ from this leg&apos;s line, so their price doesn&apos;t apply to it.</p>
-    </div>
   );
 }
 

@@ -153,3 +153,60 @@ export interface Pick {
   why: string[];
   invalidators: string[];
 }
+
+/** One player, one stat: the card the Parlay Builder shows (one per player per stat, never one per threshold). The
+ *  page computes the selected threshold's numbers from these fields; the server re-derives every leg it prices. */
+export interface PropCard {
+  key: string;
+  league: League;
+  gameId: string;
+  playerId: string;
+  playerName: string;
+  team: string;
+  opp: string | null;
+  market: string;
+  label: string;
+  noun: string;
+  /** The model's mean for this stat (shown as a whole number). */
+  projection: number;
+  /** The model's calibrated P(stat >= k) at k = k0, k0 + step, ... */
+  grid: { k0: number; step: number; p: number[] };
+  /** Thresholds offered (K for "K or more" / "under K"): model grid points between 3% and 97%, plus market lines. */
+  thresholds: number[];
+  /** Sportsbook quotes for this player and stat (each book's own main line), and the line most books posted. */
+  bookLine: number | null;
+  quotes: { book: string; title: string; line: number; over: number | null; under: number | null; lastUpdate: string | null }[];
+  /** Live Polymarket US "N+" contracts for exactly this player and stat (YES side prices). */
+  pm: { line: number; bid: number | null; ask: number | null; status: string; updatedAt: string | null }[];
+  pmFetchedAt: string | null;
+  /** Last 10 played games for this stat, newest first. */
+  values: number[] | null;
+  injury: string | null;
+  support: string | null;
+  usage: string | null;
+  /** Leg ids the catalog already lists for this player and stat (sportsbook-line and Polymarket-line legs carry prices). */
+  legIds: string[];
+}
+
+export interface GameCard {
+  league: League;
+  gameId: string;
+  kind: "spread" | "total" | "moneyline";
+  home: string;
+  away: string;
+  /** The consensus line (home perspective for spreads). */
+  consensus: number | null;
+  /** Lines offered (home perspective for spreads): consensus, every book's own line and Polymarket's. */
+  lines: number[];
+  /** The engine's distribution: normal approximation from its projection and 80% range (as the engine does). */
+  model: { mean: number; sd: number } | { homeWin: number };
+  /** The engine's own published probabilities at the consensus line (home/over, away/under, push), used verbatim there. */
+  atConsensus: { a: number; b: number; push: number } | null;
+  /** The board's stored consensus prices for the consensus line / moneyline (used only when no single book quotes it). */
+  consensusPrice: { a: number | null; b: number | null; books: number } | null;
+  /** Each book's own line and prices (spreads: home line; home/away = home/away prices; totals: home = over, away = under). */
+  books: { book: string; title: string; line: number | null; home: number | null; away: number | null; lastUpdate: string | null }[];
+  /** Live Polymarket contracts (YES side). team: "home" / "away" (null for totals); spread line from that team's side. */
+  pm: { team: "home" | "away" | null; line: number | null; bid: number | null; ask: number | null; status: string; updatedAt: string | null }[];
+  pmFetchedAt: string | null;
+}

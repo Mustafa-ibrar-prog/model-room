@@ -2,7 +2,9 @@ import "server-only";
 import { loadBoard, loadPropsBoard } from "@/server/engine/board";
 import { NFL_PREFIX, loadGameLines, loadPropLines, propLinesEnabled, ptDate, type DayView, type GameLinesView, type PlayerBookLines } from "@/server/markets/propLines";
 import { americanToDecimal } from "@/lib/parlay/joint";
-import type { BookPrice, BookQuote, GameOption, Last10, LegOption } from "@/lib/parlay/types";
+import type { BookPrice, BookQuote, GameCard, GameOption, LegOption, PropCard } from "@/lib/parlay/types";
+import { coverProbs, gridAt, last10, overProbs, sigmaFromRange } from "@/lib/parlay/lines";
+export { last10 };
 import type { League } from "@/types/domain";
 import type { EngineBoard, EngineGame } from "@/types/engine";
 import type { EnginePropMarket, EnginePropPlayer, EnginePropsBoard } from "@/types/props";
@@ -10,6 +12,7 @@ import type { Variable } from "./correlations";
 import { fetchEvent, type PmEvent } from "@/server/markets/polymarketLive";
 import { isProduction } from "@/lib/auth-config";
 import { contractsOf, gameContract, matchProps, sideQuote, type PmContract } from "./polymarket";
+import { slugCodes } from "@/server/markets/polymarketLive";
 
 export interface PmInput { events: Map<string, PmEvent>; fetchedAt: string }
 export interface PmStats { games: number; eventsFound: number; contracts: number; matchedProps: number; legsWithQuote: number; exchangeLegs: number;
@@ -34,8 +37,13 @@ export interface Catalog {
   gameLabel: Map<string, string>;
   injuries: Map<string, string[]>;
   asOf: { label: string; at: string | null }[];
-  /** Present only in the private view with live Polymarket US data. */
+  /** Present only with live Polymarket US data. */
   pm?: PmStats;
+  /** One card per player per stat, and one per game market (the Parlay Builder's layout). */
+  cards: Map<string, { props: PropCard[]; games: GameCard[] }>;
+  /** Builds a leg the catalog didn't list in advance (any model threshold on the grid, any half/whole game line),
+   *  from the same model distribution, with exact market matching. null when it can't be priced. */
+  resolve: (id: string) => CatalogLeg | null;
 }
 
 /** The prop market each league's stored sportsbook lines cover (one market per game: the free-plan budget). */
@@ -109,31 +117,7 @@ function noVig(quotes: BookQuote[], line: number | null): number | null {
 }
 const newest = (quotes: BookQuote[]) => quotes.reduce<string | null>((a, q) => (q.lastUpdate && (!a || q.lastUpdate > a) ? q.lastUpdate : a), null);
 
-// ------------------------------------------------------------------------------------------------- last 10
 const fmt1 = (x: number) => (Math.round(x * 10) / 10).toFixed(1);
-
-/**
- * The player's last 10 played games (newest first, from the board's box scores) against this exact line.
- *   book line L, over:  win above L, push at exactly L (whole-number lines only), loss below
- *   model "K+":        win at K or more; "under K": win below K (no pushes)
- * null when the board has no game log for this stat (never invented).
- */
-export function last10(values: (number | null)[] | undefined, line: number, side: 1 | -1, kind: "line" | "atleast", noun: string, label: string): Last10 | null {
-  const v = (values ?? []).filter((x): x is number => typeof x === "number" && Number.isFinite(x)).slice(0, 10);
-  if (!v.length) return null;
-  const res = v.map((x) => {
-    if (kind === "atleast") return (side > 0 ? x >= line : x < line) ? 1 : -1;
-    if (x === line) return 0;
-    return (side > 0 ? x > line : x < line) ? 1 : -1;
-  });
-  const hits = res.filter((r) => r === 1).length;
-  const pushes = res.filter((r) => r === 0).length;
-  const five = res.slice(0, 5);
-  const avg = v.reduce((a, b) => a + b, 0) / v.length;
-  const l5 = five.filter((r) => r === 1).length;
-  const text = `${label}: hit in ${hits} of last ${v.length}${pushes ? ` (${pushes} push${pushes > 1 ? "es" : ""})` : ""}. Averaging ${fmt1(avg)} ${noun}. ${l5} of the last ${five.length} hit.`;
-  return { games: v.length, hits, misses: v.length - hits - pushes, pushes, avg: Math.round(avg * 10) / 10, last5Hits: l5, last5Games: five.length, values: v, marks: res, text };
-}
 
 function usageOf(league: League, pl: EnginePropPlayer): string | undefined {
   const g = (pl.recent?.games ?? []).slice(0, 5);
@@ -342,11 +326,15 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     }
   };
   const viewFor = (start: string | null) => (start ? views[ptDate(start)] ?? null : null);
+  type Ctx = { g: EngineGame | null; pg: EnginePropsBoard["games"][number] | undefined; contracts: PmContract[] | null;
+    pmLines?: Map<string, Map<number, PmContract>>; view: DayView | null; home: string; away: string };
+  const ctxs = new Map<string, Ctx>();
   for (const g of upcoming) {
     const list: CatalogLeg[] = [];
     gameLines(league, g, gl, list);
     const pg = propGames.get(g.game_id);
     const pmg = pmFor(g.game_id, pg?.players ?? []);
+    ctxs.set(g.game_id, { g, pg, contracts: pmg.contracts, pmLines: pmg.props?.lines, view: pg ? viewFor(pg.start_time) : null, home: g.home.abbr, away: g.away.abbr });
     attachGame(list, pmg.contracts, g.home.abbr, g.away.abbr);
     if (pg) for (const pl of pg.players) playerLegs(league, g.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list, pmg.props);
     add(g.game_id, list);
@@ -360,6 +348,7 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     if (seen.has(pg.game_id) || started(pg.start_time, now)) continue;
     const list: CatalogLeg[] = [];
     const pmg = pmFor(pg.game_id, pg.players);
+    ctxs.set(pg.game_id, { g: null, pg, contracts: pmg.contracts, pmLines: pmg.props?.lines, view: viewFor(pg.start_time), home: pg.home.abbr, away: pg.away.abbr });
     for (const pl of pg.players) playerLegs(league, pg.game_id, pg.home.abbr, pl, viewFor(pg.start_time), list, pmg.props);
     add(pg.game_id, list);
     const lab = gameText(pg);
@@ -378,7 +367,161 @@ export function buildCatalog(league: League, board: EngineBoard | null, props: E
     ...Object.entries(views).filter(([, v]) => v).map(([d, v]) => ({ label: `${league.toUpperCase()} ${BOOK_MARKET[league].noun} lines for ${d}`, at: v!.updated_at })),
   ];
   if (pmIn) asOf.push({ label: `${league.toUpperCase()} Polymarket US prices (live, not stored)`, at: pmIn.fetchedAt });
-  return { league, games, legs, byGame, gameLabel, injuries, asOf, ...(pmIn ? { pm: stats } : {}) };
+
+  // ---------------------------------------------------------------- one card per player per stat, one per game market
+  const cards = new Map<string, { props: PropCard[]; games: GameCard[] }>();
+  const listedBy = new Map<string, string[]>();
+  for (const k of legs.keys()) {
+    const pre = k.split("~").slice(0, 5).join("~");
+    if (k.split("~")[2] === "prop") (listedBy.get(pre) ?? listedBy.set(pre, []).get(pre)!).push(k);
+  }
+  for (const [gid, c] of ctxs) {
+    const out = { props: [] as PropCard[], games: [] as GameCard[] };
+    for (const pl of c.pg?.players ?? []) {
+      if (/^out$/i.test(pl.injury_status ?? "")) continue;
+      for (const [mkey, m] of Object.entries(pl.markets)) {
+        if (m.support === "insufficient" || !m.grid) continue;
+        const bl = mkey === BOOK_MARKET[league].market ? c.view?.games[gid]?.players[pl.player_id] : undefined;
+        const pmc = [...(c.pmLines?.get(`${pl.player_id}|${mkey}`)?.values() ?? [])];
+        const ks = new Set<number>();
+        m.grid.p.forEach((p, i) => { if (p >= MIN_P && p <= MAX_P) ks.add(m.grid!.k0 + i * m.grid!.step); });
+        for (const t of m.thresholds) if (t.op === ">=" && !t.variant && t.model_prob >= MIN_P && t.model_prob <= MAX_P) ks.add(t.threshold);
+        for (const q of pmc) if (gridAt(m.grid, q.line!)) ks.add(q.line!);
+        for (const b of bl?.books ?? []) if (Math.abs(b.line % 1) === 0.5 && gridAt(m.grid, b.line + 0.5)) ks.add(b.line + 0.5);
+        out.props.push({
+          key: `${gid}~${pl.player_id}~${mkey}`, league, gameId: gid, playerId: pl.player_id, playerName: pl.name, team: pl.team, opp: pl.opp ?? null,
+          market: mkey, label: m.label, noun: m.label.toLowerCase(), projection: m.mean, grid: m.grid,
+          thresholds: [...ks].filter((k) => gridAt(m.grid, k) && !gridAt(m.grid, k)!.interpolated).sort((a, b) => a - b),
+          bookLine: bl ? mainLine(bl.books) : null,
+          quotes: (bl?.books ?? []).map((b) => ({ book: b.book, title: b.title, line: b.line, over: b.over, under: b.under, lastUpdate: b.last_update })),
+          pm: pmc.map((q) => ({ line: q.line!, bid: q.bid, ask: q.ask, status: q.status, updatedAt: q.updatedAt })),
+          pmFetchedAt: pmIn?.fetchedAt ?? null,
+          values: (pl.recent?.values?.[mkey] ?? []).filter((x): x is number => typeof x === "number").slice(0, 10),
+          injury: pl.injury_status, support: m.support, usage: usageOf(league, pl) ?? null,
+          legIds: listedBy.get(`${league}~${gid}~prop~${pl.player_id}~${mkey}`) ?? [],
+        });
+      }
+    }
+    const g = c.g;
+    if (g) {
+      const pr = g.projection;
+      const msd = sigmaFromRange(pr.margin_range_80);
+      const tsd = sigmaFromRange(pr.total_range_80);
+      const gb = Object.entries(gl?.games[gid]?.books ?? {});
+      const pmc = c.contracts ?? [];
+      const homeCodes = slugCodes(league, c.home);
+      const awayCodes = slugCodes(league, c.away);
+      // Polymarket team codes become "home" / "away" here, so the page never needs the slug rules.
+      const sideOf = (t?: string): "home" | "away" | null => (t && homeCodes.includes(t) ? "home" : t && awayCodes.includes(t) ? "away" : null);
+      const pmOut = (kind: string) => pmc.filter((x) => x.kind === kind && (kind === "total" || sideOf(x.team)))
+        .map((x) => ({ team: kind === "total" ? null : sideOf(x.team), line: x.line, bid: x.bid, ask: x.ask, status: x.status, updatedAt: x.updatedAt }));
+      // Model lines around the consensus (the engine's distribution supports any line); market lines are added below.
+      const around = (c0: number, half: number) => Array.from({ length: half * 4 + 1 }, (_, i) => c0 + (i - half * 2) * 0.5);
+      if (msd && g.market?.spread != null) {
+        const lines = new Set<number>(around(g.market.spread, league === "nba" ? 4 : 3));
+        for (const [, b] of gb) if (b.spread) lines.add(b.spread.line);
+        for (const x of pmc) if (x.kind === "spread" && x.line !== null && sideOf(x.team)) lines.add(sideOf(x.team) === "home" ? x.line : -x.line);
+        out.games.push({ league, gameId: gid, kind: "spread", home: c.home, away: c.away, consensus: g.market.spread, lines: [...lines].sort((a, b) => a - b),
+          atConsensus: g.edges?.at_spread && Math.abs(g.edges.at_spread.line - g.market.spread) < 1e-9 ? { a: g.edges.at_spread.home.model_prob, b: g.edges.at_spread.away.model_prob, push: g.edges.at_spread.home.push_prob ?? 0 } : null,
+          consensusPrice: g.edges?.at_spread && Math.abs(g.edges.at_spread.line - g.market.spread) < 1e-9 ? { a: g.edges.at_spread.home.market_price ?? null, b: g.edges.at_spread.away.market_price ?? null, books: g.market.books } : null,
+          model: { mean: pr.margin, sd: msd }, books: gb.filter(([, b]) => b.spread).map(([k, b]) => ({ book: k, title: b.title, line: b.spread!.line, home: b.spread!.home, away: b.spread!.away, lastUpdate: b.spread!.last_update })),
+          pm: pmOut("spread"), pmFetchedAt: pmIn?.fetchedAt ?? null });
+      }
+      if (tsd && g.market?.total != null) {
+        const lines = new Set<number>(around(g.market.total, league === "nba" ? 6 : 4));
+        for (const [, b] of gb) if (b.total) lines.add(b.total.line);
+        for (const x of pmc) if (x.kind === "total" && x.line !== null) lines.add(x.line);
+        out.games.push({ league, gameId: gid, kind: "total", home: c.home, away: c.away, consensus: g.market.total, lines: [...lines].sort((a, b) => a - b),
+          atConsensus: g.edges?.at_total && Math.abs(g.edges.at_total.line - g.market.total) < 1e-9 ? { a: g.edges.at_total.over.model_prob, b: g.edges.at_total.under.model_prob, push: g.edges.at_total.over.push_prob ?? 0 } : null,
+          consensusPrice: g.edges?.at_total && Math.abs(g.edges.at_total.line - g.market.total) < 1e-9 ? { a: g.edges.at_total.over.market_price ?? null, b: g.edges.at_total.under.market_price ?? null, books: g.market.books } : null,
+          model: { mean: pr.total, sd: tsd }, books: gb.filter(([, b]) => b.total).map(([k, b]) => ({ book: k, title: b.title, line: b.total!.line, home: b.total!.over, away: b.total!.under, lastUpdate: b.total!.last_update })),
+          pm: pmOut("total"), pmFetchedAt: pmIn?.fetchedAt ?? null });
+      }
+      if (g.edges?.moneyline) {
+        out.games.push({ league, gameId: gid, kind: "moneyline", home: c.home, away: c.away, consensus: null, lines: [], atConsensus: null,
+          consensusPrice: { a: g.edges.moneyline.home.market_price ?? null, b: g.edges.moneyline.away.market_price ?? null, books: g.market?.books ?? 0 },
+          model: { homeWin: g.edges.moneyline.home.model_prob }, books: gb.filter(([, b]) => b.moneyline).map(([k, b]) => ({ book: k, title: b.title, line: null, home: b.moneyline!.home, away: b.moneyline!.away, lastUpdate: b.moneyline!.last_update })),
+          pm: pmOut("moneyline"), pmFetchedAt: pmIn?.fetchedAt ?? null });
+      }
+    }
+    cards.set(gid, out);
+  }
+
+  // ---------------------------------------------------------------- legs built on demand, from the same distributions
+  const resolve = (id: string): CatalogLeg | null => {
+    const hit = legs.get(id);
+    if (hit) return hit;
+    const parts = id.split("~");
+    if (parts[0] !== league) return null;
+    const gid = parts[1];
+    const c = ctxs.get(gid);
+    if (!c) return null;
+    let made: CatalogLeg | null = null;
+    if (parts[2] === "prop" && parts.length === 7) {
+      const [, , , pid, mkey, tag, sd] = parts;
+      if (!tag.startsWith("m") || (sd !== "o" && sd !== "u")) return null;      // book and Polymarket legs exist only when listed
+      const K = Number(tag.slice(1));
+      const pl = c.pg?.players.find((x) => x.player_id === pid);
+      const m = pl?.markets[mkey];
+      if (!pl || !m || m.support === "insufficient" || /^out$/i.test(pl.injury_status ?? "") || !Number.isFinite(K)) return null;
+      const g0 = gridAt(m.grid, K);
+      if (!g0 || g0.interpolated) return null;                              // model grid points only: no interpolation
+      const side = sd === "o" ? 1 : -1;
+      const p = side > 0 ? g0.p : 1 - g0.p;
+      if (p < 0.005 || p > 0.995) return null;
+      const noun = m.label.toLowerCase();
+      const variable: Variable = { kind: "prop", league, gameId: gid, playerId: pid, market: mkey, team: pl.team, home: pl.team === c.home, pos: pl.position ?? null };
+      const pmc = c.pmLines?.get(`${pid}|${mkey}`)?.get(K);
+      made = { variable, side, option: { league, gameId: gid, kind: "prop", group: m.label, playerId: pid, playerName: pl.name, team: pl.team, support: m.support,
+        injury: pl.injury_status, context: { opp: pl.opp, usage: usageOf(league, pl) }, id,
+        label: side > 0 ? `${pl.name} ${K}+ ${noun}` : `${pl.name} under ${K} ${noun}`, p: r4(p), push: 0, price: null, marketP: null,
+        source: "model_line", noPrice: `${NO_PRICE}: model line, not a sportsbook line`,
+        ...(pmc && pmIn ? { polymarket: sideQuote(pmc, side > 0, pmIn.fetchedAt, `${pmc.title} ${noun}`) } : {}),
+        last10: last10(pl.recent?.values?.[mkey], K, side, "atleast", noun, side > 0 ? `${m.label} ${K}+` : `${m.label} under ${K}`) } };
+    } else if ((parts[2] === "spread" || parts[2] === "total") && parts.length === 5 && c.g) {
+      const g = c.g;
+      const L = Number(parts[4]);
+      if (!Number.isFinite(L) || Math.abs(L * 2 - Math.round(L * 2)) > 1e-9) return null;
+      const pr = g.projection;
+      const bk = Object.entries(gl?.games[gid]?.books ?? {});
+      if (parts[2] === "spread") {
+        const sd = sigmaFromRange(pr.margin_range_80);
+        const side = parts[3] === "home" ? "home" : parts[3] === "away" ? "away" : null;
+        if (!sd || !side || Math.abs(L - (g.market?.spread ?? L)) > 20) return null;
+        const cp = coverProbs(pr.margin, sd, L);
+        const legLine = side === "home" ? L : -L;
+        const quotes: BookQuote[] = bk.filter(([, b]) => b.spread).map(([k, b]) => ({ book: k, title: b.title, line: side === "home" ? b.spread!.line : -b.spread!.line,
+          price: b.spread![side], other: b.spread![side === "home" ? "away" : "home"], lastUpdate: b.spread!.last_update }));
+        const price = best(quotes, legLine);
+        made = { variable: { kind: "margin", league, gameId: gid }, side: side === "home" ? 1 : -1, option: { league, gameId: gid, kind: "spread", group: "Game lines", id,
+          label: `${g[side].abbr} ${fmt(legLine)}`, line: legLine, p: r4(side === "home" ? cp.home : cp.away), push: cp.push ? r4(cp.push) : 0,
+          source: price ? "market_line" : "model_line", team: g[side].abbr, price, quotes, updatedAt: newest(quotes), marketP: noVig(quotes, legLine),
+          noPrice: price ? null : `${NO_PRICE} at this line` } };
+      } else {
+        const sd = sigmaFromRange(pr.total_range_80);
+        const side = parts[3] === "over" ? "over" : parts[3] === "under" ? "under" : null;
+        if (!sd || !side || Math.abs(L - (g.market?.total ?? L)) > 30) return null;
+        const op = overProbs(pr.total, sd, L);
+        const quotes: BookQuote[] = bk.filter(([, b]) => b.total).map(([k, b]) => ({ book: k, title: b.title, line: b.total!.line,
+          price: b.total![side], other: b.total![side === "over" ? "under" : "over"], lastUpdate: b.total!.last_update }));
+        const price = best(quotes, L);
+        made = { variable: { kind: "total", league, gameId: gid }, side: side === "over" ? 1 : -1, option: { league, gameId: gid, kind: "total", group: "Game lines", id,
+          label: `${side === "over" ? "Over" : "Under"} ${L} total points`, line: L, p: r4(side === "over" ? op.over : op.under), push: op.push ? r4(op.push) : 0,
+          source: price ? "market_line" : "model_line", price, quotes, updatedAt: newest(quotes), marketP: noVig(quotes, L),
+          noPrice: price ? null : `${NO_PRICE} at this line` } };
+      }
+      if (made && c.contracts && pmIn) {
+        const o = made.option;
+        const team = o.kind === "total" ? null : o.team ?? null;
+        const other = team === null ? null : team === c.home ? c.away : c.home;
+        const hitc = gameContract(league, c.contracts, o.kind as "spread" | "total", team, other, o.line ?? null, made.side > 0);
+        if (hitc) o.polymarket = sideQuote(hitc.c, hitc.yes, pmIn.fetchedAt, hitc.c.title);
+      }
+    }
+    if (made) legs.set(id, made);
+    return made;
+  };
+  return { league, games, legs, byGame, gameLabel, injuries, asOf, cards, resolve, ...(pmIn ? { pm: stats } : {}) };
 }
 
 /** Loads the stored boards and, on TEST, the stored sportsbook lines (private R2), and builds the catalog. */
