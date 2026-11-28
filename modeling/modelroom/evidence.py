@@ -11,6 +11,7 @@ Builds data/published/evidence_{nba,nfl}.json from data the refresh has ALREADY 
 
 Every section carries its source and as-of time. Nothing here is a model input or changes a prediction; it's read by
 the site's evidence pack for Gemini, which may only quote it. Box scores: hoopR / ESPN (NBA), nflverse (NFL).
+Run by the TEST refresh after the props boards (python -m modelroom.evidence).
 """
 from __future__ import annotations
 
