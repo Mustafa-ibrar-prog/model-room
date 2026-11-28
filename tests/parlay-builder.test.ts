@@ -349,6 +349,7 @@ describe("AI text validation", () => {
     const allowed = allowedNumbers(pack);
     expect(cleanText("It hinges on L3. Davis is the swing leg.", allowed).text).toBe("Davis is the swing leg.");
     expect(cleanText("Per model_vs_recent it is harder.", allowed).text).toBe("");
+    expect(cleanText("He plays thirty-six minutes. Fine.", allowed).text).toBe("Fine.");   // spelled-out numbers can't dodge the number check
   });
   it("most / least likely groups come from the model's probabilities", () => {
     // the screenshot's slip: 63.2%, 70.4%, 45.0%
