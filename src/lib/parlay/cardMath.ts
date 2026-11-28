@@ -24,6 +24,8 @@ export interface Selection {
   last10: Last10 | null;
   /** Leg ids to try, best first (a listed sportsbook leg carries the book price; a model leg always exists). */
   ids: string[];
+  /** The id this selection adds: the first of `ids` the catalog lists, else the model leg. */
+  id: string;
 }
 
 const r4 = (x: number) => Math.round(x * 10000) / 10000;
@@ -56,21 +58,24 @@ function gapOf(p: number | null, pm: PmSide | null, nv: number | null): Selectio
 
 /** Player stat: "K or more" (side 1) or "under K" (side -1). A sportsbook line L counts only when L = K - 0.5. */
 export function propSelection(c: PropCard, K: number, side: 1 | -1): Selection {
-  const g = gridAt(c.grid, K);
-  const p = g && !g.interpolated ? r4(side > 0 ? g.p : 1 - g.p) : null;
   const L = K - 0.5;
-  const rows = c.quotes.map((q) => ({ title: q.title, line: q.line, price: side > 0 ? q.over : q.under, other: side > 0 ? q.under : q.over }));
-  const { book, noVig } = bestAt(rows, L);
-  const contract = c.pm.find((x) => eq(x.line, K));
-  const pm = contract ? pmSide(contract, side > 0) : null;
   const base = `${c.league}~${c.gameId}~prop~${c.playerId}~${c.market}`;
   const sd = side > 0 ? "o" : "u";
+  const contract = c.pm.find((x) => eq(x.line, K));
   const ids = [...(eq(c.bookLine, L) ? [`${base}~b${L}~${sd}`] : []), ...(contract ? [`${base}~p${K}~${sd}`] : []), `${base}~m${K}~${sd}`];
+  const chosen = ids.find((x) => c.legIds?.includes(x)) ?? ids[ids.length - 1];
+  const g = gridAt(c.grid, K);
+  // A model leg at a published ladder point uses the ladder's value; sportsbook and Polymarket legs read the grid.
+  const pk = g && !g.interpolated ? (chosen.includes("~m") ? c.ladder?.[String(K)] ?? g.p : g.p) : null;
+  const p = pk === null ? null : r4(side > 0 ? pk : 1 - pk);
+  const rows = c.quotes.map((q) => ({ title: q.title, line: q.line, price: side > 0 ? q.over : q.under, other: side > 0 ? q.under : q.over }));
+  const { book, noVig } = bestAt(rows, L);
+  const pm = contract ? pmSide(contract, side > 0) : null;
   return {
     p, push: 0, label: side > 0 ? `${c.playerName} ${K}+ ${c.noun}` : `${c.playerName} under ${K} ${c.noun}`,
     book, otherBookLines: book ? [] : [...new Set(c.quotes.map((q) => q.line))].sort((a, b) => a - b),
     pm, gap: gapOf(p, pm, noVig), marketP: noVig,
-    last10: last10(c.values ?? undefined, K, side, "atleast", c.noun, side > 0 ? `${c.label} ${K}+` : `${c.label} under ${K}`), ids,
+    last10: last10(c.values ?? undefined, K, side, "atleast", c.noun, side > 0 ? `${c.label} ${K}+` : `${c.label} under ${K}`), ids, id: chosen,
   };
 }
 
@@ -87,7 +92,7 @@ export function gameSelection(c: GameCard, line: number | null, side: 1 | -1): S
     const book = b0 ?? (cp === null ? null : { american: cp, title: "Consensus", books: c.consensusPrice!.books, line: 0 });
     const contract = c.pm.find((x) => x.team === (side > 0 ? "home" : "away"));
     const pm = contract ? pmSide(contract, true) : null;
-    return { ...empty, p, push: 0, label: `${side > 0 ? c.home : c.away} to win`, book, pm, gap: gapOf(p, pm, noVig), marketP: noVig, ids: [`${base}~ml~${side > 0 ? "home" : "away"}`] };
+    return { ...empty, p, push: 0, label: `${side > 0 ? c.home : c.away} to win`, book, pm, gap: gapOf(p, pm, noVig), marketP: noVig, ids: [`${base}~ml~${side > 0 ? "home" : "away"}`], id: `${base}~ml~${side > 0 ? "home" : "away"}` };
   }
   const L = line ?? c.consensus ?? 0;
   const { mean, sd } = c.model;
@@ -122,5 +127,5 @@ export function gameSelection(c: GameCard, line: number | null, side: 1 | -1): S
   const pr = r4(p);
   return { ...empty, p: pr, push: push ? r4(push) : 0, label, book: book && c.kind === "spread" ? { ...book, line: side > 0 ? book.line : -book.line } : book,
     otherBookLines: book ? [] : [...new Set(c.books.map((b) => b.line).filter((x): x is number => x !== null))].sort((a, b) => a - b),
-    pm, gap: gapOf(pr, pm, noVig), marketP: noVig, ids: [id] };
+    pm, gap: gapOf(pr, pm, noVig), marketP: noVig, ids: [id], id };
 }

@@ -16,8 +16,9 @@ const grid = (k0: number, step: number, p: number[]) => ({ k0, step, p });
 const G = grid(10, 1, [0.95, 0.92, 0.88, 0.84, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.26, 0.22, 0.18, 0.15, 0.12, 0.1]);
 const MARKETS = ["points", "rebounds", "assists", "threes", "pra", "steals", "blocks"];
 function market(label: string, g = G) {
+  // the board ladder is rounded, so it differs slightly from the grid (as on the real boards)
   return { label, mean: 20.4, median: 20, sd: 6, support: "ok", support_note: "", range_80: [12, 28], grid: g,
-    thresholds: [15, 20, 25].map((t) => ({ op: ">=", threshold: t, variant: null, model_prob: gridP({ grid: g } as never, t)!.p, quotes: [], best: null, edge_grade: { grade: null, reasons: [] } })) };
+    thresholds: [15, 20, 25].map((t) => ({ op: ">=", threshold: t, variant: null, model_prob: Math.round(gridP({ grid: g } as never, t)!.p * 1000) / 1000 + 0.0004, quotes: [], best: null, edge_grade: { grade: null, reasons: [] } })) };
 }
 const player = (id: string, name: string, team: string, opp: string, injury = "Available") => ({
   player_id: id, name, team, opp, position: "G", game_id: "g1", injury_status: injury, inputs: {},
@@ -78,7 +79,7 @@ describe("explorer cards", () => {
       for (const K of card.thresholds) {
         for (const side of [1, -1] as const) {
           const s = propSelection(card, K, side);
-          const id = s.ids.find((x) => card.legIds.includes(x)) ?? s.ids[s.ids.length - 1];
+          const id = s.id;
           for (const x of card.legIds) expect(c.legs.has(x)).toBe(true);
           const leg = c.resolve(id);
           if (s.p === null || s.p < 0.005 || s.p > 0.995) continue;

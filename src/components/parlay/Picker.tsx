@@ -110,7 +110,7 @@ export function PropRow({ c, league, inSlip, onAdd, head, as = "li", addText = "
   const [K, setK] = useState<number>(() => startK(c));
   const [open, setOpen] = useState(false);
   const s = useMemo(() => propSelection(c, K, side), [c, K, side]);
-  const id = s.ids.find((x) => c.legIds.includes(x)) ?? s.ids[s.ids.length - 1];
+  const id = s.id;
   const added = s.ids.some((x) => inSlip.has(x));
   const { busy, err, go } = useAdd(league, onAdd);
   const bookKs = new Set(c.quotes.map((q) => q.line + 0.5));
