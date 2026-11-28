@@ -276,6 +276,8 @@ def _ledger(args) -> int:
                 print(f"{name}: {n} picks, chain intact")
         for name, n in P.verify_grades(league).items():
             print(f"{name}: {n} grade records, chain intact")
+    for name, n in ledger.verify_series(ledger_path("nba_props_hybrid_shadow")).items():  # hybrid shadow (research)
+        print(f"{name}: {n} records, chain intact")
     for f in sorted(ledger_path("nba_props").parent.glob("nba_props_shadow_*.jsonl")):   # NBA shadow candidates
         print(f"{f.name}: {ledger.verify(f)} predictions, chain intact")
     return 0

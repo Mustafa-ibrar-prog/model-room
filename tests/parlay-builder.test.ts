@@ -316,7 +316,7 @@ describe("picks to consider", () => {
 // ------------------------------------------------------------------------------------------------- AI guardrails
 describe("AI text validation", () => {
   const price = priceParlay(["nba~g1~spread~home~-2.5", "nba~g2~total~over~222"], [catalog()], TABLE, NOW);
-  const pack = parlayPack(price, []);
+  const pack = parlayPack(price, {});
   it("the fact pack carries labels and rounded engine numbers only", () => {
     const s = JSON.stringify(pack);
     expect(s).toContain("57.0%");
@@ -332,24 +332,38 @@ describe("AI text validation", () => {
     expect(cleanText("Rounded to 57%.", allowed).removed).toBe(1);
     expect(cleanText("Fair odds would be +250.", allowed).removed).toBe(1);
   });
-  it("keeps AI text short: one-sentence summary, one sentence each for hit and miss, two watch items", () => {
-    const v = validateParlayAi({ summary: "One. Two. Three.", legs: [{ id: "L1", hit: "A. B.", miss: "C. D." }, { id: "L1", hit: "dup.", miss: "dup." }],
+  const E = (text: string) => ({ text, cites: [] as string[] });
+  it("keeps AI text short: one-sentence summary, one sentence per claim, two watch items", () => {
+    const v = validateParlayAi({ summary: "One. Two. Three.", legs: [{ id: "L1", hit: E("A. B."), miss: E("C. D."), assessment: "evidence is mixed" }, { id: "L1", hit: E("dup."), miss: E("dup.") }],
       watch: ["a.", "b.", "c."] }, pack)!;
     expect(v.summary).toBe("One.");
-    expect(v.legs).toEqual([{ id: "L1", hit: "A.", miss: "C." }]);
+    expect(v.legs).toEqual([{ id: "L1", hit: { text: "A.", cites: [] }, miss: { text: "C.", cites: [] }, assessment: "evidence is mixed", gap: "" }]);
     expect(v.watch).toHaveLength(2);
   });
-  it("drops ids Gemini invented and filler about missing prices", () => {
-    const v = validateParlayAi({ summary: "Two separate games.", legs: [{ id: "L1", hit: "Home side.", miss: "Road win." }, { id: "L9", hit: "Made up.", miss: "x." }],
+  it("drops ids Gemini invented, copied sentences and filler about missing prices", () => {
+    const v = validateParlayAi({ summary: "Two separate games.", legs: [{ id: "L1", hit: E("Home side."), miss: E("Road win.") }, { id: "L9", hit: E("Made up."), miss: E("x.") }],
       watch: ["No sportsbook price available."] }, pack)!;
     expect(v.legs.map((l) => l.id)).toEqual(["L1"]);
     expect(v.watch).toEqual([]);
-    const d = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: "Same.", miss: "Run may flatter him." }, { id: "L2", hit: "Other.", miss: "Run may flatter him." }], watch: [] }, pack)!;
-    expect(d.legs[1]).toEqual({ id: "L2", hit: "Other.", miss: "" });
-    // a number from another leg is removed (pack L1 and L2 have different model probabilities)
-    const p1 = pack.legs[0].model_probability, p2 = pack.legs[1].model_probability;
-    const x = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: `Model has it at ${p2}.`, miss: `Own number ${p1}.` }], watch: [] }, pack)!;
-    expect(x.legs[0]).toEqual({ id: "L1", hit: "", miss: `Own number ${p1}.` });
+    const d = validateParlayAi({ summary: "x.", legs: [{ id: "L1", hit: E("Same."), miss: E("Run may flatter him.") }, { id: "L2", hit: E("Other."), miss: E("Run may flatter him.") }], watch: [] }, pack)!;
+    expect(d.legs[1].miss.text).toBe("");
+  });
+  it("a claim may only use numbers from the evidence it cites, and only this leg's evidence", () => {
+    const pk = { legs: [
+      { id: "L1", label: "A 20+ points", model_probability: "55.0%", evidence: [{ id: "E1", text: "Last 10: 7 of 10 (avg 23.4)." }, { id: "E2", text: "MIA allow 61.2 points a game to guards, 3rd most of 30." }], missing: ["Starting lineups aren't confirmed by any source Model Room collects."] },
+      { id: "L2", label: "B 8+ rebounds", model_probability: "48.0%", evidence: [{ id: "E1", text: "Season: 9.6 rebounds a game." }], missing: [] },
+    ] };
+    const v = validateParlayAi({ summary: "x.", watch: [], legs: [
+      { id: "L1", hit: { text: "MIA allow 61.2 points a game to guards, 3rd most.", cites: ["E2"] }, miss: { text: "He averaged 23.4 lately.", cites: ["E2"] },
+        assessment: "evidence backs the model", gap: "starting lineups aren't confirmed by any source model room collects." },
+      { id: "L2", hit: { text: "He averages 9.6 rebounds.", cites: ["E1", "E7"] }, miss: { text: "He averaged 23.4 points.", cites: ["E1"] }, assessment: "made up" },
+    ] }, pk)!;
+    expect(v.legs[0].hit).toEqual({ text: "MIA allow 61.2 points a game to guards, 3rd most.", cites: ["E2"] });
+    expect(v.legs[0].miss.text).toBe("");                       // 23.4 is in E1, not in the cited E2
+    expect(v.legs[0].gap).toBe("Starting lineups aren't confirmed by any source Model Room collects.");
+    expect(v.legs[1].hit).toEqual({ text: "He averages 9.6 rebounds.", cites: ["E1"] });   // unknown citation dropped
+    expect(v.legs[1].miss.text).toBe("");                       // another leg's number
+    expect(v.legs[1].assessment).toBeNull();
   });
   it("drops sentences that leak leg ids or field names", () => {
     const allowed = allowedNumbers(pack);
@@ -394,18 +408,18 @@ describe("Analyze My Parlay", () => {
 
   it("without a key: numbers still come back, AI says why it's missing", async () => {
     delete process.env.GEMINI_API_KEY;
-    const r = await explainParlay(price, [c], who);
+    const r = await explainParlay(price, {}, who);
     expect(r).toMatchObject({ status: "unavailable", reason: "disabled" });
     expect(price.p).not.toBeNull();
   });
   it("off in production even with a key", async () => {
     process.env.VERCEL_ENV = "production";
-    expect((await explainParlay(price, [c], who)).status).toBe("unavailable");
+    expect((await explainParlay(price, {}, who)).status).toBe("unavailable");
   });
   it("sends the key in a header (never the URL), no tools, a token cap; validates the answer; never changes numbers", async () => {
-    const f = answer({ summary: "Both legs lean on New York. It is really 80% likely.", legs: [{ id: "L1", hit: "Needs a win by 3 or more.", miss: "A close game." }], watch: ["Late scratches."] });
+    const f = answer({ summary: "Both legs lean on New York. It is really 80% likely.", legs: [{ id: "L1", hit: { text: "Needs a win by 3 or more.", cites: [] }, miss: { text: "A close game.", cites: [] } }], watch: ["Late scratches."] });
     const before = JSON.stringify(price);
-    const r = await explainParlay(price, [c], who, f as unknown as typeof fetch);
+    const r = await explainParlay(price, {}, who, f as unknown as typeof fetch);
     expect(r.status).toBe("ok");
     if (r.status === "ok") {
       expect(r.text.summary).toBe("Both legs lean on New York.");
@@ -418,13 +432,13 @@ describe("Analyze My Parlay", () => {
     expect((init.headers as Record<string, string>)["x-goog-api-key"]).toBe("test-key-not-real");
     const body = JSON.parse(init.body as string);
     expect(body.tools).toBeUndefined();
-    expect(body.generationConfig.maxOutputTokens).toBeLessThanOrEqual(800);
+    expect(body.generationConfig.maxOutputTokens).toBeLessThanOrEqual(1200);
     expect(init.body as string).not.toContain("test-key-not-real");
   });
   it("caches identical parlays: the second click makes no request", async () => {
     const f = answer({ summary: "Fine.", legs: [], watch: [] });
-    await explainParlay(price, [c], who, f as unknown as typeof fetch);
-    const r2 = await explainParlay(price, [c], who, f as unknown as typeof fetch);
+    await explainParlay(price, {}, who, f as unknown as typeof fetch);
+    const r2 = await explainParlay(price, {}, who, f as unknown as typeof fetch);
     expect(f).toHaveBeenCalledTimes(1);
     expect(r2).toMatchObject({ status: "ok", cached: true });
   });
@@ -432,7 +446,7 @@ describe("Analyze My Parlay", () => {
     process.env.GEMINI_USER_DAILY = "2";
     for (const id of ["nba~g1~ml~home", "nba~g1~ml~away", "nba~g2~ml~home"]) {
       const p = priceParlay([id], [c], TABLE, NOW);
-      const r = await explainParlay(p, [c], who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
+      const r = await explainParlay(p, {}, who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
       if (id === "nba~g2~ml~home") expect(r).toMatchObject({ status: "unavailable", reason: "user" });
       else expect(r.status).toBe("ok");
     }
@@ -441,24 +455,24 @@ describe("Analyze My Parlay", () => {
     process.env.GEMINI_SITE_DAILY = "1";
     const a = priceParlay(["nba~g1~ml~home"], [c], TABLE, NOW);
     const b = priceParlay(["nba~g1~ml~away"], [c], TABLE, NOW);
-    await explainParlay(a, [c], who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
-    const r = await explainParlay(b, [c], { id: "22222222-2222-2222-2222-222222222222", net: "n2" }, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
+    await explainParlay(a, {}, who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
+    const r = await explainParlay(b, {}, { id: "22222222-2222-2222-2222-222222222222", net: "n2" }, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
     expect(r).toMatchObject({ status: "unavailable", reason: "site" });
   });
   it("free quota exhausted (429): pauses AI until Pacific midnight and stops calling", async () => {
     const f = vi.fn(async () => new Response("{}", { status: 429 }));
-    const r = await explainParlay(price, [c], who, f as unknown as typeof fetch);
+    const r = await explainParlay(price, {}, who, f as unknown as typeof fetch);
     expect(r).toMatchObject({ status: "unavailable", reason: "quota" });
     const other = priceParlay(["nba~g2~ml~home"], [c], TABLE, NOW);
-    const r2 = await explainParlay(other, [c], who, f as unknown as typeof fetch);
+    const r2 = await explainParlay(other, {}, who, f as unknown as typeof fetch);
     expect(r2).toMatchObject({ status: "unavailable", reason: "quota" });
     expect(f).toHaveBeenCalledTimes(1);
   });
   it("service down or garbage answer: unavailable, numbers unaffected", async () => {
     const down = vi.fn(async () => { throw new Error("net"); });
-    expect((await explainParlay(price, [c], who, down as unknown as typeof fetch)).status).toBe("unavailable");
+    expect((await explainParlay(price, {}, who, down as unknown as typeof fetch)).status).toBe("unavailable");
     const junk = vi.fn(async () => new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: "not json" }] } }] }), { status: 200 }));
-    expect((await explainParlay(priceParlay(["nba~g2~ml~away"], [c], TABLE, NOW), [c], who, junk as unknown as typeof fetch)).status).toBe("unavailable");
+    expect((await explainParlay(priceParlay(["nba~g2~ml~away"], [c], TABLE, NOW), {}, who, junk as unknown as typeof fetch)).status).toBe("unavailable");
   });
 });
 

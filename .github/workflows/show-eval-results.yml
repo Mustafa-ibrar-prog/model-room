@@ -1,0 +1,33 @@
+name: Show research results (manual, read-only)
+
+# Prints a finished research run's artifact (aggregate metrics only) to the log, for reading where artifact downloads
+# aren't reachable. Use only with research artifacts that hold aggregates (injury eval, hybrid eval).
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "run id of the research workflow"
+        required: true
+      name:
+        description: "artifact name (nba-injury-eval or nba-hybrid-eval)"
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  show:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.inputs.name }}
+          run-id: ${{ github.event.inputs.run_id }}
+          github-token: ${{ github.token }}
+          path: /tmp/a
+      - name: Print
+        run: |
+          case "${{ github.event.inputs.name }}" in nba-injury-eval|nba-hybrid-eval) ;; *) echo "not a research artifact"; exit 1;; esac
+          for f in /tmp/a/*.json; do echo "== $(basename $f)"; python3 -c "import json,sys; print(json.dumps(json.load(open(sys.argv[1])), separators=(',',':')))" "$f"; done

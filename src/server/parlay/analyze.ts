@@ -3,8 +3,10 @@ import type { ParlayPrice, Pick } from "@/lib/parlay/types";
 import { GEMINI_MODEL, generateJson, geminiEnabled } from "@/server/ai/gemini";
 import { PARLAY_SCHEMA, PICKS_SCHEMA, SYSTEM_RULES, parlayPack, picksPack } from "@/server/ai/factpack";
 import { cacheGet, cacheSet, hash, takeQuota } from "@/server/ai/limits";
-import { validateParlayAi, validatePicksAi, type ParlayAi, type PicksAi } from "@/server/ai/validate";
+import { validateParlayAi, validatePicksAi, validateReviewAi, type ParlayAi, type PicksAi, type ReviewAi } from "@/server/ai/validate";
+import { REVIEW_SCHEMA, type ReviewPack } from "./review";
 import type { Catalog } from "./legs";
+import type { LegEvidence } from "@/lib/parlay/evidence";
 
 /**
  * "Analyze My Parlay" and the picks review (TEST, Moose 2026-11-27). The engine prices first; Gemini only explains the
@@ -14,15 +16,15 @@ export type AiStatus<T> =
   | { status: "ok"; model: string; cached: boolean; text: T }
   | { status: "unavailable"; reason: string; message: string };
 
-const MAX_OUT = 700;
+const MAX_OUT = 1200;
 
 function injuriesFor(catalogs: Catalog[], gameIds: Set<string>): string[] {
   return catalogs.flatMap((c) => [...c.injuries.entries()].filter(([g]) => gameIds.has(g)).flatMap(([, v]) => v));
 }
 
-export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who: { id: string; net: string }, fetchImpl?: typeof fetch): Promise<AiStatus<ParlayAi>> {
+export async function explainParlay(price: ParlayPrice, evidence: Record<string, LegEvidence>, who: { id: string; net: string }, fetchImpl?: typeof fetch): Promise<AiStatus<ParlayAi>> {
   if (!price.ok || !price.legs.length) return { status: "unavailable", reason: "no_price", message: "Price the parlay first." };
-  const pack = parlayPack(price, injuriesFor(catalogs, new Set(price.legs.map((l) => l.gameId))));
+  const pack = parlayPack(price, evidence);
   const key = hash(`parlay:${GEMINI_MODEL}:${JSON.stringify(pack)}`);
   const hit = cacheGet<ParlayAi>(key);
   if (hit) return { status: "ok", model: GEMINI_MODEL, cached: true, text: hit };
@@ -33,16 +35,14 @@ export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who
     system: SYSTEM_RULES,
     user: [
       "Explain this parlay leg by leg. The legs are already ranked and grouped by the model (likelihood_order, group, weakest_leg): keep that, never re-rank.",
-      "summary: ONE sentence (max 25 words): which legs look solid and which leg the parlay hinges on (weakest_leg).",
-      "legs: for EVERY leg: hit = one sentence (max 22 words) on the best reason it could hit; miss = one sentence (max 22 words) on the main way it could miss.",
-      "hit: the strongest supporting fact (cushion, recent_form, recent minutes, a same-game link that helps). miss: the strongest warning (model_vs_recent when the model is less optimistic, cushion, recent_form, last_10_misses, a link that works against it, flags, injury_report), with a few words on why it matters.",
-      "Never just restate the threshold, and don't repeat the 'hit in N of last 10' line the page already shows unless it is the only fact.",
-      "Refer to players by name. Never write leg ids like L1 or field names. Name the leg's own stat (rebounds, points, assists...).",
-      "Plain, short words, like a sharp friend talking; no hype adjectives. Write numbers as digits copied from the fact pack.",
-      "When model_vs_recent says well below, use its numbers: e.g. the model has him at its percentage despite his recent run, so the run may flatter him. Each leg's sentences must be specific to that player and stat.",
-      "Use only last_10_games, recent_minutes_any_opponent, opponent, same_game_links, injury_report and flags. recent_minutes_any_opponent is his last 5 games against anyone, NOT against this opponent; never say 'against' the opponent for it.",
-      "Be specific to each leg; don't repeat the same reason across legs; don't mention missing sportsbook prices.",
-      "watch: at most 2 short items from injury_report or flags that could change things before tip-off; empty if none.",
+      "Each leg has an evidence list (ids E1, E2...) with a lean already set by Model Room's rules, and a missing list. Use ONLY that leg's evidence for that leg.",
+      "summary: ONE sentence (max 25 words): which legs look solid and which leg the parlay hinges on (weakest_leg). Use player names.",
+      "legs, for EVERY leg: hit = the strongest supporting evidence, miss = the strongest warning; each ONE sentence (max 28 words) with cites = the evidence ids it uses (1 to 3).",
+      "Prefer matchup, minutes/role, injury and game-environment evidence over recent hit rates when they exist; a recent hit rate is not the chance of hitting.",
+      "If no evidence leans against the leg, miss says plainly that the stored data shows no clear warning and cites nothing. Never invent a reason.",
+      "assessment: whether this leg's evidence backs the model, is mixed, cuts against it, or is too thin. gap: copy the single most important line from that leg's missing list, or empty.",
+      "Refer to players by name, name the stat, write numbers as digits exactly as they appear in the cited evidence. Plain, short words; no hype. No two legs get the same sentence.",
+      "watch: at most 2 short items (injury evidence or flags) that could change things before the game; empty if none.",
       `Fact pack:\n${JSON.stringify(pack)}`,
     ].join(" "),
     schema: PARLAY_SCHEMA, maxOutputTokens: MAX_OUT, fetchImpl,
@@ -70,6 +70,34 @@ export async function reviewPicks(picks: Pick[], catalogs: Catalog[], who: { id:
   });
   if (!out.ok) return { status: "unavailable", reason: out.reason, message: out.message };
   const v = validatePicksAi(out.json, pack);
+  if (!v) return { status: "unavailable", reason: "rejected", message: "The AI answer didn't pass our checks, so it isn't shown." };
+  cacheSet(key, v);
+  return { status: "ok", model: GEMINI_MODEL, cached: false, text: v };
+}
+
+/** The evidence review across the boards: one Gemini call, cached for everyone for 6 hours (same candidates, same answer). */
+export async function reviewWithAi(pack: ReviewPack, who: { id: string; net: string }, fetchImpl?: typeof fetch): Promise<AiStatus<ReviewAi>> {
+  if (!pack.candidates.length) return { status: "unavailable", reason: "no_candidates", message: "Nothing on the boards to review right now." };
+  const key = hash(`review:${GEMINI_MODEL}:${JSON.stringify(pack)}`);
+  const hit = cacheGet<ReviewAi>(key);
+  if (hit) return { status: "ok", model: GEMINI_MODEL, cached: true, text: hit };
+  if (!geminiEnabled()) return { status: "unavailable", reason: "disabled", message: "AI review isn't switched on for this site yet. The evidence counts are complete." };
+  const cap = takeQuota(who.id, who.net);
+  if (!cap.ok) return { status: "unavailable", reason: cap.scope, message: cap.message };
+  const out = await generateJson({
+    system: SYSTEM_RULES,
+    user: [
+      "These candidates come from Model Room's boards, already sorted by fixed rules into two lists: 'closer look' (independent evidence mostly agrees with the model's lean) and 'possible weakness' (evidence or history argues against the model).",
+      "For EACH candidate, in the given order: verdict = 'worth investigating' or 'low priority' (how much the evidence deserves a human's time, NOT whether to bet);",
+      "why = one sentence (max 28 words) on the strongest evidence, with cites = its evidence ids; risk = one sentence on the strongest reason it could be wrong, with cites, or a plain statement that the stored data shows no clear warning (no cites).",
+      "Never re-rank, never add candidates, never state a probability or number that isn't in the cited evidence. A recent hit rate is not a probability. Name the player and stat.",
+      "overview: one sentence on what the review found overall, without numbers.",
+      `Fact pack:\n${JSON.stringify(pack)}`,
+    ].join(" "),
+    schema: REVIEW_SCHEMA, maxOutputTokens: 1800, fetchImpl,
+  });
+  if (!out.ok) return { status: "unavailable", reason: out.reason, message: out.message };
+  const v = validateReviewAi(out.json, pack);
   if (!v) return { status: "unavailable", reason: "rejected", message: "The AI answer didn't pass our checks, so it isn't shown." };
   cacheSet(key, v);
   return { status: "ok", model: GEMINI_MODEL, cached: false, text: v };

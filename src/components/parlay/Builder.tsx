@@ -4,12 +4,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GameCard, GameOption, LegOption, ParlayPrice, Pick, PropCard } from "@/lib/parlay/types";
 import { gameSelection } from "@/lib/parlay/cardMath";
 import { likelihoodGroups } from "@/lib/parlay/likelihood";
+import { BoardReview } from "./Review";
+import { EVIDENCE_SECTIONS, evidenceBalance, type LegEvidence } from "@/lib/parlay/evidence";
 import { Gap, Market, PropRow, SideToggle, useAdd } from "./Picker";
 import type { Validation } from "@/server/parlay/validation";
 
 type League = "nba" | "nfl";
 type AiState<T> = { status: "ok"; model: string; cached: boolean; text: T } | { status: "unavailable"; reason: string; message: string };
-type ParlayAi = { summary: string; legs: { id: string; hit: string; miss: string }[]; watch: string[]; removed: number };
+type Claim = { text: string; cites: string[] };
+type ParlayAi = { summary: string; legs: { id: string; hit: Claim; miss: Claim; assessment: string | null; gap: string }[]; watch: string[]; removed: number };
 type PicksAi = { overview: string; picks: { id: string; why: string; check: string }[]; removed: number };
 
 import { SLIP_STORE as STORE } from "./Picker";
@@ -31,6 +34,7 @@ export function ParlayBuilder({ games, asOf, validation, ai, live }: {
   const [price, setPrice] = useState<ParlayPrice | null>(null);
   const [pricing, setPricing] = useState(false);
   const [analysis, setAnalysis] = useState<AiState<ParlayAi> | null>(null);
+  const [evidence, setEvidence] = useState<Record<string, LegEvidence>>({});
   const [analyzing, setAnalyzing] = useState(false);
 
   // restore the slip (per-browser convenience only); legs are re-priced on the server, so stale ones drop out
@@ -86,6 +90,7 @@ export function ParlayBuilder({ games, asOf, validation, ai, live }: {
       const r = await fetch("/api/parlay/analyze", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ legs: ids }) });
       const j = await r.json();
       if (j.price) setPrice(j.price);
+      setEvidence(j.evidence ?? {});
       setAnalysis(j.ai ?? { status: "unavailable", reason: "error", message: "Something went wrong. The numbers above are complete." });
     } catch {
       setAnalysis({ status: "unavailable", reason: "error", message: "Couldn't reach the server. The numbers above are complete." });
@@ -133,12 +138,13 @@ export function ParlayBuilder({ games, asOf, validation, ai, live }: {
         {gameId ? <GameLegs key={`${league}-${gameId}`} league={league} gameId={gameId} slip={slip} onAdd={add} /> : null}
 
         <Picks slipIds={ids} onAdd={add} ai={ai} history={validation?.discovery ?? null} />
+        <BoardReview slipIds={ids} onAdd={add} ai={ai} />
         <Method validation={validation} asOf={asOf} ai={ai} />
       </div>
 
       <aside className="lg:sticky lg:top-20 lg:self-start" aria-label="Your parlay">
         <Slip slip={slip} price={shownPrice} pricing={pricing} onRemove={remove} onClear={() => { setSlip([]); setAnalysis(null); }}
-          onAnalyze={analyze} analyzing={analyzing} analysis={analysis} ai={ai} />
+          onAnalyze={analyze} analyzing={analyzing} analysis={analysis} evidence={evidence} ai={ai} />
       </aside>
     </div>
   );
@@ -261,9 +267,9 @@ function LiveBar({ live }: { live: { on: boolean; pm?: string | null } }) {
 }
 
 // ------------------------------------------------------------------------------------------------- slip
-function Slip({ slip, price, pricing, onRemove, onClear, onAnalyze, analyzing, analysis, ai }: {
+function Slip({ slip, price, pricing, onRemove, onClear, onAnalyze, analyzing, analysis, evidence, ai }: {
   slip: LegOption[]; price: ParlayPrice | null; pricing: boolean; onRemove: (id: string) => void; onClear: () => void;
-  onAnalyze: () => void; analyzing: boolean; analysis: AiState<ParlayAi> | null; ai: { enabled: boolean; model: string; perDay: number };
+  onAnalyze: () => void; analyzing: boolean; analysis: AiState<ParlayAi> | null; evidence: Record<string, LegEvidence>; ai: { enabled: boolean; model: string; perDay: number };
 }) {
   const rejected = new Map((price?.rejected ?? []).map((r) => [r.id, r.reason]));
   const legIndex = new Map((price?.legs ?? []).map((l, i) => [l.id, i]));
@@ -308,7 +314,7 @@ function Slip({ slip, price, pricing, onRemove, onClear, onAnalyze, analyzing, a
           <p className="mt-2 text-center text-[0.72rem] text-faint">
             {ai.enabled ? `Plain-English notes from ${ai.model}. ${ai.perDay} a day. It explains the numbers; it never changes them.` : "AI notes aren't switched on yet. The numbers work without them."}
           </p>
-          {analysis ? <Analysis a={analysis} price={price} /> : null}
+          {analysis ? <Analysis a={analysis} price={price} evidence={evidence} /> : null}
         </div>
       ) : null}
     </div>
@@ -361,30 +367,83 @@ function Numbers({ price, pricing }: { price: ParlayPrice; pricing: boolean }) {
   );
 }
 
-function Analysis({ a, price }: { a: AiState<ParlayAi>; price: ParlayPrice | null }) {
-  if (a.status !== "ok") return <p className="mt-3 rounded-lg border border-navy-700 bg-navy-850 p-3 text-sm text-mute">{a.message}</p>;
+const shortTime = (iso: string | null) => {
+  if (!iso) return "";
+  const d = new Date(iso.length === 10 ? `${iso}T12:00:00Z` : iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return iso.length === 10 ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
+    : d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }) + " PT";
+};
+
+function Analysis({ a, price, evidence }: { a: AiState<ParlayAi>; price: ParlayPrice | null; evidence: Record<string, LegEvidence> }) {
   const legs = price?.legs ?? [];
   // Grouping and order come from the model's probabilities (same rule as the fact pack), not from the AI.
   const { order, least } = likelihoodGroups(legs.map((l) => l.p));
-  const notes = new Map(a.text.legs.map((l) => [l.id, l]));
+  const ok = a.status === "ok" ? a : null;
+  const notes = new Map((ok?.text.legs ?? []).map((l) => [l.id, l]));
   const row = (i: number) => {
     const l = legs[i];
     const n = notes.get(`L${i + 1}`);
+    const ev = evidence[l.id];
+    const items = new Map((ev?.items ?? []).map((x) => [x.id, x]));
+    const cite = (c: Claim) => c.cites.map((id) => items.get(id)).filter(Boolean).map((x) => `${x!.source}${x!.asOf ? `, ${shortTime(x!.asOf)}` : ""}`);
+    const bal = evidenceBalance(ev);
     return (
       <li key={l.id} className="rounded-md bg-navy-900 px-2.5 py-2">
         <p className="flex justify-between gap-3"><span className="text-ink">{l.label}</span><span className="font-mono text-model">{pct(l.p)}</span></p>
-        {n?.hit ? <p className="mt-0.5 text-mute"><span className="font-600 text-good">Could hit: </span>{n.hit}</p> : null}
-        {n?.miss ? <p className="mt-0.5 text-mute"><span className="font-600 text-edge">Could miss: </span>{n.miss}</p> : null}
+        {n?.assessment ? <p className="mt-0.5 text-[0.72rem] text-faint">AI assessment: <span className="text-mute">{n.assessment}</span></p> : null}
+        {n?.hit.text ? <p className="mt-1 text-mute"><span className="font-600 text-good">Could hit: </span>{n.hit.text}{cite(n.hit).length ? <span className="text-[0.7rem] text-faint"> ({[...new Set(cite(n.hit))].join("; ")})</span> : null}</p> : null}
+        {n?.miss.text ? <p className="mt-0.5 text-mute"><span className="font-600 text-edge">Could miss: </span>{n.miss.text}{cite(n.miss).length ? <span className="text-[0.7rem] text-faint"> ({[...new Set(cite(n.miss))].join("; ")})</span> : null}</p> : null}
+        {n?.gap ? <p className="mt-0.5 text-[0.75rem] text-pending">Missing: {n.gap}</p> : null}
+        {ev?.items.length ? (
+          <details className="mt-1.5 text-[0.78rem]">
+            <summary className="cursor-pointer text-mute hover:text-ink">Evidence ({ev.items.length}: {bal.supports} for, {bal.against} against)</summary>
+            <div className="mt-1.5 space-y-2">
+              {EVIDENCE_SECTIONS.map((sec) => {
+                const xs = ev.items.filter((x) => sec.kinds.includes(x.kind));
+                if (!xs.length) return null;
+                return (
+                  <div key={sec.title}>
+                    <p className="font-600 text-ink">{sec.title}</p>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {xs.map((x) => (
+                        <li key={x.id} className="text-mute">
+                          <span className={x.lean === "supports" ? "text-good" : x.lean === "against" ? "text-edge" : "text-faint"} aria-label={x.lean}>{x.lean === "supports" ? "+ " : x.lean === "against" ? "− " : "· "}</span>
+                          {x.text} <span className="text-[0.7rem] text-faint">{x.source}{x.asOf ? `, ${shortTime(x.asOf)}` : ""}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+              {ev.missing.length ? (
+                <div>
+                  <p className="font-600 text-ink">Not available</p>
+                  <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-faint">{ev.missing.map((m) => <li key={m}>{m}</li>)}</ul>
+                </div>
+              ) : null}
+            </div>
+          </details>
+        ) : null}
       </li>
     );
   };
   const most = order.filter((i) => !least.has(i));
   const low = order.filter((i) => least.has(i));
   const weakest = legs[order[order.length - 1]];
+  const fresh = new Map<string, string | null>();
+  for (const l of legs) for (const x of evidence[l.id]?.items ?? []) {
+    const prev = fresh.get(x.source);
+    if (!fresh.has(x.source) || (x.asOf && (!prev || x.asOf > prev))) fresh.set(x.source, x.asOf);
+  }
   return (
     <div className="mt-3 space-y-3 rounded-lg border border-navy-700 bg-navy-850 p-3 text-sm">
-      <p className="text-[0.72rem] text-faint">AI explanation · {a.model}{a.cached ? " · saved answer" : ""} · ranking and numbers come from the model; the AI writes the reasons</p>
-      {a.text.summary ? <p className="text-ink">{a.text.summary}</p> : null}
+      {ok ? (
+        <p className="text-[0.72rem] text-faint">AI explanation · {ok.model}{ok.cached ? " · saved answer" : ""} · ranking, numbers and evidence come from Model Room; the AI picks and words the reasons</p>
+      ) : (
+        <p className="text-mute">{a.status === "unavailable" ? a.message : ""} The evidence below is Model Room&apos;s own data.</p>
+      )}
+      {ok?.text.summary ? <p className="text-ink">{ok.text.summary}</p> : null}
       {most.length ? (
         <div>
           <p className="font-600 text-good">Most likely to hit</p>
@@ -400,13 +459,19 @@ function Analysis({ a, price }: { a: AiState<ParlayAi>; price: ParlayPrice | nul
       {legs.length > 1 && weakest ? (
         <p className="text-[0.78rem] text-mute">The parlay can&apos;t be more likely than its weakest leg: {weakest.label} at {pct(weakest.p)}.</p>
       ) : null}
-      {a.text.watch.length ? (
+      {ok?.text.watch.length ? (
         <div>
           <p className="font-600 text-ink">Before the games</p>
-          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-mute">{a.text.watch.map((w, i) => <li key={i}>{w}</li>)}</ul>
+          <ul className="mt-1 list-disc space-y-0.5 pl-4 text-mute">{ok.text.watch.map((w, i) => <li key={i}>{w}</li>)}</ul>
         </div>
       ) : null}
-      {a.text.removed ? <p className="text-[0.72rem] text-faint">{a.text.removed} sentence{a.text.removed > 1 ? "s" : ""} removed for stating numbers the model didn&apos;t produce.</p> : null}
+      {fresh.size ? (
+        <details className="text-[0.72rem] text-faint">
+          <summary className="cursor-pointer hover:text-mute">Data freshness</summary>
+          <ul className="mt-1 space-y-0.5">{[...fresh.entries()].map(([k, v]) => <li key={k}>{k}{v ? `: ${shortTime(v)}` : ""}</li>)}</ul>
+        </details>
+      ) : null}
+      {ok?.text.removed ? <p className="text-[0.72rem] text-faint">{ok.text.removed} sentence{ok.text.removed > 1 ? "s" : ""} removed for stating numbers the cited evidence doesn&apos;t contain.</p> : null}
     </div>
   );
 }
