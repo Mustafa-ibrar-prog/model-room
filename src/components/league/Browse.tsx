@@ -8,7 +8,12 @@ import { isLocked, type League } from "@/types/domain";
 import { browseHref, type BrowseQuery } from "./href";
 import { PlayerCard } from "./PlayerCard";
 import { PlayerDetail } from "./PlayerDetail";
-import { listedStatus } from "./simple";
+import { listedStatus, listedText, playerSub, historyCaveat } from "./simple";
+import { isProduction } from "@/lib/auth-config";
+import { liveMarketsOn } from "@/server/markets/polymarketLive";
+import { getCatalog } from "@/server/parlay/legs";
+import { ExplorerPick } from "@/components/parlay/Picker";
+import type { PropCard } from "@/lib/parlay/types";
 
 const LEAGUE_NAME: Record<League, string> = { nfl: "NFL", nba: "NBA" };
 
@@ -110,6 +115,12 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
   // ---------------------------------------------------------------- the players in one game
   const rows: ExplorerRow[] = isLocked(x.rows) ? [] : x.rows;
   const game = x.game;
+  // TEST: one picker per player for this stat (side and threshold), from the same catalog the Parlay Builder prices.
+  const cards = new Map<string, PropCard>();
+  if (!isProduction() && rows.length) {
+    const cat = await getCatalog(league, new Date(x.now), { live: liveMarketsOn() });
+    for (const c of cat.cards.values()) for (const pc of c.props) if (pc.market === x.category.key) cards.set(`${pc.gameId}~${pc.playerId}`, pc);
+  }
 
   return (
     <div className="space-y-5">
@@ -200,7 +211,30 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
               : "No sportsbook line is published for these props, so every number here is our own."}
           </p>
           <div className="space-y-2.5">
-            {rows.map((r) => (
+            {rows.map((r) => {
+              const card = cards.get(`${r.gameId}~${r.id}`);
+              const href = browseHref(league, { game: q.game ?? r.gameId, cat: q.cat, q: q.q, player: r.id });
+              if (card) {
+                const listed = listedStatus(x.injuries, r);
+                const caveat = listed ? listedText(listed) : historyCaveat(r);
+                return (
+                  <ExplorerPick key={r.id} c={card} league={league} head={
+                    <div className="flex min-w-[12rem] flex-1 items-start gap-2.5">
+                      <TeamBadge league={league} abbr={r.team} size="sm" />
+                      <div className="min-w-0">
+                        <Link href={href} scroll={false} className="block truncate text-[1.05rem] font-600 text-ink hover:text-model">{r.name}</Link>
+                        <p className="truncate text-[0.8rem] text-mute">{playerSub(r)}</p>
+                        <p className="text-[0.8rem] text-faint">
+                          {x.category.label} · we project <span className="font-600 text-model">{Math.round(card.projection)}</span> ·{" "}
+                          <Link href={href} scroll={false} className="text-model hover:underline">See why</Link>
+                        </p>
+                        {caveat ? <p className="text-xs text-edge">{caveat}</p> : null}
+                      </div>
+                    </div>
+                  } />
+                );
+              }
+              return (
               <PlayerCard
                 key={r.id}
                 league={league}
@@ -209,7 +243,8 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
                 href={browseHref(league, { game: q.game ?? r.gameId, cat: q.cat, q: q.q, player: r.id })}
                 listed={listedStatus(x.injuries, r)}
               />
-            ))}
+              );
+            })}
           </div>
         </>
       )}

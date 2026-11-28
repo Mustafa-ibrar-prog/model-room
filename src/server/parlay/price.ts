@@ -24,9 +24,13 @@ export function priceParlay(ids: string[], catalogs: Catalog[], table: Table | n
   const found: { leg: CatalogLeg; cat: Catalog }[] = [];
   const rejected: { id: string; reason: string }[] = [];
   for (const id of unique) {
-    const cat = catalogs.find((c) => c.legs.has(id));
-    if (!cat) rejected.push({ id, reason: "This leg is no longer available: the game started, the line moved or the data was refreshed." });
-    else found.push({ leg: cat.legs.get(id)!, cat });
+    let hit: { leg: CatalogLeg; cat: Catalog } | null = null;
+    for (const c of catalogs) {
+      const l = c.legs.get(id) ?? c.resolve?.(id) ?? null;
+      if (l) { hit = { leg: l, cat: c }; break; }
+    }
+    if (!hit) rejected.push({ id, reason: "This leg is no longer available: the game started, the line moved or the data was refreshed." });
+    else found.push(hit);
   }
   const dataAsOf = catalogs.flatMap((c) => c.asOf);
   if (!found.length) return { ...empty, rejected, dataAsOf, error: rejected.length ? "None of these legs can be priced now." : "Add at least one leg." };
