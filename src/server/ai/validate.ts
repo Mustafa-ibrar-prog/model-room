@@ -66,7 +66,8 @@ export function cleanText(text: unknown, allowed: Set<string>, max = 400, maxSen
   return { text: out, removed };
 }
 
-export interface ParlayAi { summary: string; legs: { id: string; note: string }[]; riskiest: { id: string; reason: string }[]; watch: string[]; removed: number }
+/** Gemini's words only. Which legs are "most likely" / "least likely" and their order come from the model (factpack). */
+export interface ParlayAi { summary: string; legs: { id: string; hit: string; miss: string }[]; watch: string[]; removed: number }
 
 export function validateParlayAi(raw: unknown, pack: { legs: { id: string }[] }): ParlayAi | null {
   if (!raw || typeof raw !== "object") return null;
@@ -80,19 +81,15 @@ export function validateParlayAi(raw: unknown, pack: { legs: { id: string }[] })
     return c.text;
   };
   const summary = take(r.summary, 220, 1);
+  const seen = new Set<string>();
   const legs = (Array.isArray(r.legs) ? r.legs : [])
-    .filter((x): x is { id: string; note: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
-    .slice(0, pack.legs.length)
-    .map((x) => ({ id: x.id, note: take(x.note, 240, 2) }))
-    .filter((x) => x.note);
-  const riskiest = (Array.isArray(r.riskiest) ? r.riskiest : [])
-    .filter((x): x is { id: string; reason: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
-    .slice(0, 2)
-    .map((x) => ({ id: x.id, reason: take(x.reason, 160, 1) }))
-    .filter((x) => x.reason);
-  const watch = (Array.isArray(r.watch) ? r.watch : []).slice(0, 2).map((w) => take(w, 120, 1)).filter(Boolean);
+    .filter((x): x is { id: string; hit: unknown; miss: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
+    .filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true)))
+    .map((x) => ({ id: x.id, hit: take(x.hit, 170, 1), miss: take(x.miss, 170, 1) }))
+    .filter((x) => x.hit || x.miss);
+  const watch = (Array.isArray(r.watch) ? r.watch : []).slice(0, 2).map((w) => take(w, 120, 1)).filter((w) => w && !/sportsbook price/i.test(w));
   if (!summary && !legs.length) return null;
-  return { summary, legs, riskiest, watch, removed };
+  return { summary, legs, watch, removed };
 }
 
 export interface PicksAi { overview: string; picks: { id: string; why: string; check: string }[]; removed: number }

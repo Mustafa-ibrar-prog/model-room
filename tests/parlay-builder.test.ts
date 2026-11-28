@@ -6,6 +6,7 @@ import { priceParlay } from "@/server/parlay/price";
 import { relate, type Table, type Variable } from "@/server/parlay/correlations";
 import { discoverPicks } from "@/server/parlay/discover";
 import { allowedNumbers, cleanText, validateParlayAi } from "@/server/ai/validate";
+import { likelihoodGroups } from "@/lib/parlay/likelihood";
 import { parlayPack, sideOf } from "@/server/ai/factpack";
 import { explainParlay } from "@/server/parlay/analyze";
 import { pauseForTests } from "@/server/ai/gemini";
@@ -331,19 +332,34 @@ describe("AI text validation", () => {
     expect(cleanText("Rounded to 57%.", allowed).removed).toBe(1);
     expect(cleanText("Fair odds would be +250.", allowed).removed).toBe(1);
   });
-  it("keeps AI text short: one-sentence summary, at most two sentences per leg, two risks, two watch items", () => {
-    const v = validateParlayAi({ summary: "One. Two. Three.", legs: [{ id: "L1", note: "A. B. C. D." }],
-      riskiest: [{ id: "L1", reason: "x. y." }, { id: "L2", reason: "z." }, { id: "L1", reason: "w." }], watch: ["a.", "b.", "c."] }, pack)!;
+  it("keeps AI text short: one-sentence summary, one sentence each for hit and miss, two watch items", () => {
+    const v = validateParlayAi({ summary: "One. Two. Three.", legs: [{ id: "L1", hit: "A. B.", miss: "C. D." }, { id: "L1", hit: "dup.", miss: "dup." }],
+      watch: ["a.", "b.", "c."] }, pack)!;
     expect(v.summary).toBe("One.");
-    expect(v.legs[0].note).toBe("A. B.");
-    expect(v.riskiest).toHaveLength(2);
-    expect(v.riskiest[0].reason).toBe("x.");
+    expect(v.legs).toEqual([{ id: "L1", hit: "A.", miss: "C." }]);
     expect(v.watch).toHaveLength(2);
   });
-  it("drops ids Gemini invented", () => {
-    const v = validateParlayAi({ summary: "Two separate games.", legs: [{ id: "L1", note: "Home side." }, { id: "L9", note: "Made up." }], riskiest: [{ id: "L7", reason: "x" }], watch: [] }, pack)!;
+  it("drops ids Gemini invented and filler about missing prices", () => {
+    const v = validateParlayAi({ summary: "Two separate games.", legs: [{ id: "L1", hit: "Home side.", miss: "Road win." }, { id: "L9", hit: "Made up.", miss: "x." }],
+      watch: ["No sportsbook price available."] }, pack)!;
     expect(v.legs.map((l) => l.id)).toEqual(["L1"]);
-    expect(v.riskiest).toEqual([]);
+    expect(v.watch).toEqual([]);
+  });
+  it("most / least likely groups come from the model's probabilities", () => {
+    // the screenshot's slip: 63.2%, 70.4%, 45.0%
+    const g = likelihoodGroups([0.632, 0.704, 0.45]);
+    expect(g.order).toEqual([1, 0, 2]);
+    expect([...g.least]).toEqual([2]);
+    // all strong: the weakest is still flagged
+    expect([...likelihoodGroups([0.8, 0.7, 0.75]).least]).toEqual([1]);
+    // everything under 50%
+    expect([...likelihoodGroups([0.4, 0.3]).least].sort()).toEqual([0, 1]);
+    expect([...likelihoodGroups([0.7]).least]).toEqual([]);
+    expect([...likelihoodGroups([0.3]).least]).toEqual([0]);
+    const pk = pack;
+    expect(pk.likelihood_order.length).toBe(pk.legs.length);
+    expect(pk.legs.every((l) => l.group && l.likelihood_rank >= 1)).toBe(true);
+    expect(JSON.stringify(pk)).not.toContain("riskiest");
   });
 });
 
@@ -375,7 +391,7 @@ describe("Analyze My Parlay", () => {
     expect((await explainParlay(price, [c], who)).status).toBe("unavailable");
   });
   it("sends the key in a header (never the URL), no tools, a token cap; validates the answer; never changes numbers", async () => {
-    const f = answer({ summary: "Both legs lean on New York. It is really 80% likely.", legs: [{ id: "L1", note: "Needs a win by 3 or more." }], riskiest: [{ id: "L2", reason: "Scoring swings." }], watch: ["Late scratches."] });
+    const f = answer({ summary: "Both legs lean on New York. It is really 80% likely.", legs: [{ id: "L1", hit: "Needs a win by 3 or more.", miss: "A close game." }], watch: ["Late scratches."] });
     const before = JSON.stringify(price);
     const r = await explainParlay(price, [c], who, f as unknown as typeof fetch);
     expect(r.status).toBe("ok");
@@ -394,7 +410,7 @@ describe("Analyze My Parlay", () => {
     expect(init.body as string).not.toContain("test-key-not-real");
   });
   it("caches identical parlays: the second click makes no request", async () => {
-    const f = answer({ summary: "Fine.", legs: [], riskiest: [], watch: [] });
+    const f = answer({ summary: "Fine.", legs: [], watch: [] });
     await explainParlay(price, [c], who, f as unknown as typeof fetch);
     const r2 = await explainParlay(price, [c], who, f as unknown as typeof fetch);
     expect(f).toHaveBeenCalledTimes(1);
@@ -404,7 +420,7 @@ describe("Analyze My Parlay", () => {
     process.env.GEMINI_USER_DAILY = "2";
     for (const id of ["nba~g1~ml~home", "nba~g1~ml~away", "nba~g2~ml~home"]) {
       const p = priceParlay([id], [c], TABLE, NOW);
-      const r = await explainParlay(p, [c], who, answer({ summary: "Ok.", legs: [], riskiest: [], watch: [] }) as unknown as typeof fetch);
+      const r = await explainParlay(p, [c], who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
       if (id === "nba~g2~ml~home") expect(r).toMatchObject({ status: "unavailable", reason: "user" });
       else expect(r.status).toBe("ok");
     }
@@ -413,8 +429,8 @@ describe("Analyze My Parlay", () => {
     process.env.GEMINI_SITE_DAILY = "1";
     const a = priceParlay(["nba~g1~ml~home"], [c], TABLE, NOW);
     const b = priceParlay(["nba~g1~ml~away"], [c], TABLE, NOW);
-    await explainParlay(a, [c], who, answer({ summary: "Ok.", legs: [], riskiest: [], watch: [] }) as unknown as typeof fetch);
-    const r = await explainParlay(b, [c], { id: "22222222-2222-2222-2222-222222222222", net: "n2" }, answer({ summary: "Ok.", legs: [], riskiest: [], watch: [] }) as unknown as typeof fetch);
+    await explainParlay(a, [c], who, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
+    const r = await explainParlay(b, [c], { id: "22222222-2222-2222-2222-222222222222", net: "n2" }, answer({ summary: "Ok.", legs: [], watch: [] }) as unknown as typeof fetch);
     expect(r).toMatchObject({ status: "unavailable", reason: "site" });
   });
   it("free quota exhausted (429): pauses AI until Pacific midnight and stops calling", async () => {
