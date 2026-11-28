@@ -85,7 +85,7 @@ export function Market({ s, pmOn }: { s: Selection; pmOn: boolean }) {
               <span className="text-mute">no two-sided price (bid {c(s.pm.bid)}, ask {c(s.pm.ask)})</span>
             )
           ) : (
-            <span className="text-mute">No Polymarket contract at this line</span>
+            <span className="text-mute">No Polymarket contract at this line{s.otherPmLines.length ? ` (Polymarket lists ${s.otherPmLines.map((x) => `${x}+`).join(", ")})` : ""}</span>
           )}
         </p>
       ) : null}

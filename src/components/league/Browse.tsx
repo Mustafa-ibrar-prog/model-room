@@ -118,7 +118,7 @@ export async function LeagueBrowse({ league, searchParams }: { league: League; s
   // TEST: one picker per player for this stat (side and threshold), from the same catalog the Parlay Builder prices.
   const cards = new Map<string, PropCard>();
   if (!isProduction() && rows.length) {
-    const cat = await getCatalog(league, new Date(x.now), { live: liveMarketsOn() });
+    const cat = await getCatalog(league, new Date(x.now), { live: liveMarketsOn(), games: [...new Set(rows.map((r) => r.gameId))] });
     for (const c of cat.cards.values()) for (const pc of c.props) if (pc.market === x.category.key) cards.set(`${pc.gameId}~${pc.playerId}`, pc);
   }
 

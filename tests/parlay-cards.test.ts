@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildCatalog, gridP } from "@/server/parlay/legs";
+import { buildCatalog, gridP, pmTargets } from "@/server/parlay/legs";
 import { priceParlay } from "@/server/parlay/price";
 import { gameSelection, propSelection } from "@/lib/parlay/cardMath";
 import type { Table } from "@/server/parlay/correlations";
@@ -151,5 +151,27 @@ describe("explorer cards", () => {
     expect(c.resolve("nba~g1~prop~p1~points~m99~o")).toBeNull();
     expect(c.resolve("nfl~g1~prop~p1~points~m20~o")).toBeNull();
     expect(c.resolve("nba~g1~total~over~222.3")).toBeNull();
+  });
+});
+
+describe("Polymarket fetch window", () => {
+  // 2026-11-27 21:42 PT; the board's real schedule shape: 4 tonight (started), 5 tomorrow, 10 the day after.
+  const at = (d: string) => ({ game_id: d + Math.random().toString(36).slice(2, 6), start_time: d });
+  const up = [...Array(4)].map(() => at("2026-11-28T02:30:00Z")).concat([...Array(5)].map(() => at("2026-11-29T01:00:00Z")), [...Array(10)].map(() => at("2026-11-29T21:00:00Z")));
+  it("covers every game tomorrow (Pacific), not only the next 36 hours", () => {
+    const now = new Date("2026-11-28T05:42:00Z");
+    const t = pmTargets("nba", up, now);
+    expect(t).toHaveLength(5);
+    expect(t.every((g) => g.start_time === "2026-11-29T01:00:00Z")).toBe(true);
+  });
+  it("on a busy day keeps all of today and tomorrow (the old cap of 20 dropped tomorrow)", () => {
+    const busy = [...Array(15)].map(() => at("2026-11-27T23:00:00Z")).concat([...Array(12)].map(() => at("2026-11-29T00:00:00Z")));
+    expect(pmTargets("nba", busy, new Date("2026-11-27T16:00:00Z"))).toHaveLength(27);
+  });
+  it("a game the visitor opened is fetched whatever its date", () => {
+    const far = at("2026-12-01T01:00:00Z");
+    const t = pmTargets("nba", [...up, far], new Date("2026-11-28T05:42:00Z"), [far.game_id]);
+    expect(t[0]).toBe(far);
+    expect(t).toHaveLength(6);
   });
 });

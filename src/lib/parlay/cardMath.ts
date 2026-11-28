@@ -18,6 +18,8 @@ export interface Selection {
   /** The books' own lines when none quotes this exact line (shown so nobody mistakes one for another). */
   otherBookLines: number[];
   pm: PmSide | null;
+  /** Polymarket's own lines for this player and stat when none is at the selected threshold ("N+" thresholds). */
+  otherPmLines: number[];
   /** Model minus market, in probability: Polymarket mid first, else the sportsbook no-vig. */
   gap: { vs: "Polymarket" | "sportsbook"; d: number } | null;
   marketP: number | null;
@@ -74,7 +76,7 @@ export function propSelection(c: PropCard, K: number, side: 1 | -1): Selection {
   return {
     p, push: 0, label: side > 0 ? `${c.playerName} ${K}+ ${c.noun}` : `${c.playerName} under ${K} ${c.noun}`,
     book, otherBookLines: book ? [] : [...new Set(c.quotes.map((q) => q.line))].sort((a, b) => a - b),
-    pm, gap: gapOf(p, pm, noVig), marketP: noVig,
+    pm, otherPmLines: contract ? [] : c.pm.map((x) => x.line).sort((a, b) => a - b), gap: gapOf(p, pm, noVig), marketP: noVig,
     last10: last10(c.values ?? undefined, K, side, "atleast", c.noun, side > 0 ? `${c.label} ${K}+` : `${c.label} under ${K}`), ids, id: chosen,
   };
 }
@@ -82,7 +84,7 @@ export function propSelection(c: PropCard, K: number, side: 1 | -1): Selection {
 /** Game market. Spread: `line` is the HOME line, side 1 = home covers. Total: side 1 = over. Moneyline: side 1 = home. */
 export function gameSelection(c: GameCard, line: number | null, side: 1 | -1): Selection {
   const base = `${c.league}~${c.gameId}`;
-  const empty = { otherBookLines: [] as number[], last10: null };
+  const empty = { otherBookLines: [] as number[], otherPmLines: [] as number[], last10: null };
   if (c.kind === "moneyline" || !("mean" in c.model)) {
     const hw = "homeWin" in c.model ? c.model.homeWin : null;
     const p = hw === null ? null : r4(side > 0 ? hw : 1 - hw);
