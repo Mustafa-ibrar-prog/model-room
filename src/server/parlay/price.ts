@@ -147,8 +147,7 @@ function legWarnings(l: CatalogLeg): string[] {
   if (o.injury && !/^available$/i.test(o.injury)) w.push(`Listed ${o.injury.toLowerCase()}.`);
   if (o.support === "limited") w.push("Limited history for this player and stat.");
   if (o.push) w.push(`Can push (${(o.push * 100).toFixed(1)}%): a push is not a win here.`);
-  if (o.source === "model_line") w.push("No sportsbook line stored: model threshold only.");
-  else if (!o.price) w.push("No sportsbook price stored for this line.");
+  if (!o.price) w.push(`${o.noPrice ?? "No sportsbook price available"}.`);
   if (o.interpolated) w.push("Probability read between two points of the model's distribution.");
   return w;
 }

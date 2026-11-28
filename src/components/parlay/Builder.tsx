@@ -30,18 +30,22 @@ export function ParlayBuilder({ games, asOf, validation, ai }: {
   const [analyzing, setAnalyzing] = useState(false);
 
   // restore the slip (per-browser convenience only); legs are re-priced on the server, so stale ones drop out
+  const restored = useRef(false);
   useEffect(() => {
     const t = setTimeout(() => {
       try {
         const raw = localStorage.getItem(STORE);
-        if (raw) setSlip(JSON.parse(raw));
+        const saved = raw ? (JSON.parse(raw) as LegOption[]) : [];
+        if (Array.isArray(saved) && saved.length) setSlip((s) => (s.length ? s : saved.slice(0, 10)));
       } catch {
         /* storage blocked: start empty */
       }
+      restored.current = true;
     }, 0);
     return () => clearTimeout(t);
   }, []);
   useEffect(() => {
+    if (!restored.current) return; // don't overwrite the saved slip before it has been read
     try {
       localStorage.setItem(STORE, JSON.stringify(slip));
     } catch {
@@ -174,32 +178,103 @@ function GameLegs({ league, gameId, slip, onAdd }: { league: League; gameId: str
         <p className="p-4 text-sm text-mute">Nothing stored for this market yet.</p>
       ) : (
         <ul className="max-h-[32rem] divide-y divide-navy-700 overflow-y-auto">
-          {shown.map((l) => (
-            <li key={l.id} className="flex items-center gap-3 px-3 py-2">
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-ink">{l.label}</p>
-                <p className="text-xs text-faint">
-                  {l.source === "book_line" ? "Sportsbook line" : l.source === "market_line" ? "Consensus line" : "Model line, no sportsbook line"}
-                  {l.injury && !/^available$/i.test(l.injury) ? <span className="text-pending"> · {l.injury}</span> : null}
-                </p>
-              </div>
-              <div className="w-16 text-right">
-                <p className="font-mono text-sm text-model">{pct(l.p)}</p>
-                <p className="text-[0.7rem] text-faint">model</p>
-              </div>
-              <div className="w-20 text-right">
-                <p className="font-mono text-sm text-market">{l.price ? odds(l.price.american) : "–"}</p>
-                <p className="truncate text-[0.7rem] text-faint">{l.price ? l.price.bookTitle ?? "book" : "no price"}</p>
-              </div>
-              <button onClick={() => onAdd(l)} disabled={inSlip.has(l.id)} aria-label={`Add ${l.label}`}
-                className="rounded-md border border-navy-600 px-2.5 py-1 text-sm font-600 text-ink hover:border-model disabled:border-navy-700 disabled:text-faint">
-                {inSlip.has(l.id) ? "Added" : "Add"}
-              </button>
-            </li>
-          ))}
+          {shown.map((l) => <LegRow key={l.id} l={l} added={inSlip.has(l.id)} onAdd={onAdd} />)}
         </ul>
       )}
     </section>
+  );
+}
+
+const SOURCE = { book_line: "Sportsbook line", market_line: "Game line (consensus of books)", model_line: "Model line, not a sportsbook line" } as const;
+
+function Record10({ r }: { r: NonNullable<LegOption["last10"]> }) {
+  return (
+    <span className="inline-flex items-center gap-1.5" title={r.text}>
+      <span className="flex gap-px" aria-hidden="true">
+        {[...r.marks].reverse().map((m, i) => (
+          <span key={i} className={`h-2.5 w-1 rounded-sm ${m > 0 ? "bg-good" : m === 0 ? "bg-pending" : "bg-navy-600"}`} />
+        ))}
+      </span>
+      <span className="font-mono text-ink">{r.hits}/{r.games}</span>
+      <span className="text-faint">last {r.games}{r.pushes ? `, ${r.pushes} push` : ""} · avg {r.avg}</span>
+    </span>
+  );
+}
+
+function LegRow({ l, added, onAdd }: { l: LegOption; added: boolean; onAdd: (l: LegOption) => void }) {
+  const [open, setOpen] = useState(false);
+  const quotes = l.quotes ?? [];
+  return (
+    <li className="px-3 py-2">
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm text-ink">{l.label}</p>
+          <p className="text-xs text-faint">
+            {SOURCE[l.source]}
+            {l.injury && !/^available$/i.test(l.injury) ? <span className="text-pending"> · {l.injury}</span> : null}
+          </p>
+          {l.kind === "prop" ? (
+            <p className="mt-0.5 text-[0.72rem]">{l.last10 ? <Record10 r={l.last10} /> : <span className="text-faint">No game log for this stat</span>}</p>
+          ) : null}
+        </div>
+        <div className="w-16 text-right">
+          <p className="font-mono text-sm text-model">{pct(l.p)}</p>
+          <p className="text-[0.7rem] text-faint">model</p>
+        </div>
+        <div className="w-28 text-right">
+          {l.price ? (
+            <>
+              <p className="font-mono text-sm text-market">{odds(l.price.american)}</p>
+              <p className="truncate text-[0.7rem] text-faint">best · {l.price.bookTitle ?? "book"}</p>
+            </>
+          ) : (
+            <p className="text-[0.7rem] leading-tight text-faint">{l.source === "model_line" ? "No sportsbook price available (model line)" : "No sportsbook price available"}</p>
+          )}
+        </div>
+        <button onClick={() => onAdd(l)} disabled={added} aria-label={`Add ${l.label}`}
+          className="rounded-md border border-navy-600 px-2.5 py-1 text-sm font-600 text-ink hover:border-model disabled:border-navy-700 disabled:text-faint">
+          {added ? "Added" : "Add"}
+        </button>
+      </div>
+      {quotes.length ? (
+        <button onClick={() => setOpen((o) => !o)} aria-expanded={open} className="mt-1 text-[0.72rem] text-mute hover:text-ink">
+          {open ? "Hide" : "Show"} {quotes.length} sportsbook{quotes.length > 1 ? "s" : ""}{l.updatedAt ? ` · updated ${time(l.updatedAt)}` : ""}
+        </button>
+      ) : null}
+      {open ? <Quotes l={l} /> : null}
+    </li>
+  );
+}
+
+function Quotes({ l }: { l: LegOption }) {
+  const qs = [...(l.quotes ?? [])].sort((a, b) => a.title.localeCompare(b.title));
+  const showLine = l.kind !== "moneyline";
+  return (
+    <div className="mt-1.5 overflow-x-auto">
+      <table className="w-full min-w-[18rem] text-left text-[0.75rem]">
+        <thead>
+          <tr className="text-faint">
+            <th className="py-0.5 font-500">Sportsbook</th>
+            {showLine ? <th className="font-500">Line</th> : null}
+            <th className="font-500">This side</th>
+            <th className="font-500">Other side</th>
+            <th className="font-500">Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {qs.map((q) => (
+            <tr key={q.book} className="border-t border-navy-700">
+              <td className="py-1 text-ink">{q.title}</td>
+              {showLine ? <td className={`font-mono ${q.line !== null && l.line != null && Math.abs(q.line - l.line) < 1e-9 ? "text-ink" : "text-pending"}`}>{q.line ?? "–"}</td> : null}
+              <td className="font-mono text-market">{q.price === null ? "no price" : odds(q.price)}</td>
+              <td className="font-mono text-mute">{q.other === null ? "no price" : odds(q.other)}</td>
+              <td className="text-faint">{q.lastUpdate ? time(q.lastUpdate) : "–"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-1 text-[0.7rem] text-faint">Lines in yellow differ from this leg&apos;s line, so their price doesn&apos;t apply to it.</p>
+    </div>
   );
 }
 
@@ -232,7 +307,9 @@ function Slip({ slip, price, pricing, onRemove, onClear, onAnalyze, analyzing, a
                   <span className="font-mono text-sm text-model">{pct(live?.p ?? l.p)}</span>
                   <button onClick={() => onRemove(l.id)} aria-label={`Remove ${l.label}`} className="px-1 text-faint hover:text-ink">×</button>
                 </div>
-                {live?.warnings.length ? <p className="mt-1 text-[0.72rem] leading-snug text-mute">{live.warnings.join(" ")}</p> : null}
+                {live?.last10 ? <p className="mt-1 text-[0.72rem] text-mute">{live.last10.text} <span className="text-faint">Past results, not the model&apos;s chance.</span></p> : null}
+                <p className="mt-0.5 text-[0.72rem] text-faint">{live?.price ? `Best price ${odds(live.price.american)} at ${live.price.bookTitle ?? "a book"}` : live ? live.noPrice ?? "No sportsbook price available" : ""}</p>
+                {live?.warnings.length ? <p className="mt-1 text-[0.72rem] leading-snug text-mute">{live.warnings.filter((w) => !w.startsWith("No sportsbook")).join(" ")}</p> : null}
               </li>
             );
           })}

@@ -14,7 +14,7 @@ export type AiStatus<T> =
   | { status: "ok"; model: string; cached: boolean; text: T }
   | { status: "unavailable"; reason: string; message: string };
 
-const MAX_OUT = 700;
+const MAX_OUT = 450;
 
 function injuriesFor(catalogs: Catalog[], gameIds: Set<string>): string[] {
   return catalogs.flatMap((c) => [...c.injuries.entries()].filter(([g]) => gameIds.has(g)).flatMap(([, v]) => v));
@@ -31,7 +31,7 @@ export async function explainParlay(price: ParlayPrice, catalogs: Catalog[], who
   if (!cap.ok) return { status: "unavailable", reason: cap.scope, message: cap.message };
   const out = await generateJson({
     system: SYSTEM_RULES,
-    user: `Explain this parlay for the reader: what it depends on, a short note per leg, the riskiest legs (use riskiest_order and the flags), and what to watch before the games. Fact pack:\n${JSON.stringify(pack)}`,
+    user: `Short notes on this parlay. summary: ONE sentence (max 25 words) on what it depends on. legs: for EVERY leg, one or two sentences (max 35 words total) on why it could win or fail, using only last_10_games, role, opponent, injury_report and flags when present. riskiest: at most 2 legs, one short sentence each. watch: at most 2 short items. Fact pack:\n${JSON.stringify(pack)}`,
     schema: PARLAY_SCHEMA, maxOutputTokens: MAX_OUT, fetchImpl,
   });
   if (!out.ok) return { status: "unavailable", reason: out.reason, message: `${out.message} The numbers above are complete.` };
@@ -52,7 +52,7 @@ export async function reviewPicks(picks: Pick[], catalogs: Catalog[], who: { id:
   if (!cap.ok) return { status: "unavailable", reason: cap.scope, message: cap.message };
   const out = await generateJson({
     system: SYSTEM_RULES,
-    user: `For each pick, say in one sentence why it is on the list (from the facts) and in one sentence what to check before using it (from could_invalidate and the injury report). Keep the list order. One short overview sentence that repeats the history note. Fact pack:\n${JSON.stringify(pack)}`,
+    user: `For each pick: why = one sentence (max 20 words) from the facts; check = one sentence (max 20 words) from could_invalidate and the injury report. Keep the list order. overview: one sentence that repeats the history note. Fact pack:\n${JSON.stringify(pack)}`,
     schema: PICKS_SCHEMA, maxOutputTokens: MAX_OUT, fetchImpl,
   });
   if (!out.ok) return { status: "unavailable", reason: out.reason, message: out.message };

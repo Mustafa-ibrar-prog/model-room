@@ -31,7 +31,7 @@ function norm(t: string) {
 }
 
 /** Removes sentences with numbers the pack doesn't contain, or with banned words. Returns the text and how much was cut. */
-export function cleanText(text: unknown, allowed: Set<string>, max = 400): { text: string; removed: number } {
+export function cleanText(text: unknown, allowed: Set<string>, max = 400, maxSentences = 2): { text: string; removed: number } {
   if (typeof text !== "string") return { text: "", removed: 0 };
   const sentences = text.replace(/\s+/g, " ").trim().split(/(?<=[.!?])\s+/);
   let removed = 0;
@@ -61,7 +61,7 @@ export function cleanText(text: unknown, allowed: Set<string>, max = 400): { tex
     if (ok) keep.push(s);
     else removed++;
   }
-  let out = keep.join(" ");
+  let out = keep.slice(0, maxSentences).join(" ");
   if (out.length > max) out = out.slice(0, max).replace(/\s+\S*$/, "") + "…";
   return { text: out, removed };
 }
@@ -74,23 +74,23 @@ export function validateParlayAi(raw: unknown, pack: { legs: { id: string }[] })
   const allowed = allowedNumbers(pack);
   const ids = new Set(pack.legs.map((l) => l.id));
   let removed = 0;
-  const take = (t: unknown, max?: number) => {
-    const c = cleanText(t, allowed, max);
+  const take = (t: unknown, max?: number, n = 2) => {
+    const c = cleanText(t, allowed, max, n);
     removed += c.removed;
     return c.text;
   };
-  const summary = take(r.summary, 500);
+  const summary = take(r.summary, 220, 1);
   const legs = (Array.isArray(r.legs) ? r.legs : [])
     .filter((x): x is { id: string; note: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
     .slice(0, pack.legs.length)
-    .map((x) => ({ id: x.id, note: take(x.note, 260) }))
+    .map((x) => ({ id: x.id, note: take(x.note, 240, 2) }))
     .filter((x) => x.note);
   const riskiest = (Array.isArray(r.riskiest) ? r.riskiest : [])
     .filter((x): x is { id: string; reason: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
-    .slice(0, 3)
-    .map((x) => ({ id: x.id, reason: take(x.reason, 220) }))
+    .slice(0, 2)
+    .map((x) => ({ id: x.id, reason: take(x.reason, 160, 1) }))
     .filter((x) => x.reason);
-  const watch = (Array.isArray(r.watch) ? r.watch : []).slice(0, 4).map((w) => take(w, 180)).filter(Boolean);
+  const watch = (Array.isArray(r.watch) ? r.watch : []).slice(0, 2).map((w) => take(w, 120, 1)).filter(Boolean);
   if (!summary && !legs.length) return null;
   return { summary, legs, riskiest, watch, removed };
 }
@@ -103,17 +103,17 @@ export function validatePicksAi(raw: unknown, pack: { picks: { id: string }[] })
   const allowed = allowedNumbers(pack);
   const ids = new Set(pack.picks.map((p) => p.id));
   let removed = 0;
-  const take = (t: unknown, max?: number) => {
-    const c = cleanText(t, allowed, max);
+  const take = (t: unknown, max?: number, n = 2) => {
+    const c = cleanText(t, allowed, max, n);
     removed += c.removed;
     return c.text;
   };
-  const overview = take(r.overview, 400);
+  const overview = take(r.overview, 220);
   const seen = new Set<string>();
   const picks = (Array.isArray(r.picks) ? r.picks : [])
     .filter((x): x is { id: string; why: unknown; check: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
     .filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true)))
-    .map((x) => ({ id: x.id, why: take(x.why, 240), check: take(x.check, 200) }))
+    .map((x) => ({ id: x.id, why: take(x.why, 160, 1), check: take(x.check, 160, 1) }))
     .filter((x) => x.why || x.check);
   if (!overview && !picks.length) return null;
   return { overview, picks, removed };
