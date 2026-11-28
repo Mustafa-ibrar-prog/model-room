@@ -1,0 +1,42 @@
+{
+ "version": "hybrid-shadow-1",
+ "fitted_from": "modelroom/nba/props/hybrid_eval.py, GitHub Actions run (seasons 2025,2026,2027; sims 1000)",
+ "features": [
+  "form10",
+  "form5",
+  "matchup",
+  "minutes_trend",
+  "split",
+  "b2b",
+  "blowout"
+ ],
+ "beta": [
+  0.86345,
+  0.24978,
+  0.04726,
+  -0.17922,
+  0.02402,
+  0.00961,
+  0.23886
+ ],
+ "cap_logit": 0.5,
+ "l2": 2.0,
+ "fitted_rows": 406384,
+ "through": "2026-11-25",
+ "status": "shadow only: recorded beside 0.2.0, never published or read by the site",
+ "out_of_sample": {
+  "ll_gain": {
+   "n": 308220,
+   "gain": 0.00266,
+   "ci95": [
+    0.00224,
+    0.00307
+   ],
+   "days": 360
+  },
+  "worse_on": [
+   "blocks",
+   "steals"
+  ]
+ }
+}

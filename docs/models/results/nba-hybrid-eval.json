@@ -1,0 +1,440 @@
+{
+ "rows": 406384,
+ "test_rows": 308220,
+ "test_months": [
+  "2025-02",
+  "2025-03",
+  "2025-04",
+  "2025-05",
+  "2025-06",
+  "2025-10",
+  "2025-11",
+  "2025-12",
+  "2026-01",
+  "2026-02",
+  "2026-03",
+  "2026-04",
+  "2026-05",
+  "2026-06",
+  "2026-10",
+  "2026-11"
+ ],
+ "overall": {
+  "original": {
+   "n": 308220,
+   "log_loss": 0.63639,
+   "brier": 0.22338,
+   "ece": 0.0188,
+   "accuracy": 0.6301,
+   "mean_p": 0.487,
+   "hit_rate": 0.4798
+  },
+  "hybrid": {
+   "n": 308220,
+   "log_loss": 0.63372,
+   "brier": 0.2223,
+   "ece": 0.0123,
+   "accuracy": 0.6315,
+   "mean_p": 0.4916,
+   "hit_rate": 0.4798
+  },
+  "ll_gain": {
+   "n": 308220,
+   "gain": 0.00266,
+   "ci95": [
+    0.00224,
+    0.00307
+   ],
+   "days": 360
+  }
+ },
+ "by_market": {
+  "assists": {
+   "original": {
+    "n": 44039,
+    "log_loss": 0.65461,
+    "brier": 0.23104,
+    "ece": 0.0327,
+    "accuracy": 0.6147,
+    "mean_p": 0.5642,
+    "hit_rate": 0.5406
+   },
+   "hybrid": {
+    "n": 44039,
+    "log_loss": 0.65037,
+    "brier": 0.22931,
+    "ece": 0.0278,
+    "accuracy": 0.6181,
+    "mean_p": 0.5675,
+    "hit_rate": 0.5406
+   },
+   "ll_gain": {
+    "n": 44039,
+    "gain": 0.00424,
+    "ci95": [
+     0.00344,
+     0.00503
+    ],
+    "days": 360
+   }
+  },
+  "blocks": {
+   "original": {
+    "n": 44048,
+    "log_loss": 0.55272,
+    "brier": 0.18599,
+    "ece": 0.0033,
+    "accuracy": 0.7224,
+    "mean_p": 0.3033,
+    "hit_rate": 0.3028
+   },
+   "hybrid": {
+    "n": 44048,
+    "log_loss": 0.55372,
+    "brier": 0.18635,
+    "ece": 0.0066,
+    "accuracy": 0.7209,
+    "mean_p": 0.3067,
+    "hit_rate": 0.3028
+   },
+   "ll_gain": {
+    "n": 44048,
+    "gain": -0.001,
+    "ci95": [
+     -0.00153,
+     -0.00045
+    ],
+    "days": 360
+   }
+  },
+  "points": {
+   "original": {
+    "n": 44033,
+    "log_loss": 0.67316,
+    "brier": 0.2398,
+    "ece": 0.0358,
+    "accuracy": 0.5881,
+    "mean_p": 0.524,
+    "hit_rate": 0.5209
+   },
+   "hybrid": {
+    "n": 44033,
+    "log_loss": 0.6683,
+    "brier": 0.23781,
+    "ece": 0.0178,
+    "accuracy": 0.588,
+    "mean_p": 0.5287,
+    "hit_rate": 0.5209
+   },
+   "ll_gain": {
+    "n": 44033,
+    "gain": 0.00486,
+    "ci95": [
+     0.0041,
+     0.00556
+    ],
+    "days": 360
+   }
+  },
+  "pra": {
+   "original": {
+    "n": 43992,
+    "log_loss": 0.67526,
+    "brier": 0.24054,
+    "ece": 0.0436,
+    "accuracy": 0.5863,
+    "mean_p": 0.5274,
+    "hit_rate": 0.5182
+   },
+   "hybrid": {
+    "n": 43992,
+    "log_loss": 0.66879,
+    "brier": 0.23797,
+    "ece": 0.0245,
+    "accuracy": 0.5899,
+    "mean_p": 0.531,
+    "hit_rate": 0.5182
+   },
+   "ll_gain": {
+    "n": 43992,
+    "gain": 0.00647,
+    "ci95": [
+     0.00563,
+     0.00731
+    ],
+    "days": 360
+   }
+  },
+  "rebounds": {
+   "original": {
+    "n": 44038,
+    "log_loss": 0.65299,
+    "brier": 0.23059,
+    "ece": 0.0203,
+    "accuracy": 0.6145,
+    "mean_p": 0.556,
+    "hit_rate": 0.5498
+   },
+   "hybrid": {
+    "n": 44038,
+    "log_loss": 0.65086,
+    "brier": 0.22969,
+    "ece": 0.0145,
+    "accuracy": 0.6161,
+    "mean_p": 0.5641,
+    "hit_rate": 0.5498
+   },
+   "ll_gain": {
+    "n": 44038,
+    "gain": 0.00213,
+    "ci95": [
+     0.00137,
+     0.00294
+    ],
+    "days": 360
+   }
+  },
+  "steals": {
+   "original": {
+    "n": 44058,
+    "log_loss": 0.64601,
+    "brier": 0.22736,
+    "ece": 0.0069,
+    "accuracy": 0.6224,
+    "mean_p": 0.4577,
+    "hit_rate": 0.4637
+   },
+   "hybrid": {
+    "n": 44058,
+    "log_loss": 0.64741,
+    "brier": 0.22798,
+    "ece": 0.0047,
+    "accuracy": 0.6231,
+    "mean_p": 0.4623,
+    "hit_rate": 0.4637
+   },
+   "ll_gain": {
+    "n": 44058,
+    "gain": -0.00141,
+    "ci95": [
+     -0.00207,
+     -0.0007
+    ],
+    "days": 360
+   }
+  },
+  "threes": {
+   "original": {
+    "n": 44012,
+    "log_loss": 0.6,
+    "brier": 0.20837,
+    "ece": 0.0167,
+    "accuracy": 0.662,
+    "mean_p": 0.4766,
+    "hit_rate": 0.4627
+   },
+   "hybrid": {
+    "n": 44012,
+    "log_loss": 0.59664,
+    "brier": 0.20698,
+    "ece": 0.0179,
+    "accuracy": 0.6643,
+    "mean_p": 0.4806,
+    "hit_rate": 0.4627
+   },
+   "ll_gain": {
+    "n": 44012,
+    "gain": 0.00336,
+    "ci95": [
+     0.00254,
+     0.00409
+    ],
+    "days": 360
+   }
+  }
+ },
+ "by_season": {
+  "2025": {
+   "original": {
+    "n": 85094,
+    "log_loss": 0.63801,
+    "brier": 0.2241,
+    "ece": 0.0205,
+    "accuracy": 0.6278,
+    "mean_p": 0.4844,
+    "hit_rate": 0.4809
+   },
+   "hybrid": {
+    "n": 85094,
+    "log_loss": 0.63494,
+    "brier": 0.22283,
+    "ece": 0.01,
+    "accuracy": 0.6313,
+    "mean_p": 0.4861,
+    "hit_rate": 0.4809
+   },
+   "ll_gain": {
+    "n": 85094,
+    "gain": 0.00308,
+    "ci95": [
+     0.00228,
+     0.00382
+    ],
+    "days": 116
+   }
+  },
+  "2026": {
+   "original": {
+    "n": 186499,
+    "log_loss": 0.6356,
+    "brier": 0.22309,
+    "ece": 0.0183,
+    "accuracy": 0.6306,
+    "mean_p": 0.4859,
+    "hit_rate": 0.4791
+   },
+   "hybrid": {
+    "n": 186499,
+    "log_loss": 0.63305,
+    "brier": 0.22205,
+    "ece": 0.0129,
+    "accuracy": 0.6317,
+    "mean_p": 0.4915,
+    "hit_rate": 0.4791
+   },
+   "ll_gain": {
+    "n": 186499,
+    "gain": 0.00255,
+    "ci95": [
+     0.00207,
+     0.00303
+    ],
+    "days": 210
+   }
+  },
+  "2027": {
+   "original": {
+    "n": 36627,
+    "log_loss": 0.6366,
+    "brier": 0.22319,
+    "ece": 0.0214,
+    "accuracy": 0.6324,
+    "mean_p": 0.4986,
+    "hit_rate": 0.4812
+   },
+   "hybrid": {
+    "n": 36627,
+    "log_loss": 0.63433,
+    "brier": 0.22231,
+    "ece": 0.0232,
+    "accuracy": 0.6309,
+    "mean_p": 0.5045,
+    "hit_rate": 0.4812
+   },
+   "ll_gain": {
+    "n": 36627,
+    "gain": 0.00227,
+    "ci95": [
+     0.00132,
+     0.00339
+    ],
+    "days": 34
+   }
+  }
+ },
+ "adjustment_size": {
+  "median_logit": 0.105,
+  "share_capped": 0.005,
+  "median_prob_points": 2.26
+ },
+ "single_feature_ll_gain": {
+  "form10": {
+   "n": 308220,
+   "gain": 0.00192,
+   "ci95": [
+    0.00158,
+    0.00224
+   ],
+   "days": 360
+  },
+  "form5": {
+   "n": 308220,
+   "gain": 4e-05,
+   "ci95": [
+    0.0,
+    7e-05
+   ],
+   "days": 360
+  },
+  "matchup": {
+   "n": 308220,
+   "gain": 0.00019,
+   "ci95": [
+    0.00012,
+    0.00027
+   ],
+   "days": 360
+  },
+  "minutes_trend": {
+   "n": 308220,
+   "gain": 5e-05,
+   "ci95": [
+    -0.00012,
+    0.00021
+   ],
+   "days": 360
+  },
+  "split": {
+   "n": 308220,
+   "gain": -1e-05,
+   "ci95": [
+    -2e-05,
+    1e-05
+   ],
+   "days": 360
+  },
+  "b2b": {
+   "n": 308220,
+   "gain": 0.0,
+   "ci95": [
+    -2e-05,
+    3e-05
+   ],
+   "days": 360
+  },
+  "blowout": {
+   "n": 308220,
+   "gain": 0.00048,
+   "ci95": [
+    0.00026,
+    0.0007
+   ],
+   "days": 360
+  }
+ },
+ "final_coefficients": {
+  "features": [
+   "form10",
+   "form5",
+   "matchup",
+   "minutes_trend",
+   "split",
+   "b2b",
+   "blowout"
+  ],
+  "beta": [
+   0.86345,
+   0.24978,
+   0.04726,
+   -0.17922,
+   0.02402,
+   0.00961,
+   0.23886
+  ],
+  "cap_logit": 0.5,
+  "l2": 2.0,
+  "fitted_rows": 406384,
+  "through": "2026-11-25"
+ },
+ "verdict": "hybrid improves out-of-sample log loss (95% interval above zero)"
+}
