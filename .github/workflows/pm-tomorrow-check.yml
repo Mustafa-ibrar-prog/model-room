@@ -1,0 +1,103 @@
+name: Polymarket NBA today/tomorrow check (TEST, manual, read-only)
+
+# Moose, 2026-11-27: Polymarket prices missing on tomorrow's NBA props. Queries the public Polymarket US gateway
+# directly (no key) and the TEST site, and prints counts only: no prices, lines or player-line pairs. Nothing stored.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SITE: https://model-room-git-preview-computer-citi.vercel.app
+      GW: https://gateway.polymarket.us
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gateway vs TEST site
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys, time, unicodedata, urllib.request, urllib.error
+          from collections import Counter, defaultdict
+          from datetime import datetime, timedelta, timezone
+          from zoneinfo import ZoneInfo
+          sys.path.insert(0, "modeling")
+          site, gw = os.environ["SITE"], os.environ["GW"]
+          PT, ET = ZoneInfo("America/Los_Angeles"), ZoneInfo("America/New_York")
+          def get(url):
+              for a in range(3):
+                  try:
+                      return json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"accept": "application/json", "user-agent": "modelroom-check"}), timeout=30))
+                  except urllib.error.HTTPError as e:
+                      if e.code == 404: return None
+                      if e.code == 429: time.sleep(5); continue
+                      return {"_err": e.code}
+                  except Exception as e:
+                      return {"_err": type(e).__name__}
+          src = open("src/server/markets/polymarketLive.ts").read()
+          m = re.search(r"nba:\s*\{([^}]*)\}", src)
+          codes = {k: [x.strip().strip('"') for x in v.split(",")] for k, v in re.findall(r'(\w+):\s*\[([^\]]*)\]', m.group(1))} if m else {}
+          sc = lambda a: codes.get(a, [a.lower()])
+          types = dict(re.findall(r'"?(basketball_player_\w+)"?\s*:\s*"(\w+)"', src))
+          norm = lambda s: re.sub(r"\s+", " ", re.sub(r"\b(jr|sr|ii|iii|iv|v)\b", "", re.sub(r"[^a-z ]", "", unicodedata.normalize("NFD", s).encode("ascii", "ignore").decode().lower()))).strip()
+          now = datetime.now(timezone.utc)
+          today = now.astimezone(PT).date()
+          print("now PT:", now.astimezone(PT).strftime("%a %Y-%m-%d %H:%M"), "| NBA prop types mapped:", len(types))
+          games = get(f"{site}/api/parlay/games?league=nba")["games"]
+          board = json.load(urllib.request.urlopen(f"https://raw.githubusercontent.com/Mustafa-ibrar-prog/model-room/preview/modeling/data/published/nba.json"))
+          up = {g["game_id"]: g for g in board["upcoming"]}
+          print("board upcoming:", len(board["upcoming"]), "| site games:", len(games))
+          for day in (today, today + timedelta(days=1)):
+              tag = "today" if day == today else "tomorrow"
+              gs = [g for g in games if g["start"] and datetime.fromisoformat(g["start"].replace("Z", "+00:00")).astimezone(PT).date() == day]
+              T = Counter(); why = Counter(); slugdate = Counter()
+              for g in gs:
+                  bg = up.get(g["gameId"]); st = datetime.fromisoformat(g["start"].replace("Z", "+00:00"))
+                  bd = bg["game_date"] if bg else None
+                  cand = {"board game_date": bd, "ET date": st.astimezone(ET).date().isoformat(), "PT date": st.astimezone(PT).date().isoformat(), "UTC date": st.date().isoformat()}
+                  T["games"] += 1
+                  if bd != cand["ET date"]: T["board game_date differs from ET date"] += 1
+                  if bg and datetime.fromisoformat(bg["start_time"].replace("Z", "+00:00")) > now + timedelta(hours=36): T["beyond site 36h window"] += 1
+                  ev = None
+                  for label in ("board game_date", "ET date", "PT date", "UTC date"):
+                      d = cand[label]
+                      for a in sc(g["away"]):
+                          for h in sc(g["home"]):
+                              for s in (f"nba-{a}-{h}-{d}", f"nba-{h}-{a}-{d}"):
+                                  r = get(f"{gw}/v1/events/slug/{s}")
+                                  if r and "_err" not in r: ev = r.get("event", r); break
+                                  if r and "_err" in r: T[f"gateway error {r['_err']}"] += 1
+                              if ev: break
+                          if ev: break
+                      if ev: slugdate[label] += 1; break
+                  if not ev: T["no event at any date"] += 1; continue
+                  T["events found"] += 1
+                  teams = {t.get("id"): (t.get("abbreviation") or "").lower() for t in ev.get("teams") or []}
+                  legs = get(f"{site}/api/parlay/legs?league=nba&game={g['gameId']}") or {}
+                  cards = (legs.get("cards") or {}).get("props", [])
+                  T["site cards"] += len(cards); T["site cards with Polymarket"] += sum(bool(c["pm"]) for c in cards)
+                  T["site Polymarket contracts on cards"] += sum(len(c["pm"]) for c in cards)
+                  byname = defaultdict(list)
+                  for c in cards: byname[norm(c["playerName"])].append(c)
+                  for mk in ev.get("markets") or []:
+                      key = types.get(mk.get("sportsMarketType") or "")
+                      if not key: continue
+                      T["API player prop contracts"] += 1
+                      md = mk.get("metadata") or {}
+                      cs = [c for c in byname.get(norm(md.get("playerName") or ""), []) if c["market"] == key]
+                      team = teams.get(md.get("teamId"))
+                      line = mk.get("line")
+                      try: line = float(line)
+                      except Exception: line = None
+                      if not byname.get(norm(md.get("playerName") or "")): why["player has no card (not on board, ruled out, or name differs)"] += 1
+                      elif not cs: why["player has no card for this stat"] += 1
+                      elif len({c["playerId"] for c in cs}) > 1: why["ambiguous name"] += 1
+                      elif not team or team not in sc(cs[0]["team"]): why["team mismatch"] += 1
+                      elif line is None or line not in cs[0]["thresholds"]: why["line outside the model's offered thresholds"] += 1
+                      elif any(q["line"] == line for q in cs[0]["pm"]): why["matched and shown on site"] += 1
+                      else: why["should match but site shows none"] += 1
+              print(f"\n{tag} ({day}):", json.dumps(T), "\n  event found by slug date:", json.dumps(slugdate), "\n  contract outcomes:", json.dumps(why))
+          PY
