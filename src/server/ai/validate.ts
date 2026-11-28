@@ -85,7 +85,12 @@ export function validateParlayAi(raw: unknown, pack: { legs: { id: string }[] })
   const legs = (Array.isArray(r.legs) ? r.legs : [])
     .filter((x): x is { id: string; hit: unknown; miss: unknown } => !!x && typeof x === "object" && typeof (x as { id?: unknown }).id === "string" && ids.has((x as { id: string }).id))
     .filter((x) => (seen.has(x.id) ? false : (seen.add(x.id), true)))
-    .map((x) => ({ id: x.id, hit: take(x.hit, 170, 1), miss: take(x.miss, 170, 1) }));
+    .map((x) => {
+      // A leg's sentences may only use that leg's own numbers (no borrowing another player's minutes or average).
+      const own = allowedNumbers((pack.legs as { id: string }[]).find((l) => l.id === x.id));
+      const t = (v: unknown) => { const c = cleanText(v, own, 170, 1); removed += c.removed; return c.text; };
+      return { id: x.id, hit: t(x.hit), miss: t(x.miss) };
+    });
   // The same sentence under two legs says nothing about either: keep the first, drop the copies.
   const said = new Set<string>();
   for (const l of legs) for (const k of ["hit", "miss"] as const) {
